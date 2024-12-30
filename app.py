@@ -12,6 +12,10 @@ import rebrick #rebrickable api
 import requests # request img from web
 import shutil # save img locally
 import eventlet
+from collections import defaultdict
+import plotly.express as px
+import pandas as pd
+
 from downloadRB import download_and_unzip,get_nil_images,get_retired_sets
 from db import initialize_database,get_rows,delete_tables
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -1084,6 +1088,98 @@ def save_number(tmp):
             json.dump(json_file,dump_file)
         
     return Response(status=204)
+
+@app.route('/dashboard')
+def dashboard():
+
+    # Connect to the SQLite database
+    conn = sqlite3.connect('app.db')
+    cursor = conn.cursor()
+    
+    # Execute the query
+    cursor.execute("SELECT year, set_num, theme_id FROM sets")
+    rows = cursor.fetchall()
+    
+    # Initialize defaultdict to count occurrences
+    theme_counts = defaultdict(int)
+    year_counts = defaultdict(int)
+    
+    # Count unique occurrences (removing duplicates)
+    seen = set()  # To track unique combinations
+    for year, set_num, theme_id in rows:
+        # Create a unique identifier for each entry
+        entry_id = f"{year}-{set_num}-{theme_id}"
+        if entry_id not in seen:
+            theme_counts[theme_id] += 1
+            year_counts[year] += 1
+            seen.add(entry_id)
+    
+    # Convert to regular dictionaries and sort
+    sets_by_theme = dict(sorted(
+        {k: v for k, v in theme_counts.items() if v > 1}.items()
+    ))
+    
+    sets_by_year = dict(sorted(
+        {k: v for k, v in year_counts.items() if v > 0}.items()
+    ))
+
+
+    # Graphs using Plotly
+    fig_sets_by_theme = px.bar(
+        x=list(sets_by_theme.keys()),
+        y=list(sets_by_theme.values()),
+        labels={'x': 'Theme ID', 'y': 'Number of Sets'},
+        title='Number of Sets by Theme'
+    )
+    fig_sets_by_year = px.line(
+        x=list(sets_by_year.keys()),
+        y=list(sets_by_year.values()),
+        labels={'x': 'Year', 'y': 'Number of Sets'},
+        title='Number of Sets Released Per Year'
+    )
+
+
+    most_frequent_parts = {
+        "Brick 1 x 1": 866,
+        "Plate 1 x 1": 782,
+        "Plate 1 x 2": 633,
+        "Plate Round 1 x 1 with Solid Stud": 409,
+        "Tile 1 x 2 with Groove": 382,
+    }
+    minifigs_by_set = {"10217-1": 12, "7595-1": 8, "10297-1": 7, "21338-1": 4, "4865-1": 4}
+    missing_parts_by_set = {"10297-1": 4, "10280-1": 1, "21301-1": 1, "21338-1": 1, "7595-1": 1}
+
+
+    fig_parts = px.bar(
+        x=list(most_frequent_parts.keys()),
+        y=list(most_frequent_parts.values()),
+        labels={'x': 'Part Name', 'y': 'Quantity'},
+        title='Most Frequent Parts'
+    )
+    fig_minifigs = px.bar(
+        x=list(minifigs_by_set.keys()),
+        y=list(minifigs_by_set.values()),
+        labels={'x': 'Set Number', 'y': 'Number of Minifigures'},
+        title='Minifigures by Set'
+    )
+    fig_missing_parts = px.bar(
+        x=list(missing_parts_by_set.keys()),
+        y=list(missing_parts_by_set.values()),
+        labels={'x': 'Set Number', 'y': 'Missing Parts Count'},
+        title='Missing Parts by Set'
+    )
+
+    # Convert graphs to HTML
+    graphs = {
+        "sets_by_theme": fig_sets_by_theme.to_html(full_html=False),
+        "sets_by_year": fig_sets_by_year.to_html(full_html=False),
+        "parts": fig_parts.to_html(full_html=False),
+        "minifigs": fig_minifigs.to_html(full_html=False),
+        "missing_parts": fig_missing_parts.to_html(full_html=False),
+    }
+
+    return render_template("dashboard.html", graphs=graphs)
+
 
 if __name__ == '__main__':
     socketio.run(app.run(host='0.0.0.0', debug=True, port=3333))

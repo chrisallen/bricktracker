@@ -1,6 +1,8 @@
 flask
 flask_socketio
 pathlib
+plotly
+pandas
 numpy
 rebrick
 requests
