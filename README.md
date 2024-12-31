@@ -74,7 +74,6 @@ services:
     ports:
       - "3333:3333"
     volumes:
-      - ./.env:/app/.env
       - ./static/parts:/app/static/parts
       - ./static/instructions:/app/static/instructions
       - ./static/sets:/app/static/sets
