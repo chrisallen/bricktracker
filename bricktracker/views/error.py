@@ -126,8 +126,9 @@ def error_404(
     **kwargs,
 ) -> Tuple[str | Response, int]:
     # Warning
-    logger.warning('Not found: {error}'.format(
+    logger.warning('Not found: {error} (path: {path})'.format(
         error=str(error),
+        path=request.path,
     ))
 
     if json:
