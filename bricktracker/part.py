@@ -193,7 +193,7 @@ class BrickPart(BrickRecord):
         if current_app.config['BRICKLINK_LINKS'].value:
             try:
                 return current_app.config['BRICKLINK_LINK_PART_PATTERN'].value.format(  # noqa: E501
-                    number=self.fields.part_num.lower(),
+                    number=self.fields.part_num,
                 )
             except Exception:
                 pass
@@ -253,7 +253,7 @@ class BrickPart(BrickRecord):
         if current_app.config['REBRICKABLE_LINKS'].value:
             try:
                 return current_app.config['REBRICKABLE_LINK_PART_PATTERN'].value.format(  # noqa: E501
-                    number=self.fields.part_num.lower(),
+                    number=self.fields.part_num,
                     color=self.fields.color_id,
                 )
             except Exception:
