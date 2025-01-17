@@ -6,7 +6,7 @@
     <h2 class="accordion-header">
       <button class="accordion-button {% if danger %}text-danger{% endif %} {% if not expanded %}collapsed{% endif %} {% if image %}py-0 ps-0{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#{{ id }}" aria-expanded="{% if expanded %}true{% else %}false{% endif %}" aria-controls="{{ id }}">
         {% if image %}
-          <img class="accordion-img" src="{{ image }}" {% if alt %}alt="{{ alt }}"{% endif %} loading="lazy">
+          <img class=" me-1" src="{{ image }}" {% if alt %}alt="{{ alt }}"{% endif %} loading="lazy">
         {% elif icon %}
           <i class="ri-{{ icon }} me-1"></i>
         {% endif %}
