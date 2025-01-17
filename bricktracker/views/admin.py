@@ -18,7 +18,11 @@ from werkzeug.wrappers.response import Response
 from ..configuration_list import BrickConfigurationList
 from .exceptions import exception_handler
 from ..instructions_list import BrickInstructionsList
+from ..minifigure import BrickMinifigure
+from ..part import BrickPart
+from ..rebrickable_image import RebrickableImage
 from ..retired_list import BrickRetiredList
+from ..set import BrickSet
 from ..sql import BrickSQL
 from ..theme_list import BrickThemeList
 from .upload import upload_helper
@@ -34,9 +38,13 @@ admin_page = Blueprint('admin', __name__, url_prefix='/admin')
 @exception_handler(__file__)
 def admin() -> str:
     counters: dict[str, int] = {}
+    count_none: int = 0
     exception: Exception | None = None
     is_init: bool = False
-    count_none: int = 0
+    nil_minifigure_name: str = ''
+    nil_minifigure_url: str = ''
+    nil_part_name: str = ''
+    nil_part_url: str = ''
 
     # This view needs to be protected against SQL errors
     try:
@@ -49,6 +57,18 @@ def admin() -> str:
         if record is not None:
             count_none = record['count']
 
+        nil_minifigure_name = RebrickableImage.nil_minifigure_name()
+        nil_minifigure_url = RebrickableImage.static_url(
+            nil_minifigure_name,
+            'MINIFIGURES_FOLDER'
+        )
+
+        nil_part_name = RebrickableImage.nil_name()
+        nil_part_url = RebrickableImage.static_url(
+            nil_part_name,
+            'PARTS_FOLDER'
+        )
+
     except Exception as e:
         exception = e
 
@@ -57,12 +77,14 @@ def admin() -> str:
             exception=str(e),
         ))
 
+    open_image = request.args.get('open_image', None)
     open_instructions = request.args.get('open_instructions', None)
     open_logout = request.args.get('open_logout', None)
     open_retired = request.args.get('open_retired', None)
     open_theme = request.args.get('open_theme', None)
 
     open_database = (
+        open_image is None and
         open_instructions is None and
         open_logout is None and
         open_retired is None and
@@ -78,7 +100,12 @@ def admin() -> str:
         exception=exception,
         instructions=BrickInstructionsList(),
         is_init=is_init,
+        nil_minifigure_name=nil_minifigure_name,
+        nil_minifigure_url=nil_minifigure_url,
+        nil_part_name=nil_part_name,
+        nil_part_url=nil_part_url,
         open_database=open_database,
+        open_image=open_image,
         open_instructions=open_instructions,
         open_logout=open_logout,
         open_retired=open_retired,
@@ -239,6 +266,31 @@ def refresh_themes() -> Response:
     BrickThemeList(force=True)
 
     return redirect(url_for('admin.admin', open_theme=True))
+
+
+# Update the default images
+@admin_page.route('/update-image', methods=['GET'])
+@login_required
+@exception_handler(__file__)
+def update_image() -> Response:
+    # Abusing the object to create a 'nil' minifigure
+    RebrickableImage(
+        BrickSet(),
+        minifigure=BrickMinifigure(record={
+            'set_img_url': None,
+        })
+    ).download()
+
+    # Abusing the object to create a 'nil' part
+    RebrickableImage(
+        BrickSet(),
+        part=BrickPart(record={
+            'part_img_url': None,
+            'part_img_url_id': None
+        })
+    ).download()
+
+    return redirect(url_for('admin.admin', open_image=True))
 
 
 # Update the themes file

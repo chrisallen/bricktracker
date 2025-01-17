@@ -1,4 +1,3 @@
-import os
 from sqlite3 import Row
 from typing import Any, Self
 
@@ -9,6 +8,7 @@ from .instructions import BrickInstructions
 from .instructions_list import BrickInstructionsList
 from .minifigure_list import BrickMinifigureList
 from .part_list import BrickPartList
+from .rebrickable_image import RebrickableImage
 from .record import BrickRecord
 from .sql import BrickSQL
 from .theme_list import BrickThemeList
@@ -158,25 +158,10 @@ class BrickSet(BrickRecord):
     # Compute the url for the set image
     def url_for_image(self, /) -> str:
         if not current_app.config['USE_REMOTE_IMAGES'].value:
-            folder: str = current_app.config['SETS_FOLDER'].value
-
-            # /!\ Everything is saved as .jpg, even if it came from a .png
-            # not changing this behaviour.
-
-            # Grab the extension
-            # _, extension = os.path.splitext(self.fields.img_url)
-            extension = '.jpg'
-            # Grab the extension
-            _, extension = os.path.splitext(self.fields.set_img_url)
-
-            # Compute the path
-            path = os.path.join(folder, '{number}{ext}'.format(
-                number=self.fields.set_num,
-                ext=extension,
-            ))
-
-            return url_for('static', filename=path)
-
+            return RebrickableImage.static_url(
+                self.fields.set_num,
+                'SETS_FOLDER'
+            )
         else:
             return self.fields.set_img_url
 

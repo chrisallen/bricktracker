@@ -1,4 +1,3 @@
-import os
 from sqlite3 import Row
 from typing import Any, Self, TYPE_CHECKING
 
@@ -126,23 +125,7 @@ class BrickMinifigure(BrickRecord):
             else:
                 file = self.fields.fig_num
 
-            folder: str = current_app.config['MINIFIGURES_FOLDER'].value
-
-            # /!\ Everything is saved as .jpg, even if it came from a .png
-            # not changing this behaviour.
-
-            # Grab the extension
-            # _, extension = os.path.splitext(self.part_img_url)
-            extension = '.jpg'
-
-            # Compute the path
-            path = os.path.join(folder, '{number}{ext}'.format(
-                number=file,
-                ext=extension,
-            ))
-
-            return url_for('static', filename=path)
-
+            return RebrickableImage.static_url(file, 'MINIFIGURES_FOLDER')
         else:
             if self.fields.set_img_url is None:
                 return current_app.config['REBRICKABLE_IMAGE_NIL_MINIFIGURE'].value  # noqa: E501

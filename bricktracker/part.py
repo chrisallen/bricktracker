@@ -208,23 +208,7 @@ class BrickPart(BrickRecord):
             else:
                 file = self.fields.part_img_url_id
 
-            folder: str = current_app.config['PARTS_FOLDER'].value
-
-            # /!\ Everything is saved as .jpg, even if it came from a .png
-            # not changing this behaviour.
-
-            # Grab the extension
-            # _, extension = os.path.splitext(self.part_img_url)
-            extension = '.jpg'
-
-            # Compute the path
-            path = os.path.join(folder, '{number}{ext}'.format(
-                number=file,
-                ext=extension,
-            ))
-
-            return url_for('static', filename=path)
-
+            return RebrickableImage.static_url(file, 'PARTS_FOLDER')
         else:
             if self.fields.part_img_url is None:
                 return current_app.config['REBRICKABLE_IMAGE_NIL'].value

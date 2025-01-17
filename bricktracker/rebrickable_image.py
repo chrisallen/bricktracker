@@ -2,7 +2,7 @@ import os
 from typing import TYPE_CHECKING
 from urllib.parse import urlparse
 
-from flask import current_app
+from flask import current_app, url_for
 import requests
 from shutil import copyfileobj
 
@@ -138,3 +138,23 @@ class RebrickableImage(object):
         )
 
         return filename
+
+    # Return the static URL for an image given a name and folder
+    @staticmethod
+    def static_url(name: str, folder_name: str) -> str:
+        folder: str = current_app.config[folder_name].value
+
+        # /!\ Everything is saved as .jpg, even if it came from a .png
+        # not changing this behaviour.
+
+        # Grab the extension
+        # _, extension = os.path.splitext(self.part_img_url)
+        extension = '.jpg'
+
+        # Compute the path
+        path = os.path.join(folder, '{name}{ext}'.format(
+            name=name,
+            ext=extension,
+        ))
+
+        return url_for('static', filename=path)
