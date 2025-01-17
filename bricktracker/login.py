@@ -53,13 +53,3 @@ class LoginManager(object):
             not current_app.config['LOGIN_DISABLED'] and
             not current_user.is_authenticated
         )
-
-    # Tell whether we are in read-only, meaning:
-    # - Authentication enabled
-    # - and User not authenticated
-    @staticmethod
-    def is_readonly() -> bool:
-        return (
-            not current_app.config['LOGIN_DISABLED'] and
-            not current_user.is_authenticated
-        )
