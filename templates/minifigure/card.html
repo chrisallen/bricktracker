@@ -10,8 +10,8 @@
       {{ badge.set(item.fields.set_num, solo=solo, last=last, id=item.fields.u_id) }}
       {{ badge.quantity(item.fields.quantity, solo=solo, last=last) }}
     {% endif %}
+    {{ badge.quantity(item.fields.total_quantity, solo=solo, last=last) }}
     {{ badge.total_sets(using | length, solo=solo, last=last) }}
-    {{ badge.total_quantity(item.fields.total_quantity, solo=solo, last=last) }}
     {{ badge.total_missing(item.fields.total_missing, solo=solo, last=last) }}
     {% if not last %}
       {{ badge.rebrickable(item, solo=solo, last=last) }}

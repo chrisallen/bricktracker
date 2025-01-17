@@ -1,5 +1,9 @@
 {% extends 'minifigure/base/select.sql' %}
 
+{% block total_quantity %}
+SUM(minifigures.quantity) AS total_quantity,
+{% endblock %}
+
 {% block where %}
 WHERE minifigures.fig_num IN (
     SELECT
@@ -12,4 +16,9 @@ WHERE minifigures.fig_num IN (
 
     GROUP BY inventory.set_num
 )
+{% endblock %}
+
+{% block group %}
+GROUP BY
+    minifigures.fig_num
 {% endblock %}
