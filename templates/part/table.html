@@ -17,7 +17,11 @@
         </td>
         <td>{{ item.fields.color_name }}</td>
         {% if not no_quantity %}
-          <td>{% if quantity %}{{ item.fields.quantity * quantity }}{% else %}{{ item.fields.quantity }}{% endif %}</td>
+          {% if all %}
+            <td>{{ item.fields.total_quantity }}</td>
+          {% else %}
+            <td>{% if quantity %}{{ item.fields.quantity * quantity }}{% else %}{{ item.fields.quantity }}{% endif %}</td>
+          {% endif %}
         {% endif %}
         {% if not no_missing %}
           <td {% if not all %}id="sort-item-{{ item.fields.u_id }}-{{ item.fields.id }}" data-sort="{{ item.fields.total_missing }}"{% endif %} class="table-td-missing">
