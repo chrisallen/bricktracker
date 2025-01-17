@@ -5,11 +5,11 @@ SUM(IFNULL(missing.quantity, 0)) AS total_missing,
 {% endblock %}
 
 {% block total_quantity %}
-SUM(IFNULL((NOT inventory.is_spare) * inventory.quantity, 0)) AS total_quantity,
+SUM((NOT inventory.is_spare) * inventory.quantity * IFNULL(minifigures.quantity, 1)) AS total_quantity,
 {% endblock %}
 
 {% block total_spare %}
-SUM(IFNULL(inventory.is_spare * inventory.quantity, 0)) AS total_spare,
+SUM(inventory.is_spare * inventory.quantity * IFNULL(minifigures.quantity, 1)) AS total_spare,
 {% endblock %}
 
 {% block join %}
@@ -20,6 +20,10 @@ AND inventory.part_num IS NOT DISTINCT FROM missing.part_num
 AND inventory.color_id IS NOT DISTINCT FROM missing.color_id
 AND inventory.element_id IS NOT DISTINCT FROM missing.element_id
 AND inventory.u_id IS NOT DISTINCT FROM missing.u_id
+
+LEFT JOIN minifigures
+ON inventory.set_num IS NOT DISTINCT FROM minifigures.fig_num
+AND inventory.u_id IS NOT DISTINCT FROM minifigures.u_id
 {% endblock %}
 
 {% block where %}
