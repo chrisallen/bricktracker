@@ -7,3 +7,4 @@ humanize
 jinja2
 rebrick
 requests
+tzdata
