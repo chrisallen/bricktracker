@@ -150,9 +150,7 @@ class BrickSQL(object):
         # Stats: fetchall
         self.stats.fetchall += 1
 
-        logger.debug('SQLite3: fetchall: {query}'.format(
-            query=BrickSQL.clean_query(query)
-        ))
+        logger.debug('SQLite3: fetchall')
         records = self.cursor.fetchall()
 
         # Stats: fetched
@@ -173,9 +171,7 @@ class BrickSQL(object):
         # Stats: fetchone
         self.stats.fetchone += 1
 
-        logger.debug('SQLite3: fetchone: {query}'.format(
-            query=BrickSQL.clean_query(query)
-        ))
+        logger.debug('SQLite3: fetchone')
         record = self.cursor.fetchone()
 
         # Stats: fetched
