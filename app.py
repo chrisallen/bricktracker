@@ -11,20 +11,20 @@ from bricktracker.socket import BrickSocket  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
+# Create the Flask app
+app = Flask(__name__)
+
+# Setup the app
+setup_app(app)
+
+# Create the socket
+s = BrickSocket(
+    app,
+    threaded=not app.config['NO_THREADED_SOCKET'].value,
+)
+
 
 if __name__ == '__main__':
-    # Create the Flask app
-    app = Flask(__name__)
-
-    # Setup the app
-    setup_app(app)
-
-    # Create the socket
-    s = BrickSocket(
-        app,
-        threaded=not app.config['NO_THREADED_SOCKET'].value,
-    )
-
     # Run the application
     logger.info('Starting BrickTracker on {host}:{port}'.format(
         host=app.config['HOST'].value,

@@ -9,4 +9,4 @@ RUN pip install -r requirements.txt
 # Bricktracker
 COPY . .
 
-ENTRYPOINT ["entrypoint.sh"]
+ENTRYPOINT ["./entrypoint.sh"]
