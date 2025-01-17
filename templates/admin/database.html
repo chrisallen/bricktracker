@@ -13,6 +13,18 @@
     </form>
   </div>
 {% else %}
+  {% if count_none %}
+    <div class="alert alert-warning" role="alert">
+      <p>
+        Your <code>missing</code> table contains <code>"None"</code> entries (instead of <code>NULL</code>). <br>
+        This can lead to "phantom" missing parts appearing in your sets if you are coming from the original version of BrickTracker.
+      </p>
+      <hr>
+      <form action="{{ url_for('admin.init_database') }}" method="post" class="text-end">
+          <button type="submit" class="btn btn-warning"><i class="ri-capsule-line"></i> Apply the fix</button>
+      </form>
+    </div>
+  {% endif %}
   <p><i class="ri-checkbox-circle-line"></i> The database is initialized.</p>
   <p>
     <a href="{{ url_for('admin.download_database') }}" class="btn btn-primary" role="button"><i class="ri-download-line"></i> Download the database file</a>

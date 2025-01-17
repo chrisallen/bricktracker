@@ -36,6 +36,7 @@ def admin() -> str:
     counters: dict[str, int] = {}
     exception: Exception | None = None
     is_init: bool = False
+    count_none: int = 0
 
     # This view needs to be protected against SQL errors
     try:
@@ -43,6 +44,11 @@ def admin() -> str:
 
         if is_init:
             counters = BrickSQL.count_records()
+
+        record = BrickSQL().fetchone('missing/count_none')
+        if record is not None:
+            count_none = record['count']
+
     except Exception as e:
         exception = e
 
@@ -67,6 +73,7 @@ def admin() -> str:
         'admin.html',
         configuration=BrickConfigurationList.list(),
         counters=counters,
+        count_none=count_none,
         error=request.args.get('error'),
         exception=exception,
         instructions=BrickInstructionsList(),
