@@ -57,10 +57,10 @@ def admin() -> str:
     open_theme = request.args.get('open_theme', None)
 
     open_database = (
-        open_instructions is not None and
-        open_logout is not None and
-        open_logout is not None and
-        open_theme is not None
+        open_instructions is None and
+        open_logout is None and
+        open_retired is None and
+        open_theme is None
     )
 
     return render_template(
