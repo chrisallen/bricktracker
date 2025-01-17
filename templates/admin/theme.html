@@ -1,0 +1,26 @@
+{% import 'macro/accordion.html' as accordion %}
+
+{{ accordion.header('Themes', 'theme', 'admin', expanded=open_theme, icon='price-tag-3-line') }}
+<h5 class="border-bottom">File</h5>
+{% if theme.exception %}<div class="alert alert-danger" role="alert">An exception occured while loading processing the themes: {{ theme.exception }}</div>{% endif %}
+<p>
+  The themes file is: <code>{{ config['THEMES_PATH'].value }}</code>.
+  {% if theme.size %}<span class="badge rounded-pill text-bg-info fw-normal"><i class="ri-hard-drive-line"></i> {{ theme.human_size() }}</span>{% endif %}
+  {% if theme.mtime %}<span class="badge rounded-pill text-bg-light border fw-normal"><i class="ri-calendar-line"></i> {{ theme.human_time() }}</span>{% endif %}
+</p>
+<h5 class="border-bottom">Counters</h5>
+<p>
+  <div class="d-flex justify-content-start">
+    <ul class="list-group">
+      <li class="list-group-item d-flex justify-content-between align-items-start">
+        <span><i class="ri-price-tag-3-line"></i> Themes</span> <span class="badge text-bg-primary rounded-pill ms-2">{{ theme.themes | length }}</span>
+      </li>
+    </ul>
+  </div>
+</p>
+<h5 class="border-bottom">Refresh</h5>
+<p>
+  <a href="{{ url_for('admin.refresh_themes') }}" class="btn btn-primary" role="button"><i class="ri-refresh-line"></i> Refresh the themes cache</a>
+  <a href="{{ url_for('admin.update_themes') }}" class="btn btn-primary" role="button"><i class="ri-download-line"></i> Update the themes file</a>
+</p>
+{{ accordion.footer() }}

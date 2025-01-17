@@ -1,0 +1,33 @@
+# Static files
+static/instructions
+static/minifigs
+static/parts
+static/sets
+
+# Docker
+Dockerfile
+compose.yaml
+
+# Documentation
+LICENSE
+*.md
+*.sample
+
+# Temporary
+*.csv
+
+# Database
+*.db
+
+# Python
+**/__pycache__
+*.pyc
+
+# Git
+.git
+
+# IDE
+.vscode
+
+# Dev
+test-server.sh

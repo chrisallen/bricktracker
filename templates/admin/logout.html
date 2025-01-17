@@ -1,0 +1,9 @@
+{% import 'macro/accordion.html' as accordion %}
+
+{% if g.login.is_enabled() %}
+  {{ accordion.header('Authentication', 'authentication', 'admin', expanded=open_logout, icon='list-settings-line') }}
+  <p>
+    <a href="{{ url_for('login.logout') }}" class="btn btn-primary" role="button"><i class="ri-logout-circle-line"></i> Logout</a>
+  </p>
+  {{ accordion.footer() }}
+{% endif %}

@@ -1,0 +1,48 @@
+{% import 'macro/accordion.html' as accordion %}
+
+{{ accordion.header('Database', 'database', 'admin', expanded=open_database, icon='database-2-line') }}
+<h5 class="border-bottom">Status</h5>
+{% if exception %}<div class="alert alert-danger" role="alert">An exception occured while loading this page: {{ exception }}</div>{% endif %}
+{% if error %}<div class="alert alert-danger" role="alert"><strong>Error:</strong> {{ error }}.</div>{% endif %}
+{% if not is_init %}
+  <div class="alert alert-warning" role="alert">
+    <p>The database is not initialized.</p>
+    <hr>
+    <form action="{{ url_for('admin.init_database') }}" method="post" class="text-end">
+        <button type="submit" class="btn btn-warning"><i class="ri-reset-right-fill"></i> Initialize the database</button>
+    </form>
+  </div>
+{% else %}
+  <p><i class="ri-checkbox-circle-line"></i> The database is initialized.</p>
+  <p>
+    <a href="{{ url_for('admin.download_database') }}" class="btn btn-primary" role="button"><i class="ri-download-line"></i> Download the database file</a>
+  </p>
+  <h5 class="border-bottom">Records</h5>
+  <div class="d-flex justify-content-start">
+    <ul class="list-group">
+      <li class="list-group-item d-flex justify-content-between align-items-start">
+        <span><i class="ri-hashtag"></i> Sets</span> <span class="badge text-bg-primary rounded-pill ms-2">{{ counters['sets'] }}</span>
+      </li>
+      <li class="list-group-item d-flex justify-content-between align-items-start">
+        <span><i class="ri-group-line"></i> Minifigures</span> <span class="badge text-bg-primary rounded-pill ms-2">{{ counters['minifigures'] }}</span>
+      </li>
+      <li class="list-group-item d-flex justify-content-between align-items-start">
+        <span><i class="ri-shapes-line"></i> Parts</span> <span class="badge text-bg-primary rounded-pill ms-2">{{ counters['inventory'] }}</span>
+      </li>
+      <li class="list-group-item d-flex justify-content-between align-items-start">
+        <span><i class="ri-error-warning-line"></i> Missing</span> <span class="badge text-bg-primary rounded-pill ms-2">{{ counters['missing'] }}</span>
+      </li>
+    </ul>
+  </div>
+{% endif %}
+{{ accordion.footer() }}
+
+{{ accordion.header('Database danger zone', 'database-danger', 'admin', danger=true, class='text-end') }}
+{% if error %}<div class="alert alert-danger text-start" role="alert"><strong>Error:</strong> {{ error }}.</div>{% endif %}
+<a href="{{ url_for('admin.import_database') }}" class="btn btn-warning" role="button"><i class="ri-upload-line"></i> Import a database file</a>
+<form action="{{ url_for('admin.init_database') }}" method="post" class="d-inline">
+  <button type="submit" class="btn btn-warning"><i class="ri-reset-right-fill"></i> Initialize the database (only missing tables)</button>
+</form>
+<a href="{{ url_for('admin.drop_database') }}" class="btn btn-danger" role="button"><i class="ri-close-line"></i> Drop the database</a>
+<a href="{{ url_for('admin.delete_database') }}" class="btn btn-danger" role="button"><i class="ri-delete-bin-2-line"></i> Delete the database file</a>
+{{ accordion.footer() }}

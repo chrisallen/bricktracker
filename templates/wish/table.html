@@ -1,0 +1,44 @@
+{% import 'macro/table.html' as table %}
+
+<div class="table-responsive-sm">
+  <table class="table table-striped align-middle" id="wish">
+    <thead>
+      <tr>
+        <th class="no-sort" scope="col"><i class="ri-image-line fw-normal"></i> Image</th>
+        <th scope="col"><i class="ri-hashtag fw-normal"></i> Set</th>
+        <th scope="col"><i class="ri-pencil-line fw-normal"></i> Name</th>
+        <th scope="col"><i class="price-tag-3-line fw-normal"></i> Theme</th>
+        <th scope="col"><i class="ri-calendar-line fw-normal"></i> Year</th>
+        <th scope="col"><i class="ri-shapes-line fw-normal"></i> Parts</th>
+        <th scope="col"><i class="ri-calendar-close-line fw-normal"></i> Retirement</th>
+        {% if g.login.is_authenticated() %}
+          <th class="no-sort" scope="col"><i class="ri-settings-4-line fw-normal"></i> Actions</th>
+        {% endif %}
+        </tr>
+    </thead>
+    <tbody>
+      {% for item in table_collection %}
+      {% set retirement_date = retired.get(item.fields.set_num) %}
+      <tr>
+        {{ table.image(item.url_for_image(), caption=item.fields.name, alt=item.fields.set_num) }}
+        <td>{{ item.fields.set_num }}</td>
+        <td>{{ item.fields.name }}</td>
+        <td>{{ item.theme_name }}</td>
+        <td>{{ item.fields.year }}</td>
+        <td>{{ item.fields.num_parts }}</td>
+        <td>{% if retirement_date %}{{ retirement_date }}{% else %}<span class="badge rounded-pill text-bg-light border">Not found</span>{% endif %}</td>
+        {% if g.login.is_authenticated() %}
+        <td>
+          <form action="{{ item.url_for_delete() }}" method="post">
+            <button type="submit" class="btn btn-sm btn-danger"><i class="ri-delete-bin-2-line"></i> Delete</button>
+          </form>
+        </td>
+        {% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% if all %}
+  {{ table.dynamic('wish', no_sort='0,7')}}
+{% endif %}

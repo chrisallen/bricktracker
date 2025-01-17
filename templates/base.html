@@ -1,383 +1,88 @@
 <!doctype html>
-<html data-theme="light" class="has-navbar-fixed-top">
-
-
+<html lang="en">
   <head>
-      <title>{{ tmp }} - {{ title }}</title>
-<meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, initial-scale=1.0">    <!-- CSS Reset -->
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css">
-
-<script src="https://www.kryogenix.org/code/browser/sorttable/sorttable.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
-<style>
-
-
-.title-image {
-            object-fit: cover;
-            width: 100%;
-            height: 200px;
-        }
-table.sortable th:not(.sorttable_sorted):not(.sorttable_sorted_reverse):not(.sorttable_nosort):after {
-    content: " \25B4\25BE"
-}
-table.sortable tbody tr:nth-child(2n) td {
-  background: #ffffff;
-}
-table.sortable tbody tr:nth-child(2n+1) td {
-  background: #ecf0f1;
-}
-
-.hidden { 
-	display: none;
-}
-
-
-table { 
-    width: 100%; /* Ensure the table takes full width of its container */
-
-}
-
-td {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    word-wrap: break-word;
-}
-
-.name-class {
-  max-width: 300px; 
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-@media only screen and (min-width: 600px) {
-
-  .hidden-desktop {
-    display: none;
-  }
-
-}
-
-
-@media only screen and (max-width: 480px) {
-    /* horizontal scrollbar for tables if mobile screen */
-    .hidden-mobile {
-  	display: none;
-    }
-
-}
-
-
-
-
-
-      /* Chrome, Safari, Edge, Opera */
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-/* Firefox */
-input[type=number] {
-  -moz-appearance: textfield;
-}
-
-.header {
-width:100%;
-    text-align:center;
-z-index: 99;
-background-color: white;
-}
-
-.content {
-	padding: 16px;
-}
-
-
-.inputContainer {
-	  display: inline-block; /* Display as an inline block */
-	    vertical-align: middle; /* Center vertically within the cell */
-	    width: 120px;
-}
-
-.inputContainer form {
-	margin: 5% auto 5% auto;
-}
-
-.inputField {
-	  display: flex;
-  align-items: center; /* Align items vertically */
-  width: 100%; /* Ensure inputField fills out inputContainer */
-  height: 100%; /* Ensure inputField fills out inputContainer */
-}
-.inputField input {
-	flex: 1;
-	width: 70%;
-	padding: 0px;
-	margin: auto 2.5px auto 2.5px;
-}
-.inputField button {
-	width: 30%;
-	padding: 0px;
-	margin: 0 2.5px 0 2.5px;
-}
-
-.square-button {
-	background-color: white;
-  border: 1px solid #d1d1d1;
-}
-
-
-      /* Modal Styles */
-      #lightbox-modal {
-  display: none;
-  position: fixed;
-  z-index: 1000;
-  padding-top: 50px;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.5);
-}
-.lightbox-wrapper {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-
-
-.lightbox-content {
-  max-width: 90%;
-  max-height: 90%;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-#lightbox-text {
-  position: absolute;
-  bottom: 20px; /* Adjust as needed */
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 10px;
-  background-color: rgba(0, 0, 0, 0.5); /* Adjust background color and opacity */
-  color: white;
-  text-align: center;
-}
-
-
-#lightbox-modal .close {
-  position: absolute;
-  top: 10px;
-  right: 25px;
-  font-size: 50px;
-  color: white;
-  cursor: pointer;
-}
-
-#lightbox-modal img {
-  display: block;
-  margin: 0 auto;
-  max-width: 90%;
-  max-height: 90%;
-}
-
-</style>
-
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BrickTracker{% block title %}{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/gh/tofsjonas/sortable@4.0.0/dist/sortable.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/baguettebox.js/1.12.0/baguetteBox.css" integrity="sha512-VZ783G3QIpxXpg7tWpzHn+XhjsOCIxFYoSWmyipKCB41OYaB9i4brxAWuY1c8gGCSqKo7uvckzPJhYcdBZQ9gg==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-datatables@9.2.1/dist/style.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='styles.css') }}" rel="stylesheet">
+    <link rel="icon" type="image/png" sizes="48x48" href="{{ url_for('static', filename='brick.png') }}">
   </head>
   <body>
-    <nav class="navbar is-dark is-fixed-top is-size-6" role="navigation" aria-label="main navigation">
-      <div class="navbar-brand">
-        <a class="navbar-item" href="/">
-          Home
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+      <div class="container">
+        <a class="navbar-brand" href="{{ url_for('index.index') }}">
+            <img src="{{ url_for('static', filename='brick.png') }}" width="30" height="30" alt="">
+            BrickTracker
         </a>
-
-	{% if minifig_list | length > 0 %}
-	<a class="navbar-item" href="#minifigs">Jump2Figs</a>
-	{% endif %}    
-
-        <a class="navbar-item hidden-desktop" id="expand-button">
-          Expand Columns
-        </a> 
-	<a class="navbar-item" id="filter-button">
-	Missing Parts
-	</a>
-        
-        <a class="navbar-item hidden-desktop js-modal-trigger" data-target="modal-delete-set" >
-            Delete
-          </a>
-        
-      </div>
-      
-      <div id="navMenu" class="navbar-menu"> 
-        <div class="navbar-end"> 
-          <!-- <a class="navbar-item" onclick="delete_set('{{ u_id }}','{{ tmp }}', '{{ title }}')">
-            Delete
-          </a> -->
-          <a class="navbar-item js-modal-trigger" data-target="modal-delete-set">
-            Delete
-          </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            {% for item in config['_NAVBAR'] %}
+              {% if item.flag and not config[item.flag].value %}
+                <li class="nav-item px-1">
+                  <a {% if request.url_rule.endpoint == item.endpoint %}class="nav-link active" aria-current="page"{% else %}class="nav-link"{% endif %} href="{{ url_for(item.endpoint) }}">
+                    {% if item.icon %}
+                      <i class="ri-{{ item.icon }}"></i>
+                    {% endif %}
+                    {{ item.title }}
+                  </a>
+                </li>
+              {% endif %}
+            {% endfor %}
+          </ul>
+          {% if g.login.is_enabled() %}
+            {% if current_user.is_authenticated %}
+              <a href="{{ url_for('admin.admin', open_logout=true) }}" class="badge text-bg-success text-decoration-none">Authenticated</a>
+            {% else %}
+              <a href="{{ url_for('login.login', next=request.path) }}" class="badge text-bg-secondary text-decoration-none">Read-only</a>
+            {% endif %}
+          {% endif %}
         </div>
       </div>
     </nav>
 
-    <div class="modal" id="modal-delete-set">
-      <div class="modal-background"></div>
-      <div class="modal-card">
-        <header class="modal-card-head">
-          <p class="modal-card-title">Delete set?</p>
-          <button class="delete" aria-label="close"></button>
-        </header>
-        <section class="modal-card-body">
-          Are you sure you want to delete:
-          <br>
-          <b>{{ tmp }} - {{ title }}</b>
-          <br><br>
-          With unique ID: <br><b>{{ u_id }}</b>
-        </section>
-        <footer class="modal-card-foot">
-          <div class="buttons">
-            <a href="{{ '/delete/' + u_id }}" class="button is-danger">Delete</a>
-            <button class="button">Cancel</button>
-          </div>
-        </footer>
-      </div>
-    </div>
+    <main class="pt-2">
+      {% block main %}{% endblock %}
+    </main>
 
-    <div class="container">
-      <center>
-        <h1 class="title is-2 mt-4">{{ tmp }} - {{ title }}</h1>
-      <img class="lightbox-trigger title-image mb-5" id="cover" style='height: 150px; width: auto; object-fit: contain'  src="/static/sets/{{ tmp }}.jpg" alt="{{ tmp }} - {{ title }}">
-      {% block content %}{% endblock %}
-    </div>
+    <footer class="d-flex justify-content-between mx-1 p-2 border-top">
+      <div class="col-md-3 d-flex justify-content-start">
+        <img src="{{ url_for('static', filename='brick.png') }}" width="24" height="24" alt="">
+        <span class="ps-2 mb-3 mb-md-0 text-body-secondary">BrickTracker ({{ g.version }})</span>
+      </div>
+
+      <div class="col-md-6 d-flex justify-content-center">
+        <small>
+          <i class="ri-timer-2-line"></i> {{ g.request_time() }}
+          {%if config['DEBUG'].value and g.database_stats %}
+          | <i class="ri-database-2-line"></i> {{g.database_stats.print() }}
+          {% endif %}
+        </small>
+      </div>
+
+      <ul class="nav col-md-3 d-flex list-unstyled justify-content-end">
+        <li class="ms-3"><a class="text-body-secondary text-decoration-none" href="https://gitea.baerentsen.space/FrederikBaerentsen/BrickTracker" target="_blank"><img src="{{ url_for('static', filename='gitea.svg') }}" width="24" height="24" alt=""> Source</a></li>
+      </ul>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/gh/tofsjonas/sortable@4.0.0/dist/sortable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinysort/3.2.8/tinysort.min.js" integrity="sha512-P3lisBxY1PusizpelihVrBeciBfWA9r7Ff/8j16b4K399OWJIrY1UdzdE7/BctqKv6Xujr8hp3IA2XiQX3Bsew==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/baguettebox.js/1.12.0/baguetteBox.min.js" integrity="sha512-HzIuiABxntLbBS8ClRa7drXZI3cqvkAZ5DD0JCAkmRwUtykSGqzA9uItHivDhRUYnW3MMyY5xqk7qVUHOEMbMA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.1/socket.io.min.js" integrity="sha512-8ExARjWWkIllMlNzVg7JKq9RKWPlJABQUNq6YvAjE/HobctjH/NA+bSiDMDvouBVjp4Wwnf1VP1OEv7Zgjtuxw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@9.2.1/dist/umd/simple-datatables.min.js"></script>
+    <!-- Bootstrap tooltips -->
+    <script type="text/javascript">
+      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+      const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+    </script>
     {% block scripts %}{% endblock %}
   </body>
-  <script>
-    function delete_set(u_id,tmp,title) {
-      let text = "";
-      if (confirm(text) == true) {
-        text = "You pressed OK!";
-      } else {
-        text = "You canceled!";
-      }
-      document.getElementById("demo").innerHTML = text;
-    }
-    document.addEventListener('DOMContentLoaded', () => {
-  // Functions to open and close a modal
-  function openModal($el) {
-    $el.classList.add('is-active');
-  }
-
-  function closeModal($el) {
-    $el.classList.remove('is-active');
-  }
-
-  function closeAllModals() {
-    (document.querySelectorAll('.modal') || []).forEach(($modal) => {
-      closeModal($modal);
-    });
-  }
-
-  // Add a click event on buttons to open a specific modal
-  (document.querySelectorAll('.js-modal-trigger') || []).forEach(($trigger) => {
-    const modal = $trigger.dataset.target;
-    const $target = document.getElementById(modal);
-
-    $trigger.addEventListener('click', () => {
-      openModal($target);
-    });
-  });
-
-  // Add a click event on various child elements to close the parent modal
-  (document.querySelectorAll('.modal-background, .modal-close, .modal-card-head .delete, .modal-card-foot .button') || []).forEach(($close) => {
-    const $target = $close.closest('.modal');
-
-    $close.addEventListener('click', () => {
-      closeModal($target);
-    });
-  });
-
-  // Add a keyboard event to close all modals
-  document.addEventListener('keydown', (event) => {
-    if(event.key === "Escape") {
-      closeAllModals();
-    }
-  });
-});
-
-/*
-  document.getElementById("filter-button").addEventListener("click", () => {
-  const table = document.getElementById("data");
-  const rows = table.querySelectorAll("tbody tr");
-
-  // Check if any rows are currently hidden
-  const isFiltered = Array.from(rows).some(row => row.classList.contains("hidden"));
-
-  rows.forEach(row => {
-    const inputField = row.querySelector("input#missing");
-    if (inputField) {
-      const inputValue = inputField.value.trim();
-      if (isFiltered) {
-        // If currently filtered, show all rows
-        row.classList.remove("hidden");
-      } else {
-        // If not filtered, hide rows with empty input fields
-        if (inputValue === "") {
-          row.classList.add("hidden");
-        }
-      }
-    }
-  });
-
-  // Update button text based on the state
-  document.getElementById("filter-button").textContent = isFiltered
-    ? "Only Show Missing"
-    : "Show All Parts";
-});
-
-*/
-document.getElementById("filter-button").addEventListener("click", () => {
-      const tables = document.querySelectorAll("#data"); // Select all tables with the class 'data-table'
-      let isFiltered = false;
-
-      // Check if any row in any table is hidden
-      tables.forEach(table => {
-        const rows = table.querySelectorAll("tbody tr");
-        if (Array.from(rows).some(row => row.classList.contains("hidden"))) {
-          isFiltered = true;
-        }
-      });
-
-      // Apply toggle logic to each table
-      tables.forEach(table => {
-        const rows = table.querySelectorAll("tbody tr");
-        rows.forEach(row => {
-          const inputField = row.querySelector("input#missing");
-          if (inputField) {
-            const inputValue = inputField.value.trim();
-            if (isFiltered) {
-              row.classList.remove("hidden");
-            } else {
-              if (inputValue === "") {
-                row.classList.add("hidden");
-              }
-            }
-          }
-        });
-      });
-
-      // Update button text based on the state
-      document.getElementById("filter-button").textContent = isFiltered
-        ? "Missing Parts"
-        : "All Parts";
-    });
-
-  </script>
 </html>

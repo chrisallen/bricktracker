@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %} - Administration{% endblock %}
+
+{% block main %}
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      <div class="col-12">
+        <div class="card mb-3">
+          <div class="card-header">
+            <h5 class="mb-0"><i class="ri-settings-4-line"></i> Administration</h5>
+          </div>
+          <div class="accordion accordion-flush" id="admin">
+            {% if delete_database %}
+            {% include 'admin/database/delete.html' %}
+            {% elif drop_database %}
+            {% include 'admin/database/drop.html' %}
+            {% elif import_database %}
+            {% include 'admin/database/import.html' %}
+            {% else %}
+              {% include 'admin/logout.html' %}
+              {% include 'admin/instructions.html' %}
+              {% include 'admin/theme.html' %}
+              {% include 'admin/retired.html' %}
+              {% include 'admin/database.html' %}
+              {% include 'admin/configuration.html' %}
+            {% endif %}
+          </div>
+          <div class="card-footer"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% macro header(title, id, parent, size=none, total=none, quantity=none, expanded=false, icon=none, class=none, danger=none, image=none, alt=none) %}
+  {% if danger %}
+    {% set icon='alert-fill' %}
+  {% endif %}
+  <div class="accordion-item">
+    <h2 class="accordion-header">
+      <button class="accordion-button {% if danger %}text-danger{% endif %} {% if not expanded %}collapsed{% endif %} {% if image %}py-0 ps-0{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#{{ id }}" aria-expanded="{% if expanded %}true{% else %}false{% endif %}" aria-controls="{{ id }}">
+        {% if image %}
+          <img class="accordion-img" src="{{ image }}" {% if alt %}alt="{{ alt }}"{% endif %} loading="lazy">
+        {% elif icon %}
+          <i class="ri-{{ icon }} me-1"></i>
+        {% endif %}
+        {{ title }}
+        {% if size and total %}
+          ({{ total }} total | {{ size }} unique)
+        {% elif size and quantity %}
+          (x{{ quantity }} | {{ size }} unique)
+        {% elif size %}
+          ({{ size }})
+        {% endif %}
+      </button>
+    </h2>
+    <div id="{{ id }}" class="accordion-collapse collapse {% if expanded %}show{% endif %}" {% if not config['INDEPENDENT_ACCORDIONS'].value %}data-bs-parent="#{{ parent }}"{% endif %}>
+      <div class="accordion-body {% if class %}{{ class }}{% endif %}">
+{% endmacro %}
+
+{% macro footer() %}
+      </div>
+    </div>
+  </div>
+{% endmacro %}
+
+{% macro cards(card_collection, title, id, parent, target, icon=none) %}
+  {% set size=card_collection | length %}
+  {% if size %}
+    {{ header(title, id, parent, size=size, icon=icon) }}
+      <div class="row">
+        {% for item in card_collection %}
+          <div class="col-md-6 col-xl-3 d-flex align-items-stretch">
+            {% with solo=false, tiny=true %}
+              {% include target %}
+            {% endwith %}
+          </div>
+        {% endfor %}
+      </div>
+      {{ footer() }}
+  {% endif %}
+{% endmacro %}
+
+{% macro table(table_collection, title, id, parent, target, total=none, quantity=none, icon=none, image=none, alt=none, details=none, no_missing=none, read_only_missing=none) %}
+  {% set size=table_collection | length %}
+  {% if size %}
+    {{ header(title, id, parent, size=size, total=total, quantity=quantity, icon=icon, class='p-0', image=image, alt=alt) }}
+      {% if details %}
+        <p class="border-top border-bottom p-2 text-center">
+          {% if image %}
+            <a data-lightbox data-caption="{{ title }}" href="{{ image }}" target="_blank" class="text-decoration-none text-reset">
+              <img class="accordion-img" src="{{ image }}" {% if alt %}alt="{{ alt }}"{% endif %} loading="lazy">
+            </a>
+          {% endif %}
+          <a class="btn border bg-secondary-text" href="{{ details }}">{% if icon %}<i class="ri-{{ icon }}"></i>{% endif %} Details</a>
+        </p>
+      {% endif %}
+      {% with solo=true, all=false %}
+        {% include target %}
+      {% endwith %}
+    {{ footer() }}
+  {% endif %}
+{% endmacro %}

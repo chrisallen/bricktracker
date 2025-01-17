@@ -1,0 +1,76 @@
+{% macro header(color=false, quantity=false, missing=false, missing_parts=false, sets=false, minifigures=false) %}
+  <thead>
+    <tr>
+      <th class="no-sort" scope="col"><i class="ri-image-line fw-normal"></i> Image</th>
+      <th scope="col"><i class="ri-pencil-line fw-normal"></i> Name</th>
+      {% if color %}
+        <th scope="col"><i class="ri-palette-line fw-normal"></i> Color</th>
+      {% endif %}
+      {% if quantity %}
+        <th scope="col"><i class="ri-functions fw-normal"></i> Quantity</th>
+      {% endif %}
+      {% if missing %}
+        <th scope="col"><i class="ri-error-warning-line fw-normal"></i> Missing</th>
+      {% endif %}
+      {% if missing_parts %}
+        <th scope="col"><i class="ri-error-warning-line fw-normal"></i> Missing parts</th>
+      {% endif %}
+      {% if sets %}
+        <th scope="col"><i class="ri-hashtag fw-normal"></i> Sets</th>
+      {% endif %}
+      {% if minifigures %}
+        <th scope="col"><i class="ri-group-line fw-normal"></i> Minifigures</th>
+      {% endif %}
+    </tr>
+  </thead>
+{% endmacro %}
+
+{% macro bricklink(item) %}
+  {% set url=item.url_for_bricklink() %}
+  {% if url %}
+    <a href="{{ url }}" target="_blank" class="badge rounded-pill text-bg-light border fw-normal">
+      <i class="ri-external-link-line"></i> Bricklink
+    </a>
+  {% endif %}
+{% endmacro %}
+
+{% macro image(image, caption=none, alt=none, accordion=false) %}
+  <td class="py-0">
+    <a data-lightbox data-caption="{{ caption }}" href="{{ image }}" target="_blank">
+      <img class="{% if accordion %}accordion-img{% else %}table-img{% endif %}" src="{{ image }}" {% if alt %}alt="{{ alt }}"{% endif %} loading="lazy">
+    </a>
+  </td>
+{% endmacro %}
+
+{% macro rebrickable(item) %}
+  {% set url=item.url_for_rebrickable() %}
+  {% if url %}
+    <a href="{{ url }}" target="_blank" class="badge rounded-pill text-bg-light border fw-normal">
+      <i class="ri-external-link-line"></i> Rebrickable
+    </a>
+  {% endif %}
+{% endmacro %}
+
+{% macro dynamic(id, no_sort=none, number=none) %}
+  <script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", () => {
+      new simpleDatatables.DataTable("#{{ id }}", {
+        columns: [
+          {% if no_sort %}{ select: [{{ no_sort }}], sortable: false, searchable: false },{% endif %}
+          {% if number %}{ select: [{{ number }}], type: "number", searchable: false },{% endif %}
+        ],
+        pagerDelta: 1,
+        perPage: {{ config['DEFAULT_TABLE_PER_PAGE'].value }},
+        perPageSelect: [10, 25, 50, 100, 500, 1000],
+        searchable: true,
+        searchQuerySeparator: "",
+        tableRender: () => {
+          baguetteBox.run('[data-lightbox]')
+        },
+        pagerRender: () => {
+          baguetteBox.run('[data-lightbox]')
+        }
+      });
+    });
+  </script>
+{% endmacro %}

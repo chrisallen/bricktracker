@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %} - Add a set{% endblock %}
+
+{% block main %}
+<div class="container">
+  {% if not config['HIDE_ADD_BULK_SET'].value %}
+  <div class="alert alert-primary" role="alert">
+    <h4 class="alert-heading">Too many to add?</h4>
+    <p class="mb-0">You can import multiple sets at once with <a href="{{ url_for('add.bulk') }}" class="btn btn-primary"><i class="ri-function-add-line"></i> Bulk add</a>.</p>
+  </div>
+  {% endif %}
+  <div class="row">
+    <div class="col-12">
+      <div class="card mb-3">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="ri-add-circle-line"></i> Add a set</h5>
+        </div>
+        <div class="card-body">
+          <div id="add-fail" class="alert alert-danger d-none" role="alert"></div>
+          <div id="add-complete" class="alert alert-success d-none" role="alert"></div>
+          <div class="mb-3">
+            <label for="add-set" class="form-label">Set number (only one)</label>
+            <input type="text" class="form-control" id="add-set" placeholder="107-1 or 1642-1 or ...">
+          </div>
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="add-no-confirm">
+            <label class="form-check-label" for="add-no-confirm">
+              Add without confirmation
+            </label>
+          </div>
+          <hr>
+          <div class="mb-3">
+            <p>
+              Progress <span id="add-count"></span>
+              <span id="add-spinner" class="d-none">
+                <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                <span class="visually-hidden" role="status">Loading...</span>
+              </span>
+            </p>
+            <div id="add-progress" class="progress" role="progressbar" aria-label="Add a set progress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+              <div id="add-progress-bar" class="progress-bar" style="width: 0%"></div>
+            </div>
+            <p id="add-progress-message" class="text-center d-none"></p>
+          </div>
+          <div id="add-card" class="d-flex d-none justify-content-center">
+            <div class="card mb-3 col-6">
+              <div class="card-header">
+                <h5 class="mb-0">
+                  <span class="badge text-bg-secondary fw-normal"><i class="ri-hashtag"></i> <span id="add-card-number"></span></span>
+                  <span id="add-card-name"></span>
+                </h5>
+              </div>
+              <div id="add-card-image-container" class="card-img">
+                <img id="add-card-image" loading="lazy">
+              </div>
+              <div id="add-card-footer" class="card-footer text-end d-none">
+                <button id="add-card-dismiss" type="button" class="btn btn-danger"><i class="ri-close-line"></i> Dismiss</button>
+                <button id="add-card-confirm" type="button" class="btn btn-primary"><i class="ri-check-double-line"></i> Confirm add</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer text-end">
+          <span id="add-status-icon" class="me-1"></span><span id="add-status" class="me-1"></span><button id="add" type="button" class="btn btn-primary"><i class="ri-add-circle-line"></i> Add</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% include 'set/socket.html' %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='scripts/socket.js') }}"></script>
+{% endblock %}

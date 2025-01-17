@@ -1,0 +1,26 @@
+{% import 'macro/table.html' as table %}
+
+<div class="table-responsive-sm">
+  <table class="table table-striped align-middle" id="minifigures">
+    {{ table.header(quantity=true, missing_parts=true, sets=true) }}
+    <tbody>
+      {% for item in table_collection %}
+      <tr>
+        {{ table.image(item.url_for_image(), caption=item.fields.name, alt=item.fields.fig_num) }}
+        <td >
+          <a class="text-reset" href="{{ item.url() }}" style="max-width:auto">{{ item.fields.name }}</a>
+          {% if all %}
+            {{ table.rebrickable(item) }}
+          {% endif %}
+        </td>
+        <td>{{ item.fields.total_quantity }}</td>
+        <td>{{ item.fields.total_missing }}</td>
+        <td>{{ item.fields.total_sets }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% if all %}
+  {{ table.dynamic('minifigures', no_sort='0', number='2, 3, 4')}}
+{% endif %}

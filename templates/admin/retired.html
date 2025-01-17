@@ -1,0 +1,26 @@
+{% import 'macro/accordion.html' as accordion %}
+
+{{ accordion.header('Retired sets', 'retired', 'admin', expanded=open_retired, icon='calendar-close-line') }}
+<h5 class="border-bottom">File</h5>
+{% if retired.exception %}<div class="alert alert-danger" role="alert">An exception occured while loading processing the retired sets: {{ retired.exception }}</div>{% endif %}
+<p>
+  The retired sets file is: <code>{{ config['RETIRED_SETS_PATH'].value }}</code>.
+  {% if retired.size %}<span class="badge rounded-pill text-bg-info fw-normal"><i class="ri-hard-drive-line"></i> {{ retired.human_size() }}</span>{% endif %}
+  {% if retired.mtime %}<span class="badge rounded-pill text-bg-light border fw-normal"><i class="ri-calendar-line"></i> {{ retired.human_time() }}</span>{% endif %}
+</p>
+<h5 class="border-bottom">Counters</h5>
+<p>
+  <div class="d-flex justify-content-start">
+    <ul class="list-group">
+      <li class="list-group-item d-flex justify-content-between align-items-start">
+        <span><i class="ri-calendar-close-line"></i> Retired sets</span> <span class="badge text-bg-primary rounded-pill ms-2">{{ retired.retired | length }}</span>
+      </li>
+    </ul>
+  </div>
+</p>
+<h5 class="border-bottom">Refresh</h5>
+<p>
+  <a href="{{ url_for('admin.refresh_retired') }}" class="btn btn-primary" role="button"><i class="ri-refresh-line"></i> Refresh the retired sets cache</a>
+  <a href="{{ url_for('admin.update_retired') }}" class="btn btn-primary" role="button"><i class="ri-download-line"></i> Update the retired sets file</a>
+</p>
+{{ accordion.footer() }}

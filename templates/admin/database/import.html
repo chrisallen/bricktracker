@@ -1,0 +1,16 @@
+{% import 'macro/accordion.html' as accordion %}
+
+{{ accordion.header('Database danger zone', 'database-danger', 'admin', expanded=true, danger=true) }}
+<form action="{{ url_for('admin.do_import_database') }}" method="post" enctype="multipart/form-data">
+  {% if error %}<div class="alert alert-danger text-start" role="alert"><strong>Error:</strong> {{ error }}.</div>{% endif %}
+  <div class="alert alert-warning text-center" role="alert">You are about to <strong>import a database file</strong>. This will replace the <strong>whole content</strong> of the database. This action is irreversible.</div>
+  <div class="mb-3">
+    <label for="database" class="form-label">New database file</label>
+    <input type="file" class="form-control" id="database" name="database" accept=".db">
+  </div>
+  <div class="text-end">
+    <a class="btn btn-danger" href="{{ url_for('admin.admin') }}" role="button"><i class="ri-arrow-left-long-line"></i> Back to the admin</a>
+    <button type="submit" class="btn btn-warning"><i class="ri-upload-line"></i> Import a database file</button>
+  </div>
+</form>
+{{ accordion.footer() }}

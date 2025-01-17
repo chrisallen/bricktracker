@@ -1,0 +1,31 @@
+{% import 'macro/accordion.html' as accordion %}
+
+{{ accordion.header('Configuration variables', 'configuration', 'admin', icon='list-settings-line') }}
+<ul class="list-group list-group-flush">
+  {% for entry in configuration %}
+    <li class="list-group-item">
+      <strong>{{ entry.name }}</strong>:
+      {% if entry.value == none or entry.value == '' %}
+        <span class="badge rounded-pill text-bg-secondary">Unset</span>
+      {% elif entry.value == true %}
+        <span class="badge rounded-pill text-bg-success">True</span>
+      {% elif entry.value == false %}
+        <span class="badge rounded-pill text-bg-danger">False</span>
+      {% else %}
+        {% if entry.is_secret() %}
+          <span class="badge rounded-pill text-bg-success">Set</span>
+        {% else %}
+          <code>{{ entry.value }}</code>
+        {% endif %}
+      {% endif %}
+      {% if not entry.not_from_env %}
+        <span class="badge rounded-pill text-bg-light border">Env: {{ entry.env_name }}</span>
+        {% if entry.extra_name %}<span class="badge rounded-pill text-bg-light border">Env: {{ entry.extra_name }}</span>{% endif %}
+        {% if entry.is_changed() %}
+          <span class="badge rounded-pill text-bg-warning">Changed</span>
+        {% endif %}
+      {% endif %}
+    </li>
+  {% endfor %}
+</ul>
+{{ accordion.footer() }}

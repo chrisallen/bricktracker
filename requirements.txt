@@ -1,10 +1,11 @@
+eventlet
 flask
 flask_socketio
+flask-login
+gunicorn
+humanize
+jinja2
 pathlib
 plotly
-pandas
-numpy
 rebrick
 requests
-eventlet
-gunicorn

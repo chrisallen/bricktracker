@@ -1,0 +1,35 @@
+{% import 'macro/accordion.html' as accordion %}
+{% import 'macro/card.html' as card %}
+
+<div class="container">
+  <div class="card mb-3">
+    <div class="card-header">
+      <h5 class="mb-0"><i class="ri-file-line"></i> Instructions</h5>
+    </div>
+    <div class="accordion accordion-flush" id="instructions">
+      {{ accordion.header('Instructions danger zone', 'instructions-delete', 'instructions', expanded=true, danger=true) }}
+      {% if item.brickset %}
+        <div class="d-flex justify-content-center">
+          {% with item=item.brickset %}
+            {% include 'set/mini.html' %}
+          {% endwith %}
+        </div>
+      {% endif %}
+      <form action="{{ url_for('instructions.do_delete', name=item.filename) }}" method="post">
+        {% if error %}<div class="alert alert-danger" role="alert"><strong>Error:</strong> {{ error }}.</div>{% endif %}
+        <div class="alert alert-danger text-center" role="alert">You are about to <strong>delete the instruction file {{ item.filename }}</strong>. This action is irreversible.</div>
+        <div class="text-end">
+          <a class="btn btn-danger" href="{{ url_for('instructions.list') }}" role="button"><i class="ri-arrow-left-long-line"></i> Back to the instructions</a>
+          <button type="submit" class="btn btn-danger"><i class="ri-delete-bin-2-line"></i> Delete <strong>the instruction file {{ item.filename }}</strong></button>
+        </div>
+      </form>
+      {{ accordion.footer() }}
+    </div>
+    <div class="card-footer"></div>
+  </div>
+</div>
+<script type="text/javascript">
+  document.addEventListener("DOMContentLoaded", () => {
+    baguetteBox.run('[data-lightbox]');
+  });
+</script>

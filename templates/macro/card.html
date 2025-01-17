@@ -1,0 +1,24 @@
+{% macro header(item, name, solo=false, number=none, color=none, icon='hashtag') %}
+  <div class="card-header">
+    {% if not solo %}
+      <a class="text-decoration-none text-reset" href="{{ item.url() }}" data-bs-toggle="tooltip" title="{{ name }}">
+    {% endif %}
+    <h5 class="mb-0 {% if not solo %}fs-6 text-nowrap overflow-x-hidden text-truncate{% endif %}">
+      {% if number %}<span class="badge text-bg-secondary fw-normal"><i class="ri-{{ icon }}"></i>{{ number }}</span>{% endif %}
+      {% if color %}<span class="badge text-bg-light fw-normal border"><i class="ri-palette-line"></i> {{ color }}</span>{% endif %}
+      {{ name }}
+    </h5>
+    {% if not solo %}
+      </a>
+    {% endif %}
+  </div>
+{% endmacro %}
+
+{% macro image(item, solo=false, last=false, caption=none, alt=none, medium=none) %}
+  {% set image_url=item.url_for_image() %}
+  <div class="card-img border-bottom" style="background-image: url({{ image_url }})">
+    <a {% if solo %}data-lightbox {% if caption %}data-caption="{{ caption }}"{% endif %} href="{{ image_url }}" target="_blank"{% else %}href="{{ item.url() }}"{% endif %}>
+      <img {% if solo and medium %}class="card-medium-img"{% endif %}{% if last %}class="card-last-img"{% endif %} src="{{ image_url }}" {% if alt %}alt="{{ alt }}"{% endif %} loading="lazy">
+    </a>
+  </div>
+{% endmacro %}

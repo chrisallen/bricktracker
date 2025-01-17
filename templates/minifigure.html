@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %} - Minifigure {{ item.fields.name }}{% endblock %}
+
+{% block main %}
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      {% with solo=true, read_only_missing=true %}
+        {% include 'minifigure/card.html' %}
+      {% endwith %}
+    </div>
+  </div>
+</div>
+<script type="text/javascript">
+  document.addEventListener("DOMContentLoaded", () => {
+    baguetteBox.run('[data-lightbox]');
+  });
+</script>
+{% endblock %}

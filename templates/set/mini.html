@@ -1,0 +1,12 @@
+{% import 'macro/badge.html' as badge %}
+{% import 'macro/card.html' as card %}
+
+<div class="card mb-3">
+  {{ card.header(item, item.fields.name, solo=true, number=item.fields.set_num) }}
+  {{ card.image(item, solo=true, last=false, caption=item.fields.name, alt=item.fields.set_num) }}
+  <div class="card-body p-1">
+    {{ badge.theme(item.theme_name) }}
+    {{ badge.year(item.fields.year) }}
+    {{ badge.parts(item.fields.num_parts) }}
+  </div>
+</div>

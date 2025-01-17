@@ -1,0 +1,101 @@
+import logging
+import sys
+import time
+from zoneinfo import ZoneInfo
+
+from flask import current_app, Flask, g
+from werkzeug.middleware.proxy_fix import ProxyFix
+
+from bricktracker.configuration_list import BrickConfigurationList
+from bricktracker.login import LoginManager
+from bricktracker.navbar import Navbar
+from bricktracker.sql import close
+from bricktracker.version import __version__
+from bricktracker.views.add import add_page
+from bricktracker.views.admin import admin_page
+from bricktracker.views.error import error_404
+from bricktracker.views.index import index_page
+from bricktracker.views.instructions import instructions_page
+from bricktracker.views.login import login_page
+from bricktracker.views.minifigure import minifigure_page
+from bricktracker.views.part import part_page
+from bricktracker.views.set import set_page
+from bricktracker.views.wish import wish_page
+
+
+def setup_app(app: Flask) -> None:
+    # Load the configuration
+    BrickConfigurationList(app)
+
+    # Set the logging level
+    if app.config['DEBUG'].value:
+        logging.basicConfig(
+            stream=sys.stdout,
+            level=logging.DEBUG,
+            format='[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s',  # noqa: E501
+        )
+    else:
+        logging.basicConfig(
+            stream=sys.stdout,
+            level=logging.INFO,
+            format='[%(asctime)s] %(levelname)s - %(message)s',
+        )
+
+    # Load the navbar
+    Navbar(app)
+
+    # Setup the login manager
+    LoginManager(app)
+
+    # I don't know :-)
+    app.wsgi_app = ProxyFix(
+        app.wsgi_app,
+        x_for=1,
+        x_proto=1,
+        x_host=1,
+        x_port=1,
+        x_prefix=1,
+    )
+
+    # Register errors
+    app.register_error_handler(404, error_404)
+
+    # Register routes
+    app.register_blueprint(add_page)
+    app.register_blueprint(admin_page)
+    app.register_blueprint(index_page)
+    app.register_blueprint(instructions_page)
+    app.register_blueprint(login_page)
+    app.register_blueprint(minifigure_page)
+    app.register_blueprint(part_page)
+    app.register_blueprint(set_page)
+    app.register_blueprint(wish_page)
+
+    # An helper to make global variables available to the
+    # request
+    @app.before_request
+    def before_request() -> None:
+        def request_time() -> str:
+            elapsed = time.time() - g.request_start_time
+            if elapsed < 1:
+                return '{elapsed:.0f}ms'.format(elapsed=elapsed*1000)
+            else:
+                return '{elapsed:.2f}s'.format(elapsed=elapsed)
+
+        # Login manager
+        g.login = LoginManager
+
+        # Execution time
+        g.request_start_time = time.time()
+        g.request_time = request_time
+
+        # Register the timezone
+        g.timezone = ZoneInfo(current_app.config['TIMEZONE'].value)
+
+        # Version
+        g.version = __version__
+
+    # Make sure all connections are closed at the end
+    @app.teardown_appcontext
+    def close_connections(exception, /) -> None:
+        close()
