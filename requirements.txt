@@ -5,7 +5,5 @@ flask-login
 gunicorn
 humanize
 jinja2
-pathlib
-plotly
 rebrick
 requests

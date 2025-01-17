@@ -1,12 +1,11 @@
-FROM python:slim
+FROM python:3-slim
 
 WORKDIR /app
 
-# Python library requirements
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-
 # Bricktracker
 COPY . .
+
+# Python library requirements
+RUN pip --no-cache-dir install -r requirements.txt
 
 ENTRYPOINT ["./entrypoint.sh"]
