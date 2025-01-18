@@ -38,7 +38,7 @@
             {% endfor %}
           </ul>
           {% if g.login.is_enabled() %}
-            {% if current_user.is_authenticated %}
+            {% if g.login.is_authenticated() %}
               <a href="{{ url_for('admin.admin', open_logout=true) }}" class="badge text-bg-success text-decoration-none">Authenticated</a>
             {% else %}
               <a href="{{ url_for('login.login', next=request.path) }}" class="badge text-bg-secondary text-decoration-none">Read-only</a>
