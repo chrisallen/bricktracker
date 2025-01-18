@@ -9,6 +9,7 @@ Dockerfile
 compose.yaml
 
 # Documentation
+docs/
 LICENSE
 *.md
 *.sample
