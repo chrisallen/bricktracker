@@ -17,6 +17,7 @@ static/sets/
 
 # Temporary
 *.csv
+/local/
 
 # Apple idiocy
 .DS_Store
