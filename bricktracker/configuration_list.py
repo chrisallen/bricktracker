@@ -23,11 +23,14 @@ class BrickConfigurationList(object):
     # Check whether a str configuration is set
     @staticmethod
     def error_unless_is_set(name: str):
-        value = current_app.config[name].value
+        config: BrickConfiguration = current_app.config[name]
 
-        if value is None or value == '':
+        if config.value is None or config.value == '':
             raise ConfigurationMissingException(
-                '{name} must be defined'.format(name=name),
+                '{name} must be defined (using the {environ} environment variable)'.format(  # noqa: E501
+                    name=config.name,
+                    environ=config.env_name
+                ),
             )
 
     # Get all the configuration items from the app config
