@@ -40,7 +40,7 @@
   {% if solo %}
     <div class="accordion accordion-flush" id="set-details">
       {% if not delete %}
-        {{ accordion.header('Instructions', 'instructions', 'set-details', expanded=open_instructions, icon='file-line', class='p-0') }}
+        {{ accordion.header('Instructions', 'instructions', 'set-details', expanded=open_instructions, size=item.instructions | length, icon='file-line', class='p-0') }}
         <div class="list-group list-group-flush">
           {% if item.instructions | length %}
             {% for instruction in item.instructions %}
