@@ -40,7 +40,7 @@
   {% if solo %}
     <div class="accordion accordion-flush" id="set-details">
       {% if not delete %}
-        {{ accordion.header('Instructions', 'instructions', 'set-details', expanded=open_instructions, size=item.instructions | length, icon='file-line', class='p-0') }}
+        {{ accordion.header('Instructions', 'instructions', 'set-details', expanded=open_instructions, quantity=item.instructions | length, icon='file-line', class='p-0') }}
         <div class="list-group list-group-flush">
           {% if item.instructions | length %}
             {% for instruction in item.instructions %}
@@ -54,7 +54,7 @@
           {% endif %}
         </div>
         {{ accordion.footer() }}
-        {{ accordion.table(item.parts(), 'Parts', 'parts-inventory', 'set-details', 'part/table.html', total=item.fields.num_parts, icon='shapes-line')}}
+        {{ accordion.table(item.parts(), 'Parts', 'parts-inventory', 'set-details', 'part/table.html', icon='shapes-line')}}
         {% for minifigure in item.minifigures() %}
           {{ accordion.table(minifigure.parts(), minifigure.fields.name, minifigure.fields.fig_num, 'set-details', 'part/table.html', quantity=minifigure.fields.quantity, icon='group-line', image=minifigure.url_for_image(), alt=minifigure.fields.fig_num, details=minifigure.url())}}
         {% endfor %}
