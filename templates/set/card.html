@@ -47,7 +47,10 @@
             <a class="list-group-item list-group-item-action" href="{{ instruction.url() }}" target="_blank"><i class="ri-arrow-right-long-line"></i> <i class="ri-{{ instruction.icon() }}"></i> {{ instruction.filename }}</a>
             {% endfor %}
           {% else %}
-            <a class="list-group-item list-group-item-action" href="{{ url_for('instructions.upload') }}"><i class="ri-upload-line"></i> Upload an instructions file</a>
+            <span class="list-group-item list-group-item-action text-center"><i class="ri-error-warning-line"></i> No instructions file found.</span>
+            {% if g.login.is_authenticated() %}
+              <a class="list-group-item list-group-item-action" href="{{ url_for('instructions.upload') }}"><i class="ri-upload-line"></i> Upload an instructions file</a>
+            {% endif %}
           {% endif %}
         </div>
         {{ accordion.footer() }}
