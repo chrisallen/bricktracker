@@ -6,7 +6,7 @@
 {% if error %}<div class="alert alert-danger" role="alert"><strong>Error:</strong> {{ error }}.</div>{% endif %}
 {% if not is_init %}
   <div class="alert alert-warning" role="alert">
-    <p>The database is not initialized.</p>
+    <p>The database file is: <code>{{ config['DATABASE_PATH'].value }}</code>. The database is not initialized.</p>
     <hr>
     <form action="{{ url_for('admin.init_database') }}" method="post" class="text-end">
         <button type="submit" class="btn btn-warning"><i class="ri-reset-right-fill"></i> Initialize the database</button>
@@ -25,7 +25,7 @@
       </form>
     </div>
   {% endif %}
-  <p><i class="ri-checkbox-circle-line"></i> The database is initialized.</p>
+  <p>The database file is: <code>{{ config['DATABASE_PATH'].value }}</code>. <i class="ri-checkbox-circle-line"></i> The database is initialized.</p>
   <p>
     <a href="{{ url_for('admin.download_database') }}" class="btn btn-primary" role="button"><i class="ri-download-line"></i> Download the database file</a>
   </p>
