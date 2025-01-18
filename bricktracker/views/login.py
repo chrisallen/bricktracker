@@ -3,6 +3,7 @@ import logging
 from flask import (
     Blueprint,
     current_app,
+    g,
     redirect,
     render_template,
     request,
@@ -27,7 +28,11 @@ login_page = Blueprint('login', __name__)
 # Index
 @login_page.route('/login', methods=['GET'])
 @exception_handler(__file__)
-def login() -> str:
+def login() -> str | Response:
+    # Do not log if logged in
+    if g.login.is_authenticated():
+        return redirect(url_for('index.index'))
+
     return render_template(
         'login.html',
         next=request.args.get('next'),
