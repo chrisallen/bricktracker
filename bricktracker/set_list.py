@@ -9,6 +9,7 @@ from .set import BrickSet
 # All the sets from the database
 class BrickSetList(BrickRecordList[BrickSet]):
     themes: list[str]
+    order: str
 
     # Queries
     generic_query: str = 'set/list/generic'
@@ -24,14 +25,15 @@ class BrickSetList(BrickRecordList[BrickSet]):
         # Placeholders
         self.themes = []
 
+        # Store the order for this list
+        self.order = current_app.config['SETS_DEFAULT_ORDER'].value
+
     # All the sets
     def all(self, /) -> Self:
         themes = set()
 
         # Load the sets from the database
-        for record in self.select(
-            order=current_app.config['SETS_DEFAULT_ORDER'].value
-        ):
+        for record in self.select(order=self.order):
             brickset = BrickSet(record=record)
 
             self.records.append(brickset)
@@ -45,7 +47,10 @@ class BrickSetList(BrickRecordList[BrickSet]):
 
     # A generic list of the different sets
     def generic(self, /) -> Self:
-        for record in self.select(override_query=self.generic_query):
+        for record in self.select(
+            override_query=self.generic_query,
+            order=self.order
+        ):
             brickset = BrickSet(record=record)
 
             self.records.append(brickset)
@@ -78,7 +83,8 @@ class BrickSetList(BrickRecordList[BrickSet]):
 
         # Load the sets from the database
         for record in self.select(
-            override_query=self.missing_minifigure_query
+            override_query=self.missing_minifigure_query,
+            order=self.order
         ):
             brickset = BrickSet(record=record)
 
@@ -100,7 +106,10 @@ class BrickSetList(BrickRecordList[BrickSet]):
         self.fields.element_id = element_id
 
         # Load the sets from the database
-        for record in self.select(override_query=self.missing_part_query):
+        for record in self.select(
+            override_query=self.missing_part_query,
+            order=self.order
+        ):
             brickset = BrickSet(record=record)
 
             self.records.append(brickset)
@@ -117,7 +126,10 @@ class BrickSetList(BrickRecordList[BrickSet]):
         self.fields.fig_num = fig_num
 
         # Load the sets from the database
-        for record in self.select(override_query=self.using_minifigure_query):
+        for record in self.select(
+            override_query=self.using_minifigure_query,
+            order=self.order
+        ):
             brickset = BrickSet(record=record)
 
             self.records.append(brickset)
@@ -138,7 +150,10 @@ class BrickSetList(BrickRecordList[BrickSet]):
         self.fields.element_id = element_id
 
         # Load the sets from the database
-        for record in self.select(override_query=self.using_part_query):
+        for record in self.select(
+            override_query=self.using_part_query,
+            order=self.order
+        ):
             brickset = BrickSet(record=record)
 
             self.records.append(brickset)

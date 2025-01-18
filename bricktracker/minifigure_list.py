@@ -11,6 +11,7 @@ if TYPE_CHECKING:
 # Lego minifigures
 class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
     brickset: 'BrickSet | None'
+    order: str
 
     # Queries
     all_query: str = 'minifigure/list/all'
@@ -25,11 +26,14 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
         # Placeholders
         self.brickset = None
 
+        # Store the order for this list
+        self.order = current_app.config['MINIFIGURES_DEFAULT_ORDER'].value
+
     # Load all minifigures
     def all(self, /) -> Self:
         for record in self.select(
             override_query=self.all_query,
-            order=current_app.config['MINIFIGURES_DEFAULT_ORDER'].value
+            order=self.order
         ):
             minifigure = BrickMinifigure(record=record)
 
@@ -62,9 +66,7 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
         self.brickset = brickset
 
         # Load the minifigures from the database
-        for record in self.select(
-            order=current_app.config['MINIFIGURES_DEFAULT_ORDER'].value
-        ):
+        for record in self.select(order=self.order):
             minifigure = BrickMinifigure(brickset=self.brickset, record=record)
 
             self.records.append(minifigure)
@@ -94,8 +96,11 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
         self.fields.color_id = color_id
         self.fields.element_id = element_id
 
-        # Load the sets from the database
-        for record in self.select(override_query=self.missing_part_query):
+        # Load the minifigures from the database
+        for record in self.select(
+            override_query=self.missing_part_query,
+            order=self.order
+        ):
             minifigure = BrickMinifigure(record=record)
 
             self.records.append(minifigure)
@@ -115,8 +120,11 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
         self.fields.color_id = color_id
         self.fields.element_id = element_id
 
-        # Load the sets from the database
-        for record in self.select(override_query=self.using_part_query):
+        # Load the minifigures from the database
+        for record in self.select(
+            override_query=self.using_part_query,
+            order=self.order
+        ):
             minifigure = BrickMinifigure(record=record)
 
             self.records.append(minifigure)

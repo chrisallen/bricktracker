@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 class BrickPartList(BrickRecordList[BrickPart]):
     brickset: 'BrickSet | None'
     minifigure: 'BrickMinifigure | None'
+    order: str
 
     # Queries
     all_query: str = 'part/list/all'
@@ -28,11 +29,14 @@ class BrickPartList(BrickRecordList[BrickPart]):
         self.brickset = None
         self.minifigure = None
 
+        # Store the order for this list
+        self.order = current_app.config['PARTS_DEFAULT_ORDER'].value
+
     # Load all parts
     def all(self, /) -> Self:
         for record in self.select(
             override_query=self.all_query,
-            order=current_app.config['PARTS_DEFAULT_ORDER'].value
+            order=self.order
         ):
             part = BrickPart(record=record)
 
@@ -52,9 +56,7 @@ class BrickPartList(BrickRecordList[BrickPart]):
         self.minifigure = minifigure
 
         # Load the parts from the database
-        for record in self.select(
-            order=current_app.config['PARTS_DEFAULT_ORDER'].value
-        ):
+        for record in self.select(order=self.order):
             part = BrickPart(
                 brickset=self.brickset,
                 minifigure=minifigure,
@@ -83,7 +85,7 @@ class BrickPartList(BrickRecordList[BrickPart]):
         # Load the parts from the database
         for record in self.select(
             override_query=self.minifigure_query,
-            order=current_app.config['PARTS_DEFAULT_ORDER'].value
+            order=self.order
         ):
             part = BrickPart(
                 minifigure=minifigure,
@@ -104,7 +106,7 @@ class BrickPartList(BrickRecordList[BrickPart]):
     def missing(self, /) -> Self:
         for record in self.select(
             override_query=self.missing_query,
-            order=current_app.config['PARTS_DEFAULT_ORDER'].value
+            order=self.order
         ):
             part = BrickPart(record=record)
 
