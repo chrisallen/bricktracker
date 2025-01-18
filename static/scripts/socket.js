@@ -40,7 +40,7 @@ class BrickSocket {
 
         if (this.html_button) {
             this.add_listener = ((bricksocket) => (e) => {
-                if (!bricksocket.disabled) {
+                if (!bricksocket.disabled && bricksocket.socket !== undefined && bricksocket.socket.connected) {
                     bricksocket.toggle(false);
 
                     // Split and save the list if bulk
