@@ -1,8 +1,11 @@
-FROM python:slim
+FROM python:3-slim
+
 WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
+
+# Bricktracker
 COPY . .
-RUN bash lego.sh
-#CMD ["python", "app.py"]
-CMD ["gunicorn","--bind","0.0.0.0:3333","app:app","--worker-class","eventlet"]
+
+# Python library requirements
+RUN pip --no-cache-dir install -r requirements.txt
+
+ENTRYPOINT ["./entrypoint.sh"]

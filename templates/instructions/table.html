@@ -1,0 +1,51 @@
+{% import 'macro/table.html' as table %}
+
+<div class="table-responsive-sm">
+  <table class="table table-striped align-middle" id="instructions">
+    <thead>
+      <tr>
+        <th scope="col"><i class="ri-file-line fw-normal"></i> Filename</th>
+        <th scope="col"><i class="ri-hashtag fw-normal"></i> Set</th>
+        <th class="no-sort" scope="col"><i class="ri-image-line fw-normal"></i> Image</th>
+        {% if g.login.is_authenticated() %}
+          <th class="no-sort" scope="col"><i class="ri-settings-4-line fw-normal"></i> Actions</th>
+        {% endif %}
+        </tr>
+    </thead>
+    <tbody>
+      {% for item in table_collection %}
+      <tr>
+        <td>
+          {% if item.allowed %}
+            <a class="text-reset" href="{{ item.url() }}" target="_blank">
+          {%- endif -%}
+          <i class="ri-{{ item.icon() }}"></i> {{ item.filename }}
+          {%- if item.allowed -%}
+            </a>
+          {% endif %}
+          <span class="badge rounded-pill text-bg-info fw-normal"><i class="ri-hard-drive-line"></i> {{ item.human_size() }}</span>
+          <span class="badge rounded-pill text-bg-light border fw-normal"><i class="ri-calendar-line"></i> {{ item.human_time() }}</span>
+        </td>
+        <td>
+          {% if item.number %}<span class="badge text-bg-secondary fw-normal"><i class="ri-hashtag"></i> {{ item.number }}</span>{% endif %}
+          {% if item.brickset %}{{ item.brickset.fields.name }}{% endif %}
+        </td>
+        {% if item.brickset %}
+          {{ table.image(item.brickset.url_for_image(), caption=item.brickset.fields.name, alt=item.brickset.fields.set_num) }}
+        {% else %}
+          <td><i class="ri-file-warning-line"></i></td>
+        {% endif %}
+        {% if g.login.is_authenticated() %}
+        <td>
+          <a href="{{ url_for('instructions.rename', name=item.filename) }}" class="btn btn-sm btn-primary"><i class="ri-edit-line"></i> Rename</a>
+          <a href="{{ url_for('instructions.delete', name=item.filename) }}" class="btn btn-sm btn-danger"><i class="ri-delete-bin-2-line"></i> Delete</a>
+        </td>
+        {% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% if all %}
+  {{ table.dynamic('instructions', no_sort='2,3')}}
+{% endif %}

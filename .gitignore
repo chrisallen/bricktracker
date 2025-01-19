@@ -1,11 +1,23 @@
-api
+# Application
 .env
-*.csv
 *.db
-*.png
-*.pdf
-*.jpg
-*.log
-/info
-/__pycache__
-*.bk
+
+# Python specifics
+__pycache__/
+*.pyc
+
+# Static folders
+static/instructions/
+static/minifigs/
+static/parts/
+static/sets/
+
+# IDE
+.vscode/
+
+# Temporary
+*.csv
+/local/
+
+# Apple idiocy
+.DS_Store

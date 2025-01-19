@@ -1,0 +1,20 @@
+INSERT INTO missing (
+    set_num,
+    id,
+    part_num,
+    part_img_url_id,
+    color_id,
+    quantity,
+    element_id,
+    u_id
+)
+VALUES(
+    :set_num,
+    :id,
+    :part_num,
+    :part_img_url_id,
+    :color_id,
+    :quantity,
+    :element_id,
+    :u_id
+)

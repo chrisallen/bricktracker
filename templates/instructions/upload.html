@@ -1,0 +1,42 @@
+{% import 'macro/accordion.html' as accordion %}
+{% import 'macro/card.html' as card %}
+
+<div class="container">
+  <div class="card mb-3">
+    <div class="card-header">
+      <h5 class="mb-0"><i class="ri-file-line"></i> Instructions</h5>
+    </div>
+    <div class="accordion accordion-flush" id="instructions">
+      {{ accordion.header('Management', 'instructions-upload', 'instructions', expanded=true) }}
+      <form action="{{ url_for('instructions.do_upload') }}" method="post" enctype="multipart/form-data">
+        {% if error %}<div class="alert alert-danger" role="alert"><strong>Error:</strong> {{ error }}.</div>{% endif %}
+        <div class="alert alert-info" role="alert">
+          <strong>File naming convention:</strong> You are free to use any name you want for your intructions files. <br>
+          However if you want an instructions file to be associated to a set, the filename must start with the set number (<code>number-version</code>). <br>
+          For instance, you could use:
+          <ul>
+            <li>Instructions.pdf: will <strong>not be</strong> matched to any set</li>
+            <li>107.pdf: will <strong>not be</strong> matched to set <code>107-1</code></li>
+            <li>107-1.pdf: will be matched to set <code>107-1</code></li>
+            <li>107-1-2.pdf: will be matched to set <code>107-1</code></li>
+            <li>107-1 Special instructions.pdf: will be matched to set <code>107-1</code></li>
+            <li>107-1_Special_instructions.pdf: will be matched to set <code>107-1</code></li>
+          </ul>
+        </div>
+        <div class="mb-3">
+          <label for="file" class="form-label">Instructions file</label>
+          <div class="input-group">
+            <input type="file" class="form-control" id="file" name="file" accept="{{ ','.join(config['INSTRUCTIONS_ALLOWED_EXTENSIONS'].value) }}">
+            <span class="input-group-text">{{ ', '.join(config['INSTRUCTIONS_ALLOWED_EXTENSIONS'].value) }}</span>
+          </div>
+        </div>
+        <div class="text-end">
+          <a class="btn btn-primary" href="{{ url_for('instructions.list') }}" role="button"><i class="ri-arrow-left-long-line"></i> Back to the instructions</a>
+          <button type="submit" class="btn btn-primary"><i class="ri-upload-line"></i> Upload an instructions file</button>
+        </div>
+      </form>
+      {{ accordion.footer() }}
+    </div>
+    <div class="card-footer"></div>
+  </div>
+</div>

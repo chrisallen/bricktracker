@@ -1,0 +1,61 @@
+.card-img {
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.card-img img {
+    max-height: 150px;
+    height: 100%;
+    width: 100%;
+    object-fit:contain;
+    -webkit-backdrop-filter: blur(8px) contrast(60%);
+    backdrop-filter: blur(8px) contrast(60%);
+}
+
+.card-img img.card-last-img {
+    max-height: 100px;
+}
+
+.card-check {
+    font-size: 12px;
+}
+
+.card-solo > .card-img img {
+    max-height:300px !important;
+}
+
+.card-solo > .card-img img.card-medium-img {
+    max-height:200px !important;
+}
+
+.card-solo .card-check {
+    font-size: inherit !important;
+}
+
+.accordion-img {
+    max-height: 50px;
+    max-width: 50px;
+    height: 100%;
+    width: 100%;
+    object-fit:contain;
+}
+
+.table-img {
+    height: 75px;
+    width: 75px;
+    object-fit:contain;
+}
+
+.table-td-missing {
+    max-width: 150px;
+}
+
+/* Fixes for sortable.js */
+.sortable {
+    --th-color: #000 !important;
+    --th-bg:#fff !important;
+}
+
+.sortable thead th {
+    font-weight: bold !important;
+}

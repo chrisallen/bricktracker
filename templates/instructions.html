@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %} - All instructions{% endblock %}
+
+{% block main %}
+  {% if upload %}
+    {% include 'instructions/upload.html' %}
+  {% elif rename %}
+    {% include 'instructions/rename.html' %}
+  {% elif delete %}
+    {% include 'instructions/delete.html' %}
+  {% else %}
+    <div class="container-fluid px-0">
+      {% if g.login.is_authenticated() %}
+        <p class="border-bottom pb-2 px-2 text-center">
+          <a class="btn btn-primary" href="{{ url_for('instructions.upload') }}"><i class="ri-upload-line"></i> Upload an instructions file</a>
+          <a href="{{ url_for('admin.admin', open_instructions=true) }}" class="btn btn-light border" role="button"><i class="ri-refresh-line"></i> Refresh the instructions cache</a>
+        </p>
+      {% endif %}
+      {% with all=true %}
+        {% include 'instructions/table.html' %}
+      {% endwith %}
+    </div>
+  {% endif %}
+{% endblock %}

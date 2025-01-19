@@ -1,0 +1,79 @@
+{% import 'macro/accordion.html' as accordion %}
+{% import 'macro/badge.html' as badge %}
+{% import 'macro/card.html' as card %}
+{% import 'macro/form.html' as form %}
+
+<div {% if not solo %}id="set-{{ item.fields.u_id }}"{% endif %} class="card mb-3 flex-fill {% if solo %}card-solo{% endif %}"
+  {% if not solo %}data-index="{{ index }}" data-number="{{ item.fields.set_number }}" data-name="{{ item.fields.name | lower }}" data-parts="{{ item.fields.num_parts }}"
+  data-year="{{ item.fields.year }}" data-theme="{{ item.theme_name | lower }}" data-minifigures-collected="{{ item.fields.mini_col }}" data-set-collected="{{ item.fields.set_col }}"
+  data-set-checked="{{ item.fields.set_check }}" data-has-missing="{{ (item.fields.total_missing > 0) | int }}" data-has-minifigures="{{ (item.fields.total_minifigures > 0) | int }}"
+  data-has-missing-instructions="{{ (not (item.instructions | length)) | int }}" data-minifigures="{{ item.fields.total_minifigures }}" data-missing="{{ item.fields.total_missing }}"{% endif %}
+>
+  {{ card.header(item, item.fields.name, solo=solo, number=item.fields.set_num) }}
+  {{ card.image(item, solo=solo, last=last, caption=item.fields.name, alt=item.fields.set_num) }}
+  <div class="card-body {% if not solo %}p-1{% endif %}">
+    {{ badge.theme(item.theme_name, solo=solo, last=last) }}
+    {{ badge.year(item.fields.year, solo=solo, last=last) }}
+    {{ badge.parts(item.fields.num_parts, solo=solo, last=last) }}
+    {{ badge.total_minifigures(item.fields.total_minifigures, solo=solo, last=last) }}
+    {{ badge.total_missing(item.fields.total_missing, solo=solo, last=last) }}
+    {% if not last %}
+      {% if not solo %}
+        {{ badge.instructions(item, solo=solo, last=last) }}
+      {% endif %}
+      {{ badge.rebrickable(item, solo=solo, last=last) }}
+    {% endif %}
+  </div>
+  {% if not tiny %}
+    <ul class="list-group list-group-flush card-check">
+      <li class="list-group-item {% if not solo %}p-1{% endif %}">
+        {{ form.checkbox('minifigures-collected', item.fields.u_id, 'Minifigures are collected', item.url_for_minifigures_collected(), item.fields.mini_col, delete=delete) }}
+      </li>
+      <li class="list-group-item {% if not solo %}p-1{% endif %}">
+        {{ form.checkbox('set-checked', item.fields.u_id, 'Set is checked', item.url_for_set_checked(), item.fields.set_check, delete=delete) }}
+      </li>
+      <li class="list-group-item {% if not solo %}p-1{% endif %}">
+        {{ form.checkbox('set-collected', item.fields.u_id, 'Set is collected and boxed', item.url_for_set_collected(), item.fields.set_col, delete=delete) }}
+      </li>
+    </ul>
+  {% endif %}
+  {% if solo %}
+    <div class="accordion accordion-flush" id="set-details">
+      {% if not delete %}
+        {{ accordion.header('Instructions', 'instructions', 'set-details', expanded=open_instructions, quantity=item.instructions | length, icon='file-line', class='p-0') }}
+        <div class="list-group list-group-flush">
+          {% if item.instructions | length %}
+            {% for instruction in item.instructions %}
+            <a class="list-group-item list-group-item-action" href="{{ instruction.url() }}" target="_blank"><i class="ri-arrow-right-long-line"></i> <i class="ri-{{ instruction.icon() }}"></i> {{ instruction.filename }}</a>
+            {% endfor %}
+          {% else %}
+            <span class="list-group-item list-group-item-action text-center"><i class="ri-error-warning-line"></i> No instructions file found.</span>
+            {% if g.login.is_authenticated() %}
+              <a class="list-group-item list-group-item-action" href="{{ url_for('instructions.upload') }}"><i class="ri-upload-line"></i> Upload an instructions file</a>
+            {% endif %}
+          {% endif %}
+        </div>
+        {{ accordion.footer() }}
+        {{ accordion.table(item.parts(), 'Parts', 'parts-inventory', 'set-details', 'part/table.html', icon='shapes-line')}}
+        {% for minifigure in item.minifigures() %}
+          {{ accordion.table(minifigure.parts(), minifigure.fields.name, minifigure.fields.fig_num, 'set-details', 'part/table.html', quantity=minifigure.fields.quantity, icon='group-line', image=minifigure.url_for_image(), alt=minifigure.fields.fig_num, details=minifigure.url())}}
+        {% endfor %}
+      {% endif %}
+      {% if g.login.is_authenticated() %}
+        {{ accordion.header('Danger zone', 'danger-zone', 'set-details', expanded=delete, danger=true, class='text-end') }}
+          {% if delete %}
+            <form action="{{ item.url_for_do_delete() }}" method="post">
+              {% if error %}<div class="alert alert-danger text-start" role="alert"><strong>Error:</strong> {{ error }}.</div>{% endif %}
+              <div class="alert alert-danger text-center" role="alert">You are about to delete a set. This action is irreversible.</div>
+              <a class="btn btn-primary" href="{{ item.url() }}" role="button"><i class="ri-arrow-left-long-line"></i> Back to the set</a>
+              <button type="submit" class="btn btn-danger"><i class="ri-close-line"></i> Delete the set</button>
+            </form>
+          {% else %}
+            <a href="{{ item.url_for_delete() }}" class="btn btn-danger" role="button"><i class="ri-close-line"></i> Delete the set</a>
+          {% endif %}
+        {{ accordion.footer() }}
+      {% endif %}
+    </div>
+    <div class="card-footer"></div>
+  {% endif %}
+</div>

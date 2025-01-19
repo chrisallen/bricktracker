@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %} - All sets{% endblock %}
+
+{% block main %}
+{% if collection | length %}
+<div class="container-fluid">
+  <div class="row row-cols-lg-auto g-1 justify-content-center align-items-center pb-2">
+    <div class="col-12 flex-grow-1">
+      <label class="visually-hidden" for="grid-search">Search</label>
+      <div class="input-group">
+        <span class="input-group-text">Search</span>
+        <input id="grid-search" class="form-control form-control-sm" type="text" placeholder="Set name, set number, set theme or number of parts..." value="">
+      </div>
+    </div>
+    <div class="col-12 flex-grow-1">
+      <label class="visually-hidden" for="grid-filter">Filter</label>
+      <div class="input-group">
+        <span class="input-group-text">Filter</span>
+        <select id="grid-filter" class="form-select form-select-sm" autocomplete="off">
+          <option value="" selected>All sets</option>
+          <option value="minifigures-collected">Minifigures are collected</option>
+          <option value="set-collected">Set is collected and boxed</option>
+          <option value="set-checked">Set is checked</option>
+          <option value="-has-missing">Set is complete</option>
+          <option value="has-missing">Set has missing pieces</option>
+          <option value="has-missing-instructions">Set has missing instructions</option>
+        </select>
+        <select id="grid-theme" class="form-select form-select-sm" autocomplete="off">
+          <option value="" selected>All themes</option>
+          {% for theme in collection.themes %}
+          <option value="{{ theme | lower }}">{{ theme }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="col-12">
+      <div id="grid-sort" class="input-group">
+        <span class="input-group-text">Sort</span>
+        <button id="sort-number" type="button" class="btn btn-sm btn-outline-primary"
+          data-sort-target="div#grid>div" data-sort-attribute="number" data-sort-natural="true">Num.</button>
+        <button id="sort-name" type="button" class="btn btn-sm btn-outline-primary"
+          data-sort-target="div#grid>div" data-sort-attribute="name">Name</button>
+        <button id="sort-theme" type="button" class="btn btn-sm btn-outline-primary"
+          data-sort-target="div#grid>div" data-sort-attribute="theme">Theme</button>
+        <button id="sort-year" type="button" class="btn btn-sm btn-outline-primary"
+          data-sort-target="div#grid>div" data-sort-attribute="year">Year</button>
+        <button id="sort-minifigure" type="button" class="btn btn-sm btn-outline-primary"
+          data-sort-target="div#grid>div" data-sort-attribute="minifigures" data-sort-desc="true">Fig.</button>
+        <button id="sort-parts" type="button" class="btn btn-sm btn-outline-primary"
+          data-sort-target="div#grid>div" data-sort-attribute="parts" data-sort-desc="true">Parts</button>
+        <button id="sort-missing" type="button" class="btn btn-sm btn-outline-primary"
+          data-sort-target="div#grid>div" data-sort-attribute="missing" data-sort-desc="true">Miss.</button>
+        <button id="sort-clear" type="button" class="btn btn-sm btn-outline-dark"
+          data-sort-target="div#grid>div" data-sort-clear="true"><i class="ri-filter-off-line"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="row" id="grid">
+  {% for item in collection %}
+    <div class="col-md-6 col-xl-3 d-flex align-items-stretch">
+      {% with index=loop.index0 %}
+        {% include 'set/card.html' %}
+      {% endwith %}
+    </div>
+  {% endfor %}
+  </div>
+  <script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", () => {
+      new BrickGrid("grid");
+    });
+  </script>
+</div>
+{% else %}
+  {% include 'set/empty.html' %}
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='scripts/grid.js') }}"></script>
+<script src="{{ url_for('static', filename='scripts/set.js') }}"></script>
+{% endblock %}

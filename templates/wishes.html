@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %} - Wishlist{% endblock %}
+
+{% block main %}
+<div class="container-fluid px-0">
+  {% if g.login.is_authenticated() %}
+  <div class="pb-2 px-2 border-bottom">
+    {% if error %}<div class="alert alert-danger" role="alert"><strong>Error:</strong> {{ error }}.</div>{% endif %}
+    <form action="{{ url_for('wish.add') }}" method="post" class="row row-cols-lg-auto g-1 justify-content-center align-items-center">
+      <div class="col-12">
+        <label class="visually-hidden" for="number">Set number</label>
+        <div class="input-group">
+          <div class="input-group-text"><i class="ri-hashtag"></i></div>
+          <input type="text" class="form-control" id="number" name="number" placeholder="107-1 or 1642-1 or ..." value="" autocomplete="off">
+        </div>
+      </div>
+      <div class="col-12">
+        <button type="submit" class="btn btn-primary"><i class="ri-add-circle-line"></i> Add a set</button>
+      </div>
+      <div class="col-12">
+        <a class="btn border bg-secondary-text" href="{{ url_for('admin.admin', open_retired=true) }}"><i class="ri-refresh-line"></i> Refresh retired sets</a>
+      </div>
+    </form>
+  </div>
+  {% endif %}
+  {% with all=true %}
+    {% include 'wish/table.html' %}
+  {% endwith %}
+</div>
+{% endblock %}
