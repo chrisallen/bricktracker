@@ -1,1 +1,4 @@
-__version__ = '1.0.0'
+from typing import Final
+
+__version__: Final[str] = '1.0.0'
+__database_version__: Final[int] = 2

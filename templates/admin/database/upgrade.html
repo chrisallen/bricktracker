@@ -1,0 +1,29 @@
+{% import 'macro/accordion.html' as accordion %}
+
+{{ accordion.header('Database', 'database', 'admin', expanded=true, icon='database-2-line') }}
+<form action="{{ url_for('admin.do_upgrade_database') }}" method="post">
+  {% if error %}<div class="alert alert-danger text-start" role="alert"><strong>Error:</strong> {{ error }}.</div>{% endif %}
+  <div class="alert alert-warning text-center" role="alert">
+    You are about to <strong>upgrade your database file</strong>. This action is irreversible.<br>
+    The process shold be lossless, but just to be sure, grab a copy of your database before proceeding.<br>
+  </div>
+  <h5 class="border-bottom">Upgrades</h5>
+  <ul>
+    {% for migration in migrations %}
+    <li>
+      <span class="badge rounded-pill text-bg-light border fw-normal me-2"><i class="ri-hashtag"></i>{{ migration.version }}</span>
+      {% if migration.get_description() %}
+        <code>{{ migration.get_description() }}</code>
+      {% else %}
+        <span class="badge rounded-pill text-bg-secondary fst-italic">No description</span>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  <div class="text-end">
+    <a class="btn btn-danger" href="{{ url_for('admin.admin') }}" role="button"><i class="ri-arrow-left-long-line"></i> Back to the admin</a>
+    <a href="{{ url_for('admin.download_database') }}" class="btn btn-primary" role="button"><i class="ri-download-line"></i> Download the database file</a>
+    <button type="submit" class="btn btn-warning"><i class="ri-arrow-up-double-line"></i> Upgrade the database</button>
+  </div>
+</form>
+{{ accordion.footer() }}

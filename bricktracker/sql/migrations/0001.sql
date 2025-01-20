@@ -1,3 +1,4 @@
+-- description: Database initialization
 -- FROM sqlite3 app.db .schema > init.sql with extra IF NOT EXISTS and transaction
 BEGIN transaction;
 
@@ -57,10 +58,5 @@ CREATE TABLE IF NOT EXISTS missing (
         element_id INTEGER,
         u_id TEXT
     );
-
--- Fix a bug where 'None' was inserted in missing instead of NULL
-UPDATE missing
-SET element_id = NULL
-WHERE element_id = 'None';
 
 COMMIT;

@@ -24,6 +24,7 @@ from ..rebrickable_image import RebrickableImage
 from ..retired_list import BrickRetiredList
 from ..set import BrickSet
 from ..sql_counter import BrickCounter
+from ..sql_migration_list import BrickSQLMigrationList
 from ..sql import BrickSQL
 from ..theme_list import BrickThemeList
 from .upload import upload_helper
@@ -38,10 +39,10 @@ admin_page = Blueprint('admin', __name__, url_prefix='/admin')
 @login_required
 @exception_handler(__file__)
 def admin() -> str:
-    counters: dict[str, int] = {}
-    count_none: int = 0
-    exception: Exception | None = None
-    is_init: bool = False
+    database_counters: list[BrickCounter] = []
+    database_exception: Exception | None = None
+    database_needs_upgrade: bool = False
+    database_version: int = -1
     nil_minifigure_name: str = ''
     nil_minifigure_url: str = ''
     nil_part_name: str = ''
@@ -49,34 +50,31 @@ def admin() -> str:
 
     # This view needs to be protected against SQL errors
     try:
-        is_init = BrickSQL.is_init()
+        database = BrickSQL(failsafe=True)
+        database_needs_upgrade = database.needs_upgrade()
+        database_version = database.version
 
-        if is_init:
-            counters = BrickSQL().count_records()
-
-        record = BrickSQL().fetchone('missing/count_none')
-        if record is not None:
-            count_none = record['count']
-
-        nil_minifigure_name = RebrickableImage.nil_minifigure_name()
-        nil_minifigure_url = RebrickableImage.static_url(
-            nil_minifigure_name,
-            'MINIFIGURES_FOLDER'
-        )
-
-        nil_part_name = RebrickableImage.nil_name()
-        nil_part_url = RebrickableImage.static_url(
-            nil_part_name,
-            'PARTS_FOLDER'
-        )
-
+        if not database_needs_upgrade:
+            database_counters = BrickSQL().count_records()
     except Exception as e:
-        exception = e
+        database_exception = e
 
         # Warning
-        logger.warning('An exception occured while loading the admin page: {exception}'.format(  # noqa: E501
+        logger.warning('A database exception occured while loading the admin page: {exception}'.format(  # noqa: E501
             exception=str(e),
         ))
+
+    nil_minifigure_name = RebrickableImage.nil_minifigure_name()
+    nil_minifigure_url = RebrickableImage.static_url(
+        nil_minifigure_name,
+        'MINIFIGURES_FOLDER'
+    )
+
+    nil_part_name = RebrickableImage.nil_name()
+    nil_part_url = RebrickableImage.static_url(
+        nil_part_name,
+        'PARTS_FOLDER'
+    )
 
     open_image = request.args.get('open_image', None)
     open_instructions = request.args.get('open_instructions', None)
@@ -95,12 +93,12 @@ def admin() -> str:
     return render_template(
         'admin.html',
         configuration=BrickConfigurationList.list(),
-        counters=counters,
-        count_none=count_none,
-        error=request.args.get('error'),
-        exception=exception,
+        database_counters=database_counters,
+        database_error=request.args.get('error'),
+        database_exception=database_exception,
+        database_needs_upgrade=database_needs_upgrade,
+        database_version=database_version,
         instructions=BrickInstructionsList(),
-        is_init=is_init,
         nil_minifigure_name=nil_minifigure_name,
         nil_minifigure_url=nil_minifigure_url,
         nil_part_name=nil_part_name,
@@ -114,19 +112,6 @@ def admin() -> str:
         retired=BrickRetiredList(),
         theme=BrickThemeList(),
     )
-
-
-# Initialize the database
-@admin_page.route('/init-database', methods=['POST'])
-@login_required
-@exception_handler(__file__, post_redirect='admin.admin')
-def init_database() -> Response:
-    BrickSQL.initialize()
-
-    # Reload the instructions
-    BrickInstructionsList(force=True)
-
-    return redirect(url_for('admin.admin'))
 
 
 # Delete the database
@@ -201,6 +186,16 @@ def do_drop_database() -> Response:
 
     # Reload the instructions
     BrickInstructionsList(force=True)
+
+    return redirect(url_for('admin.admin'))
+
+
+# Actually upgrade the database
+@admin_page.route('/upgrade-database', methods=['POST'])
+@login_required
+@exception_handler(__file__, post_redirect='admin.upgrade_database')
+def do_upgrade_database() -> Response:
+    BrickSQL(failsafe=True).upgrade()
 
     return redirect(url_for('admin.admin'))
 
@@ -316,3 +311,20 @@ def update_themes() -> Response:
     BrickThemeList(force=True)
 
     return redirect(url_for('admin.admin', open_theme=True))
+
+
+# Upgrade the database
+@admin_page.route('/upgrade-database', methods=['GET'])
+@login_required
+@exception_handler(__file__, post_redirect='admin.admin')
+def upgrade_database() -> str:
+    database = BrickSQL(failsafe=True)
+
+    return render_template(
+        'admin.html',
+        upgrade_database=True,
+        migrations=BrickSQLMigrationList().pending(
+            database.version
+        ),
+        error=request.args.get('error')
+    )

@@ -18,6 +18,8 @@
             {% include 'admin/database/drop.html' %}
             {% elif import_database %}
             {% include 'admin/database/import.html' %}
+            {% elif upgrade_database %}
+            {% include 'admin/database/upgrade.html' %}
             {% else %}
               {% include 'admin/logout.html' %}
               {% include 'admin/instructions.html' %}

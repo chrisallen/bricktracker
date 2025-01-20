@@ -3,13 +3,15 @@ import os
 import sqlite3
 from typing import Any, Final, Tuple
 
-from .sql_stats import BrickSQLStats
-
 from flask import current_app, g
 from jinja2 import Environment, FileSystemLoader
 from werkzeug.datastructures import FileStorage
 
+from .exceptions import DatabaseException
 from .sql_counter import BrickCounter
+from .sql_migration_list import BrickSQLMigrationList
+from .sql_stats import BrickSQLStats
+from .version import __database_version__
 
 logger = logging.getLogger(__name__)
 
@@ -26,8 +28,9 @@ class BrickSQL(object):
     connection: sqlite3.Connection
     cursor: sqlite3.Cursor
     stats: BrickSQLStats
+    version: int
 
-    def __init__(self, /):
+    def __init__(self, /, failsafe: bool = False):
         # Instantiate the database connection in the Flask
         # application context so that it can be used by all
         # requests without re-opening connections
@@ -37,6 +40,9 @@ class BrickSQL(object):
         if database is not None:
             self.connection = database
             self.stats = getattr(g, 'database_stats', BrickSQLStats())
+
+            # Grab a cursor
+            self.cursor = self.connection.cursor()
         else:
             # Instantiate the stats
             self.stats = BrickSQLStats()
@@ -52,16 +58,38 @@ class BrickSQL(object):
             # Setup the row factory to get pseudo-dicts rather than tuples
             self.connection.row_factory = sqlite3.Row
 
-            # Debug: Attach the debugger
-            # Uncomment manually because this is ultra verbose
-            # self.connection.set_trace_callback(print)
+            # Grab a cursor
+            self.cursor = self.connection.cursor()
 
-            # Save the connection globally for later use
-            g.database = self.connection
-            g.database_stats = self.stats
+            # Grab the version and check
+            try:
+                version = self.fetchone('schema/get_version')
 
-        # Grab a cursor
-        self.cursor = self.connection.cursor()
+                if version is None:
+                    raise Exception('version is None')
+
+                self.version = version[0]
+            except Exception as e:
+                self.version = 0
+
+                raise DatabaseException('Could not get the database version: {error}'.format(  # noqa: E501
+                    error=str(e)
+                ))
+
+            if not failsafe:
+                if self.needs_upgrade():
+                    raise DatabaseException('Your database need to be upgraded from version {version} to version {required}'.format(  # noqa: E501
+                        version=self.version,
+                        required=__database_version__,
+                    ))
+
+                # Debug: Attach the debugger
+                # Uncomment manually because this is ultra verbose
+                # self.connection.set_trace_callback(print)
+
+                # Save the connection globally for later use
+                g.database = self.connection
+                g.database_stats = self.stats
 
     # Clear the defer stack
     def clear_defer(self, /) -> None:
@@ -236,17 +264,33 @@ class BrickSQL(object):
 
         return template.render(**context)
 
+    # Tells whether the database needs upgrade
+    def needs_upgrade(self) -> bool:
+        return self.version < __database_version__
+
     # Raw execute the query without any options
     def raw_execute(
         self,
         query: str,
-        parameters: dict[str, Any]
+        parameters: dict[str, Any],
+        /,
     ) -> sqlite3.Cursor:
         logger.debug('SQLite3: execute: {query}'.format(
             query=BrickSQL.clean_query(query)
         ))
 
         return self.cursor.execute(query, parameters)
+
+    # Upgrade the database
+    def upgrade(self) -> None:
+        if self.needs_upgrade():
+            for pending in BrickSQLMigrationList().pending(self.version):
+                logger.info('Applying migration {version}'.format(
+                    version=pending.version)
+                )
+
+                self.executescript(pending.get_query())
+                self.execute('schema/set_version', version=pending.version)
 
     # Clean the query for debugging
     @staticmethod
@@ -288,11 +332,6 @@ class BrickSQL(object):
 
         # Info
         logger.info('The database has been initialized')
-
-    # Check if the database is initialized
-    @staticmethod
-    def is_init() -> bool:
-        return BrickSQL().fetchone('schema/is_init') is not None
 
     # Replace the database with a new file
     @staticmethod
