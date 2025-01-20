@@ -1,7 +1,7 @@
 import logging
 import os
 import sqlite3
-from typing import Any, Tuple
+from typing import Any, Final, Tuple
 
 from .sql_stats import BrickSQLStats
 
@@ -9,7 +9,16 @@ from flask import current_app, g
 from jinja2 import Environment, FileSystemLoader
 from werkzeug.datastructures import FileStorage
 
+from .sql_counter import BrickCounter
+
 logger = logging.getLogger(__name__)
+
+COUNTERS: Final[list[BrickCounter]] = [
+    BrickCounter('Sets', 'sets', icon='hashtag'),
+    BrickCounter('Minifigures', 'minifigures', icon='group-line'),
+    BrickCounter('Parts', 'inventory', icon='shapes-line'),
+    BrickCounter('Missing', 'missing', icon='error-warning-line'),
+]
 
 
 # SQLite3 client with our extra features
@@ -71,6 +80,16 @@ class BrickSQL(object):
 
         logger.debug('SQLite3: commit')
         return self.connection.commit()
+
+    # Count the database records
+    def count_records(self) -> list[BrickCounter]:
+        for counter in COUNTERS:
+            record = self.fetchone('schema/count', table=counter.table)
+
+            if record is not None:
+                counter.count = record['count']
+
+        return COUNTERS
 
     # Defer a call to execute
     def defer(self, query: str, parameters: dict[str, Any], /):
@@ -261,20 +280,6 @@ class BrickSQL(object):
 
         # Info
         logger.info('The database has been dropped')
-
-    # Count the database records
-    @staticmethod
-    def count_records() -> dict[str, int]:
-        database = BrickSQL()
-
-        counters: dict[str, int] = {}
-        for table in ['sets', 'minifigures', 'inventory', 'missing']:
-            record = database.fetchone('schema/count', table=table)
-
-            if record is not None:
-                counters[table] = record['count']
-
-        return counters
 
     # Initialize the database
     @staticmethod

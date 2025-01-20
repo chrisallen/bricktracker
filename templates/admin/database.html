@@ -32,18 +32,15 @@
   <h5 class="border-bottom">Records</h5>
   <div class="d-flex justify-content-start">
     <ul class="list-group">
-      <li class="list-group-item d-flex justify-content-between align-items-start">
-        <span><i class="ri-hashtag"></i> Sets</span> <span class="badge text-bg-primary rounded-pill ms-2">{{ counters['sets'] }}</span>
-      </li>
-      <li class="list-group-item d-flex justify-content-between align-items-start">
-        <span><i class="ri-group-line"></i> Minifigures</span> <span class="badge text-bg-primary rounded-pill ms-2">{{ counters['minifigures'] }}</span>
-      </li>
-      <li class="list-group-item d-flex justify-content-between align-items-start">
-        <span><i class="ri-shapes-line"></i> Parts</span> <span class="badge text-bg-primary rounded-pill ms-2">{{ counters['inventory'] }}</span>
-      </li>
-      <li class="list-group-item d-flex justify-content-between align-items-start">
-        <span><i class="ri-error-warning-line"></i> Missing</span> <span class="badge text-bg-primary rounded-pill ms-2">{{ counters['missing'] }}</span>
-      </li>
+      {% for counter in counters %}
+        {% if not (loop.index % 5) %}
+          </ul>
+          <ul class="list-group">
+        {% endif %}
+        <li class="list-group-item d-flex justify-content-between align-items-start">
+          <span><i class="ri-{{ counter.icon }}"></i> {{ counter.name }}</span> <span class="badge text-bg-primary rounded-pill ms-2">{{ counter.count }}</span>
+        </li>
+      {% endfor %}
     </ul>
   </div>
 {% endif %}

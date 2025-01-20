@@ -23,6 +23,7 @@ from ..part import BrickPart
 from ..rebrickable_image import RebrickableImage
 from ..retired_list import BrickRetiredList
 from ..set import BrickSet
+from ..sql_counter import BrickCounter
 from ..sql import BrickSQL
 from ..theme_list import BrickThemeList
 from .upload import upload_helper
@@ -51,7 +52,7 @@ def admin() -> str:
         is_init = BrickSQL.is_init()
 
         if is_init:
-            counters = BrickSQL.count_records()
+            counters = BrickSQL().count_records()
 
         record = BrickSQL().fetchone('missing/count_none')
         if record is not None:
