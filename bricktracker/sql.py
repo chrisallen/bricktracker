@@ -37,7 +37,7 @@ class BrickSQL(object):
 
             logger.debug('SQLite3: connect')
             self.connection = sqlite3.connect(
-                current_app.config['DATABASE_PATH'].value
+                current_app.config['DATABASE_PATH']
             )
 
             # Setup the row factory to get pseudo-dicts rather than tuples
@@ -249,7 +249,7 @@ class BrickSQL(object):
     # Delete the database
     @staticmethod
     def delete() -> None:
-        os.remove(current_app.config['DATABASE_PATH'].value)
+        os.remove(current_app.config['DATABASE_PATH'])
 
         # Info
         logger.info('The database has been deleted')
@@ -292,7 +292,7 @@ class BrickSQL(object):
     # Replace the database with a new file
     @staticmethod
     def upload(file: FileStorage, /) -> None:
-        file.save(current_app.config['DATABASE_PATH'].value)
+        file.save(current_app.config['DATABASE_PATH'])
 
         # Info
         logger.info('The database has been imported using file {file}'.format(

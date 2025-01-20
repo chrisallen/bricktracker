@@ -70,12 +70,12 @@ class RebrickableImage(object):
     # Return the folder depending on the objects provided
     def folder(self, /) -> str:
         if self.part is not None:
-            return current_app.config['PARTS_FOLDER'].value
+            return current_app.config['PARTS_FOLDER']
 
         if self.minifigure is not None:
-            return current_app.config['MINIFIGURES_FOLDER'].value
+            return current_app.config['MINIFIGURES_FOLDER']
 
-        return current_app.config['SETS_FOLDER'].value
+        return current_app.config['SETS_FOLDER']
 
     # Return the id depending on the objects provided
     def id(self, /) -> str:
@@ -105,13 +105,13 @@ class RebrickableImage(object):
     def url(self, /) -> str:
         if self.part is not None:
             if self.part.fields.part_img_url is None:
-                return current_app.config['REBRICKABLE_IMAGE_NIL'].value
+                return current_app.config['REBRICKABLE_IMAGE_NIL']
             else:
                 return self.part.fields.part_img_url
 
         if self.minifigure is not None:
             if self.minifigure.fields.set_img_url is None:
-                return current_app.config['REBRICKABLE_IMAGE_NIL_MINIFIGURE'].value  # noqa: E501
+                return current_app.config['REBRICKABLE_IMAGE_NIL_MINIFIGURE']
             else:
                 return self.minifigure.fields.set_img_url
 
@@ -122,7 +122,7 @@ class RebrickableImage(object):
     def nil_name() -> str:
         filename, _ = os.path.splitext(
             os.path.basename(
-                urlparse(current_app.config['REBRICKABLE_IMAGE_NIL'].value).path  # noqa: E501
+                urlparse(current_app.config['REBRICKABLE_IMAGE_NIL']).path
             )
         )
 
@@ -133,7 +133,7 @@ class RebrickableImage(object):
     def nil_minifigure_name() -> str:
         filename, _ = os.path.splitext(
             os.path.basename(
-                urlparse(current_app.config['REBRICKABLE_IMAGE_NIL_MINIFIGURE'].value).path  # noqa: E501
+                urlparse(current_app.config['REBRICKABLE_IMAGE_NIL_MINIFIGURE']).path  # noqa: E501
             )
         )
 
@@ -142,7 +142,7 @@ class RebrickableImage(object):
     # Return the static URL for an image given a name and folder
     @staticmethod
     def static_url(name: str, folder_name: str) -> str:
-        folder: str = current_app.config[folder_name].value
+        folder: str = current_app.config[folder_name]
 
         # /!\ Everything is saved as .jpg, even if it came from a .png
         # not changing this behaviour.

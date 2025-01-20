@@ -30,7 +30,7 @@ class BrickPartList(BrickRecordList[BrickPart]):
         self.minifigure = None
 
         # Store the order for this list
-        self.order = current_app.config['PARTS_DEFAULT_ORDER'].value
+        self.order = current_app.config['PARTS_DEFAULT_ORDER']
 
     # Load all parts
     def all(self, /) -> Self:
@@ -63,10 +63,7 @@ class BrickPartList(BrickRecordList[BrickPart]):
                 record=record,
             )
 
-            if (
-                current_app.config['SKIP_SPARE_PARTS'].value and
-                part.fields.is_spare
-            ):
+            if current_app.config['SKIP_SPARE_PARTS'] and part.fields.is_spare:
                 continue
 
             self.records.append(part)
@@ -92,10 +89,7 @@ class BrickPartList(BrickRecordList[BrickPart]):
                 record=record,
             )
 
-            if (
-                current_app.config['SKIP_SPARE_PARTS'].value and
-                part.fields.is_spare
-            ):
+            if current_app.config['SKIP_SPARE_PARTS'] and part.fields.is_spare:
                 continue
 
             self.records.append(part)

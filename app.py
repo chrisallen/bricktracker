@@ -20,19 +20,19 @@ setup_app(app)
 # Create the socket
 s = BrickSocket(
     app,
-    threaded=not app.config['NO_THREADED_SOCKET'].value,
+    threaded=not app.config['NO_THREADED_SOCKET'],
 )
 
 
 if __name__ == '__main__':
     # Run the application
     logger.info('Starting BrickTracker on {host}:{port}'.format(
-        host=app.config['HOST'].value,
-        port=app.config['PORT'].value,
+        host=app.config['HOST'],
+        port=app.config['PORT'],
     ))
     s.socket.run(
         app,
-        host=app.config['HOST'].value,
-        debug=app.config['DEBUG'].value,
-        port=app.config['PORT'].value,
+        host=app.config['HOST'],
+        debug=app.config['DEBUG'],
+        port=app.config['PORT'],
     )

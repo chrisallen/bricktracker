@@ -4,7 +4,7 @@
 <h5 class="border-bottom">File</h5>
 {% if retired.exception %}<div class="alert alert-danger" role="alert">An exception occured while loading processing the retired sets: {{ retired.exception }}</div>{% endif %}
 <p>
-  The retired sets file is: <code>{{ config['RETIRED_SETS_PATH'].value }}</code>.
+  The retired sets file is: <code>{{ config['RETIRED_SETS_PATH'] }}</code>.
   {% if retired.size %}<span class="badge rounded-pill text-bg-info fw-normal"><i class="ri-hard-drive-line"></i> {{ retired.human_size() }}</span>{% endif %}
   {% if retired.mtime %}<span class="badge rounded-pill text-bg-light border fw-normal"><i class="ri-calendar-line"></i> {{ retired.human_time() }}</span>{% endif %}
 </p>

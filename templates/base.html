@@ -25,7 +25,7 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             {% for item in config['_NAVBAR'] %}
-              {% if item.flag and not config[item.flag].value %}
+              {% if item.flag and not config[item.flag] %}
                 <li class="nav-item px-1">
                   <a {% if request.url_rule.endpoint == item.endpoint %}class="nav-link active" aria-current="page"{% else %}class="nav-link"{% endif %} href="{{ url_for(item.endpoint) }}">
                     {% if item.icon %}
@@ -61,7 +61,7 @@
       <div class="col-md-6 d-flex justify-content-center">
         <small>
           <i class="ri-timer-2-line"></i> {{ g.request_time() }}
-          {%if config['DEBUG'].value and g.database_stats %}
+          {%if config['DEBUG'] and g.database_stats %}
           | <i class="ri-database-2-line"></i> {{g.database_stats.print() }}
           {% endif %}
         </small>

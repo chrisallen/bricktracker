@@ -4,7 +4,7 @@
 <h5 class="border-bottom">File</h5>
 {% if theme.exception %}<div class="alert alert-danger" role="alert">An exception occured while loading processing the themes: {{ theme.exception }}</div>{% endif %}
 <p>
-  The themes file is: <code>{{ config['THEMES_PATH'].value }}</code>.
+  The themes file is: <code>{{ config['THEMES_PATH'] }}</code>.
   {% if theme.size %}<span class="badge rounded-pill text-bg-info fw-normal"><i class="ri-hard-drive-line"></i> {{ theme.human_size() }}</span>{% endif %}
   {% if theme.mtime %}<span class="badge rounded-pill text-bg-light border fw-normal"><i class="ri-calendar-line"></i> {{ theme.human_time() }}</span>{% endif %}
 </p>

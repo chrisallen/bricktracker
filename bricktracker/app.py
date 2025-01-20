@@ -28,7 +28,7 @@ def setup_app(app: Flask) -> None:
     BrickConfigurationList(app)
 
     # Set the logging level
-    if app.config['DEBUG'].value:
+    if app.config['DEBUG']:
         logging.basicConfig(
             stream=sys.stdout,
             level=logging.DEBUG,
@@ -90,7 +90,7 @@ def setup_app(app: Flask) -> None:
         g.request_time = request_time
 
         # Register the timezone
-        g.timezone = ZoneInfo(current_app.config['TIMEZONE'].value)
+        g.timezone = ZoneInfo(current_app.config['TIMEZONE'])
 
         # Version
         g.version = __version__

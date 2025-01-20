@@ -76,7 +76,7 @@ class RebrickableParts(object):
         for index, part in enumerate(inventory):
             # Skip spare parts
             if (
-                current_app.config['SKIP_SPARE_PARTS'].value and
+                current_app.config['SKIP_SPARE_PARTS'] and
                 part.fields.is_spare
             ):
                 continue
@@ -104,7 +104,7 @@ class RebrickableParts(object):
                 )
             )
 
-            if not current_app.config['USE_REMOTE_IMAGES'].value:
+            if not current_app.config['USE_REMOTE_IMAGES']:
                 RebrickableImage(
                     self.brickset,
                     minifigure=self.minifigure,

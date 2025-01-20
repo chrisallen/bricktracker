@@ -190,9 +190,9 @@ class BrickPart(BrickRecord):
 
     # Compute the url for the bricklink page
     def url_for_bricklink(self, /) -> str:
-        if current_app.config['BRICKLINK_LINKS'].value:
+        if current_app.config['BRICKLINK_LINKS']:
             try:
-                return current_app.config['BRICKLINK_LINK_PART_PATTERN'].value.format(  # noqa: E501
+                return current_app.config['BRICKLINK_LINK_PART_PATTERN'].format(  # noqa: E501
                     number=self.fields.part_num,
                 )
             except Exception:
@@ -202,7 +202,7 @@ class BrickPart(BrickRecord):
 
     # Compute the url for the part image
     def url_for_image(self, /) -> str:
-        if not current_app.config['USE_REMOTE_IMAGES'].value:
+        if not current_app.config['USE_REMOTE_IMAGES']:
             if self.fields.part_img_url is None:
                 file = RebrickableImage.nil_name()
             else:
@@ -211,7 +211,7 @@ class BrickPart(BrickRecord):
             return RebrickableImage.static_url(file, 'PARTS_FOLDER')
         else:
             if self.fields.part_img_url is None:
-                return current_app.config['REBRICKABLE_IMAGE_NIL'].value
+                return current_app.config['REBRICKABLE_IMAGE_NIL']
             else:
                 return self.fields.part_img_url
 
@@ -234,9 +234,9 @@ class BrickPart(BrickRecord):
 
     # Compute the url for the rebrickable page
     def url_for_rebrickable(self, /) -> str:
-        if current_app.config['REBRICKABLE_LINKS'].value:
+        if current_app.config['REBRICKABLE_LINKS']:
             try:
-                return current_app.config['REBRICKABLE_LINK_PART_PATTERN'].value.format(  # noqa: E501
+                return current_app.config['REBRICKABLE_LINK_PART_PATTERN'].format(  # noqa: E501
                     number=self.fields.part_num,
                     color=self.fields.color_id,
                 )

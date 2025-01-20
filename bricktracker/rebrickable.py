@@ -77,7 +77,7 @@ class Rebrickable(Generic[T]):
 
         # Bootstrap a first set of parameters
         parameters: dict[str, Any] | None = {
-            'page_size': current_app.config['REBRICKABLE_PAGE_SIZE'].value,
+            'page_size': current_app.config['REBRICKABLE_PAGE_SIZE'],
         }
 
         # Read all pages
@@ -115,7 +115,7 @@ class Rebrickable(Generic[T]):
     # Load from the API
     def load(self, /, parameters: dict[str, Any] = {}) -> dict[str, Any]:
         # Inject the API key
-        parameters['api_key'] = current_app.config['REBRICKABLE_API_KEY'].value,  # noqa: E501
+        parameters['api_key'] = current_app.config['REBRICKABLE_API_KEY']
 
         try:
             return json.loads(

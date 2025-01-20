@@ -26,7 +26,7 @@ class BrickSetList(BrickRecordList[BrickSet]):
         self.themes = []
 
         # Store the order for this list
-        self.order = current_app.config['SETS_DEFAULT_ORDER'].value
+        self.order = current_app.config['SETS_DEFAULT_ORDER']
 
     # All the sets
     def all(self, /) -> Self:
@@ -60,7 +60,7 @@ class BrickSetList(BrickRecordList[BrickSet]):
     # Last added sets
     def last(self, /, limit: int = 6) -> Self:
         # Randomize
-        if current_app.config['RANDOM'].value:
+        if current_app.config['RANDOM']:
             order = 'RANDOM()'
         else:
             order = 'sets.rowid DESC'

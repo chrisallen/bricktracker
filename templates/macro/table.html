@@ -60,7 +60,7 @@
           {% if number %}{ select: [{{ number }}], type: "number", searchable: false },{% endif %}
         ],
         pagerDelta: 1,
-        perPage: {{ config['DEFAULT_TABLE_PER_PAGE'].value }},
+        perPage: {{ config['DEFAULT_TABLE_PER_PAGE'] }},
         perPageSelect: [10, 25, 50, 100, 500, 1000],
         searchable: true,
         searchQuerySeparator: "",

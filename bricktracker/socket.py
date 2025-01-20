@@ -56,19 +56,19 @@ class BrickSocket(object):
 
         # Compute the namespace
         self.namespace = '/{namespace}'.format(
-            namespace=app.config['SOCKET_NAMESPACE'].value
+            namespace=app.config['SOCKET_NAMESPACE']
         )
 
         # Inject CORS if a domain is defined
-        if app.config['DOMAIN_NAME'].value != '':
-            kwargs['cors_allowed_origins'] = app.config['DOMAIN_NAME'].value
+        if app.config['DOMAIN_NAME'] != '':
+            kwargs['cors_allowed_origins'] = app.config['DOMAIN_NAME']
 
         # Instantiate the socket
         self.socket = SocketIO(
             self.app,
             *args,
             **kwargs,
-            path=app.config['SOCKET_PATH'].value,
+            path=app.config['SOCKET_PATH'],
             async_mode='eventlet',
         )
 

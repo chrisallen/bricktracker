@@ -17,8 +17,8 @@ def add() -> str:
 
     return render_template(
         'add.html',
-        path=current_app.config['SOCKET_PATH'].value,
-        namespace=current_app.config['SOCKET_NAMESPACE'].value,
+        path=current_app.config['SOCKET_PATH'],
+        namespace=current_app.config['SOCKET_NAMESPACE'],
         messages=MESSAGES
     )
 
@@ -32,7 +32,7 @@ def bulk() -> str:
 
     return render_template(
         'bulk.html',
-        path=current_app.config['SOCKET_PATH'].value,
-        namespace=current_app.config['SOCKET_NAMESPACE'].value,
+        path=current_app.config['SOCKET_PATH'],
+        namespace=current_app.config['SOCKET_NAMESPACE'],
         messages=MESSAGES
     )

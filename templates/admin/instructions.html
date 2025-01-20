@@ -3,8 +3,8 @@
 {{ accordion.header('Instructions', 'instructions', 'admin', expanded=open_instructions, icon='file-line') }}
 <h5 class="border-bottom">Folder</h5>
 <p>
-  The instructions files folder is: <code>{{ config['INSTRUCTIONS_FOLDER'].value }}</code>. <br>
-  Allowed file formats for instructions are the following: <code>{{ ', '.join(config['INSTRUCTIONS_ALLOWED_EXTENSIONS'].value) }}</code>.
+  The instructions files folder is: <code>{{ config['INSTRUCTIONS_FOLDER'] }}</code>. <br>
+  Allowed file formats for instructions are the following: <code>{{ ', '.join(config['INSTRUCTIONS_ALLOWED_EXTENSIONS']) }}</code>.
 </p>
 <h5 class="border-bottom">Counters</h5>
 <p>

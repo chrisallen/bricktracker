@@ -26,8 +26,8 @@
         <div class="mb-3">
           <label for="file" class="form-label">Instructions file</label>
           <div class="input-group">
-            <input type="file" class="form-control" id="file" name="file" accept="{{ ','.join(config['INSTRUCTIONS_ALLOWED_EXTENSIONS'].value) }}">
-            <span class="input-group-text">{{ ', '.join(config['INSTRUCTIONS_ALLOWED_EXTENSIONS'].value) }}</span>
+            <input type="file" class="form-control" id="file" name="file" accept="{{ ','.join(config['INSTRUCTIONS_ALLOWED_EXTENSIONS']) }}">
+            <span class="input-group-text">{{ ', '.join(config['INSTRUCTIONS_ALLOWED_EXTENSIONS']) }}</span>
           </div>
         </div>
         <div class="text-end">

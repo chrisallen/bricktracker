@@ -39,7 +39,7 @@ class BrickInstructions(object):
         # Store the name and extension, check if extension is allowed
         self.name, self.extension = os.path.splitext(self.filename)
         self.extension = self.extension.lower()
-        self.allowed = self.extension in current_app.config['INSTRUCTIONS_ALLOWED_EXTENSIONS'].value  # noqa: E501
+        self.allowed = self.extension in current_app.config['INSTRUCTIONS_ALLOWED_EXTENSIONS']  # noqa: E501
 
         # Placeholder
         self.brickset = None
@@ -67,7 +67,7 @@ class BrickInstructions(object):
     # Display the time in a human format
     def human_time(self) -> str:
         return self.mtime.astimezone(g.timezone).strftime(
-            current_app.config['FILE_DATETIME_FORMAT'].value
+            current_app.config['FILE_DATETIME_FORMAT']
         )
 
     # Compute the path of an instruction file
@@ -77,7 +77,7 @@ class BrickInstructions(object):
 
         return os.path.join(
             current_app.static_folder,  # type: ignore
-            current_app.config['INSTRUCTIONS_FOLDER'].value,
+            current_app.config['INSTRUCTIONS_FOLDER'],
             filename
         )
 
@@ -118,7 +118,7 @@ class BrickInstructions(object):
         if not self.allowed:
             return ''
 
-        folder: str = current_app.config['INSTRUCTIONS_FOLDER'].value
+        folder: str = current_app.config['INSTRUCTIONS_FOLDER']
 
         # Compute the path
         path = os.path.join(folder, self.filename)

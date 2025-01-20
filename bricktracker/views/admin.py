@@ -160,19 +160,19 @@ def do_delete_database() -> Response:
 def download_database() -> Response:
     # Create a file name with a timestamp embedded
     name, extension = os.path.splitext(
-        os.path.basename(current_app.config['DATABASE_PATH'].value)
+        os.path.basename(current_app.config['DATABASE_PATH'])
     )
 
     # Info
     logger.info('The database has been downloaded')
 
     return send_file(
-        current_app.config['DATABASE_PATH'].value,
+        current_app.config['DATABASE_PATH'],
         as_attachment=True,
         download_name='{name}-{timestamp}{extension}'.format(
             name=name,
             timestamp=datetime.now().astimezone(g.timezone).strftime(
-                current_app.config['DATABASE_TIMESTAMP_FORMAT'].value
+                current_app.config['DATABASE_TIMESTAMP_FORMAT']
             ),
             extension=extension
         )

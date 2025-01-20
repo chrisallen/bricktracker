@@ -55,7 +55,7 @@ class RebrickableSet(object):
             # Insert into database
             brickset.insert(commit=False)
 
-            if not current_app.config['USE_REMOTE_IMAGES'].value:
+            if not current_app.config['USE_REMOTE_IMAGES']:
                 RebrickableImage(brickset).download()
 
             # Load the inventory
@@ -210,5 +210,5 @@ class RebrickableSet(object):
         # Insert into database
         brickwish.insert()
 
-        if not current_app.config['USE_REMOTE_IMAGES'].value:
+        if not current_app.config['USE_REMOTE_IMAGES']:
             RebrickableImage(brickwish).download()

@@ -4,7 +4,7 @@
 
 {% block main %}
 <div class="container">
-  {% if not config['HIDE_ADD_BULK_SET'].value %}
+  {% if not config['HIDE_ADD_BULK_SET'] %}
   <div class="alert alert-primary" role="alert">
     <h4 class="alert-heading">Too many to add?</h4>
     <p class="mb-0">You can import multiple sets at once with <a href="{{ url_for('add.bulk') }}" class="btn btn-primary"><i class="ri-function-add-line"></i> Bulk add</a>.</p>

@@ -36,7 +36,7 @@ class BrickInstructionsList(object):
                 # Make a folder relative to static
                 folder: str = os.path.join(
                     current_app.static_folder,  # type: ignore
-                    current_app.config['INSTRUCTIONS_FOLDER'].value,
+                    current_app.config['INSTRUCTIONS_FOLDER'],
                 )
 
                 for file in os.scandir(folder):
@@ -68,9 +68,8 @@ class BrickInstructionsList(object):
                 for brickset in BrickSetList().generic().records:
                     bricksets[brickset.fields.set_num] = brickset
 
-                # Return the files
+                # Inject the brickset if it exists
                 for instruction in self.all.values():
-                    # Inject the brickset if it exists
                     if (
                         instruction.allowed and
                         instruction.number is not None and

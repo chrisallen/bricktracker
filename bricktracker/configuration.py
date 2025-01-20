@@ -69,6 +69,7 @@ class BrickConfiguration(object):
                 # Remove static prefix
                 value = value.removeprefix('static/')
 
+        # Type casting
         if self.cast is not None:
             self.value = self.cast(value)
         else:

@@ -33,7 +33,7 @@ class BrickThemeList(object):
 
             # Try to read the themes from a CSV file
             try:
-                with open(current_app.config['THEMES_PATH'].value, newline='') as themes_file:  # noqa: E501
+                with open(current_app.config['THEMES_PATH'], newline='') as themes_file:  # noqa: E501
                     themes_reader = csv.reader(themes_file)
 
                     # Ignore the header
@@ -44,7 +44,7 @@ class BrickThemeList(object):
                         BrickThemeList.themes[theme.id] = theme
 
                 # File stats
-                stat = os.stat(current_app.config['THEMES_PATH'].value)
+                stat = os.stat(current_app.config['THEMES_PATH'])
                 BrickThemeList.size = stat.st_size
                 BrickThemeList.mtime = datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc)  # noqa: E501
 
@@ -78,7 +78,7 @@ class BrickThemeList(object):
     def human_time(self) -> str:
         if self.mtime is not None:
             return self.mtime.astimezone(g.timezone).strftime(
-                current_app.config['FILE_DATETIME_FORMAT'].value
+                current_app.config['FILE_DATETIME_FORMAT']
             )
         else:
             return ''
@@ -87,7 +87,7 @@ class BrickThemeList(object):
     @staticmethod
     def update() -> None:
         response = requests.get(
-            current_app.config['THEMES_FILE_URL'].value,
+            current_app.config['THEMES_FILE_URL'],
             stream=True,
         )
 
@@ -98,7 +98,7 @@ class BrickThemeList(object):
 
         content = gzip.GzipFile(fileobj=response.raw)
 
-        with open(current_app.config['THEMES_PATH'].value, 'wb') as f:
+        with open(current_app.config['THEMES_PATH'], 'wb') as f:
             copyfileobj(content, f)
 
         logger.info('Theme list updated')

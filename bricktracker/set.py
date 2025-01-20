@@ -157,7 +157,7 @@ class BrickSet(BrickRecord):
 
     # Compute the url for the set image
     def url_for_image(self, /) -> str:
-        if not current_app.config['USE_REMOTE_IMAGES'].value:
+        if not current_app.config['USE_REMOTE_IMAGES']:
             return RebrickableImage.static_url(
                 self.fields.set_num,
                 'SETS_FOLDER'
@@ -182,9 +182,9 @@ class BrickSet(BrickRecord):
 
     # Compute the url for the rebrickable page
     def url_for_rebrickable(self, /) -> str:
-        if current_app.config['REBRICKABLE_LINKS'].value:
+        if current_app.config['REBRICKABLE_LINKS']:
             try:
-                return current_app.config['REBRICKABLE_LINK_SET_PATTERN'].value.format(  # noqa: E501
+                return current_app.config['REBRICKABLE_LINK_SET_PATTERN'].format(  # noqa: E501
                     number=self.fields.set_num.lower(),
                 )
             except Exception:

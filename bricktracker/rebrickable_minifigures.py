@@ -71,7 +71,7 @@ class RebrickableMinifigures(object):
                 )
             )
 
-            if not current_app.config['USE_REMOTE_IMAGES'].value:
+            if not current_app.config['USE_REMOTE_IMAGES']:
                 RebrickableImage(
                     self.brickset,
                     minifigure=minifigure

@@ -12,7 +12,7 @@ class LoginManager(object):
 
     def __init__(self, app: Flask, /):
         # Setup basic authentication
-        app.secret_key = app.config['AUTHENTICATION_KEY'].value
+        app.secret_key = app.config['AUTHENTICATION_KEY']
 
         manager = login_manager.LoginManager()
         manager.login_view = 'login.login'  # type: ignore
@@ -23,11 +23,11 @@ class LoginManager(object):
         def user_loader(*arg) -> LoginManager.User:
             return self.User(
                 'admin',
-                app.config['AUTHENTICATION_PASSWORD'].value
+                app.config['AUTHENTICATION_PASSWORD']
             )
 
         # If the password is unset, globally disable
-        app.config['LOGIN_DISABLED'] = app.config['AUTHENTICATION_PASSWORD'].value == ''  # noqa: E501
+        app.config['LOGIN_DISABLED'] = app.config['AUTHENTICATION_PASSWORD'] == ''  # noqa: E501
 
     # Tells whether the user is authenticated, meaning:
     # - Authentication disabled

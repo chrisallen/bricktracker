@@ -119,7 +119,7 @@ class BrickMinifigure(BrickRecord):
 
     # Compute the url for minifigure part image
     def url_for_image(self, /) -> str:
-        if not current_app.config['USE_REMOTE_IMAGES'].value:
+        if not current_app.config['USE_REMOTE_IMAGES']:
             if self.fields.set_img_url is None:
                 file = RebrickableImage.nil_minifigure_name()
             else:
@@ -128,15 +128,15 @@ class BrickMinifigure(BrickRecord):
             return RebrickableImage.static_url(file, 'MINIFIGURES_FOLDER')
         else:
             if self.fields.set_img_url is None:
-                return current_app.config['REBRICKABLE_IMAGE_NIL_MINIFIGURE'].value  # noqa: E501
+                return current_app.config['REBRICKABLE_IMAGE_NIL_MINIFIGURE']
             else:
                 return self.fields.set_img_url
 
     # Compute the url for the rebrickable page
     def url_for_rebrickable(self, /) -> str:
-        if current_app.config['REBRICKABLE_LINKS'].value:
+        if current_app.config['REBRICKABLE_LINKS']:
             try:
-                return current_app.config['REBRICKABLE_LINK_MINIFIGURE_PATTERN'].value.format(  # noqa: E501
+                return current_app.config['REBRICKABLE_LINK_MINIFIGURE_PATTERN'].format(  # noqa: E501
                     number=self.fields.fig_num.lower(),
                 )
             except Exception:

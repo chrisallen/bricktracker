@@ -18,7 +18,7 @@ class BrickWishList(BrickRecordList[BrickWish]):
     def all(self, /) -> Self:
         # Load the wished sets from the database
         for record in self.select(
-            order=current_app.config['WISHES_DEFAULT_ORDER'].value
+            order=current_app.config['WISHES_DEFAULT_ORDER']
         ):
             brickwish = BrickWish(record=record)
 
