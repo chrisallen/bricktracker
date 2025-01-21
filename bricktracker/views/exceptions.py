@@ -33,7 +33,7 @@ def exception_handler(
         def wrapper(*args, **kwargs) -> ViewReturn:
             try:
                 return function(*args, **kwargs)
-            # Catch SQLite errors as database errors
+            # Handle errors
             except Exception as e:
                 return error(
                     e,
