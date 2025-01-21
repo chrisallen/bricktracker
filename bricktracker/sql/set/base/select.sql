@@ -13,7 +13,7 @@ SELECT
     "sets"."u_id",
     {% block number %}
     CAST(SUBSTR("sets"."set_num", 1, INSTR("sets"."set_num", '-') - 1) AS INTEGER) AS "set_number",
-    CAST(SUBSTR("sets"."set_num", 1, INSTR("sets"."set_num", '-') + 1) AS INTEGER) AS "set_version",
+    CAST(SUBSTR("sets"."set_num", INSTR("sets"."set_num", '-') + 1) AS INTEGER) AS "set_version",
     {% endblock %}
     IFNULL("missing_join"."total", 0) AS "total_missing",
     IFNULL("minifigures_join"."total", 0) AS "total_minifigures"
