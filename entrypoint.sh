@@ -13,4 +13,4 @@ then
 fi
 
 # Execute the WSGI server
-gunicorn --bind "${BK_SERVER}:${BK_PORT}" "app:app" --worker-class "eventlet" "$@"
+gunicorn --bind "${BK_SERVER}:${BK_PORT}" "app:create_app()" --worker-class "eventlet" "$@"

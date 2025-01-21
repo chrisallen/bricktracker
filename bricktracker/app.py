@@ -96,6 +96,6 @@ def setup_app(app: Flask) -> None:
         g.version = __version__
 
     # Make sure all connections are closed at the end
-    @app.teardown_appcontext
-    def close_connections(exception, /) -> None:
+    @app.teardown_request
+    def teardown_request(_: BaseException | None) -> None:
         close()
