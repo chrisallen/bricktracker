@@ -24,11 +24,7 @@ class BrickSQLMigrationList(object):
                 'sql/migrations/*.sql'
             )
 
-            print(path)
-
             files = glob(path)
-
-            print(files)
 
             for file in files:
                 try:
@@ -36,8 +32,7 @@ class BrickSQLMigrationList(object):
                         BrickSQLMigration(file)
                     )
                 # Ignore file if error
-                except Exception as e:
-                    print(e)
+                except Exception:
                     pass
 
     # Get the sorted list of pending migrations
