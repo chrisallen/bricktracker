@@ -32,6 +32,7 @@ class BrickRecordList(Generic[T]):
     def select(
         self,
         /,
+        *,
         override_query: str | None = None,
         order: str | None = None,
         limit: int | None = None,

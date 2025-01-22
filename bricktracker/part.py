@@ -27,6 +27,7 @@ class BrickPart(BrickRecord):
     def __init__(
         self,
         /,
+        *,
         brickset: 'BrickSet | None' = None,
         minifigure: 'BrickMinifigure | None' = None,
         record: Row | dict[str, Any] | None = None,
@@ -83,6 +84,7 @@ class BrickPart(BrickRecord):
         part_num: str,
         color_id: int,
         /,
+        *,
         element_id: int | None = None
     ) -> Self:
         # Save the parameters to the fields
@@ -112,6 +114,7 @@ class BrickPart(BrickRecord):
         brickset: 'BrickSet',
         id: str,
         /,
+        *,
         minifigure: 'BrickMinifigure | None' = None,
     ) -> Self:
         # Save the parameters to the fields
@@ -250,6 +253,7 @@ class BrickPart(BrickRecord):
     def from_rebrickable(
         data: dict[str, Any],
         /,
+        *,
         brickset: 'BrickSet | None' = None,
         minifigure: 'BrickMinifigure | None' = None,
         **_,

@@ -18,7 +18,7 @@ class BrickInstructionsList(object):
     sets_total: int
     unknown_total: int
 
-    def __init__(self, /, force=False):
+    def __init__(self, /, *, force=False):
         # Load instructions only if there is none already loaded
         all = getattr(self, 'all', None)
 

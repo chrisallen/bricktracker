@@ -29,6 +29,7 @@ class RebrickableParts(object):
         socket: 'BrickSocket',
         brickset: 'BrickSet',
         /,
+        *,
         minifigure: 'BrickMinifigure | None' = None,
     ):
         # Save the socket

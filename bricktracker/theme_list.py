@@ -22,7 +22,7 @@ class BrickThemeList(object):
     size: int | None
     exception: Exception | None
 
-    def __init__(self, /, force: bool = False):
+    def __init__(self, /, *, force: bool = False):
         # Load themes only if there is none already loaded
         themes = getattr(self, 'themes', None)
 

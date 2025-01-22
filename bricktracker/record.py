@@ -24,7 +24,7 @@ class BrickRecord(object):
 
     # Insert into the database
     # If we do not commit immediately, we defer the execute() call
-    def insert(self, /, commit=True) -> None:
+    def insert(self, /, *, commit=True) -> None:
         database = BrickSQL()
         rows, q = database.execute(
             self.insert_query,
@@ -40,7 +40,7 @@ class BrickRecord(object):
         return self.fields.__dict__.items()
 
     # Get from the database using the query
-    def select(self, /, override_query: str | None = None) -> Row | None:
+    def select(self, /, *, override_query: str | None = None) -> Row | None:
         if override_query:
             query = override_query
         else:

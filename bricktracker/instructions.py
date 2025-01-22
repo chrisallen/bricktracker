@@ -71,7 +71,7 @@ class BrickInstructions(object):
         )
 
     # Compute the path of an instruction file
-    def path(self, /, filename=None) -> str:
+    def path(self, /, *, filename=None) -> str:
         if filename is None:
             filename = self.filename
 
@@ -99,7 +99,7 @@ class BrickInstructions(object):
 
     # Upload a new instructions file
     def upload(self, file: FileStorage, /) -> None:
-        target = self.path(secure_filename(self.filename))
+        target = self.path(filename=secure_filename(self.filename))
 
         if os.path.isfile(target):
             raise ErrorException('Cannot upload {target} as it already exists'.format(  # noqa: E501

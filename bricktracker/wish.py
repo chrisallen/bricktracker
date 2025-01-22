@@ -17,6 +17,7 @@ class BrickWish(BrickSet):
     def __init__(
         self,
         /,
+        *,
         record: Row | dict[str, Any] | None = None,
     ):
         # Don't init BrickSet, init the parent of BrickSet directly

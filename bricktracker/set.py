@@ -26,6 +26,7 @@ class BrickSet(BrickRecord):
     def __init__(
         self,
         /,
+        *,
         record: Row | dict[str, Any] | None = None,
     ):
         super().__init__()

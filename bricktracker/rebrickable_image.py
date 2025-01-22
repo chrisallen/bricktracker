@@ -25,6 +25,7 @@ class RebrickableImage(object):
         self,
         brickset: 'BrickSet',
         /,
+        *,
         minifigure: 'BrickMinifigure | None' = None,
         part: 'BrickPart | None' = None,
     ):

@@ -42,7 +42,7 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
         return self
 
     # Last added minifigure
-    def last(self, /, limit: int = 6) -> Self:
+    def last(self, /, *, limit: int = 6) -> Self:
         # Randomize
         if current_app.config['RANDOM']:
             order = 'RANDOM()'
@@ -89,6 +89,7 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
         part_num: str,
         color_id: int,
         /,
+        *,
         element_id: int | None = None,
     ) -> Self:
         # Save the parameters to the fields
@@ -113,6 +114,7 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
         part_num: str,
         color_id: int,
         /,
+        *,
         element_id: int | None = None,
     ) -> Self:
         # Save the parameters to the fields

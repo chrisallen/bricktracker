@@ -58,7 +58,7 @@ class BrickSetList(BrickRecordList[BrickSet]):
         return self
 
     # Last added sets
-    def last(self, /, limit: int = 6) -> Self:
+    def last(self, /, *, limit: int = 6) -> Self:
         # Randomize
         if current_app.config['RANDOM']:
             order = 'RANDOM()'
@@ -76,7 +76,7 @@ class BrickSetList(BrickRecordList[BrickSet]):
     def missing_minifigure(
         self,
         fig_num: str,
-        /,
+        /
     ) -> Self:
         # Save the parameters to the fields
         self.fields.fig_num = fig_num
@@ -98,6 +98,7 @@ class BrickSetList(BrickRecordList[BrickSet]):
         part_num: str,
         color_id: int,
         /,
+        *,
         element_id: int | None = None,
     ) -> Self:
         # Save the parameters to the fields
@@ -120,7 +121,7 @@ class BrickSetList(BrickRecordList[BrickSet]):
     def using_minifigure(
         self,
         fig_num: str,
-        /,
+        /
     ) -> Self:
         # Save the parameters to the fields
         self.fields.fig_num = fig_num
@@ -142,6 +143,7 @@ class BrickSetList(BrickRecordList[BrickSet]):
         part_num: str,
         color_id: int,
         /,
+        *,
         element_id: int | None = None,
     ) -> Self:
         # Save the parameters to the fields

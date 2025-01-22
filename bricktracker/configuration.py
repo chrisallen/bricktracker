@@ -16,6 +16,7 @@ class BrickConfiguration(object):
     def __init__(
         self,
         /,
+        *,
         n: str,
         e: str | None = None,
         d: Any = None,

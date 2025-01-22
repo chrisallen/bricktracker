@@ -34,6 +34,7 @@ class Rebrickable(Generic[T]):
         number: str,
         model: Type[T],
         /,
+        *,
         socket: 'BrickSocket | None' = None,
         brickset: 'BrickSet | None' = None,
         minifigure: 'BrickMinifigure | None' = None
@@ -113,7 +114,7 @@ class Rebrickable(Generic[T]):
         return results
 
     # Load from the API
-    def load(self, /, parameters: dict[str, Any] = {}) -> dict[str, Any]:
+    def load(self, /, *, parameters: dict[str, Any] = {}) -> dict[str, Any]:
         # Inject the API key
         parameters['api_key'] = current_app.config['REBRICKABLE_API_KEY']
 

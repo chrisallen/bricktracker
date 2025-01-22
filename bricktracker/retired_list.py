@@ -22,7 +22,7 @@ class BrickRetiredList(object):
     size: int | None
     exception: Exception | None
 
-    def __init__(self, /, force: bool = False):
+    def __init__(self, /, *, force: bool = False):
         # Load sets only if there is none already loaded
         retired = getattr(self, 'retired', None)
 

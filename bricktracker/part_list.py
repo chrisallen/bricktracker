@@ -49,6 +49,7 @@ class BrickPartList(BrickRecordList[BrickPart]):
         self,
         brickset: 'BrickSet',
         /,
+        *,
         minifigure: 'BrickMinifigure | None' = None,
     ) -> Self:
         # Save the brickset and minifigure

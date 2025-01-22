@@ -140,6 +140,7 @@ class BrickSocket(object):
     def auto_progress(
         self,
         /,
+        *,
         message: str | None = None,
         increment_total=False,
     ) -> None:
@@ -203,7 +204,7 @@ class BrickSocket(object):
         sql_close()
 
     # Update the progress
-    def progress(self, /, message: str | None = None) -> None:
+    def progress(self, /, *, message: str | None = None) -> None:
         # Save the las message
         if message is not None:
             self.progress_message = message
@@ -218,14 +219,14 @@ class BrickSocket(object):
         self.emit('PROGRESS', data)
 
     # Update the progress total only
-    def update_total(self, total: int, /, add: bool = False) -> None:
+    def update_total(self, total: int, /, *, add: bool = False) -> None:
         if add:
             self.progress_total += total
         else:
             self.progress_total = total
 
     # Update the total
-    def total_progress(self, total: int, /, add: bool = False) -> None:
+    def total_progress(self, total: int, /, *, add: bool = False) -> None:
         self.update_total(total, add=add)
 
         self.progress()

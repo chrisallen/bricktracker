@@ -23,6 +23,7 @@ class BrickMinifigure(BrickRecord):
     def __init__(
         self,
         /,
+        *,
         brickset: 'BrickSet | None' = None,
         record: Row | dict[str, Any] | None = None,
     ):
@@ -149,6 +150,7 @@ class BrickMinifigure(BrickRecord):
     def from_rebrickable(
         data: dict[str, Any],
         /,
+        *,
         brickset: 'BrickSet | None' = None,
         **_,
     ) -> dict[str, Any]:

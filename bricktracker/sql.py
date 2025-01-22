@@ -35,7 +35,7 @@ class BrickSQL(object):
     stats: BrickSQLStats
     version: int
 
-    def __init__(self, /, failsafe: bool = False):
+    def __init__(self, /, *, failsafe: bool = False):
         # Instantiate the database connection in the Flask
         # application context so that it can be used by all
         # requests without re-opening connections
@@ -147,9 +147,10 @@ class BrickSQL(object):
         self,
         query: str,
         /,
+        *,
         parameters: dict[str, Any] = {},
         defer: bool = False,
-        **context,
+        **context: Any,
     ) -> Tuple[int, str]:
         # Stats: execute
         self.stats.execute += 1
@@ -172,7 +173,7 @@ class BrickSQL(object):
             return result.rowcount, query
 
     # Shorthand to executescript
-    def executescript(self, query: str, /, **context) -> None:
+    def executescript(self, query: str, /, **context: Any) -> None:
         # Load the query
         query = self.load_query(query, **context)
 
@@ -187,8 +188,9 @@ class BrickSQL(object):
         self,
         query: str,
         /,
+        *,
         parameters: dict[str, Any] = {},
-        **context,
+        **context: Any,
     ) -> Tuple[int, str]:
         rows, query = self.execute(query, parameters=parameters, **context)
         self.commit()
@@ -200,8 +202,9 @@ class BrickSQL(object):
         self,
         query: str,
         /,
+        *,
         parameters: dict[str, Any] = {},
-        **context,
+        **context: Any,
     ) -> list[sqlite3.Row]:
         _, query = self.execute(query, parameters=parameters, **context)
 
@@ -221,8 +224,9 @@ class BrickSQL(object):
         self,
         query: str,
         /,
+        *,
         parameters: dict[str, Any] = {},
-        **context,
+        **context: Any,
     ) -> sqlite3.Row | None:
         _, query = self.execute(query, parameters=parameters, **context)
 
@@ -245,7 +249,7 @@ class BrickSQL(object):
         return defer
 
     # Load a query by name
-    def load_query(self, name: str, /, **context) -> str:
+    def load_query(self, name: str, /, **context: Any) -> str:
         # Grab the existing environment if it exists
         environment = getattr(g, G_ENVIRONMENT, None)
 
@@ -276,7 +280,7 @@ class BrickSQL(object):
         self,
         query: str,
         parameters: dict[str, Any],
-        /,
+        /
     ) -> sqlite3.Cursor:
         logger.debug('SQLite3: execute: {query}'.format(
             query=BrickSQL.clean_query(query)

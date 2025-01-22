@@ -104,6 +104,7 @@ class RebrickableSet(object):
         self,
         data: dict[str, Any],
         /,
+        *,
         from_download=False,
     ) -> BrickSet | None:
         # Reset the progress
