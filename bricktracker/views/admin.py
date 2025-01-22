@@ -155,8 +155,9 @@ def download_database() -> Response:
     return send_file(
         current_app.config['DATABASE_PATH'],
         as_attachment=True,
-        download_name='{name}-{timestamp}{extension}'.format(
+        download_name='{name}-v{version}-{timestamp}{extension}'.format(
             name=name,
+            version=BrickSQL(failsafe=True).version,
             timestamp=datetime.now().astimezone(g.timezone).strftime(
                 current_app.config['DATABASE_TIMESTAMP_FORMAT']
             ),
