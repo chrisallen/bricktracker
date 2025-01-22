@@ -4,7 +4,7 @@
 <h5 class="border-bottom">Status</h5>
 {% if database_exception %}<div class="alert alert-danger" role="alert">An exception occured while loading this page: {{ database_exception }}</div>{% endif %}
 {% if database_error %}<div class="alert alert-danger" role="alert"><strong>Error:</strong> {{ database_error }}.</div>{% endif %}
-{% if database_needs_upgrade %}
+{% if database_upgrade_needed %}
   <div class="alert alert-warning" role="alert">
     <p>Your database needs to be upgraded.</p>
     <hr>

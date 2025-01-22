@@ -81,6 +81,12 @@ class BrickSQL(object):
                     error=str(e)
                 ))
 
+            if self.upgrade_too_far():
+                raise DatabaseException('Your database version ({version}) is too far ahead for this version of the application. Expected at most {required}'.format(  # noqa: E501
+                    version=self.version,
+                    required=__database_version__,
+                ))
+
             # Debug: Attach the debugger
             # Uncomment manually because this is ultra verbose
             # self.connection.set_trace_callback(print)
@@ -90,7 +96,7 @@ class BrickSQL(object):
             setattr(g, G_STATS, self.stats)
 
             if not failsafe:
-                if self.needs_upgrade():
+                if self.upgrade_needed():
                     raise DatabaseException('Your database need to be upgraded from version {version} to version {required}'.format(  # noqa: E501
                         version=self.version,
                         required=__database_version__,
@@ -265,10 +271,6 @@ class BrickSQL(object):
 
         return template.render(**context)
 
-    # Tells whether the database needs upgrade
-    def needs_upgrade(self) -> bool:
-        return self.version < __database_version__
-
     # Raw execute the query without any options
     def raw_execute(
         self,
@@ -284,7 +286,7 @@ class BrickSQL(object):
 
     # Upgrade the database
     def upgrade(self) -> None:
-        if self.needs_upgrade():
+        if self.upgrade_needed():
             for pending in BrickSQLMigrationList().pending(self.version):
                 logger.info('Applying migration {version}'.format(
                     version=pending.version)
@@ -292,6 +294,14 @@ class BrickSQL(object):
 
                 self.executescript(pending.get_query())
                 self.execute('schema/set_version', version=pending.version)
+
+    # Tells whether the database needs upgrade
+    def upgrade_needed(self) -> bool:
+        return self.version < __database_version__
+
+    # Tells whether the database is too far
+    def upgrade_too_far(self) -> bool:
+        return self.version > __database_version__
 
     # Clean the query for debugging
     @staticmethod

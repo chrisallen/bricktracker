@@ -41,7 +41,7 @@ admin_page = Blueprint('admin', __name__, url_prefix='/admin')
 def admin() -> str:
     database_counters: list[BrickCounter] = []
     database_exception: Exception | None = None
-    database_needs_upgrade: bool = False
+    database_upgrade_needed: bool = False
     database_version: int = -1
     nil_minifigure_name: str = ''
     nil_minifigure_url: str = ''
@@ -51,10 +51,10 @@ def admin() -> str:
     # This view needs to be protected against SQL errors
     try:
         database = BrickSQL(failsafe=True)
-        database_needs_upgrade = database.needs_upgrade()
+        database_upgrade_needed = database.upgrade_needed()
         database_version = database.version
 
-        if not database_needs_upgrade:
+        if not database_upgrade_needed:
             database_counters = BrickSQL().count_records()
     except Exception as e:
         database_exception = e
@@ -96,7 +96,7 @@ def admin() -> str:
         database_counters=database_counters,
         database_error=request.args.get('error'),
         database_exception=database_exception,
-        database_needs_upgrade=database_needs_upgrade,
+        database_upgrade_needed=database_upgrade_needed,
         database_version=database_version,
         instructions=BrickInstructionsList(),
         nil_minifigure_name=nil_minifigure_name,
@@ -317,8 +317,11 @@ def update_themes() -> Response:
 @admin_page.route('/upgrade-database', methods=['GET'])
 @login_required
 @exception_handler(__file__, post_redirect='admin.admin')
-def upgrade_database() -> str:
+def upgrade_database() -> str | Response:
     database = BrickSQL(failsafe=True)
+
+    if not database.upgrade_needed():
+        return redirect(url_for('admin.admin'))
 
     return render_template(
         'admin.html',
