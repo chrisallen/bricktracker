@@ -54,7 +54,14 @@ class BrickInstructions(object):
             splits = normalized.split('-', 2)
 
             if len(splits) >= 2:
-                self.number = '-'.join(splits[:2])
+                try:
+                    # Trying to make sense of each part as integers
+                    int(splits[0])
+                    int(splits[1])
+
+                    self.set = '-'.join(splits[:2])
+                except Exception:
+                    pass
 
     # Delete an instruction file
     def delete(self, /) -> None:
