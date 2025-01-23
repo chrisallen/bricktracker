@@ -25,6 +25,7 @@ ViewCallable = Callable[P, ViewReturn]
 def exception_handler(
     file: str,
     /,
+    *,
     json: bool = False,
     post_redirect: str | None = None
 ) -> Callable[[ViewCallable], ViewCallable]:
