@@ -25,6 +25,7 @@ COUNTERS: Final[list[BrickCounter]] = [
     BrickCounter('Minifigures', 'minifigures', icon='group-line'),
     BrickCounter('Parts', 'inventory', icon='shapes-line'),
     BrickCounter('Missing', 'missing', icon='error-warning-line'),
+    BrickCounter('Wishlist', 'wishlist', icon='gift-line'),
 ]
 
 
