@@ -124,10 +124,14 @@ class BrickSQL(object):
     # Count the database records
     def count_records(self) -> list[BrickCounter]:
         for counter in COUNTERS:
-            record = self.fetchone('schema/count', table=counter.table)
+            # Failsafe this one
+            try:
+                record = self.fetchone('schema/count', table=counter.table)
 
-            if record is not None:
-                counter.count = record['count']
+                if record is not None:
+                    counter.count = record['count']
+            except Exception:
+                pass
 
         return COUNTERS
 
