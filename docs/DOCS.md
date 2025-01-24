@@ -18,7 +18,9 @@ This page helps you navigate the documentation of BrickTracker.
 ## Specific procedures
 
 - [Setup lightweight authentication](authentication.md)
-- [Move an existing ./app.db database](move-existing-database.md)
+- Database
+    - [Move an existing ./app.db database](move-existing-database.md)
+    - [Upgrade your database](upgrade-database.md)
 
 ## Troubleshooting
 

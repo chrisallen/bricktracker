@@ -1,7 +1,7 @@
 # Common errors/problems
 
 > **Note**
-> The following page is based on version `1.0.0` of BrickTracker.
+> The following page is based on version `1.1.0` of BrickTracker.
 
 ## I need a password to access some pages
 
@@ -46,3 +46,9 @@ Make sure that the folder exists, and if it exists that it is writable by the ap
 
 Either the theme is too recent for your version of the themes file, or your theme file has not be initialized.
 Head to the **Admin** page, **Themes** section and update the file.
+
+## Your database need to be upgraded from version &lt;current&gt; to version &lt;required&gt;.
+
+![](images/common-errors-05.png)
+
+A database schema modification was necessary to implement new features and the database need to be upgraded from the **Admin** page. See [upgrade your database](upgrade-database.md) for more information.
