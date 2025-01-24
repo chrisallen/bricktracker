@@ -3,7 +3,7 @@
 -- Set the journal mode to WAL
 PRAGMA journal_mode = WAL;
 
-BEGIN transaction;
+BEGIN TRANSACTION;
 
 -- Fix a bug where 'None' was inserted in missing instead of NULL
 UPDATE "missing"

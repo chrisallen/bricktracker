@@ -9,11 +9,12 @@ from .exceptions import NotFoundException, ErrorException
 if TYPE_CHECKING:
     from .minifigure import BrickMinifigure
     from .part import BrickPart
+    from .rebrickable_set import RebrickableSet
     from .set import BrickSet
     from .socket import BrickSocket
     from .wish import BrickWish
 
-T = TypeVar('T', 'BrickSet', 'BrickPart', 'BrickMinifigure', 'BrickWish')
+T = TypeVar('T', 'RebrickableSet', 'BrickPart', 'BrickMinifigure', 'BrickWish')
 
 
 # An helper around the rebrick library, autoconverting
@@ -23,10 +24,11 @@ class Rebrickable(Generic[T]):
     number: str
     model: Type[T]
 
-    socket: 'BrickSocket | None'
     brickset: 'BrickSet | None'
-    minifigure: 'BrickMinifigure | None'
+    instance: T | None
     kind: str
+    minifigure: 'BrickMinifigure | None'
+    socket: 'BrickSocket | None'
 
     def __init__(
         self,
@@ -35,9 +37,10 @@ class Rebrickable(Generic[T]):
         model: Type[T],
         /,
         *,
-        socket: 'BrickSocket | None' = None,
         brickset: 'BrickSet | None' = None,
-        minifigure: 'BrickMinifigure | None' = None
+        instance: T | None = None,
+        minifigure: 'BrickMinifigure | None' = None,
+        socket: 'BrickSocket | None' = None,
     ):
         if not hasattr(lego, method):
             raise ErrorException('{method} is not a valid method for the rebrick.lego module'.format(  # noqa: E501
@@ -49,9 +52,10 @@ class Rebrickable(Generic[T]):
         self.number = number
         self.model = model
 
-        self.socket = socket
         self.brickset = brickset
+        self.instance = instance
         self.minifigure = minifigure
+        self.socket = socket
 
         if self.minifigure is not None:
             self.kind = 'Minifigure'
@@ -62,13 +66,15 @@ class Rebrickable(Generic[T]):
     def get(self, /) -> T:
         model_parameters = self.model_parameters()
 
-        return self.model(
-            **model_parameters,
-            record=self.model.from_rebrickable(
-                self.load(),
-                brickset=self.brickset,
-            ),
-        )
+        if self.instance is None:
+            self.instance = self.model(**model_parameters)
+
+        self.instance.ingest(self.model.from_rebrickable(
+            self.load(),
+            brickset=self.brickset,
+        ))
+
+        return self.instance
 
     # Get paginated elements from the Rebrickable API
     def list(self, /) -> list[T]:

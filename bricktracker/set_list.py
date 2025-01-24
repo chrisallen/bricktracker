@@ -3,6 +3,7 @@ from typing import Self
 from flask import current_app
 
 from .record_list import BrickRecordList
+from .set_checkbox_list import BrickSetCheckboxList
 from .set import BrickSet
 
 
@@ -13,6 +14,7 @@ class BrickSetList(BrickRecordList[BrickSet]):
 
     # Queries
     generic_query: str = 'set/list/generic'
+    light_query: str = 'set/list/light'
     missing_minifigure_query: str = 'set/list/missing_minifigure'
     missing_part_query: str = 'set/list/missing_part'
     select_query: str = 'set/list/all'
@@ -33,11 +35,14 @@ class BrickSetList(BrickRecordList[BrickSet]):
         themes = set()
 
         # Load the sets from the database
-        for record in self.select(order=self.order):
+        for record in self.select(
+            order=self.order,
+            statuses=BrickSetCheckboxList().as_columns()
+        ):
             brickset = BrickSet(record=record)
 
             self.records.append(brickset)
-            themes.add(brickset.theme_name)
+            themes.add(brickset.theme.name)
 
         # Convert the set into a list and sort it
         self.themes = list(themes)
@@ -63,9 +68,13 @@ class BrickSetList(BrickRecordList[BrickSet]):
         if current_app.config['RANDOM']:
             order = 'RANDOM()'
         else:
-            order = 'sets.rowid DESC'
+            order = '"bricktracker_sets"."rowid" DESC'
 
-        for record in self.select(order=order, limit=limit):
+        for record in self.select(
+            order=order,
+            limit=limit,
+            statuses=BrickSetCheckboxList().as_columns()
+        ):
             brickset = BrickSet(record=record)
 
             self.records.append(brickset)

@@ -44,7 +44,7 @@ class RebrickableParts(object):
             self.kind = 'Minifigure'
             self.method = 'get_minifig_elements'
         else:
-            self.number = self.brickset.fields.set_num
+            self.number = self.brickset.fields.set
             self.kind = 'Set'
             self.method = 'get_set_elements'
 

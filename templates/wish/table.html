@@ -18,14 +18,14 @@
     </thead>
     <tbody>
       {% for item in table_collection %}
-      {% set retirement_date = retired.get(item.fields.set_num) %}
+      {% set retirement_date = retired.get(item.fields.set) %}
       <tr>
-        {{ table.image(item.url_for_image(), caption=item.fields.name, alt=item.fields.set_num) }}
-        <td>{{ item.fields.set_num }}</td>
+        {{ table.image(item.url_for_image(), caption=item.fields.name, alt=item.fields.set) }}
+        <td>{{ item.fields.set }}</td>
         <td>{{ item.fields.name }}</td>
-        <td>{{ item.theme_name }}</td>
+        <td>{{ item.theme.name }}</td>
         <td>{{ item.fields.year }}</td>
-        <td>{{ item.fields.num_parts }}</td>
+        <td>{{ item.fields.number_of_parts }}</td>
         <td>{% if retirement_date %}{{ retirement_date }}{% else %}<span class="badge rounded-pill text-bg-light border">Not found</span>{% endif %}</td>
         {% if g.login.is_authenticated() %}
         <td>

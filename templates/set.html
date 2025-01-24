@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %} - Set {{ item.fields.name}} ({{ item.fields.set_num }}){% endblock %}
+{% block title %} - Set {{ item.fields.name}} ({{ item.fields.set }}){% endblock %}
 
 {% block main %}
 <div class="container">
@@ -15,10 +15,12 @@
 <script type="text/javascript">
   document.addEventListener("DOMContentLoaded", () => {
     baguetteBox.run('[data-lightbox]');
+    setup_changers();
   });
 </script>
 {% endblock %}
 
 {% block scripts %}
+<script src="{{ url_for('static', filename='scripts/changer.js') }}"></script>
 <script src="{{ url_for('static', filename='scripts/set.js') }}"></script>
 {% endblock %}

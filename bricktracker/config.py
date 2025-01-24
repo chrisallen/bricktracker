@@ -48,7 +48,7 @@ CONFIG: Final[list[dict[str, Any]]] = [
     {'n': 'REBRICKABLE_PAGE_SIZE', 'd': 100, 'c': int},
     {'n': 'RETIRED_SETS_FILE_URL', 'd': 'https://docs.google.com/spreadsheets/d/1rlYfEXtNKxUOZt2Mfv0H17DvK7bj6Pe0CuYwq6ay8WA/gviz/tq?tqx=out:csv&sheet=Sorted%20by%20Retirement%20Date'},  # noqa: E501
     {'n': 'RETIRED_SETS_PATH', 'd': './retired_sets.csv'},
-    {'n': 'SETS_DEFAULT_ORDER', 'd': 'set_number DESC, set_version ASC'},
+    {'n': 'SETS_DEFAULT_ORDER', 'd': '"rebrickable_sets"."number" DESC, "rebrickable_sets"."version" ASC'},  # noqa: E501
     {'n': 'SETS_FOLDER', 'd': 'sets', 's': True},
     {'n': 'SKIP_SPARE_PARTS', 'c': bool},
     {'n': 'SOCKET_NAMESPACE', 'd': 'bricksocket'},
@@ -57,5 +57,5 @@ CONFIG: Final[list[dict[str, Any]]] = [
     {'n': 'THEMES_PATH', 'd': './themes.csv'},
     {'n': 'TIMEZONE', 'd': 'Etc/UTC'},
     {'n': 'USE_REMOTE_IMAGES', 'c': bool},
-    {'n': 'WISHES_DEFAULT_ORDER', 'd': 'wishlist.rowid DESC'},
+    {'n': 'WISHES_DEFAULT_ORDER', 'd': '"bricktracker_wishes"."rowid" DESC'},
 ]

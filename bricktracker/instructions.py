@@ -10,18 +10,18 @@ from werkzeug.utils import secure_filename
 
 from .exceptions import ErrorException
 if TYPE_CHECKING:
-    from .set import BrickSet
+    from .rebrickable_set import RebrickableSet
 
 logger = logging.getLogger(__name__)
 
 
 class BrickInstructions(object):
     allowed: bool
-    brickset: 'BrickSet | None'
+    rebrickable: 'RebrickableSet | None'
     extension: str
     filename: str
     mtime: datetime
-    number: 'str | None'
+    set: 'str | None'
     name: str
     size: int
 
@@ -42,8 +42,8 @@ class BrickInstructions(object):
         self.allowed = self.extension in current_app.config['INSTRUCTIONS_ALLOWED_EXTENSIONS']  # noqa: E501
 
         # Placeholder
-        self.brickset = None
-        self.number = None
+        self.rebrickable = None
+        self.set = None
 
         # Extract the set number
         if self.allowed:

@@ -8,9 +8,9 @@
     </div>
     <div class="accordion accordion-flush" id="instructions">
       {{ accordion.header('Management', 'instructions-rename', 'instructions', expanded=true) }}
-      {% if item.brickset %}
+      {% if item.rebrickable %}
         <div class="d-flex justify-content-center">
-          {% with item=item.brickset %}
+          {% with item=item.rebrickable %}
             {% include 'set/mini.html' %}
           {% endwith %}
         </div>

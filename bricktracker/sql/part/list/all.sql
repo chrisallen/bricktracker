@@ -9,7 +9,7 @@ SUM("inventory"."quantity" * IFNULL("minifigures"."quantity", 1)) AS "total_quan
 {% endblock %}
 
 {% block total_sets %}
-COUNT(DISTINCT "sets"."u_id") AS "total_sets",
+COUNT(DISTINCT "bricktracker_sets"."id") AS "total_sets",
 {% endblock %}
 
 {% block total_minifigures %}
@@ -29,8 +29,8 @@ LEFT JOIN "minifigures"
 ON "inventory"."set_num" IS NOT DISTINCT FROM "minifigures"."fig_num"
 AND "inventory"."u_id" IS NOT DISTINCT FROM "minifigures"."u_id"
 
-LEFT JOIN sets
-ON "inventory"."u_id" IS NOT DISTINCT FROM "sets"."u_id"
+LEFT JOIN "bricktracker_sets"
+ON "inventory"."u_id" IS NOT DISTINCT FROM "bricktracker_sets"."id"
 {% endblock %}
 
 {% block group %}

@@ -1,6 +1,6 @@
 -- description: Original database initialization
 -- FROM sqlite3 app.db .schema > init.sql with extra IF NOT EXISTS, transaction and quotes
-BEGIN transaction;
+BEGIN TRANSACTION;
 
 CREATE TABLE IF NOT EXISTS "wishlist" (
     "set_num" TEXT,

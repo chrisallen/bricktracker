@@ -78,8 +78,8 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
         parameters: dict[str, Any] = super().sql_parameters()
 
         if self.brickset is not None:
-            parameters['u_id'] = self.brickset.fields.u_id
-            parameters['set_num'] = self.brickset.fields.set_num
+            parameters['u_id'] = self.brickset.fields.id
+            parameters['set_num'] = self.brickset.fields.set
 
         return parameters
 

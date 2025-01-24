@@ -1,7 +1,7 @@
-{% extends 'set/base/select.sql' %}
+{% extends 'set/base/full.sql' %}
 
 {% block where %}
-WHERE "sets"."u_id" IN (
+WHERE "bricktracker_sets"."id" IN (
     SELECT
         "inventory"."u_id"
     FROM "inventory"

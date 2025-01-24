@@ -12,7 +12,9 @@
             <h5 class="mb-0"><i class="ri-settings-4-line"></i> Administration</h5>
           </div>
           <div class="accordion accordion-flush" id="admin">
-            {% if delete_database %}
+            {% if delete_checkbox %}
+            {% include 'admin/checkbox/delete.html' %}
+            {% elif delete_database %}
             {% include 'admin/database/delete.html' %}
             {% elif drop_database %}
             {% include 'admin/database/drop.html' %}
@@ -28,6 +30,7 @@
               {% endif %}
               {% include 'admin/theme.html' %}
               {% include 'admin/retired.html' %}
+              {% include 'admin/checkbox.html' %}
               {% include 'admin/database.html' %}
               {% include 'admin/configuration.html' %}
             {% endif %}
@@ -38,4 +41,8 @@
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='scripts/changer.js') }}"></script>
 {% endblock %}

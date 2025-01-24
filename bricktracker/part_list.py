@@ -115,13 +115,13 @@ class BrickPartList(BrickRecordList[BrickPart]):
 
         # Set id
         if self.brickset is not None:
-            parameters['u_id'] = self.brickset.fields.u_id
+            parameters['u_id'] = self.brickset.fields.id
 
         # Use the minifigure number if present,
         # otherwise use the set number
         if self.minifigure is not None:
             parameters['set_num'] = self.minifigure.fields.fig_num
         elif self.brickset is not None:
-            parameters['set_num'] = self.brickset.fields.set_num
+            parameters['set_num'] = self.brickset.fields.set
 
         return parameters

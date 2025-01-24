@@ -81,7 +81,7 @@ class BrickMinifigure(BrickRecord):
             raise NotFoundException(
                 'Minifigure with number {number} from set {set} was not found in the database'.format(  # noqa: E501
                     number=self.fields.fig_num,
-                    set=self.brickset.fields.set_num,
+                    set=self.brickset.fields.set,
                 ),
             )
 
@@ -94,10 +94,10 @@ class BrickMinifigure(BrickRecord):
         # Supplement from the brickset
         if self.brickset is not None:
             if 'u_id' not in parameters:
-                parameters['u_id'] = self.brickset.fields.u_id
+                parameters['u_id'] = self.brickset.fields.id
 
             if 'set_num' not in parameters:
-                parameters['set_num'] = self.brickset.fields.set_num
+                parameters['set_num'] = self.brickset.fields.set
 
         return parameters
 
@@ -152,7 +152,7 @@ class BrickMinifigure(BrickRecord):
         }
 
         if brickset is not None:
-            record['set_num'] = brickset.fields.set_num
-            record['u_id'] = brickset.fields.u_id
+            record['set_num'] = brickset.fields.set
+            record['u_id'] = brickset.fields.id
 
         return record

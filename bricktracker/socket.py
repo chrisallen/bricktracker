@@ -6,7 +6,7 @@ from flask_socketio import SocketIO
 
 from .configuration_list import BrickConfigurationList
 from .login import LoginManager
-from .rebrickable_set import RebrickableSet
+from .set import BrickSet
 from .sql import close as sql_close
 
 logger = logging.getLogger(__name__)
@@ -98,7 +98,7 @@ class BrickSocket(object):
                 self.fail(message=str(e))
                 return
 
-            brickset = RebrickableSet(self)
+            brickset = BrickSet(socket=self)
 
             # Start it in a thread if requested
             if self.threaded:
@@ -124,7 +124,7 @@ class BrickSocket(object):
                 self.fail(message=str(e))
                 return
 
-            brickset = RebrickableSet(self)
+            brickset = BrickSet(socket=self)
 
             # Start it in a thread if requested
             if self.threaded:

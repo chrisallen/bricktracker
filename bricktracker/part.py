@@ -121,7 +121,7 @@ class BrickPart(BrickRecord):
             raise NotFoundException(
                 'Part with ID {id} from set {set} was not found in the database'.format(  # noqa: E501
                     id=self.fields.id,
-                    set=self.brickset.fields.set_num,
+                    set=self.brickset.fields.set,
                 ),
             )
 
@@ -133,14 +133,14 @@ class BrickPart(BrickRecord):
 
         # Supplement from the brickset
         if 'u_id' not in parameters and self.brickset is not None:
-            parameters['u_id'] = self.brickset.fields.u_id
+            parameters['u_id'] = self.brickset.fields.id
 
         if 'set_num' not in parameters:
             if self.minifigure is not None:
                 parameters['set_num'] = self.minifigure.fields.fig_num
 
             elif self.brickset is not None:
-                parameters['set_num'] = self.brickset.fields.set_num
+                parameters['set_num'] = self.brickset.fields.set
 
         return parameters
 
@@ -263,7 +263,7 @@ class BrickPart(BrickRecord):
         }
 
         if brickset is not None:
-            record['u_id'] = brickset.fields.u_id
+            record['u_id'] = brickset.fields.id
 
         if minifigure is not None:
             record['set_num'] = data['fig_num']

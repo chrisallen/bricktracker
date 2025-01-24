@@ -10,12 +10,12 @@ from .exceptions import DownloadException
 if TYPE_CHECKING:
     from .minifigure import BrickMinifigure
     from .part import BrickPart
-    from .set import BrickSet
+    from .rebrickable_set import RebrickableSet
 
 
 # A set, part or minifigure image from Rebrickable
 class RebrickableImage(object):
-    brickset: 'BrickSet'
+    set: 'RebrickableSet'
     minifigure: 'BrickMinifigure | None'
     part: 'BrickPart | None'
 
@@ -23,14 +23,14 @@ class RebrickableImage(object):
 
     def __init__(
         self,
-        brickset: 'BrickSet',
+        set: 'RebrickableSet',
         /,
         *,
         minifigure: 'BrickMinifigure | None' = None,
         part: 'BrickPart | None' = None,
     ):
         # Save all objects
-        self.brickset = brickset
+        self.set = set
         self.minifigure = minifigure
         self.part = part
 
@@ -92,7 +92,7 @@ class RebrickableImage(object):
             else:
                 return self.minifigure.fields.fig_num
 
-        return self.brickset.fields.set_num
+        return self.set.fields.set
 
     # Return the path depending on the objects provided
     def path(self, /) -> str:
@@ -116,7 +116,7 @@ class RebrickableImage(object):
             else:
                 return self.minifigure.fields.set_img_url
 
-        return self.brickset.fields.set_img_url
+        return self.set.fields.image
 
     # Return the name of the nil image file
     @staticmethod
