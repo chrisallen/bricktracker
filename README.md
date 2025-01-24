@@ -27,6 +27,6 @@ See [first steps](docs/first-steps.md).
 ## Documentation
 
 Most of the pages should be self explanatory to use.
-However, you can find more specific documentation in the [docs](docs/) folder.
+However, you can find more specific documentation in the [documentation](docs/DOCS.md).
 
 You can find screenshots of the application in the [bricktracker](docs/bricktracker.md) documentation file.
