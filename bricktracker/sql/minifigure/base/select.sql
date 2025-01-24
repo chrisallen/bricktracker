@@ -1,20 +1,20 @@
 SELECT
-    minifigures.fig_num,
-    minifigures.set_num,
-    minifigures.name,
-    minifigures.quantity,
-    minifigures.set_img_url,
-    minifigures.u_id,
+    "minifigures"."fig_num",
+    "minifigures"."set_num",
+    "minifigures"."name",
+    "minifigures"."quantity",
+    "minifigures"."set_img_url",
+    "minifigures"."u_id",
     {% block total_missing %}
-    NULL AS total_missing, -- dummy for order: total_missing
+    NULL AS "total_missing", -- dummy for order: total_missing
     {% endblock %}
     {% block total_quantity %}
-    NULL AS total_quantity, -- dummy for order: total_quantity
+    NULL AS "total_quantity", -- dummy for order: total_quantity
     {% endblock %}
     {% block total_sets %}
-    NULL AS total_sets -- dummy for order: total_sets
+    NULL AS "total_sets" -- dummy for order: total_sets
     {% endblock %}
-FROM minifigures
+FROM "minifigures"
 
 {% block join %}{% endblock %}
 

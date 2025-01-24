@@ -12,6 +12,7 @@ def upload_helper(
     name: str,
     endpoint: str,
     /,
+    *,
     extensions: list[str] = [],
 ) -> FileStorage | Response:
     # Bogus submit

@@ -30,7 +30,7 @@ class BrickPartList(BrickRecordList[BrickPart]):
         self.minifigure = None
 
         # Store the order for this list
-        self.order = current_app.config['PARTS_DEFAULT_ORDER'].value
+        self.order = current_app.config['PARTS_DEFAULT_ORDER']
 
     # Load all parts
     def all(self, /) -> Self:
@@ -49,6 +49,7 @@ class BrickPartList(BrickRecordList[BrickPart]):
         self,
         brickset: 'BrickSet',
         /,
+        *,
         minifigure: 'BrickMinifigure | None' = None,
     ) -> Self:
         # Save the brickset and minifigure
@@ -63,10 +64,7 @@ class BrickPartList(BrickRecordList[BrickPart]):
                 record=record,
             )
 
-            if (
-                current_app.config['SKIP_SPARE_PARTS'].value and
-                part.fields.is_spare
-            ):
+            if current_app.config['SKIP_SPARE_PARTS'] and part.fields.is_spare:
                 continue
 
             self.records.append(part)
@@ -92,10 +90,7 @@ class BrickPartList(BrickRecordList[BrickPart]):
                 record=record,
             )
 
-            if (
-                current_app.config['SKIP_SPARE_PARTS'].value and
-                part.fields.is_spare
-            ):
+            if current_app.config['SKIP_SPARE_PARTS'] and part.fields.is_spare:
                 continue
 
             self.records.append(part)
@@ -120,13 +115,13 @@ class BrickPartList(BrickRecordList[BrickPart]):
 
         # Set id
         if self.brickset is not None:
-            parameters['u_id'] = self.brickset.fields.u_id
+            parameters['u_id'] = self.brickset.fields.id
 
         # Use the minifigure number if present,
         # otherwise use the set number
         if self.minifigure is not None:
             parameters['set_num'] = self.minifigure.fields.fig_num
         elif self.brickset is not None:
-            parameters['set_num'] = self.brickset.fields.set_num
+            parameters['set_num'] = self.brickset.fields.set
 
         return parameters

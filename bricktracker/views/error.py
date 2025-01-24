@@ -30,6 +30,7 @@ def error(
     error: Exception | None,
     file: str,
     /,
+    *,
     json: bool = False,
     post_redirect: str | None = None,
     **kwargs,
@@ -121,6 +122,7 @@ def error(
 def error_404(
     error: Exception,
     /,
+    *,
     json: bool = False,
     post_redirect: str | None = None,
     **kwargs,

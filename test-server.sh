@@ -1,5 +1,14 @@
 #!/usr/bin/env sh
 
+# Cleanup any extra BK_ env that would have been set external
+for VAR in `env | cut -d '=' -f 1`
+do
+    case $VAR in BK_*)
+        echo "Unsetting external $VAR"
+        unset "$VAR"
+    esac
+done
+
 if [ -f ".env" ]
 then
     set -a

@@ -22,7 +22,7 @@ class BrickRetiredList(object):
     size: int | None
     exception: Exception | None
 
-    def __init__(self, /, force: bool = False):
+    def __init__(self, /, *, force: bool = False):
         # Load sets only if there is none already loaded
         retired = getattr(self, 'retired', None)
 
@@ -33,7 +33,7 @@ class BrickRetiredList(object):
 
             # Try to read the themes from a CSV file
             try:
-                with open(current_app.config['RETIRED_SETS_PATH'].value, newline='') as themes_file:  # noqa: E501
+                with open(current_app.config['RETIRED_SETS_PATH'], newline='') as themes_file:  # noqa: E501
                     themes_reader = csv.reader(themes_file)
 
                     # Ignore the header
@@ -44,7 +44,7 @@ class BrickRetiredList(object):
                         BrickRetiredList.retired[retired.number] = retired
 
                 # File stats
-                stat = os.stat(current_app.config['RETIRED_SETS_PATH'].value)
+                stat = os.stat(current_app.config['RETIRED_SETS_PATH'])
                 BrickRetiredList.size = stat.st_size
                 BrickRetiredList.mtime = datetime.fromtimestamp(stat.st_mtime, tz=timezone.utc)  # noqa: E501
 
@@ -79,7 +79,7 @@ class BrickRetiredList(object):
     def human_time(self) -> str:
         if self.mtime is not None:
             return self.mtime.astimezone(g.timezone).strftime(
-                current_app.config['FILE_DATETIME_FORMAT'].value
+                current_app.config['FILE_DATETIME_FORMAT']
             )
         else:
             return ''
@@ -88,7 +88,7 @@ class BrickRetiredList(object):
     @staticmethod
     def update() -> None:
         response = requests.get(
-            current_app.config['RETIRED_SETS_FILE_URL'].value,
+            current_app.config['RETIRED_SETS_FILE_URL'],
             stream=True,
         )
 
@@ -99,7 +99,7 @@ class BrickRetiredList(object):
 
         content = gzip.GzipFile(fileobj=response.raw)
 
-        with open(current_app.config['RETIRED_SETS_PATH'].value, 'wb') as f:
+        with open(current_app.config['RETIRED_SETS_PATH'], 'wb') as f:
             copyfileobj(content, f)
 
     logger.info('Retired sets list updated')

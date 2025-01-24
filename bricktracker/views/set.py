@@ -15,6 +15,7 @@ from .exceptions import exception_handler
 from ..minifigure import BrickMinifigure
 from ..part import BrickPart
 from ..set import BrickSet
+from ..set_checkbox_list import BrickSetCheckboxList
 from ..set_list import BrickSetList
 
 logger = logging.getLogger(__name__)
@@ -26,47 +27,34 @@ set_page = Blueprint('set', __name__, url_prefix='/sets')
 @set_page.route('/', methods=['GET'])
 @exception_handler(__file__)
 def list() -> str:
-    return render_template('sets.html', collection=BrickSetList().all())
+    return render_template(
+        'sets.html',
+        collection=BrickSetList().all(),
+        brickset_checkboxes=BrickSetCheckboxList().list(),
+    )
 
 
-# Change the set checked status of one set
-@set_page.route('/<id>/checked', methods=['POST'])
+# Change the status of a checkbox
+@set_page.route('/<id>/status/<checkbox_id>', methods=['POST'])
 @login_required
 @exception_handler(__file__, json=True)
-def set_checked(*, id: str) -> Response:
-    state: bool = request.json.get('state', False)  # type: ignore
+def update_status(*, id: str, checkbox_id: str) -> Response:
+    value: bool = request.json.get('value', False)  # type: ignore
 
-    brickset = BrickSet().select_specific(id)
-    brickset.update_checked('set_check', state)
+    brickset = BrickSet().select_light(id)
+    checkbox = BrickSetCheckboxList().get(checkbox_id)
 
-    # Info
-    logger.info('Set {number} ({id}): changed set checked status to {state}'.format(  # noqa: E501
-        number=brickset.fields.set_num,
-        id=brickset.fields.u_id,
-        state=state,
-    ))
-
-    return jsonify({'state': state})
-
-
-# Change the set collected status of one set
-@set_page.route('/<id>/collected', methods=['POST'])
-@login_required
-@exception_handler(__file__, json=True)
-def set_collected(*, id: str) -> Response:
-    state: bool = request.json.get('state', False)  # type: ignore
-
-    brickset = BrickSet().select_specific(id)
-    brickset.update_checked('set_col', state)
+    brickset.update_status(checkbox, value)
 
     # Info
-    logger.info('Set {number} ({id}): changed set collected status to {state}'.format(  # noqa: E501
-        number=brickset.fields.set_num,
-        id=brickset.fields.u_id,
-        state=state,
+    logger.info('Set {number} ({id}): status "{status}" changed to "{state}"'.format(  # noqa: E501
+        number=brickset.fields.set,
+        id=brickset.fields.id,
+        status=checkbox.fields.name,
+        state=value,
     ))
 
-    return jsonify({'state': state})
+    return jsonify({'value': value})
 
 
 # Ask for deletion of a set
@@ -85,13 +73,13 @@ def delete(*, id: str) -> str:
 @set_page.route('/<id>/delete', methods=['POST'])
 @exception_handler(__file__, post_redirect='set.delete')
 def do_delete(*, id: str) -> Response:
-    brickset = BrickSet().select_specific(id)
+    brickset = BrickSet().select_light(id)
     brickset.delete()
 
     # Info
     logger.info('Set {number} ({id}): deleted'.format(
-        number=brickset.fields.set_num,
-        id=brickset.fields.u_id,
+        number=brickset.fields.set,
+        id=brickset.fields.id,
     ))
 
     return redirect(url_for('set.deleted', id=id))
@@ -115,27 +103,8 @@ def details(*, id: str) -> str:
         'set.html',
         item=BrickSet().select_specific(id),
         open_instructions=request.args.get('open_instructions'),
+        brickset_checkboxes=BrickSetCheckboxList().list(all=True),
     )
-
-
-# Change the minifigures collected status of one set
-@set_page.route('/sets/<id>/minifigures/collected', methods=['POST'])
-@login_required
-@exception_handler(__file__, json=True)
-def minifigures_collected(*, id: str) -> Response:
-    state: bool = request.json.get('state', False)  # type: ignore
-
-    brickset = BrickSet().select_specific(id)
-    brickset.update_checked('mini_col', state)
-
-    # Info
-    logger.info('Set {number} ({id}): changed minifigures collected status to {state}'.format(  # noqa: E501
-        number=brickset.fields.set_num,
-        id=brickset.fields.u_id,
-        state=state,
-    ))
-
-    return jsonify({'state': state})
 
 
 # Update the missing pieces of a minifig part
@@ -162,8 +131,8 @@ def missing_minifigure_part(
 
     # Info
     logger.info('Set {number} ({id}): updated minifigure ({minifigure}) part ({part}) missing count to {missing}'.format(  # noqa: E501
-        number=brickset.fields.set_num,
-        id=brickset.fields.u_id,
+        number=brickset.fields.set,
+        id=brickset.fields.id,
         minifigure=minifigure.fields.fig_num,
         part=part.fields.id,
         missing=missing,
@@ -186,8 +155,8 @@ def missing_part(*, id: str, part_id: str) -> Response:
 
     # Info
     logger.info('Set {number} ({id}): updated part ({part}) missing count to {missing}'.format(  # noqa: E501
-        number=brickset.fields.set_num,
-        id=brickset.fields.u_id,
+        number=brickset.fields.set,
+        id=brickset.fields.id,
         part=part.fields.id,
         missing=missing,
     ))

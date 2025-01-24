@@ -1,6 +1,6 @@
 # BrickTracker
 
-> **Note**<br>
+> **Note**
 > The following page is based on version `1.0.0` of BrickTracker.
 
 ## Frontpage
@@ -14,7 +14,7 @@ You can click the card name or image to access a set or minifigure detail.
 
 ## Sets
 
-> **Info**<br>
+> **Info**
 > This does not do any pagination and loads **everything**. It can be slow depending on how many sets you have.
 
 ![](images/bricktracker-02.png)
@@ -66,7 +66,7 @@ If an error occur, it will put back in the input field the list of number that w
 
 ## Parts
 
-> **Info**<br>
+> **Info**
 > This does not do any pagination and loads **everything**. It can be slow depending on how many sets you have.
 
 ![](images/bricktracker-06.png)
@@ -79,7 +79,7 @@ Clicking on a part name will load its details.
 
 ## Missing (parts)
 
-> **Info**<br>
+> **Info**
 > This does not do any pagination and loads **everything**. It can be slow depending on how missing parts you have.
 
 ![](images/bricktracker-07.png)
@@ -92,7 +92,7 @@ Clicking on a part name will load its details.
 
 ## Minifigures
 
-> **Info**<br>
+> **Info**
 > This does not do any pagination and loads **everything**. It can be slow depending on how many minifigures you have.
 
 ![](images/bricktracker-08.png)
@@ -105,7 +105,7 @@ Clicking on a minifigure name will load its details.
 
 ## Instructions
 
-> **Info**<br>
+> **Info**
 > This does not do any pagination and loads **everything**. It can be slow depending on how many instructions you have.
 
 ![](images/bricktracker-08.png)
@@ -118,7 +118,7 @@ Clicking on a set image will open it fullscreen.
 
 ## Wishlist
 
-> **Info**<br>
+> **Info**
 > This does not do any pagination and loads **everything**. It can be slow depending on how many wished sets you have.
 
 ![](images/bricktracker-12.png)

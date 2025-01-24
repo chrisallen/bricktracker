@@ -12,7 +12,13 @@ from bricktracker.navbar import Navbar
 from bricktracker.sql import close
 from bricktracker.version import __version__
 from bricktracker.views.add import add_page
-from bricktracker.views.admin import admin_page
+from bricktracker.views.admin.admin import admin_page
+from bricktracker.views.admin.checkbox import admin_checkbox_page
+from bricktracker.views.admin.database import admin_database_page
+from bricktracker.views.admin.image import admin_image_page
+from bricktracker.views.admin.instructions import admin_instructions_page
+from bricktracker.views.admin.retired import admin_retired_page
+from bricktracker.views.admin.theme import admin_theme_page
 from bricktracker.views.error import error_404
 from bricktracker.views.index import index_page
 from bricktracker.views.instructions import instructions_page
@@ -28,7 +34,7 @@ def setup_app(app: Flask) -> None:
     BrickConfigurationList(app)
 
     # Set the logging level
-    if app.config['DEBUG'].value:
+    if app.config['DEBUG']:
         logging.basicConfig(
             stream=sys.stdout,
             level=logging.DEBUG,
@@ -60,9 +66,8 @@ def setup_app(app: Flask) -> None:
     # Register errors
     app.register_error_handler(404, error_404)
 
-    # Register routes
+    # Register app routes
     app.register_blueprint(add_page)
-    app.register_blueprint(admin_page)
     app.register_blueprint(index_page)
     app.register_blueprint(instructions_page)
     app.register_blueprint(login_page)
@@ -70,6 +75,15 @@ def setup_app(app: Flask) -> None:
     app.register_blueprint(part_page)
     app.register_blueprint(set_page)
     app.register_blueprint(wish_page)
+
+    # Register admin routes
+    app.register_blueprint(admin_page)
+    app.register_blueprint(admin_checkbox_page)
+    app.register_blueprint(admin_database_page)
+    app.register_blueprint(admin_image_page)
+    app.register_blueprint(admin_instructions_page)
+    app.register_blueprint(admin_retired_page)
+    app.register_blueprint(admin_theme_page)
 
     # An helper to make global variables available to the
     # request
@@ -90,12 +104,12 @@ def setup_app(app: Flask) -> None:
         g.request_time = request_time
 
         # Register the timezone
-        g.timezone = ZoneInfo(current_app.config['TIMEZONE'].value)
+        g.timezone = ZoneInfo(current_app.config['TIMEZONE'])
 
         # Version
         g.version = __version__
 
     # Make sure all connections are closed at the end
-    @app.teardown_appcontext
-    def close_connections(exception, /) -> None:
+    @app.teardown_request
+    def teardown_request(_: BaseException | None) -> None:
         close()

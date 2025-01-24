@@ -8,9 +8,9 @@
     </div>
     <div class="accordion accordion-flush" id="instructions">
       {{ accordion.header('Instructions danger zone', 'instructions-delete', 'instructions', expanded=true, danger=true) }}
-      {% if item.brickset %}
+      {% if item.rebrickable %}
         <div class="d-flex justify-content-center">
-          {% with item=item.brickset %}
+          {% with item=item.rebrickable %}
             {% include 'set/mini.html' %}
           {% endwith %}
         </div>
@@ -28,8 +28,3 @@
     <div class="card-footer"></div>
   </div>
 </div>
-<script type="text/javascript">
-  document.addEventListener("DOMContentLoaded", () => {
-    baguetteBox.run('[data-lightbox]');
-  });
-</script>

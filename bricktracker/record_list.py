@@ -6,10 +6,20 @@ from .sql import BrickSQL
 if TYPE_CHECKING:
     from .minifigure import BrickMinifigure
     from .part import BrickPart
+    from .rebrickable_set import RebrickableSet
     from .set import BrickSet
+    from .set_checkbox import BrickSetCheckbox
     from .wish import BrickWish
 
-T = TypeVar('T', 'BrickSet', 'BrickPart', 'BrickMinifigure', 'BrickWish')
+T = TypeVar(
+    'T',
+    'BrickSet',
+    'BrickSetCheckbox',
+    'BrickPart',
+    'BrickMinifigure',
+    'BrickWish',
+    'RebrickableSet'
+)
 
 
 # SQLite records
@@ -32,9 +42,11 @@ class BrickRecordList(Generic[T]):
     def select(
         self,
         /,
+        *,
         override_query: str | None = None,
         order: str | None = None,
         limit: int | None = None,
+        **context: Any,
     ) -> list[Row]:
         # Select the query
         if override_query:
@@ -47,6 +59,7 @@ class BrickRecordList(Generic[T]):
             parameters=self.sql_parameters(),
             order=order,
             limit=limit,
+            **context
         )
 
     # Generic SQL parameters from fields
@@ -62,6 +75,6 @@ class BrickRecordList(Generic[T]):
         for record in self.records:
             yield record
 
-    # Make the sets measurable
+    # Make the list measurable
     def __len__(self, /) -> int:
         return len(self.records)

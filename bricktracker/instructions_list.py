@@ -1,11 +1,14 @@
 import logging
 import os
-from typing import Generator
+from typing import Generator, TYPE_CHECKING
 
 from flask import current_app
 
 from .exceptions import NotFoundException
 from .instructions import BrickInstructions
+from .rebrickable_set_list import RebrickableSetList
+if TYPE_CHECKING:
+    from .rebrickable_set import RebrickableSet
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +21,7 @@ class BrickInstructionsList(object):
     sets_total: int
     unknown_total: int
 
-    def __init__(self, /, force=False):
+    def __init__(self, /, *, force=False):
         # Load instructions only if there is none already loaded
         all = getattr(self, 'all', None)
 
@@ -36,7 +39,7 @@ class BrickInstructionsList(object):
                 # Make a folder relative to static
                 folder: str = os.path.join(
                     current_app.static_folder,  # type: ignore
-                    current_app.config['INSTRUCTIONS_FOLDER'].value,
+                    current_app.config['INSTRUCTIONS_FOLDER'],
                 )
 
                 for file in os.scandir(folder):
@@ -46,47 +49,40 @@ class BrickInstructionsList(object):
                     BrickInstructionsList.all[instruction.filename] = instruction  # noqa: E501
 
                     if instruction.allowed:
-                        if instruction.number:
+                        if instruction.set:
                             # Instantiate the list if not existing yet
-                            if instruction.number not in BrickInstructionsList.sets:  # noqa: E501
-                                BrickInstructionsList.sets[instruction.number] = []  # noqa: E501
+                            if instruction.set not in BrickInstructionsList.sets:  # noqa: E501
+                                BrickInstructionsList.sets[instruction.set] = []  # noqa: E501
 
-                            BrickInstructionsList.sets[instruction.number].append(instruction)  # noqa: E501
+                            BrickInstructionsList.sets[instruction.set].append(instruction)  # noqa: E501
                             BrickInstructionsList.sets_total += 1
                         else:
                             BrickInstructionsList.unknown_total += 1
                     else:
                         BrickInstructionsList.rejected_total += 1
 
-                # Associate bricksets
-                # Not ideal, to avoid a circular import
-                from .set import BrickSet
-                from .set_list import BrickSetList
+                # List of Rebrickable sets
+                rebrickable_sets: dict[str, RebrickableSet] = {}
+                for rebrickable_set in RebrickableSetList().all():
+                    rebrickable_sets[rebrickable_set.fields.set] = rebrickable_set  # noqa: E501
 
-                # Grab the generic list of sets
-                bricksets: dict[str, BrickSet] = {}
-                for brickset in BrickSetList().generic().records:
-                    bricksets[brickset.fields.set_num] = brickset
-
-                # Return the files
+                # Inject the brickset if it exists
                 for instruction in self.all.values():
-                    # Inject the brickset if it exists
                     if (
                         instruction.allowed and
-                        instruction.number is not None and
-                        instruction.brickset is None and
-                        instruction.number in bricksets
+                        instruction.set is not None and
+                        instruction.rebrickable is None and
+                        instruction.set in rebrickable_sets
                     ):
-                        instruction.brickset = bricksets[instruction.number]
-
+                        instruction.rebrickable = rebrickable_sets[instruction.set]  # noqa: E501
             # Ignore errors
             except Exception:
                 pass
 
     # Grab instructions for a set
-    def get(self, number: str) -> list[BrickInstructions]:
-        if number in self.sets:
-            return self.sets[number]
+    def get(self, set: str) -> list[BrickInstructions]:
+        if set in self.sets:
+            return self.sets[set]
         else:
             return []
 

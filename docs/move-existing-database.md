@@ -2,7 +2,7 @@
 
 If you are coming from the original version of BrickTracker and you wish to move your database from a bind mount to a volume, you can follow this procedure.
 
-> **Note**<br>
+> **Note**
 > If you already have a copy of your `app.db` file easily available, you can skip directly to "Move the database" section
 
 ## Update to version 1.0.0
@@ -57,7 +57,7 @@ This will download a copy of the database file to your computer.
 Now that you have a copy of your database, you can tell the application its new path.
 Edit the `BK_DATABASE_PATH` environment variable and redeploy your application.
 
-> **Note**<br>
+> **Note**
 > The name of the database file does not have to be `app.db`
 
 For instance:

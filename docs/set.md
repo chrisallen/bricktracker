@@ -1,6 +1,6 @@
 # Managing your sets
 
-> **Note**<br>
+> **Note**
 > The following page is based on version `1.0.0` of BrickTracker.
 
 ## Set image

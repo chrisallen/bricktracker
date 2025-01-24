@@ -1,2 +1,2 @@
-DELETE FROM wishlist
-WHERE set_num IS NOT DISTINCT FROM :set_num
+DELETE FROM "bricktracker_wishes"
+WHERE "bricktracker_wishes"."set" IS NOT DISTINCT FROM :set

@@ -1,54 +1,18 @@
 # Common errors/problems
 
-> **Note**<br>
-> The following page is based on version `1.0.0` of BrickTracker.
+> **Note**
+> The following page is based on version `1.1.0` of BrickTracker.
 
 ## I need a password to access some pages
 
-You have setup lightweight authentication. Your password is in your environement `BK_AUTHENTICATION_PASSWORD` variable.
+You have setup [lightweight authentication](authentication.md). Your password is in your environement `BK_AUTHENTICATION_PASSWORD` variable.
 
 ## I cannot access the Add page (Configuration missing!)
 
 ![](images/common-errors-01.png)
 
 You need to pass the `BK_REBRICKABLE_API_KEY` environment to your application, depending on how you run the application.
-For instance:
-
-- Docker: `docker run -e BK_REBRICKABLE_API_KEY=xxxx`
-- Docker compose (directly in `compose.yaml`):
-
-```
-services:
-  bricktracker:
-    environment:
-      - BK_AUTHENTICATION_KEY=xxxx
-```
-
-- Docker compose (with an environement file, for instance `.env`)
-
-```
--- .env
-BK_AUTHENTICATION_KEY=xxxx
-
--- compose.yaml
-services:
-  bricktracker:
-    env_file: ".env"
-```
-
-> **Warning**<br>
-> Do not use quotes (", ') around your environment variables.
-> Docker will interpret them has being part of the **value** of the environment variable.
-> For instance...
->
-> ```
-> services:
->  bricktracker:
->    environment:
->      - BK_AUTHENTICATION_KEY="xxxx"
-> ```
->
-> ...will make Docker believe that your API key is `"xxxx"`.
+See [setup](setup.md) for more information.
 
 ## The socket is disconnected
 
@@ -69,16 +33,22 @@ Make sure the value you have set is matching the URL of your application.
 If it is not the case, adjust the value and restart the application.
 
 
-## No such file or directory: '<path>' when adding a set
+## No such file or directory: '&lt;path&gt;' when adding a set
 
 ![](images/common-errors-03.png)
 
 The application doestake care of creating folders for static images and expects them to be writable.
 Make sure that the folder exists, and if it exists that it is writable by the application.
 
-## I'm seeing Unknown (<number>) instead of the set theme
+## I'm seeing Unknown (&lt;number&gt;) instead of the set theme
 
 ![](images/common-errors-04.png)
 
 Either the theme is too recent for your version of the themes file, or your theme file has not be initialized.
 Head to the **Admin** page, **Themes** section and update the file.
+
+## Your database need to be upgraded from version &lt;current&gt; to version &lt;required&gt;.
+
+![](images/common-errors-05.png)
+
+A database schema modification was necessary to implement new features and the database need to be upgraded from the **Admin** page. See [upgrade your database](upgrade-database.md) for more information.

@@ -1,12 +1,6 @@
-SELECT
-    sets.set_num,
-    sets.name,
-    sets.year,
-    sets.theme_id,
-    sets.num_parts,
-    sets.set_img_url,
-    sets.set_url
-FROM sets
+{% extends 'set/base/base.sql' %}
 
+{% block group %}
 GROUP BY
-    sets.set_num
+    "bricktracker_sets"."rebrickable_set"
+{% endblock %}

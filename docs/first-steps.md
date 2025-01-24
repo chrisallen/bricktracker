@@ -1,6 +1,6 @@
 # First steps
 
-> **Note**<br>
+> **Note**
 > The following page is based on version `1.0.0` of BrickTracker.
 
 ## Database initialization
@@ -35,10 +35,10 @@ If everything went well you should see no more error message and some counters.
 
 ## Add a set
 
-> **Important**<br>
+> **Important**
 > Make sure you have set up your Rebrickable API key (`BK_REBRICKABLE_KEY`) for this to work (see [common errors](common-errors.md)).
 
-> **Important**<br>
+> **Important**
 > If you are using the CORS allowed origin restriction (`BK_DOMAIN_NAME`), make sure it is matching your application URL (see [common errors](common-errors.md)).
 
 Use the menu bar to navigate to the **Add** page, make sure the socket is in a **connected** state.
@@ -55,7 +55,7 @@ It will load information about the set you are about to add, but not add it yet.
 
 Use the **Confirm add** button to add the set, or the **Dismiss** button if it is not the one you wanted.
 
-> **Note**<br>
+> **Note**
 > If you do not want to go through the confirmation process, check the **Add without confirmation** checkbox and the
 > set will be added when you press the **Add** button.
 

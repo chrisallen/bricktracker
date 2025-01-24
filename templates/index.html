@@ -3,8 +3,8 @@
 {% block main %}
 <div class="container-fluid">
   <h2 class="border-bottom lh-base pb-1">
-    <i class="ri-hashtag"></i> {% if config['RANDOM'].value %}Random selection of{% else %}Latest added{% endif %} sets
-    {% if not config['HIDE_ALL_SETS'].value %}
+    <i class="ri-hashtag"></i> {% if config['RANDOM'] %}Random selection of{% else %}Latest added{% endif %} sets
+    {% if not config['HIDE_ALL_SETS'] %}
       <a href="{{ url_for('set.list') }}" class="btn btn-sm btn-primary ms-1">All sets</a>
     {% endif %}
   </h2>
@@ -23,8 +23,8 @@
   {% endif %}
   {% if minifigure_collection | length %}
     <h2 class="border-bottom lh-base pb-1">
-      <i class="ri-group-line"></i> {% if config['RANDOM'].value %}Random selection of{% else %}Latest added{% endif %} minifigures
-      {% if not config['HIDE_ALL_MINIFIGURES'].value %}
+      <i class="ri-group-line"></i> {% if config['RANDOM'] %}Random selection of{% else %}Latest added{% endif %} minifigures
+      {% if not config['HIDE_ALL_MINIFIGURES'] %}
         <a href="{{ url_for('minifigure.list') }}" class="btn btn-sm btn-primary ms-1">All minifigures</a>
       {% endif %}
       </h2>

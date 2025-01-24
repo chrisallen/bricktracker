@@ -27,7 +27,7 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
         self.brickset = None
 
         # Store the order for this list
-        self.order = current_app.config['MINIFIGURES_DEFAULT_ORDER'].value
+        self.order = current_app.config['MINIFIGURES_DEFAULT_ORDER']
 
     # Load all minifigures
     def all(self, /) -> Self:
@@ -42,9 +42,9 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
         return self
 
     # Last added minifigure
-    def last(self, /, limit: int = 6) -> Self:
+    def last(self, /, *, limit: int = 6) -> Self:
         # Randomize
-        if current_app.config['RANDOM'].value:
+        if current_app.config['RANDOM']:
             order = 'RANDOM()'
         else:
             order = 'minifigures.rowid DESC'
@@ -78,8 +78,8 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
         parameters: dict[str, Any] = super().sql_parameters()
 
         if self.brickset is not None:
-            parameters['u_id'] = self.brickset.fields.u_id
-            parameters['set_num'] = self.brickset.fields.set_num
+            parameters['u_id'] = self.brickset.fields.id
+            parameters['set_num'] = self.brickset.fields.set
 
         return parameters
 
@@ -89,6 +89,7 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
         part_num: str,
         color_id: int,
         /,
+        *,
         element_id: int | None = None,
     ) -> Self:
         # Save the parameters to the fields
@@ -113,6 +114,7 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
         part_num: str,
         color_id: int,
         /,
+        *,
         element_id: int | None = None,
     ) -> Self:
         # Save the parameters to the fields

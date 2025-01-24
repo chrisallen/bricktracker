@@ -18,12 +18,10 @@
           <code>{{ entry.value }}</code>
         {% endif %}
       {% endif %}
-      {% if not entry.not_from_env %}
-        <span class="badge rounded-pill text-bg-light border">Env: {{ entry.env_name }}</span>
-        {% if entry.extra_name %}<span class="badge rounded-pill text-bg-light border">Env: {{ entry.extra_name }}</span>{% endif %}
-        {% if entry.is_changed() %}
-          <span class="badge rounded-pill text-bg-warning">Changed</span>
-        {% endif %}
+      <span class="badge rounded-pill text-bg-light border">Env: {{ entry.env_name }}</span>
+      {% if entry.extra_name %}<span class="badge rounded-pill text-bg-light border">Env: {{ entry.extra_name }}</span>{% endif %}
+      {% if entry.is_changed() %}
+        <span class="badge rounded-pill text-bg-warning">Changed</span>
       {% endif %}
     </li>
   {% endfor %}

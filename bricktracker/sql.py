@@ -1,15 +1,24 @@
 import logging
 import os
 import sqlite3
-from typing import Any, Tuple
-
-from .sql_stats import BrickSQLStats
+from typing import Any, Final, Tuple
 
 from flask import current_app, g
 from jinja2 import Environment, FileSystemLoader
 from werkzeug.datastructures import FileStorage
 
+from .exceptions import DatabaseException
+from .sql_counter import BrickCounter
+from .sql_migration_list import BrickSQLMigrationList
+from .sql_stats import BrickSQLStats
+from .version import __database_version__
+
 logger = logging.getLogger(__name__)
+
+G_CONNECTION: Final[str] = 'database_connection'
+G_ENVIRONMENT: Final[str] = 'database_environment'
+G_DEFER: Final[str] = 'database_defer'
+G_STATS: Final[str] = 'database_stats'
 
 
 # SQLite3 client with our extra features
@@ -17,17 +26,21 @@ class BrickSQL(object):
     connection: sqlite3.Connection
     cursor: sqlite3.Cursor
     stats: BrickSQLStats
+    version: int
 
-    def __init__(self, /):
+    def __init__(self, /, *, failsafe: bool = False):
         # Instantiate the database connection in the Flask
         # application context so that it can be used by all
         # requests without re-opening connections
-        database = getattr(g, 'database', None)
+        connection = getattr(g, G_CONNECTION, None)
 
         # Grab the existing connection if it exists
-        if database is not None:
-            self.connection = database
-            self.stats = getattr(g, 'database_stats', BrickSQLStats())
+        if connection is not None:
+            self.connection = connection
+            self.stats = getattr(g, G_STATS, BrickSQLStats())
+
+            # Grab a cursor
+            self.cursor = self.connection.cursor()
         else:
             # Instantiate the stats
             self.stats = BrickSQLStats()
@@ -37,26 +50,54 @@ class BrickSQL(object):
 
             logger.debug('SQLite3: connect')
             self.connection = sqlite3.connect(
-                current_app.config['DATABASE_PATH'].value
+                current_app.config['DATABASE_PATH']
             )
 
             # Setup the row factory to get pseudo-dicts rather than tuples
             self.connection.row_factory = sqlite3.Row
+
+            # Grab a cursor
+            self.cursor = self.connection.cursor()
+
+            # Grab the version and check
+            try:
+                version = self.fetchone('schema/get_version')
+
+                if version is None:
+                    raise Exception('version is None')
+
+                self.version = version[0]
+            except Exception as e:
+                self.version = 0
+
+                raise DatabaseException('Could not get the database version: {error}'.format(  # noqa: E501
+                    error=str(e)
+                ))
+
+            if self.upgrade_too_far():
+                raise DatabaseException('Your database version ({version}) is too far ahead for this version of the application. Expected at most {required}'.format(  # noqa: E501
+                    version=self.version,
+                    required=__database_version__,
+                ))
 
             # Debug: Attach the debugger
             # Uncomment manually because this is ultra verbose
             # self.connection.set_trace_callback(print)
 
             # Save the connection globally for later use
-            g.database = self.connection
-            g.database_stats = self.stats
+            setattr(g, G_CONNECTION, self.connection)
+            setattr(g, G_STATS, self.stats)
 
-        # Grab a cursor
-        self.cursor = self.connection.cursor()
+            if not failsafe:
+                if self.upgrade_needed():
+                    raise DatabaseException('Your database need to be upgraded from version {version} to version {required}'.format(  # noqa: E501
+                        version=self.version,
+                        required=__database_version__,
+                    ))
 
     # Clear the defer stack
     def clear_defer(self, /) -> None:
-        g.database_defer = []
+        setattr(g, G_DEFER, [])
 
     # Shorthand to commit
     def commit(self, /) -> None:
@@ -72,6 +113,27 @@ class BrickSQL(object):
         logger.debug('SQLite3: commit')
         return self.connection.commit()
 
+    # Count the database records
+    def count_records(self) -> list[BrickCounter]:
+        counters: list[BrickCounter] = []
+
+        # Get all tables
+        for table in self.fetchall('schema/tables'):
+            counter = BrickCounter(table['name'])
+
+            # Failsafe this one
+            try:
+                record = self.fetchone('schema/count', table=counter.table)
+
+                if record is not None:
+                    counter.count = record['count']
+            except Exception:
+                pass
+
+            counters.append(counter)
+
+        return counters
+
     # Defer a call to execute
     def defer(self, query: str, parameters: dict[str, Any], /):
         defer = self.get_defer()
@@ -82,16 +144,17 @@ class BrickSQL(object):
         defer.append((query, parameters))
 
         # Save the defer stack
-        g.database_defer = defer
+        setattr(g, G_DEFER, defer)
 
     # Shorthand to execute, returning number of affected rows
     def execute(
         self,
         query: str,
         /,
+        *,
         parameters: dict[str, Any] = {},
         defer: bool = False,
-        **context,
+        **context: Any,
     ) -> Tuple[int, str]:
         # Stats: execute
         self.stats.execute += 1
@@ -114,7 +177,7 @@ class BrickSQL(object):
             return result.rowcount, query
 
     # Shorthand to executescript
-    def executescript(self, query: str, /, **context) -> None:
+    def executescript(self, query: str, /, **context: Any) -> None:
         # Load the query
         query = self.load_query(query, **context)
 
@@ -129,8 +192,9 @@ class BrickSQL(object):
         self,
         query: str,
         /,
+        *,
         parameters: dict[str, Any] = {},
-        **context,
+        **context: Any,
     ) -> Tuple[int, str]:
         rows, query = self.execute(query, parameters=parameters, **context)
         self.commit()
@@ -142,8 +206,9 @@ class BrickSQL(object):
         self,
         query: str,
         /,
+        *,
         parameters: dict[str, Any] = {},
-        **context,
+        **context: Any,
     ) -> list[sqlite3.Row]:
         _, query = self.execute(query, parameters=parameters, **context)
 
@@ -163,8 +228,9 @@ class BrickSQL(object):
         self,
         query: str,
         /,
+        *,
         parameters: dict[str, Any] = {},
-        **context,
+        **context: Any,
     ) -> sqlite3.Row | None:
         _, query = self.execute(query, parameters=parameters, **context)
 
@@ -182,21 +248,18 @@ class BrickSQL(object):
 
     # Grab the defer stack
     def get_defer(self, /) -> list[Tuple[str, dict[str, Any]]]:
-        defer: list[Tuple[str, dict[str, Any]]] = getattr(
-            g,
-            'database_defer',
-            []
-        )
+        defer: list[Tuple[str, dict[str, Any]]] = getattr(g, G_DEFER, [])
 
         return defer
 
     # Load a query by name
-    def load_query(self, name: str, /, **context) -> str:
+    def load_query(self, name: str, /, **context: Any) -> str:
         # Grab the existing environment if it exists
-        environment = getattr(g, 'database_loader', None)
+        environment = getattr(g, G_ENVIRONMENT, None)
 
         # Instantiate Jinja environment for SQL files
         if environment is None:
+            logger.debug('SQLite3: instantiating the Jinja loader')
             environment = Environment(
                 loader=FileSystemLoader(
                     os.path.join(os.path.dirname(__file__), 'sql/')
@@ -204,10 +267,10 @@ class BrickSQL(object):
             )
 
             # Save the environment globally for later use
-            g.database_environment = environment
+            setattr(g, G_ENVIRONMENT, environment)
 
         # Grab the template
-        logger.debug('SQLite: loading {name} (context: {context})'.format(
+        logger.debug('SQLite3: loading {name} (context: {context})'.format(
             name=name,
             context=context,
         ))
@@ -221,13 +284,33 @@ class BrickSQL(object):
     def raw_execute(
         self,
         query: str,
-        parameters: dict[str, Any]
+        parameters: dict[str, Any],
+        /
     ) -> sqlite3.Cursor:
         logger.debug('SQLite3: execute: {query}'.format(
             query=BrickSQL.clean_query(query)
         ))
 
         return self.cursor.execute(query, parameters)
+
+    # Upgrade the database
+    def upgrade(self) -> None:
+        if self.upgrade_needed():
+            for pending in BrickSQLMigrationList().pending(self.version):
+                logger.info('Applying migration {version}'.format(
+                    version=pending.version)
+                )
+
+                self.executescript(pending.get_query())
+                self.execute('schema/set_version', version=pending.version)
+
+    # Tells whether the database needs upgrade
+    def upgrade_needed(self) -> bool:
+        return self.version < __database_version__
+
+    # Tells whether the database is too far
+    def upgrade_too_far(self) -> bool:
+        return self.version > __database_version__
 
     # Clean the query for debugging
     @staticmethod
@@ -249,7 +332,7 @@ class BrickSQL(object):
     # Delete the database
     @staticmethod
     def delete() -> None:
-        os.remove(current_app.config['DATABASE_PATH'].value)
+        os.remove(current_app.config['DATABASE_PATH'])
 
         # Info
         logger.info('The database has been deleted')
@@ -262,37 +345,10 @@ class BrickSQL(object):
         # Info
         logger.info('The database has been dropped')
 
-    # Count the database records
-    @staticmethod
-    def count_records() -> dict[str, int]:
-        database = BrickSQL()
-
-        counters: dict[str, int] = {}
-        for table in ['sets', 'minifigures', 'inventory', 'missing']:
-            record = database.fetchone('schema/count', table=table)
-
-            if record is not None:
-                counters[table] = record['count']
-
-        return counters
-
-    # Initialize the database
-    @staticmethod
-    def initialize() -> None:
-        BrickSQL().executescript('migrations/init')
-
-        # Info
-        logger.info('The database has been initialized')
-
-    # Check if the database is initialized
-    @staticmethod
-    def is_init() -> bool:
-        return BrickSQL().fetchone('schema/is_init') is not None
-
     # Replace the database with a new file
     @staticmethod
     def upload(file: FileStorage, /) -> None:
-        file.save(current_app.config['DATABASE_PATH'].value)
+        file.save(current_app.config['DATABASE_PATH'])
 
         # Info
         logger.info('The database has been imported using file {file}'.format(
@@ -302,11 +358,11 @@ class BrickSQL(object):
 
 # Close all existing SQLite3 connections
 def close() -> None:
-    database: sqlite3.Connection | None = getattr(g, 'database', None)
+    connection: sqlite3.Connection | None = getattr(g, G_CONNECTION, None)
 
-    if database is not None:
+    if connection is not None:
         logger.debug('SQLite3: close')
-        database.close()
+        connection.close()
 
         # Remove the database from the context
-        delattr(g, 'database')
+        delattr(g, G_CONNECTION)
