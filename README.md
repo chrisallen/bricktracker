@@ -29,4 +29,4 @@ See [first steps](docs/first-steps.md).
 Most of the pages should be self explanatory to use.
 However, you can find more specific documentation in the [documentation](docs/DOCS.md).
 
-You can find screenshots of the application in the [bricktracker](docs/bricktracker.md) documentation file.
+You can find screenshots of the application in the [overview](docs/overview.md) documentation file.

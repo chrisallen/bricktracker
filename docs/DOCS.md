@@ -4,7 +4,7 @@ This page helps you navigate the documentation of BrickTracker.
 
 ## Overview
 
-- [Overview](overview.md) (this screenshots of the application are here!)
+- [Overview](overview.md) (the screenshots of the application are here!)
 
 ## Installation
 
