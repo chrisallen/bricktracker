@@ -4,13 +4,25 @@
 > The following page is based on version `1.0.0` of BrickTracker.
 
 The application is written in Python version 3.
-It uses:
+It uses the following Python/pip packages:
 
 - `flask` (Web framework)
 - `flask_socketio` (Socket.IO: Websocket library for real-time client-server communication)
 - `flask-login` (Lightweight Flask authentication library)
+- `humanize` (Unit and datetime conversion)
 - `sqlite3` (Light database management system)
 - `rebrick` API (Library to interact with the Rebrickable.com API)
+
+It also uses the following libraries and frameworks:
+
+- Boostrap (https://getbootstrap.com/)
+- `baguettebox` (https://github.com/feimosi/baguetteBox.js)
+- `tinysort` (https://github.com/Sjeiti/TinySort)
+- `sortable` (https://github.com/tofsjonas/sortable)
+- `simple-datatables` (https://github.com/fiduswriter/simple-datatables)
+
+The BrickTracker brick logo is part of the Small n' Flat Icons set designed by [Arnaud Chesne](https://iconduck.com/designers/arnaud-chesne).
+
 
 ## Running a local debug instance
 
