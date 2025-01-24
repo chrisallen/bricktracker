@@ -4,7 +4,7 @@
 SUM(IFNULL("missing_join"."total", 0)) AS "total_missing",
 {% endblock %}
 
-{% block "total_quantity" %}
+{% block total_quantity %}
 SUM(IFNULL("minifigures"."quantity", 0)) AS "total_quantity",
 {% endblock %}
 
