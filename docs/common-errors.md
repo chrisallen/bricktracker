@@ -33,14 +33,14 @@ Make sure the value you have set is matching the URL of your application.
 If it is not the case, adjust the value and restart the application.
 
 
-## No such file or directory: '<path>' when adding a set
+## No such file or directory: '&lt;path&gt;' when adding a set
 
 ![](images/common-errors-03.png)
 
 The application doestake care of creating folders for static images and expects them to be writable.
 Make sure that the folder exists, and if it exists that it is writable by the application.
 
-## I'm seeing Unknown (<number>) instead of the set theme
+## I'm seeing Unknown (&lt;number&gt;) instead of the set theme
 
 ![](images/common-errors-04.png)
 
