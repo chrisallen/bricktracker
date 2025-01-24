@@ -31,10 +31,10 @@ CONFIG: Final[list[dict[str, Any]]] = [
     {'n': 'HIDE_ALL_SETS', 'c': bool},
     {'n': 'HIDE_MISSING_PARTS', 'c': bool},
     {'n': 'HIDE_WISHES', 'c': bool},
-    {'n': 'MINIFIGURES_DEFAULT_ORDER', 'd': 'minifigures.name ASC'},
+    {'n': 'MINIFIGURES_DEFAULT_ORDER', 'd': '"minifigures"."name" ASC'},
     {'n': 'MINIFIGURES_FOLDER', 'd': 'minifigs', 's': True},
     {'n': 'NO_THREADED_SOCKET', 'c': bool},
-    {'n': 'PARTS_DEFAULT_ORDER', 'd': 'inventory.name ASC, inventory.color_name ASC, is_spare ASC'},  # noqa: E501
+    {'n': 'PARTS_DEFAULT_ORDER', 'd': '"inventory"."name" ASC, "inventory"."color_name" ASC, "inventory"."is_spare" ASC'},  # noqa: E501
     {'n': 'PARTS_FOLDER', 'd': 'parts', 's': True},
     {'n': 'PORT', 'd': 3333, 'c': int},
     {'n': 'RANDOM', 'e': 'RANDOM', 'c': bool},
