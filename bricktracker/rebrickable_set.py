@@ -165,12 +165,7 @@ class RebrickableSet(BrickRecord):
     # Compute the url for the rebrickable page
     def url_for_rebrickable(self, /) -> str:
         if current_app.config['REBRICKABLE_LINKS']:
-            try:
-                return current_app.config['REBRICKABLE_LINK_SET_PATTERN'].format(  # noqa: E501
-                    number=self.fields.number,
-                )
-            except Exception:
-                pass
+            return self.fields.url
 
         return ''
 
