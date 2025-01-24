@@ -20,14 +20,6 @@ G_ENVIRONMENT: Final[str] = 'database_environment'
 G_DEFER: Final[str] = 'database_defer'
 G_STATS: Final[str] = 'database_stats'
 
-COUNTERS: Final[list[BrickCounter]] = [
-    BrickCounter('Sets', 'sets', icon='hashtag'),
-    BrickCounter('Minifigures', 'minifigures', icon='group-line'),
-    BrickCounter('Parts', 'inventory', icon='shapes-line'),
-    BrickCounter('Missing', 'missing', icon='error-warning-line'),
-    BrickCounter('Wishlist', 'wishlist', icon='gift-line'),
-]
-
 
 # SQLite3 client with our extra features
 class BrickSQL(object):
@@ -123,7 +115,12 @@ class BrickSQL(object):
 
     # Count the database records
     def count_records(self) -> list[BrickCounter]:
-        for counter in COUNTERS:
+        counters: list[BrickCounter] = []
+
+        # Get all tables
+        for table in self.fetchall('schema/tables'):
+            counter = BrickCounter(table['name'])
+
             # Failsafe this one
             try:
                 record = self.fetchone('schema/count', table=counter.table)
@@ -133,7 +130,9 @@ class BrickSQL(object):
             except Exception:
                 pass
 
-        return COUNTERS
+            counters.append(counter)
+
+        return counters
 
     # Defer a call to execute
     def defer(self, query: str, parameters: dict[str, Any], /):
