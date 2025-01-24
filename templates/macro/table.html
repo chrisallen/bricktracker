@@ -28,7 +28,7 @@
 {% macro bricklink(item) %}
   {% set url=item.url_for_bricklink() %}
   {% if url %}
-    <a href="{{ url }}" target="_blank" class="badge rounded-pill text-bg-light border fw-normal">
+    <a data-search="exclude" href="{{ url }}" target="_blank" class="badge rounded-pill text-bg-light border fw-normal">
       <i class="ri-external-link-line"></i> Bricklink
     </a>
   {% endif %}
@@ -45,32 +45,8 @@
 {% macro rebrickable(item) %}
   {% set url=item.url_for_rebrickable() %}
   {% if url %}
-    <a href="{{ url }}" target="_blank" class="badge rounded-pill text-bg-light border fw-normal">
+    <a data-search="exclude" href="{{ url }}" target="_blank" class="badge rounded-pill text-bg-light border fw-normal">
       <i class="ri-external-link-line"></i> Rebrickable
     </a>
   {% endif %}
-{% endmacro %}
-
-{% macro dynamic(id, no_sort=none, number=none) %}
-  <script type="text/javascript">
-    document.addEventListener("DOMContentLoaded", () => {
-      new simpleDatatables.DataTable("#{{ id }}", {
-        columns: [
-          {% if no_sort %}{ select: [{{ no_sort }}], sortable: false, searchable: false },{% endif %}
-          {% if number %}{ select: [{{ number }}], type: "number", searchable: false },{% endif %}
-        ],
-        pagerDelta: 1,
-        perPage: {{ config['DEFAULT_TABLE_PER_PAGE'] }},
-        perPageSelect: [10, 25, 50, 100, 500, 1000],
-        searchable: true,
-        searchQuerySeparator: "",
-        tableRender: () => {
-          baguetteBox.run('[data-lightbox]')
-        },
-        pagerRender: () => {
-          baguetteBox.run('[data-lightbox]')
-        }
-      });
-    });
-  </script>
 {% endmacro %}

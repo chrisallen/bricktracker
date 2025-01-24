@@ -23,8 +23,8 @@
           {%- if item.allowed -%}
             </a>
           {% endif %}
-          <span class="badge rounded-pill text-bg-info fw-normal"><i class="ri-hard-drive-line"></i> {{ item.human_size() }}</span>
-          <span class="badge rounded-pill text-bg-light border fw-normal"><i class="ri-calendar-line"></i> {{ item.human_time() }}</span>
+          <span data-search="exclude" class="badge rounded-pill text-bg-info fw-normal"><i class="ri-hard-drive-line"></i> {{ item.human_size() }}</span>
+          <span data-search="exclude" class="badge rounded-pill text-bg-light border fw-normal"><i class="ri-calendar-line"></i> {{ item.human_time() }}</span>
         </td>
         <td>
           {% if item.set %}<span class="badge text-bg-secondary fw-normal"><i class="ri-hashtag"></i> {{ item.set }}</span>{% endif %}
@@ -47,5 +47,9 @@
   </table>
 </div>
 {% if all %}
-  {{ table.dynamic('instructions', no_sort='2,3')}}
+  <script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", () => {
+      new BrickTable('instructions', {{ config['DEFAULT_TABLE_PER_PAGE'] }}, [2, 3]);
+    });
+  </script>
 {% endif %}

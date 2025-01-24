@@ -41,5 +41,9 @@
   </table>
 </div>
 {% if all %}
-  {{ table.dynamic('wish', no_sort='0,7')}}
+  <script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", () => {
+      new BrickTable('wish', {{ config['DEFAULT_TABLE_PER_PAGE'] }}, [0, 7]);
+    });
+  </script>
 {% endif %}

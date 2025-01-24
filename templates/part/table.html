@@ -52,5 +52,9 @@
   </table>
 </div>
 {% if all %}
-  {{ table.dynamic('parts', no_sort='0', number='3, 4, 5, 6')}}
+  <script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", () => {
+      new BrickTable('parts', {{ config['DEFAULT_TABLE_PER_PAGE'] }}, [0], [3, 4, 5, 6]);
+    });
+  </script>
 {% endif %}

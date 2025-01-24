@@ -22,5 +22,9 @@
   </table>
 </div>
 {% if all %}
-  {{ table.dynamic('minifigures', no_sort='0', number='2, 3, 4')}}
+  <script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", () => {
+      new BrickTable('minifigures', {{ config['DEFAULT_TABLE_PER_PAGE'] }}, [0], [2, 3, 4]);
+    });
+  </script>
 {% endif %}
