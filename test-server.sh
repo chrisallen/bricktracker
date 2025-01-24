@@ -4,7 +4,7 @@
 for VAR in `env | cut -d '=' -f 1`
 do
     case $VAR in BK_*)
-        echo "Unsetting $VAR"
+        echo "Unsetting external $VAR"
         unset "$VAR"
     esac
 done
