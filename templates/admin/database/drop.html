@@ -1,7 +1,7 @@
 {% import 'macro/accordion.html' as accordion %}
 
 {{ accordion.header('Database danger zone', 'database-danger', 'admin', expanded=true, danger=true, class='text-end') }}
-<form action="{{ url_for('admin.do_drop_database') }}" method="post">
+<form action="{{ url_for('admin_database.do_drop') }}" method="post">
   {% if error %}<div class="alert alert-danger text-start" role="alert"><strong>Error:</strong> {{ error }}.</div>{% endif %}
   <div class="alert alert-danger text-center" role="alert">You are about to <strong>drop all the tables from the database</strong>. This action is irreversible.</div>
   <a class="btn btn-danger" href="{{ url_for('admin.admin') }}" role="button"><i class="ri-arrow-left-long-line"></i> Back to the admin</a>

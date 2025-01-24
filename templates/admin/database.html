@@ -9,13 +9,13 @@
     <p>Your database needs to be upgraded.</p>
     <hr>
     <div class="text-end">
-      <a href="{{ url_for('admin.upgrade_database') }}" class="btn btn-warning" role="button"><i class="ri-arrow-up-double-line"></i> Upgrade the database</a>
+      <a href="{{ url_for('admin_database.upgrade') }}" class="btn btn-warning" role="button"><i class="ri-arrow-up-double-line"></i> Upgrade the database</a>
     </div>
   </div>
 {% endif %}
 <p>The database file is: <code>{{ config['DATABASE_PATH'] }}</code> at version <span class="badge rounded-pill text-bg-light border fw-normal"><i class="ri-hashtag"></i>{{ database_version }}</span></p>
 <p>
-  <a href="{{ url_for('admin.download_database') }}" class="btn btn-primary" role="button"><i class="ri-download-line"></i> Download the database file</a>
+  <a href="{{ url_for('admin_database.download') }}" class="btn btn-primary" role="button"><i class="ri-download-line"></i> Download the database file</a>
 </p>
 {% if database_counters %}
   <h5 class="border-bottom">Records</h5>
@@ -37,7 +37,7 @@
 
 {{ accordion.header('Database danger zone', 'database-danger', 'admin', danger=true, class='text-end') }}
 {% if error %}<div class="alert alert-danger text-start" role="alert"><strong>Error:</strong> {{ error }}.</div>{% endif %}
-<a href="{{ url_for('admin.import_database') }}" class="btn btn-warning" role="button"><i class="ri-upload-line"></i> Import a database file</a>
-<a href="{{ url_for('admin.drop_database') }}" class="btn btn-danger" role="button"><i class="ri-close-line"></i> Drop the database</a>
-<a href="{{ url_for('admin.delete_database') }}" class="btn btn-danger" role="button"><i class="ri-delete-bin-2-line"></i> Delete the database file</a>
+<a href="{{ url_for('admin_database.upload') }}" class="btn btn-warning" role="button"><i class="ri-upload-line"></i> Import a database file</a>
+<a href="{{ url_for('admin_database.drop') }}" class="btn btn-danger" role="button"><i class="ri-close-line"></i> Drop the database</a>
+<a href="{{ url_for('admin_database.delete') }}" class="btn btn-danger" role="button"><i class="ri-delete-bin-2-line"></i> Delete the database file</a>
 {{ accordion.footer() }}

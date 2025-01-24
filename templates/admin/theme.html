@@ -20,7 +20,7 @@
 </p>
 <h5 class="border-bottom">Refresh</h5>
 <p>
-  <a href="{{ url_for('admin.refresh_themes') }}" class="btn btn-primary" role="button"><i class="ri-refresh-line"></i> Refresh the themes cache</a>
-  <a href="{{ url_for('admin.update_themes') }}" class="btn btn-primary" role="button"><i class="ri-download-line"></i> Update the themes file</a>
+  <a href="{{ url_for('admin_theme.refresh') }}" class="btn btn-primary" role="button"><i class="ri-refresh-line"></i> Refresh the themes cache</a>
+  <a href="{{ url_for('admin_theme.update') }}" class="btn btn-primary" role="button"><i class="ri-download-line"></i> Update the themes file</a>
 </p>
 {{ accordion.footer() }}
