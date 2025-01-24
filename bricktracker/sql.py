@@ -259,6 +259,7 @@ class BrickSQL(object):
 
         # Instantiate Jinja environment for SQL files
         if environment is None:
+            logger.debug('SQLite3: instantiating the Jinja loader')
             environment = Environment(
                 loader=FileSystemLoader(
                     os.path.join(os.path.dirname(__file__), 'sql/')
@@ -269,7 +270,7 @@ class BrickSQL(object):
             setattr(g, G_ENVIRONMENT, environment)
 
         # Grab the template
-        logger.debug('SQLite: loading {name} (context: {context})'.format(
+        logger.debug('SQLite3: loading {name} (context: {context})'.format(
             name=name,
             context=context,
         ))
