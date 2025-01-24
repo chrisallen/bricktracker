@@ -1,15 +1,15 @@
-{% extends 'set/base/select.sql' %}
+{% extends 'set/base/full.sql' %}
 
 {% block where %}
-WHERE sets.u_id IN (
+WHERE "bricktracker_sets"."id" IN (
     SELECT
-        missing.u_id
-    FROM missing
+        "missing"."u_id"
+    FROM "missing"
 
-    WHERE missing.color_id IS NOT DISTINCT FROM :color_id
-    AND missing.element_id IS NOT DISTINCT FROM :element_id
-    AND missing.part_num IS NOT DISTINCT FROM :part_num
+    WHERE "missing"."color_id" IS NOT DISTINCT FROM :color_id
+    AND "missing"."element_id" IS NOT DISTINCT FROM :element_id
+    AND "missing"."part_num" IS NOT DISTINCT FROM :part_num
 
-    GROUP BY missing.u_id
+    GROUP BY "missing"."u_id"
 )
 {% endblock %}

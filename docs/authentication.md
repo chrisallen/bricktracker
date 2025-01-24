@@ -1,9 +1,9 @@
 # Authentication
 
-> **Note**<br>
+> **Note**
 > The following page is based on version `1.0.0` of BrickTracker.
 
-> **Warning**<br>
+> **Warning**
 > This is a lightweight access control feature and does not provide any strong layer of security to the application.
 
 By default, every feature of the application is available.
@@ -15,7 +15,7 @@ To set up the authentication, you need to set the two following environment vari
 - `BK_AUTHENTICATION_KEY`: a secret for the server to encrypt the session cookie. See [.env.sample](../.env.sample) for how to generate the value
 - `BK_AUTHENTICATION_PASSWORD`: the actual password
 
-> **Warning**<br>
+> **Warning**
 > The password is stored in **plaintext**. Be mindful.
 
 Once the authentication is set up, you should see a ![read-only](images/authentication-01.png) pill on the right side of the menu bar.

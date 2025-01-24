@@ -1,1 +1,1 @@
-{% extends 'set/base/select.sql' %}
+{% extends 'set/base/full.sql' %}

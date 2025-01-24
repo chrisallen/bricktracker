@@ -25,15 +25,17 @@ ViewCallable = Callable[P, ViewReturn]
 def exception_handler(
     file: str,
     /,
+    *,
     json: bool = False,
-    post_redirect: str | None = None
+    post_redirect: str | None = None,
+    **superkwargs,
 ) -> Callable[[ViewCallable], ViewCallable]:
     def outer(function: ViewCallable, /) -> ViewCallable:
         @wraps(function)
         def wrapper(*args, **kwargs) -> ViewReturn:
             try:
                 return function(*args, **kwargs)
-            # Catch SQLite errors as database errors
+            # Handle errors
             except Exception as e:
                 return error(
                     e,
@@ -41,6 +43,7 @@ def exception_handler(
                     json=json,
                     post_redirect=post_redirect,
                     **kwargs,
+                    **superkwargs,
                 )
         return wrapper
     return outer

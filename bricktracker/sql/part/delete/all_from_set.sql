@@ -1,2 +1,0 @@
-DELETE FROM inventory
-WHERE u_id IS NOT DISTINCT FROM :u_id

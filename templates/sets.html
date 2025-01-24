@@ -19,12 +19,13 @@
         <span class="input-group-text">Filter</span>
         <select id="grid-filter" class="form-select form-select-sm" autocomplete="off">
           <option value="" selected>All sets</option>
-          <option value="minifigures-collected">Minifigures are collected</option>
-          <option value="set-collected">Set is collected and boxed</option>
-          <option value="set-checked">Set is checked</option>
           <option value="-has-missing">Set is complete</option>
           <option value="has-missing">Set has missing pieces</option>
           <option value="has-missing-instructions">Set has missing instructions</option>
+          {% for checkbox in brickset_checkboxes %}
+            <option value="{{ checkbox.as_dataset() }}">{{ checkbox.fields.name }}</option>
+            <option value="-{{ checkbox.as_dataset() }}">NOT: {{ checkbox.fields.name }}</option>
+          {% endfor %}
         </select>
         <select id="grid-theme" class="form-select form-select-sm" autocomplete="off">
           <option value="" selected>All themes</option>
@@ -57,7 +58,7 @@
     </div>
   </div>
 
-  <div class="row" id="grid">
+  <div class="row" data-grid="true" id="grid">
   {% for item in collection %}
     <div class="col-md-6 col-xl-3 d-flex align-items-stretch">
       {% with index=loop.index0 %}
@@ -66,18 +67,8 @@
     </div>
   {% endfor %}
   </div>
-  <script type="text/javascript">
-    document.addEventListener("DOMContentLoaded", () => {
-      new BrickGrid("grid");
-    });
-  </script>
 </div>
 {% else %}
   {% include 'set/empty.html' %}
 {% endif %}
-{% endblock %}
-
-{% block scripts %}
-<script src="{{ url_for('static', filename='scripts/grid.js') }}"></script>
-<script src="{{ url_for('static', filename='scripts/set.js') }}"></script>
 {% endblock %}

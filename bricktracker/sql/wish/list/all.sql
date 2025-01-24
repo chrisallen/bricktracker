@@ -1,1 +1,1 @@
-{% extends 'wish/base/select.sql' %}
+{% extends 'wish/base/base.sql' %}

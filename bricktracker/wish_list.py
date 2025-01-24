@@ -1,12 +1,16 @@
+import logging
 from typing import Self
 
 from flask import current_app
 
-from bricktracker.exceptions import NotFoundException
-
+from .exceptions import NotFoundException
+from .rebrickable import Rebrickable
+from .rebrickable_image import RebrickableImage
 from .rebrickable_set import RebrickableSet
 from .record_list import BrickRecordList
 from .wish import BrickWish
+
+logger = logging.getLogger(__name__)
 
 
 # All the wished sets from the database
@@ -18,7 +22,7 @@ class BrickWishList(BrickRecordList[BrickWish]):
     def all(self, /) -> Self:
         # Load the wished sets from the database
         for record in self.select(
-            order=current_app.config['WISHES_DEFAULT_ORDER'].value
+            order=current_app.config['WISHES_DEFAULT_ORDER']
         ):
             brickwish = BrickWish(record=record)
 
@@ -28,10 +32,23 @@ class BrickWishList(BrickRecordList[BrickWish]):
 
     # Add a set to the wishlist
     @staticmethod
-    def add(set_num: str, /) -> None:
-        # Check if it already exists
+    def add(set: str, /) -> None:
         try:
-            set_num = RebrickableSet.parse_number(set_num)
-            BrickWish().select_specific(set_num)
+            set = RebrickableSet.parse_number(set)
+            BrickWish().select_specific(set)
         except NotFoundException:
-            RebrickableSet.wish(set_num)
+            logger.debug('rebrick.lego.get_set("{set}")'.format(
+                set=set,
+            ))
+
+            brickwish = Rebrickable[BrickWish](
+                'get_set',
+                set,
+                BrickWish,
+            ).get()
+
+            # Insert into database
+            brickwish.insert()
+
+            if not current_app.config['USE_REMOTE_IMAGES']:
+                RebrickableImage(brickwish).download()

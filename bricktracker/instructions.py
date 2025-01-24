@@ -10,18 +10,18 @@ from werkzeug.utils import secure_filename
 
 from .exceptions import ErrorException
 if TYPE_CHECKING:
-    from .set import BrickSet
+    from .rebrickable_set import RebrickableSet
 
 logger = logging.getLogger(__name__)
 
 
 class BrickInstructions(object):
     allowed: bool
-    brickset: 'BrickSet | None'
+    rebrickable: 'RebrickableSet | None'
     extension: str
     filename: str
     mtime: datetime
-    number: 'str | None'
+    set: 'str | None'
     name: str
     size: int
 
@@ -39,11 +39,11 @@ class BrickInstructions(object):
         # Store the name and extension, check if extension is allowed
         self.name, self.extension = os.path.splitext(self.filename)
         self.extension = self.extension.lower()
-        self.allowed = self.extension in current_app.config['INSTRUCTIONS_ALLOWED_EXTENSIONS'].value  # noqa: E501
+        self.allowed = self.extension in current_app.config['INSTRUCTIONS_ALLOWED_EXTENSIONS']  # noqa: E501
 
         # Placeholder
-        self.brickset = None
-        self.number = None
+        self.rebrickable = None
+        self.set = None
 
         # Extract the set number
         if self.allowed:
@@ -54,7 +54,14 @@ class BrickInstructions(object):
             splits = normalized.split('-', 2)
 
             if len(splits) >= 2:
-                self.number = '-'.join(splits[:2])
+                try:
+                    # Trying to make sense of each part as integers
+                    int(splits[0])
+                    int(splits[1])
+
+                    self.set = '-'.join(splits[:2])
+                except Exception:
+                    pass
 
     # Delete an instruction file
     def delete(self, /) -> None:
@@ -67,17 +74,17 @@ class BrickInstructions(object):
     # Display the time in a human format
     def human_time(self) -> str:
         return self.mtime.astimezone(g.timezone).strftime(
-            current_app.config['FILE_DATETIME_FORMAT'].value
+            current_app.config['FILE_DATETIME_FORMAT']
         )
 
     # Compute the path of an instruction file
-    def path(self, /, filename=None) -> str:
+    def path(self, /, *, filename=None) -> str:
         if filename is None:
             filename = self.filename
 
         return os.path.join(
             current_app.static_folder,  # type: ignore
-            current_app.config['INSTRUCTIONS_FOLDER'].value,
+            current_app.config['INSTRUCTIONS_FOLDER'],
             filename
         )
 
@@ -99,7 +106,7 @@ class BrickInstructions(object):
 
     # Upload a new instructions file
     def upload(self, file: FileStorage, /) -> None:
-        target = self.path(secure_filename(self.filename))
+        target = self.path(filename=secure_filename(self.filename))
 
         if os.path.isfile(target):
             raise ErrorException('Cannot upload {target} as it already exists'.format(  # noqa: E501
@@ -118,7 +125,7 @@ class BrickInstructions(object):
         if not self.allowed:
             return ''
 
-        folder: str = current_app.config['INSTRUCTIONS_FOLDER'].value
+        folder: str = current_app.config['INSTRUCTIONS_FOLDER']
 
         # Compute the path
         path = os.path.join(folder, self.filename)

@@ -1,6 +1,8 @@
 # Application
 .env
 *.db
+*.db-shm
+*.db-wal
 
 # Python specifics
 __pycache__/
@@ -9,6 +11,7 @@ __pycache__/
 # Static folders
 static/instructions/
 static/minifigs/
+static/minifigures/
 static/parts/
 static/sets/
 

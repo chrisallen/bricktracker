@@ -6,7 +6,7 @@ from flask_socketio import SocketIO
 
 from .configuration_list import BrickConfigurationList
 from .login import LoginManager
-from .rebrickable_set import RebrickableSet
+from .set import BrickSet
 from .sql import close as sql_close
 
 logger = logging.getLogger(__name__)
@@ -56,19 +56,19 @@ class BrickSocket(object):
 
         # Compute the namespace
         self.namespace = '/{namespace}'.format(
-            namespace=app.config['SOCKET_NAMESPACE'].value
+            namespace=app.config['SOCKET_NAMESPACE']
         )
 
         # Inject CORS if a domain is defined
-        if app.config['DOMAIN_NAME'].value != '':
-            kwargs['cors_allowed_origins'] = app.config['DOMAIN_NAME'].value
+        if app.config['DOMAIN_NAME'] != '':
+            kwargs['cors_allowed_origins'] = app.config['DOMAIN_NAME']
 
         # Instantiate the socket
         self.socket = SocketIO(
             self.app,
             *args,
             **kwargs,
-            path=app.config['SOCKET_PATH'].value,
+            path=app.config['SOCKET_PATH'],
             async_mode='eventlet',
         )
 
@@ -98,7 +98,7 @@ class BrickSocket(object):
                 self.fail(message=str(e))
                 return
 
-            brickset = RebrickableSet(self)
+            brickset = BrickSet(socket=self)
 
             # Start it in a thread if requested
             if self.threaded:
@@ -124,7 +124,7 @@ class BrickSocket(object):
                 self.fail(message=str(e))
                 return
 
-            brickset = RebrickableSet(self)
+            brickset = BrickSet(socket=self)
 
             # Start it in a thread if requested
             if self.threaded:
@@ -140,6 +140,7 @@ class BrickSocket(object):
     def auto_progress(
         self,
         /,
+        *,
         message: str | None = None,
         increment_total=False,
     ) -> None:
@@ -203,7 +204,7 @@ class BrickSocket(object):
         sql_close()
 
     # Update the progress
-    def progress(self, /, message: str | None = None) -> None:
+    def progress(self, /, *, message: str | None = None) -> None:
         # Save the las message
         if message is not None:
             self.progress_message = message
@@ -218,14 +219,14 @@ class BrickSocket(object):
         self.emit('PROGRESS', data)
 
     # Update the progress total only
-    def update_total(self, total: int, /, add: bool = False) -> None:
+    def update_total(self, total: int, /, *, add: bool = False) -> None:
         if add:
             self.progress_total += total
         else:
             self.progress_total = total
 
     # Update the total
-    def total_progress(self, total: int, /, add: bool = False) -> None:
+    def total_progress(self, total: int, /, *, add: bool = False) -> None:
         self.update_total(total, add=add)
 
         self.progress()

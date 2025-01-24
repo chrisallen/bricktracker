@@ -1,7 +1,7 @@
 {% import 'macro/table.html' as table %}
 
 <div class="table-responsive-sm">
-  <table class="table table-striped align-middle" id="minifigures">
+  <table data-table="{% if all %}true{% endif %}" class="table table-striped align-middle" id="minifigures">
     {{ table.header(quantity=true, missing_parts=true, sets=true) }}
     <tbody>
       {% for item in table_collection %}
@@ -21,6 +21,3 @@
     </tbody>
   </table>
 </div>
-{% if all %}
-  {{ table.dynamic('minifigures', no_sort='0', number='2, 3, 4')}}
-{% endif %}

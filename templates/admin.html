@@ -12,20 +12,25 @@
             <h5 class="mb-0"><i class="ri-settings-4-line"></i> Administration</h5>
           </div>
           <div class="accordion accordion-flush" id="admin">
-            {% if delete_database %}
+            {% if delete_checkbox %}
+            {% include 'admin/checkbox/delete.html' %}
+            {% elif delete_database %}
             {% include 'admin/database/delete.html' %}
             {% elif drop_database %}
             {% include 'admin/database/drop.html' %}
             {% elif import_database %}
             {% include 'admin/database/import.html' %}
+            {% elif upgrade_database %}
+            {% include 'admin/database/upgrade.html' %}
             {% else %}
               {% include 'admin/logout.html' %}
               {% include 'admin/instructions.html' %}
-              {% if not config['USE_REMOTE_IMAGES'].value %}
+              {% if not config['USE_REMOTE_IMAGES'] %}
                 {% include 'admin/image.html' %}
               {% endif %}
               {% include 'admin/theme.html' %}
               {% include 'admin/retired.html' %}
+              {% include 'admin/checkbox.html' %}
               {% include 'admin/database.html' %}
               {% include 'admin/configuration.html' %}
             {% endif %}

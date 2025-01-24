@@ -30,7 +30,7 @@ class BrickSocket {
 
         // Card elements
         this.html_card = document.getElementById(`${id}-card`);
-        this.html_card_number = document.getElementById(`${id}-card-number`);
+        this.html_card_set = document.getElementById(`${id}-card-set`);
         this.html_card_name = document.getElementById(`${id}-card-name`);
         this.html_card_image_container = document.getElementById(`${id}-card-image-container`);
         this.html_card_image = document.getElementById(`${id}-card-image`);
@@ -190,9 +190,9 @@ class BrickSocket {
         }
 
         if (this.bulk && this.html_input) {
-            if (this.set_list_last_number !== undefined) {
-                this.set_list.unshift(this.set_list_last_number);
-                this.set_list_last_number = undefined;
+            if (this.set_list_last_set !== undefined) {
+                this.set_list.unshift(this.set_list_last_set);
+                this.set_list_last_set = undefined;
             }
 
             this.html_input.value = this.set_list.join(', ');
@@ -200,7 +200,7 @@ class BrickSocket {
     }
 
     // Import a set
-    import_set(no_confirm, number, from_complete=false) {
+    import_set(no_confirm, set, from_complete=false) {
         if (this.html_input) {
             if (!this.bulk || !from_complete) {
                 // Reset the progress
@@ -213,10 +213,10 @@ class BrickSocket {
 
             // Grab from the list if bulk
             if (this.bulk) {
-                number = this.set_list.shift()
+                set = this.set_list.shift()
 
                 // Abort if nothing left to process
-                if (number === undefined) {
+                if (set === undefined) {
                     // Clear the input
                     this.html_input.value = "";
 
@@ -227,14 +227,14 @@ class BrickSocket {
                     return;
                 }
 
-                // Save the pulled number
-                this.set_list_last_number = number;
+                // Save the pulled set
+                this.set_list_last_set = set;
             }
 
             this.spinner(true);
 
             this.socket.emit(this.messages.IMPORT_SET, {
-                set_num: (number !== undefined) ? number : this.html_input.value,
+                set: (set !== undefined) ? set : this.html_input.value,
             });
         } else {
             this.fail("Could not find the input field for the set number");
@@ -249,7 +249,7 @@ class BrickSocket {
             this.spinner(true);
 
             this.socket.emit(this.messages.LOAD_SET, {
-                set_num: this.html_input.value
+                set: this.html_input.value
             });
         } else {
             this.fail("Could not find the input field for the set number");
@@ -319,8 +319,8 @@ class BrickSocket {
         if (this.html_card) {
             this.html_card.classList.remove("d-none");
 
-            if (this.html_card_number) {
-                this.html_card_number.textContent = data["set_num"];
+            if (this.html_card_set) {
+                this.html_card_set.textContent = data["set"];
             }
 
             if (this.html_card_name) {
@@ -328,12 +328,12 @@ class BrickSocket {
             }
 
             if (this.html_card_image_container) {
-                this.html_card_image_container.setAttribute("style", `background-image: url(${data["set_img_url"]})`);
+                this.html_card_image_container.setAttribute("style", `background-image: url(${data["image"]})`);
             }
 
             if (this.html_card_image) {
-                this.html_card_image.setAttribute("src", data["set_img_url"]);
-                this.html_card_image.setAttribute("alt", data["set_num"]);
+                this.html_card_image.setAttribute("src", data["image"]);
+                this.html_card_image.setAttribute("alt", data["set"]);
             }
 
             if (this.html_card_footer) {
@@ -347,12 +347,12 @@ class BrickSocket {
                             this.html_card_confirm.removeEventListener("click", this.confirm_listener);
                         }
 
-                        this.confirm_listener = ((bricksocket, number) => (e) => {
+                        this.confirm_listener = ((bricksocket, set) => (e) => {
                             if (!bricksocket.disabled) {
                                 bricksocket.toggle(false);
-                                bricksocket.import_set(false, number);
+                                bricksocket.import_set(false, set);
                             }
-                        })(this, data["set_num"]);
+                        })(this, data["set"]);
 
                         this.html_card_confirm.addEventListener("click", this.confirm_listener);
                     }

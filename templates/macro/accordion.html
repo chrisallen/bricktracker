@@ -16,7 +16,7 @@
         {% endif %}
       </button>
     </h2>
-    <div id="{{ id }}" class="accordion-collapse collapse {% if expanded %}show{% endif %}" {% if not config['INDEPENDENT_ACCORDIONS'].value %}data-bs-parent="#{{ parent }}"{% endif %}>
+    <div id="{{ id }}" class="accordion-collapse collapse {% if expanded %}show{% endif %}" {% if not config['INDEPENDENT_ACCORDIONS'] %}data-bs-parent="#{{ parent }}"{% endif %}>
       <div class="accordion-body {% if class %}{{ class }}{% endif %}">
 {% endmacro %}
 

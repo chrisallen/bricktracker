@@ -2,11 +2,11 @@
 {% import 'macro/card.html' as card %}
 
 <div class="card mb-3">
-  {{ card.header(item, item.fields.name, solo=true, number=item.fields.set_num) }}
-  {{ card.image(item, solo=true, last=false, caption=item.fields.name, alt=item.fields.set_num) }}
+  {{ card.header(item, item.fields.name, solo=true, number=item.fields.set) }}
+  {{ card.image(item, solo=true, last=false, caption=item.fields.name, alt=item.fields.set) }}
   <div class="card-body p-1">
-    {{ badge.theme(item.theme_name) }}
+    {{ badge.theme(item.theme.name) }}
     {{ badge.year(item.fields.year) }}
-    {{ badge.parts(item.fields.num_parts) }}
+    {{ badge.parts(item.fields.number_of_parts) }}
   </div>
 </div>

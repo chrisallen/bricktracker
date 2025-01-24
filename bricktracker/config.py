@@ -31,10 +31,10 @@ CONFIG: Final[list[dict[str, Any]]] = [
     {'n': 'HIDE_ALL_SETS', 'c': bool},
     {'n': 'HIDE_MISSING_PARTS', 'c': bool},
     {'n': 'HIDE_WISHES', 'c': bool},
-    {'n': 'MINIFIGURES_DEFAULT_ORDER', 'd': 'minifigures.name ASC'},
+    {'n': 'MINIFIGURES_DEFAULT_ORDER', 'd': '"minifigures"."name" ASC'},
     {'n': 'MINIFIGURES_FOLDER', 'd': 'minifigs', 's': True},
     {'n': 'NO_THREADED_SOCKET', 'c': bool},
-    {'n': 'PARTS_DEFAULT_ORDER', 'd': 'inventory.name ASC, inventory.color_name ASC, is_spare ASC'},  # noqa: E501
+    {'n': 'PARTS_DEFAULT_ORDER', 'd': '"inventory"."name" ASC, "inventory"."color_name" ASC, "inventory"."is_spare" ASC'},  # noqa: E501
     {'n': 'PARTS_FOLDER', 'd': 'parts', 's': True},
     {'n': 'PORT', 'd': 3333, 'c': int},
     {'n': 'RANDOM', 'e': 'RANDOM', 'c': bool},
@@ -43,12 +43,11 @@ CONFIG: Final[list[dict[str, Any]]] = [
     {'n': 'REBRICKABLE_IMAGE_NIL_MINIFIGURE', 'd': 'https://rebrickable.com/static/img/nil_mf.jpg'},  # noqa: E501
     {'n': 'REBRICKABLE_LINK_MINIFIGURE_PATTERN', 'd': 'https://rebrickable.com/minifigs/{number}'},  # noqa: E501
     {'n': 'REBRICKABLE_LINK_PART_PATTERN', 'd': 'https://rebrickable.com/parts/{number}/_/{color}'},  # noqa: E501
-    {'n': 'REBRICKABLE_LINK_SET_PATTERN', 'd': 'https://rebrickable.com/sets/{number}'},  # noqa: E501
     {'n': 'REBRICKABLE_LINKS', 'e': 'LINKS', 'c': bool},
     {'n': 'REBRICKABLE_PAGE_SIZE', 'd': 100, 'c': int},
     {'n': 'RETIRED_SETS_FILE_URL', 'd': 'https://docs.google.com/spreadsheets/d/1rlYfEXtNKxUOZt2Mfv0H17DvK7bj6Pe0CuYwq6ay8WA/gviz/tq?tqx=out:csv&sheet=Sorted%20by%20Retirement%20Date'},  # noqa: E501
     {'n': 'RETIRED_SETS_PATH', 'd': './retired_sets.csv'},
-    {'n': 'SETS_DEFAULT_ORDER', 'd': 'set_number DESC, set_version ASC'},
+    {'n': 'SETS_DEFAULT_ORDER', 'd': '"rebrickable_sets"."number" DESC, "rebrickable_sets"."version" ASC'},  # noqa: E501
     {'n': 'SETS_FOLDER', 'd': 'sets', 's': True},
     {'n': 'SKIP_SPARE_PARTS', 'c': bool},
     {'n': 'SOCKET_NAMESPACE', 'd': 'bricksocket'},
@@ -57,5 +56,5 @@ CONFIG: Final[list[dict[str, Any]]] = [
     {'n': 'THEMES_PATH', 'd': './themes.csv'},
     {'n': 'TIMEZONE', 'd': 'Etc/UTC'},
     {'n': 'USE_REMOTE_IMAGES', 'c': bool},
-    {'n': 'WISHES_DEFAULT_ORDER', 'd': 'wishlist.rowid DESC'},
+    {'n': 'WISHES_DEFAULT_ORDER', 'd': '"bricktracker_wishes"."rowid" DESC'},
 ]

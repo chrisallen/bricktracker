@@ -23,6 +23,7 @@ class BrickMinifigure(BrickRecord):
     def __init__(
         self,
         /,
+        *,
         brickset: 'BrickSet | None' = None,
         record: Row | dict[str, Any] | None = None,
     ):
@@ -61,17 +62,12 @@ class BrickMinifigure(BrickRecord):
         # Save the parameters to the fields
         self.fields.fig_num = fig_num
 
-        record = self.select(override_query=self.generic_query)
-
-        if record is None:
+        if not self.select(override_query=self.generic_query):
             raise NotFoundException(
                 'Minifigure with number {number} was not found in the database'.format(  # noqa: E501
                     number=self.fields.fig_num,
                 ),
             )
-
-        # Ingest the record
-        self.ingest(record)
 
         return self
 
@@ -81,18 +77,13 @@ class BrickMinifigure(BrickRecord):
         self.brickset = brickset
         self.fields.fig_num = fig_num
 
-        record = self.select()
-
-        if record is None:
+        if not self.select():
             raise NotFoundException(
                 'Minifigure with number {number} from set {set} was not found in the database'.format(  # noqa: E501
                     number=self.fields.fig_num,
-                    set=self.brickset.fields.set_num,
+                    set=self.brickset.fields.set,
                 ),
             )
-
-        # Ingest the record
-        self.ingest(record)
 
         return self
 
@@ -103,10 +94,10 @@ class BrickMinifigure(BrickRecord):
         # Supplement from the brickset
         if self.brickset is not None:
             if 'u_id' not in parameters:
-                parameters['u_id'] = self.brickset.fields.u_id
+                parameters['u_id'] = self.brickset.fields.id
 
             if 'set_num' not in parameters:
-                parameters['set_num'] = self.brickset.fields.set_num
+                parameters['set_num'] = self.brickset.fields.set
 
         return parameters
 
@@ -119,7 +110,7 @@ class BrickMinifigure(BrickRecord):
 
     # Compute the url for minifigure part image
     def url_for_image(self, /) -> str:
-        if not current_app.config['USE_REMOTE_IMAGES'].value:
+        if not current_app.config['USE_REMOTE_IMAGES']:
             if self.fields.set_img_url is None:
                 file = RebrickableImage.nil_minifigure_name()
             else:
@@ -128,15 +119,15 @@ class BrickMinifigure(BrickRecord):
             return RebrickableImage.static_url(file, 'MINIFIGURES_FOLDER')
         else:
             if self.fields.set_img_url is None:
-                return current_app.config['REBRICKABLE_IMAGE_NIL_MINIFIGURE'].value  # noqa: E501
+                return current_app.config['REBRICKABLE_IMAGE_NIL_MINIFIGURE']
             else:
                 return self.fields.set_img_url
 
     # Compute the url for the rebrickable page
     def url_for_rebrickable(self, /) -> str:
-        if current_app.config['REBRICKABLE_LINKS'].value:
+        if current_app.config['REBRICKABLE_LINKS']:
             try:
-                return current_app.config['REBRICKABLE_LINK_MINIFIGURE_PATTERN'].value.format(  # noqa: E501
+                return current_app.config['REBRICKABLE_LINK_MINIFIGURE_PATTERN'].format(  # noqa: E501
                     number=self.fields.fig_num.lower(),
                 )
             except Exception:
@@ -149,6 +140,7 @@ class BrickMinifigure(BrickRecord):
     def from_rebrickable(
         data: dict[str, Any],
         /,
+        *,
         brickset: 'BrickSet | None' = None,
         **_,
     ) -> dict[str, Any]:
@@ -160,7 +152,7 @@ class BrickMinifigure(BrickRecord):
         }
 
         if brickset is not None:
-            record['set_num'] = brickset.fields.set_num
-            record['u_id'] = brickset.fields.u_id
+            record['set_num'] = brickset.fields.set
+            record['u_id'] = brickset.fields.id
 
         return record

@@ -30,18 +30,18 @@ class RebrickableMinifigures(object):
     def download(self, /) -> None:
         self.socket.auto_progress(
             message='Set {number}: loading minifigures from Rebrickable'.format(  # noqa: E501
-                number=self.brickset.fields.set_num,
+                number=self.brickset.fields.set,
             ),
             increment_total=True,
         )
 
-        logger.debug('rebrick.lego.get_set_minifigs("{set_num}")'.format(
-            set_num=self.brickset.fields.set_num,
+        logger.debug('rebrick.lego.get_set_minifigs("{set}")'.format(
+            set=self.brickset.fields.set,
         ))
 
         minifigures = Rebrickable[BrickMinifigure](
             'get_set_minifigs',
-            self.brickset.fields.set_num,
+            self.brickset.fields.set,
             BrickMinifigure,
             socket=self.socket,
             brickset=self.brickset,
@@ -53,7 +53,7 @@ class RebrickableMinifigures(object):
             # Insert into the database
             self.socket.auto_progress(
                 message='Set {number}: inserting minifigure {current}/{total} into database'.format(  # noqa: E501
-                    number=self.brickset.fields.set_num,
+                    number=self.brickset.fields.set,
                     current=index+1,
                     total=total,
                 )
@@ -65,13 +65,13 @@ class RebrickableMinifigures(object):
             # Grab the image
             self.socket.progress(
                 message='Set {number}: downloading minifigure {current}/{total} image'.format(  # noqa: E501
-                    number=self.brickset.fields.set_num,
+                    number=self.brickset.fields.set,
                     current=index+1,
                     total=total,
                 )
             )
 
-            if not current_app.config['USE_REMOTE_IMAGES'].value:
+            if not current_app.config['USE_REMOTE_IMAGES']:
                 RebrickableImage(
                     self.brickset,
                     minifigure=minifigure

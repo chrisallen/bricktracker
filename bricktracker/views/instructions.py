@@ -114,7 +114,7 @@ def do_upload() -> Response:
     file = upload_helper(
         'file',
         'instructions.upload',
-        extensions=current_app.config['INSTRUCTIONS_ALLOWED_EXTENSIONS'].value,
+        extensions=current_app.config['INSTRUCTIONS_ALLOWED_EXTENSIONS'],
     )
 
     if isinstance(file, Response):

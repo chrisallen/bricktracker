@@ -27,6 +27,7 @@ class BrickPart(BrickRecord):
     def __init__(
         self,
         /,
+        *,
         brickset: 'BrickSet | None' = None,
         minifigure: 'BrickMinifigure | None' = None,
         record: Row | dict[str, Any] | None = None,
@@ -83,6 +84,7 @@ class BrickPart(BrickRecord):
         part_num: str,
         color_id: int,
         /,
+        *,
         element_id: int | None = None
     ) -> Self:
         # Save the parameters to the fields
@@ -90,9 +92,7 @@ class BrickPart(BrickRecord):
         self.fields.color_id = color_id
         self.fields.element_id = element_id
 
-        record = self.select(override_query=self.generic_query)
-
-        if record is None:
+        if not self.select(override_query=self.generic_query):
             raise NotFoundException(
                 'Part with number {number}, color ID {color} and element ID {element} was not found in the database'.format(  # noqa: E501
                     number=self.fields.part_num,
@@ -100,9 +100,6 @@ class BrickPart(BrickRecord):
                     element=self.fields.element_id,
                 ),
             )
-
-        # Ingest the record
-        self.ingest(record)
 
         return self
 
@@ -112,6 +109,7 @@ class BrickPart(BrickRecord):
         brickset: 'BrickSet',
         id: str,
         /,
+        *,
         minifigure: 'BrickMinifigure | None' = None,
     ) -> Self:
         # Save the parameters to the fields
@@ -119,18 +117,13 @@ class BrickPart(BrickRecord):
         self.minifigure = minifigure
         self.fields.id = id
 
-        record = self.select()
-
-        if record is None:
+        if not self.select():
             raise NotFoundException(
                 'Part with ID {id} from set {set} was not found in the database'.format(  # noqa: E501
                     id=self.fields.id,
-                    set=self.brickset.fields.set_num,
+                    set=self.brickset.fields.set,
                 ),
             )
-
-        # Ingest the record
-        self.ingest(record)
 
         return self
 
@@ -140,14 +133,14 @@ class BrickPart(BrickRecord):
 
         # Supplement from the brickset
         if 'u_id' not in parameters and self.brickset is not None:
-            parameters['u_id'] = self.brickset.fields.u_id
+            parameters['u_id'] = self.brickset.fields.id
 
         if 'set_num' not in parameters:
             if self.minifigure is not None:
                 parameters['set_num'] = self.minifigure.fields.fig_num
 
             elif self.brickset is not None:
-                parameters['set_num'] = self.brickset.fields.set_num
+                parameters['set_num'] = self.brickset.fields.set
 
         return parameters
 
@@ -190,9 +183,9 @@ class BrickPart(BrickRecord):
 
     # Compute the url for the bricklink page
     def url_for_bricklink(self, /) -> str:
-        if current_app.config['BRICKLINK_LINKS'].value:
+        if current_app.config['BRICKLINK_LINKS']:
             try:
-                return current_app.config['BRICKLINK_LINK_PART_PATTERN'].value.format(  # noqa: E501
+                return current_app.config['BRICKLINK_LINK_PART_PATTERN'].format(  # noqa: E501
                     number=self.fields.part_num,
                 )
             except Exception:
@@ -202,7 +195,7 @@ class BrickPart(BrickRecord):
 
     # Compute the url for the part image
     def url_for_image(self, /) -> str:
-        if not current_app.config['USE_REMOTE_IMAGES'].value:
+        if not current_app.config['USE_REMOTE_IMAGES']:
             if self.fields.part_img_url is None:
                 file = RebrickableImage.nil_name()
             else:
@@ -211,7 +204,7 @@ class BrickPart(BrickRecord):
             return RebrickableImage.static_url(file, 'PARTS_FOLDER')
         else:
             if self.fields.part_img_url is None:
-                return current_app.config['REBRICKABLE_IMAGE_NIL'].value
+                return current_app.config['REBRICKABLE_IMAGE_NIL']
             else:
                 return self.fields.part_img_url
 
@@ -234,9 +227,9 @@ class BrickPart(BrickRecord):
 
     # Compute the url for the rebrickable page
     def url_for_rebrickable(self, /) -> str:
-        if current_app.config['REBRICKABLE_LINKS'].value:
+        if current_app.config['REBRICKABLE_LINKS']:
             try:
-                return current_app.config['REBRICKABLE_LINK_PART_PATTERN'].value.format(  # noqa: E501
+                return current_app.config['REBRICKABLE_LINK_PART_PATTERN'].format(  # noqa: E501
                     number=self.fields.part_num,
                     color=self.fields.color_id,
                 )
@@ -250,6 +243,7 @@ class BrickPart(BrickRecord):
     def from_rebrickable(
         data: dict[str, Any],
         /,
+        *,
         brickset: 'BrickSet | None' = None,
         minifigure: 'BrickMinifigure | None' = None,
         **_,
@@ -269,7 +263,7 @@ class BrickPart(BrickRecord):
         }
 
         if brickset is not None:
-            record['u_id'] = brickset.fields.u_id
+            record['u_id'] = brickset.fields.id
 
         if minifigure is not None:
             record['set_num'] = data['fig_num']
