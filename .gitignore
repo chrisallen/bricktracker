@@ -11,6 +11,7 @@ __pycache__/
 # Static folders
 static/instructions/
 static/minifigs/
+static/minifigures/
 static/parts/
 static/sets/
 
