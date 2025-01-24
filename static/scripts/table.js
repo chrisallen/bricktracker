@@ -1,6 +1,19 @@
 class BrickTable {
-    constructor(id, per_page, no_sort = [], number = []) {
-        const columns = [];
+    constructor(table, per_page) {
+        const columns = []
+        const no_sort = [];
+        const number = [];
+
+        // Read the table header for parameters
+        table.querySelectorAll('th').forEach((th, index) => {
+            if (th.dataset.tableNoSort) {
+                no_sort.push(index);
+            }
+
+            if (th.dataset.tableNumber) {
+                number.push(index);
+            }
+        });
 
         if (no_sort.length) {
             columns.push({ select: no_sort, sortable: false, searchable: false });
@@ -10,7 +23,7 @@ class BrickTable {
             columns.push({ select: number, type: "number", searchable: false });
         }
 
-        this.table = new simpleDatatables.DataTable(`#${id}`, {
+        this.table = new simpleDatatables.DataTable(`#${table.id}`, {
             columns: columns,
             pagerDelta: 1,
             perPage: per_page,
@@ -67,3 +80,8 @@ class BrickTable {
         return search;
     }
 }
+
+// Helper to setup the tables
+const setup_tables = (per_page) => document.querySelectorAll('table[data-table="true"]').forEach(
+    el => new BrickTable(el, per_page)
+);

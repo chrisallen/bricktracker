@@ -115,13 +115,11 @@ class BrickChanger {
 }
 
 // Helper to setup the changer
-const setup_changers = () => {
-    document.querySelectorAll("*[data-changer-id]").forEach(el => {
-        new BrickChanger(
-            el.dataset.changerPrefix,
-            el.dataset.changerId,
-            el.dataset.changerUrl,
-            el.dataset.changerParent
-        );
-      });
-}
+const setup_changers = () => document.querySelectorAll("*[data-changer-id]").forEach(
+    el => new BrickChanger(
+        el.dataset.changerPrefix,
+        el.dataset.changerId,
+        el.dataset.changerUrl,
+        el.dataset.changerParent
+    )
+);

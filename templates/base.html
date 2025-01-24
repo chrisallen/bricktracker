@@ -78,11 +78,25 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/baguettebox.js/1.12.0/baguetteBox.min.js" integrity="sha512-HzIuiABxntLbBS8ClRa7drXZI3cqvkAZ5DD0JCAkmRwUtykSGqzA9uItHivDhRUYnW3MMyY5xqk7qVUHOEMbMA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.1/socket.io.min.js" integrity="sha512-8ExARjWWkIllMlNzVg7JKq9RKWPlJABQUNq6YvAjE/HobctjH/NA+bSiDMDvouBVjp4Wwnf1VP1OEv7Zgjtuxw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdn.jsdelivr.net/npm/simple-datatables@9.2.1/dist/umd/simple-datatables.min.js"></script>
+    <!-- BrickTracker scripts -->
+    <script src="{{ url_for('static', filename='scripts/changer.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/grid.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/set.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/socket.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/table.js') }}"></script>
+    <script type="text/javascript">
+      document.addEventListener("DOMContentLoaded", () => {
+        setup_grids();
+        setup_changers();
+        setup_tables({{ config['DEFAULT_TABLE_PER_PAGE'] }});
+        baguetteBox.run('[data-lightbox]');
+      });
+    </script>
+
     <!-- Bootstrap tooltips -->
     <script type="text/javascript">
       const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
       const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
     </script>
-    {% block scripts %}{% endblock %}
   </body>
 </html>

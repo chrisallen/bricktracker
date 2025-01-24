@@ -58,7 +58,7 @@
     </div>
   </div>
 
-  <div class="row" id="grid">
+  <div class="row" data-grid="true" id="grid">
   {% for item in collection %}
     <div class="col-md-6 col-xl-3 d-flex align-items-stretch">
       {% with index=loop.index0 %}
@@ -67,19 +67,8 @@
     </div>
   {% endfor %}
   </div>
-  <script type="text/javascript">
-    document.addEventListener("DOMContentLoaded", () => {
-      new BrickGrid("grid");
-      setup_changers();
-    });
-  </script>
 </div>
 {% else %}
   {% include 'set/empty.html' %}
 {% endif %}
-{% endblock %}
-
-{% block scripts %}
-<script src="{{ url_for('static', filename='scripts/grid.js') }}"></script>
-<script src="{{ url_for('static', filename='scripts/changer.js') }}"></script>
 {% endblock %}

@@ -1,14 +1,14 @@
 {% import 'macro/table.html' as table %}
 
 <div class="table-responsive-sm">
-  <table class="table table-striped align-middle" id="instructions">
+  <table data-table="{% if all %}true{% endif %}" class="table table-striped align-middle" id="instructions">
     <thead>
       <tr>
         <th scope="col"><i class="ri-file-line fw-normal"></i> Filename</th>
         <th scope="col"><i class="ri-hashtag fw-normal"></i> Set</th>
-        <th class="no-sort" scope="col"><i class="ri-image-line fw-normal"></i> Image</th>
+        <th data-table-no-sort="true" class="no-sort" scope="col"><i class="ri-image-line fw-normal"></i> Image</th>
         {% if g.login.is_authenticated() %}
-          <th class="no-sort" scope="col"><i class="ri-settings-4-line fw-normal"></i> Actions</th>
+          <th data-table-no-sort="true" class="no-sort" scope="col"><i class="ri-settings-4-line fw-normal"></i> Actions</th>
         {% endif %}
         </tr>
     </thead>
@@ -46,10 +46,3 @@
     </tbody>
   </table>
 </div>
-{% if all %}
-  <script type="text/javascript">
-    document.addEventListener("DOMContentLoaded", () => {
-      new BrickTable('instructions', {{ config['DEFAULT_TABLE_PER_PAGE'] }}, [2, 3]);
-    });
-  </script>
-{% endif %}

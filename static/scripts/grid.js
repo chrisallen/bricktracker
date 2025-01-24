@@ -50,15 +50,15 @@ class BrickGridSortButton {
 
 // Grid class
 class BrickGrid {
-    constructor(id) {
-        this.id = id;
+    constructor(grid) {
+        this.id = grid.id;
 
         // Grid elements (built based on the initial id)
-        this.html_grid = document.getElementById(id);
-        this.html_sort = document.getElementById(`${id}-sort`);
-        this.html_search = document.getElementById(`${id}-search`);
-        this.html_filter = document.getElementById(`${id}-filter`);
-        this.html_theme = document.getElementById(`${id}-theme`);
+        this.html_grid = document.getElementById(this.id);
+        this.html_sort = document.getElementById(`${this.id}-sort`);
+        this.html_search = document.getElementById(`${this.id}-search`);
+        this.html_filter = document.getElementById(`${this.id}-filter`);
+        this.html_theme = document.getElementById(`${this.id}-theme`);
 
         // Sort buttons
         this.html_sort_buttons = {};
@@ -251,3 +251,8 @@ class BrickGrid {
         }
     }
 }
+
+// Helper to setup the grids
+const setup_grids = () => document.querySelectorAll('*[data-grid="true"]').forEach(
+    el => new BrickGrid(el)
+);

@@ -1,25 +1,25 @@
 {% macro header(color=false, quantity=false, missing=false, missing_parts=false, sets=false, minifigures=false) %}
   <thead>
     <tr>
-      <th class="no-sort" scope="col"><i class="ri-image-line fw-normal"></i> Image</th>
+      <th data-table-no-sort="true" class="no-sort" scope="col"><i class="ri-image-line fw-normal"></i> Image</th>
       <th scope="col"><i class="ri-pencil-line fw-normal"></i> Name</th>
       {% if color %}
         <th scope="col"><i class="ri-palette-line fw-normal"></i> Color</th>
       {% endif %}
       {% if quantity %}
-        <th scope="col"><i class="ri-functions fw-normal"></i> Quantity</th>
+        <th data-table-number="true" scope="col"><i class="ri-functions fw-normal"></i> Quantity</th>
       {% endif %}
       {% if missing %}
-        <th scope="col"><i class="ri-error-warning-line fw-normal"></i> Missing</th>
+        <th data-table-number="true" scope="col"><i class="ri-error-warning-line fw-normal"></i> Missing</th>
       {% endif %}
       {% if missing_parts %}
-        <th scope="col"><i class="ri-error-warning-line fw-normal"></i> Missing parts</th>
+        <th data-table-number="true" scope="col"><i class="ri-error-warning-line fw-normal"></i> Missing parts</th>
       {% endif %}
       {% if sets %}
-        <th scope="col"><i class="ri-hashtag fw-normal"></i> Sets</th>
+        <th data-table-number="true" scope="col"><i class="ri-hashtag fw-normal"></i> Sets</th>
       {% endif %}
       {% if minifigures %}
-        <th scope="col"><i class="ri-group-line fw-normal"></i> Minifigures</th>
+        <th data-table-number="true" scope="col"><i class="ri-group-line fw-normal"></i> Minifigures</th>
       {% endif %}
     </tr>
   </thead>

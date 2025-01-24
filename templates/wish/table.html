@@ -2,10 +2,10 @@
 {% import 'macro/badge.html' as badge %}
 
 <div class="table-responsive-sm">
-  <table class="table table-striped align-middle" id="wish">
+  <table data-table="{% if all %}true{% endif %}" class="table table-striped align-middle" id="wish">
     <thead>
       <tr>
-        <th class="no-sort" scope="col"><i class="ri-image-line fw-normal"></i> Image</th>
+        <th data-table-no-sort="true" class="no-sort" scope="col"><i class="ri-image-line fw-normal"></i> Image</th>
         <th scope="col"><i class="ri-hashtag fw-normal"></i> Set</th>
         <th scope="col"><i class="ri-pencil-line fw-normal"></i> Name</th>
         <th scope="col"><i class="price-tag-3-line fw-normal"></i> Theme</th>
@@ -13,7 +13,7 @@
         <th scope="col"><i class="ri-shapes-line fw-normal"></i> Parts</th>
         <th scope="col"><i class="ri-calendar-close-line fw-normal"></i> Retirement</th>
         {% if g.login.is_authenticated() %}
-          <th class="no-sort" scope="col"><i class="ri-settings-4-line fw-normal"></i> Actions</th>
+          <th data-table-no-sort="true" class="no-sort" scope="col"><i class="ri-settings-4-line fw-normal"></i> Actions</th>
         {% endif %}
         </tr>
     </thead>
@@ -40,10 +40,3 @@
     </tbody>
   </table>
 </div>
-{% if all %}
-  <script type="text/javascript">
-    document.addEventListener("DOMContentLoaded", () => {
-      new BrickTable('wish', {{ config['DEFAULT_TABLE_PER_PAGE'] }}, [0, 7]);
-    });
-  </script>
-{% endif %}
