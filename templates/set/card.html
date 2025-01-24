@@ -13,7 +13,7 @@
 >
   {{ card.header(item, item.fields.name, solo=solo, number=item.fields.number) }}
   {{ card.image(item, solo=solo, last=last, caption=item.fields.name, alt=item.fields.number) }}
-  <div class="card-body {% if solo %}border-bottom{% else %}p-1{% endif %}">
+  <div class="card-body border-bottom-0 {% if not solo %}p-1{% endif %}">
     {{ badge.theme(item.theme.name, solo=solo, last=last) }}
     {{ badge.year(item.fields.year, solo=solo, last=last) }}
     {{ badge.parts(item.fields.number_of_parts, solo=solo, last=last) }}
@@ -27,7 +27,7 @@
     {% endif %}
   </div>
   {% if not tiny and brickset_checkboxes | length %}
-    <ul class="list-group list-group-flush card-check border-top-0 {% if not solo %}border-bottom-0{% endif %}">
+    <ul class="list-group list-group-flush card-check border-bottom-0">
       {% for checkbox in brickset_checkboxes %}
         <li class="list-group-item {% if not solo %}p-1{% endif %}">
           {{ form.checkbox(checkbox.as_dataset(), item.fields.id, checkbox.fields.name, checkbox.status_url(item.fields.id), item.fields[checkbox.as_column()], delete=delete) }}
@@ -36,7 +36,7 @@
     </ul>
   {% endif %}
   {% if solo %}
-    <div class="accordion accordion-flush" id="set-details">
+    <div class="accordion accordion-flush border-top" id="set-details">
       {% if not delete %}
         {{ accordion.header('Instructions', 'instructions', 'set-details', expanded=open_instructions, quantity=item.instructions | length, icon='file-line', class='p-0') }}
         <div class="list-group list-group-flush">
