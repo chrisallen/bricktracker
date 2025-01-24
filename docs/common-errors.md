@@ -1,6 +1,6 @@
 # Common errors/problems
 
-> **Note**<br>
+> **Note**
 > The following page is based on version `1.0.0` of BrickTracker.
 
 ## I need a password to access some pages
@@ -36,7 +36,7 @@ services:
     env_file: ".env"
 ```
 
-> **Warning**<br>
+> **Warning**
 > Do not use quotes (", ') around your environment variables.
 > Docker will interpret them has being part of the **value** of the environment variable.
 > For instance...
