@@ -5,50 +5,14 @@
 
 ## I need a password to access some pages
 
-You have setup lightweight authentication. Your password is in your environement `BK_AUTHENTICATION_PASSWORD` variable.
+You have setup [lightweight authentication](authentication.md). Your password is in your environement `BK_AUTHENTICATION_PASSWORD` variable.
 
 ## I cannot access the Add page (Configuration missing!)
 
 ![](images/common-errors-01.png)
 
 You need to pass the `BK_REBRICKABLE_API_KEY` environment to your application, depending on how you run the application.
-For instance:
-
-- Docker: `docker run -e BK_REBRICKABLE_API_KEY=xxxx`
-- Docker compose (directly in `compose.yaml`):
-
-```
-services:
-  bricktracker:
-    environment:
-      - BK_AUTHENTICATION_KEY=xxxx
-```
-
-- Docker compose (with an environement file, for instance `.env`)
-
-```
--- .env
-BK_AUTHENTICATION_KEY=xxxx
-
--- compose.yaml
-services:
-  bricktracker:
-    env_file: ".env"
-```
-
-> **Warning**
-> Do not use quotes (", ') around your environment variables.
-> Docker will interpret them has being part of the **value** of the environment variable.
-> For instance...
->
-> ```
-> services:
->  bricktracker:
->    environment:
->      - BK_AUTHENTICATION_KEY="xxxx"
-> ```
->
-> ...will make Docker believe that your API key is `"xxxx"`.
+See [setup](setup.md) for more information.
 
 ## The socket is disconnected
 
