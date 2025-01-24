@@ -46,17 +46,12 @@ class BrickWish(BrickSet):
         self.fields.set_num = set_num
 
         # Load from database
-        record = self.select()
-
-        if record is None:
+        if not self.select():
             raise NotFoundException(
                 'Wish with number {number} was not found in the database'.format(  # noqa: E501
                     number=self.fields.set_num,
                 ),
             )
-
-        # Ingest the record
-        self.ingest(record)
 
         # Resolve the theme
         self.resolve_theme()

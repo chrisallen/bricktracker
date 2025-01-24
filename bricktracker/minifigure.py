@@ -62,17 +62,12 @@ class BrickMinifigure(BrickRecord):
         # Save the parameters to the fields
         self.fields.fig_num = fig_num
 
-        record = self.select(override_query=self.generic_query)
-
-        if record is None:
+        if not self.select(override_query=self.generic_query):
             raise NotFoundException(
                 'Minifigure with number {number} was not found in the database'.format(  # noqa: E501
                     number=self.fields.fig_num,
                 ),
             )
-
-        # Ingest the record
-        self.ingest(record)
 
         return self
 
@@ -82,18 +77,13 @@ class BrickMinifigure(BrickRecord):
         self.brickset = brickset
         self.fields.fig_num = fig_num
 
-        record = self.select()
-
-        if record is None:
+        if not self.select():
             raise NotFoundException(
                 'Minifigure with number {number} from set {set} was not found in the database'.format(  # noqa: E501
                     number=self.fields.fig_num,
                     set=self.brickset.fields.set_num,
                 ),
             )
-
-        # Ingest the record
-        self.ingest(record)
 
         return self
 

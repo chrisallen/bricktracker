@@ -54,16 +54,32 @@ class BrickRecord(object):
         return self.fields.__dict__.items()
 
     # Get from the database using the query
-    def select(self, /, *, override_query: str | None = None) -> Row | None:
+    def select(
+        self,
+        /,
+        *,
+        override_query: str | None = None,
+        **context: Any
+    ) -> bool:
         if override_query:
             query = override_query
         else:
             query = self.select_query
 
-        return BrickSQL().fetchone(
+        record = BrickSQL().fetchone(
             query,
-            parameters=self.sql_parameters()
+            parameters=self.sql_parameters(),
+            **context
         )
+
+        # Ingest the record
+        if record is not None:
+            self.ingest(record)
+
+            return True
+
+        else:
+            return False
 
     # Generic SQL parameters from fields
     def sql_parameters(self, /) -> dict[str, Any]:

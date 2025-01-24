@@ -106,17 +106,12 @@ class BrickSet(BrickRecord):
         self.fields.u_id = u_id
 
         # Load from database
-        record = self.select()
-
-        if record is None:
+        if not self.select():
             raise NotFoundException(
                 'Set with ID {id} was not found in the database'.format(
                     id=self.fields.u_id,
                 ),
             )
-
-        # Ingest the record
-        self.ingest(record)
 
         # Resolve the theme
         self.resolve_theme()

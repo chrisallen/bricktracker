@@ -36,6 +36,7 @@ class BrickRecordList(Generic[T]):
         override_query: str | None = None,
         order: str | None = None,
         limit: int | None = None,
+        **context: Any,
     ) -> list[Row]:
         # Select the query
         if override_query:
@@ -48,6 +49,7 @@ class BrickRecordList(Generic[T]):
             parameters=self.sql_parameters(),
             order=order,
             limit=limit,
+            **context
         )
 
     # Generic SQL parameters from fields

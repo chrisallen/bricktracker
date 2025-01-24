@@ -92,9 +92,7 @@ class BrickPart(BrickRecord):
         self.fields.color_id = color_id
         self.fields.element_id = element_id
 
-        record = self.select(override_query=self.generic_query)
-
-        if record is None:
+        if not self.select(override_query=self.generic_query):
             raise NotFoundException(
                 'Part with number {number}, color ID {color} and element ID {element} was not found in the database'.format(  # noqa: E501
                     number=self.fields.part_num,
@@ -102,9 +100,6 @@ class BrickPart(BrickRecord):
                     element=self.fields.element_id,
                 ),
             )
-
-        # Ingest the record
-        self.ingest(record)
 
         return self
 
@@ -122,18 +117,13 @@ class BrickPart(BrickRecord):
         self.minifigure = minifigure
         self.fields.id = id
 
-        record = self.select()
-
-        if record is None:
+        if not self.select():
             raise NotFoundException(
                 'Part with ID {id} from set {set} was not found in the database'.format(  # noqa: E501
                     id=self.fields.id,
                     set=self.brickset.fields.set_num,
                 ),
             )
-
-        # Ingest the record
-        self.ingest(record)
 
         return self
 
