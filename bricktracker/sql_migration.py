@@ -49,6 +49,4 @@ class BrickSQLMigration(object):
             ))
         )
 
-        print(relative)
-
         return relative
