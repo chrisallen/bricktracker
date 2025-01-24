@@ -345,14 +345,6 @@ class BrickSQL(object):
         # Info
         logger.info('The database has been dropped')
 
-    # Initialize the database
-    @staticmethod
-    def initialize() -> None:
-        BrickSQL().executescript('migrations/init')
-
-        # Info
-        logger.info('The database has been initialized')
-
     # Replace the database with a new file
     @staticmethod
     def upload(file: FileStorage, /) -> None:
