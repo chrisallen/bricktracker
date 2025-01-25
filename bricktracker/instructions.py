@@ -111,11 +111,14 @@ class BrickInstructions(object):
                 url = current_app.config['REBRICKABLE_LINK_INSTRUCTIONS_PATTERN'].format(  # noqa: E501
                     path=path
                 )
+                trimmed_url = current_app.config['REBRICKABLE_LINK_INSTRUCTIONS_PATTERN'].format(  # noqa: E501
+                    path=path.partition('/')[0]
+                )
 
                 # Request the file
                 self.socket.progress(
                     message='Requesting {url}'.format(
-                        url=url,
+                        url=trimmed_url,
                     )
                 )
 
@@ -133,7 +136,7 @@ class BrickInstructions(object):
                     # Downloading the file
                     self.socket.progress(
                         message='Downloading {url} ({size})'.format(
-                            url=url,
+                            url=trimmed_url,
                             size=self.human_size(),
                         )
                     )
