@@ -1,0 +1,10 @@
+<script type="text/javascript">
+  document.addEventListener("DOMContentLoaded", () => {
+    new BrickInstructionsSocket('download', '{{ path }}', '{{ namespace }}', {
+      COMPLETE: '{{ messages['COMPLETE'] }}',
+      DOWNLOAD_INSTRUCTIONS: '{{ messages['DOWNLOAD_INSTRUCTIONS'] }}',
+      FAIL: '{{ messages['FAIL'] }}',
+      PROGRESS: '{{ messages['PROGRESS'] }}',
+    });
+  });
+</script>

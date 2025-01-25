@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 import logging
 import os
 from shutil import copyfileobj
+import traceback
 from typing import Tuple, TYPE_CHECKING
 
 from bs4 import BeautifulSoup
@@ -12,14 +13,16 @@ from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 
 from .exceptions import ErrorException, DownloadException
-from .parser import parse_set
 if TYPE_CHECKING:
     from .rebrickable_set import RebrickableSet
+    from .socket import BrickSocket
 
 logger = logging.getLogger(__name__)
 
 
 class BrickInstructions(object):
+    socket: 'BrickSocket'
+
     allowed: bool
     rebrickable: 'RebrickableSet | None'
     extension: str
@@ -29,9 +32,22 @@ class BrickInstructions(object):
     name: str
     size: int
 
-    def __init__(self, file: os.DirEntry | str, /):
+    def __init__(
+        self,
+        file: os.DirEntry | str,
+        /,
+        *,
+        socket: 'BrickSocket | None' = None,
+    ):
+        # Save the socket
+        if socket is not None:
+            self.socket = socket
+
         if isinstance(file, str):
             self.filename = file
+
+            if self.filename == '':
+                raise ErrorException('An instruction filename cannot be empty')
         else:
             self.filename = file.name
 
@@ -73,31 +89,84 @@ class BrickInstructions(object):
 
     # Download an instruction file
     def download(self, path: str, /) -> None:
-        target = self.path(filename=secure_filename(self.filename))
+        try:
+            # Just to make sure that the progress is initiated
+            self.socket.progress(
+                message='Downloading {file}'.format(
+                    file=self.filename,
+                )
+            )
 
-        if os.path.isfile(target):
-            raise ErrorException('Cannot download {target} as it already exists'.format(  # noqa: E501
-                target=self.filename
-            ))
+            target = self.path(filename=secure_filename(self.filename))
 
-        url = current_app.config['REBRICKABLE_LINK_INSTRUCTIONS_PATTERN'].format(  # noqa: E501
-            path=path
-        )
+            # Skipping rather than failing here
+            if os.path.isfile(target):
+                self.socket.complete(
+                    message='File {file} already exists, skipped'.format(
+                        file=self.filename,
+                    )
+                )
 
-        response = requests.get(url, stream=True)
-        if response.ok:
-            with open(target, 'wb') as f:
-                copyfileobj(response.raw, f)
-        else:
-            raise DownloadException('Failed to download {file}. Status code: {code}'.format(  # noqa: E501
-                file=self.filename,
-                code=response.status_code
-            ))
+            else:
+                url = current_app.config['REBRICKABLE_LINK_INSTRUCTIONS_PATTERN'].format(  # noqa: E501
+                    path=path
+                )
 
-        # Info
-        logger.info('The instruction file {file} has been downloaded'.format(
-            file=self.filename
-        ))
+                # Request the file
+                self.socket.progress(
+                    message='Requesting {url}'.format(
+                        url=url,
+                    )
+                )
+
+                response = requests.get(url, stream=True)
+                if response.ok:
+
+                    # Store the content header as size
+                    try:
+                        self.size = int(
+                            response.headers.get('Content-length', 0)
+                        )
+                    except Exception:
+                        self.size = 0
+
+                    # Downloading the file
+                    self.socket.progress(
+                        message='Downloading {url} ({size})'.format(
+                            url=url,
+                            size=self.human_size(),
+                        )
+                    )
+
+                    with open(target, 'wb') as f:
+                        copyfileobj(response.raw, f)
+                else:
+                    raise DownloadException('failed to download: {code}'.format(  # noqa: E501
+                        code=response.status_code
+                    ))
+
+                # Info
+                logger.info('The instruction file {file} has been downloaded'.format(  # noqa: E501
+                    file=self.filename
+                ))
+
+                # Complete
+                self.socket.complete(
+                    message='File {file} downloaded ({size})'.format(  # noqa: E501
+                        file=self.filename,
+                        size=self.human_size()
+                    )
+                )
+
+        except Exception as e:
+            self.socket.fail(
+                message='Error while downloading instruction {file}: {error}'.format(  # noqa: E501
+                    file=self.filename,
+                    error=e,
+                )
+            )
+
+            logger.debug(traceback.format_exc())
 
     # Display the size in a human format
     def human_size(self) -> str:
@@ -175,36 +244,9 @@ class BrickInstructions(object):
         else:
             return 'file-line'
 
-    # Download selected instructions for a set
-    @staticmethod
-    def download_instructions(form: dict[str, str], /) -> None:
-        selected_instructions: list[Tuple[str, str]] = []
-
-        # Get the list of instructions
-        for key in form:
-            if key.startswith('instruction-') and form.get(key) == 'on':
-                _, _, index = key.partition('-')
-                alt_text = form.get(f'instruction-alt-text-{index}', '')
-                href_text = form.get(f'instruction-href-text-{index}', '').removeprefix('/instructions/')  # Remove the /instructions/ part  # noqa: E501
-                selected_instructions.append((href_text, alt_text))
-
-        # Raise if nothing selected
-        if not len(selected_instructions):
-            raise ErrorException('No instruction was selected to download')
-
-        # Loop over selected instructions and download them
-        for href, filename in selected_instructions:
-            BrickInstructions(f"{filename}.pdf").download(href)
-
     # Find the instructions for a set
     @staticmethod
-    def find_instructions(form: dict[str, str], /) -> list[Tuple[str, str]]:
-        # Grab the set ID
-        set: str = form.get('add-set', '')
-
-        # Parse it
-        set = parse_set(set)
-
+    def find_instructions(set: str, /) -> list[Tuple[str, str]]:
         response = requests.get(
             current_app.config['REBRICKABLE_LINK_INSTRUCTIONS_PATTERN'].format(
                 path=set,

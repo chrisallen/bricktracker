@@ -5,6 +5,8 @@ from flask import copy_current_request_context, Flask, request
 from flask_socketio import SocketIO
 
 from .configuration_list import BrickConfigurationList
+from .instructions import BrickInstructions
+from .instructions_list import BrickInstructionsList
 from .login import LoginManager
 from .set import BrickSet
 from .sql import close as sql_close
@@ -17,6 +19,7 @@ MESSAGES: Final[dict[str, str]] = {
     'COMPLETE': 'complete',
     'CONNECT': 'connect',
     'DISCONNECT': 'disconnect',
+    'DOWNLOAD_INSTRUCTIONS': 'download_instructions',
     'FAIL': 'fail',
     'IMPORT_SET': 'import_set',
     'LOAD_SET': 'load_set',
@@ -83,6 +86,41 @@ class BrickSocket(object):
         @self.socket.on(MESSAGES['DISCONNECT'], namespace=self.namespace)
         def disconnect() -> None:
             self.disconnected()
+
+        @self.socket.on(MESSAGES['DOWNLOAD_INSTRUCTIONS'], namespace=self.namespace)  # noqa: E501
+        def download_instructions(data: dict[str, Any], /) -> None:
+            # Needs to be authenticated
+            if LoginManager.is_not_authenticated():
+                self.fail(message='You need to be authenticated')
+                return
+
+            instructions = BrickInstructions(
+                '{name}.pdf'.format(name=data.get('alt', '')),
+                socket=self
+            )
+
+            path = data.get('href', '').removeprefix('/instructions/')
+
+            # Update the progress
+            try:
+                self.progress_total = int(data.get('total', 0))
+                self.progress_count = int(data.get('current', 0))
+            except Exception:
+                pass
+
+            # Start it in a thread if requested
+            if self.threaded:
+                @copy_current_request_context
+                def do_download() -> None:
+                    instructions.download(path)
+
+                    BrickInstructionsList(force=True)
+
+                self.socket.start_background_task(do_download)
+            else:
+                instructions.download(path)
+
+                BrickInstructionsList(force=True)
 
         @self.socket.on(MESSAGES['IMPORT_SET'], namespace=self.namespace)
         def import_set(data: dict[str, Any], /) -> None:
