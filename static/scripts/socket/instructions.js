@@ -64,7 +64,7 @@ class BrickInstructionsSocket extends BrickSocket {
             if (!from_complete) {
                 this.total = this.get_files(true).length;
                 this.current = 0;
-                this.clear_status();
+                this.clear();
             }
 
             // Find the next checkbox
