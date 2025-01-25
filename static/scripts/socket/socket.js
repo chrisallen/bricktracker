@@ -26,7 +26,7 @@ class BrickSocket {
         // Socket status
         window.setInterval(((bricksocket) => () => {
             bricksocket.status();
-        })(this), 500);
+        })(this), 1000);
     }
 
     // Clear form
