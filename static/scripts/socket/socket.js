@@ -43,6 +43,8 @@ class BrickSocket {
             this.html_progress_bar.textContent = "";
         }
 
+        this.progress_message("");
+
         this.spinner(false);
     }
 
