@@ -139,7 +139,7 @@ class BrickSocket {
         let count = data["count"]
 
         // Fix the total if bogus
-        if (!total || isNaN(total) || total <= 1) {
+        if (!total || isNaN(total) || total <= 0) {
             total = 0;
         }
 
