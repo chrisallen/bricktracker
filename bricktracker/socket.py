@@ -15,7 +15,6 @@ logger = logging.getLogger(__name__)
 
 # Messages valid through the socket
 MESSAGES: Final[dict[str, str]] = {
-    'ADD_SET': 'add_set',
     'COMPLETE': 'complete',
     'CONNECT': 'connect',
     'DISCONNECT': 'disconnect',
