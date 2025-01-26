@@ -3,7 +3,7 @@ import traceback
 from typing import Any, Self
 from uuid import uuid4
 
-from flask import url_for
+from flask import current_app, url_for
 
 from .exceptions import DatabaseException, NotFoundException
 from .minifigure_list import BrickMinifigureList
@@ -179,7 +179,10 @@ class BrickSet(RebrickableSet):
 
     # Compute the url for the set instructions
     def url_for_instructions(self, /) -> str:
-        if len(self.instructions):
+        if (
+            not current_app.config['HIDE_SET_INSTRUCTIONS'] and
+            len(self.instructions)
+        ):
             return url_for(
                 'set.details',
                 id=self.fields.id,

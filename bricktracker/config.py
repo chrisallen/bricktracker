@@ -30,6 +30,7 @@ CONFIG: Final[list[dict[str, Any]]] = [
     {'n': 'HIDE_ALL_PARTS', 'c': bool},
     {'n': 'HIDE_ALL_SETS', 'c': bool},
     {'n': 'HIDE_MISSING_PARTS', 'c': bool},
+    {'n': 'HIDE_SET_INSTRUCTIONS', 'c': bool},
     {'n': 'HIDE_WISHES', 'c': bool},
     {'n': 'MINIFIGURES_DEFAULT_ORDER', 'd': '"minifigures"."name" ASC'},
     {'n': 'MINIFIGURES_FOLDER', 'd': 'minifigs', 's': True},

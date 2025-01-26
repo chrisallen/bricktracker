@@ -35,7 +35,7 @@
       {% endfor %}
     </ul>
   {% endif %}
-  {% if solo %}
+  {% if solo and not config['HIDE_SET_INSTRUCTIONS'] %}
     <div class="accordion accordion-flush border-top" id="set-details">
       {% if not delete %}
         {{ accordion.header('Instructions', 'instructions', 'set-details', expanded=open_instructions, quantity=item.instructions | length, icon='file-line', class='p-0') }}
