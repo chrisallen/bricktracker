@@ -50,6 +50,9 @@
               <a class="list-group-item list-group-item-action" href="{{ url_for('instructions.upload') }}"><i class="ri-upload-line"></i> Upload an instructions file</a>
             {% endif %}
           {% endif %}
+          {% if g.login.is_authenticated() %}
+            <a class="list-group-item list-group-item-action" href="{{ url_for('instructions.download', set=item.fields.set) }}"><i class="ri-download-line"></i> Download instructions from Rebrickable</a>
+          {% endif %}
         </div>
         {{ accordion.footer() }}
         {{ accordion.table(item.parts(), 'Parts', 'parts-inventory', 'set-details', 'part/table.html', icon='shapes-line')}}

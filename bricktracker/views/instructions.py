@@ -13,6 +13,8 @@ from werkzeug.utils import secure_filename
 from .exceptions import exception_handler
 from ..instructions import BrickInstructions
 from ..instructions_list import BrickInstructionsList
+from ..parser import parse_set
+from ..socket import MESSAGES
 from .upload import upload_helper
 
 instructions_page = Blueprint(
@@ -126,3 +128,44 @@ def do_upload() -> Response:
     BrickInstructionsList(force=True)
 
     return redirect(url_for('instructions.list'))
+
+
+# Download instructions from Rebrickable
+@instructions_page.route('/download/', methods=['GET'])
+@login_required
+@exception_handler(__file__)
+def download() -> str:
+    # Grab the set number
+    try:
+        set = parse_set(request.args.get('set', ''))
+    except Exception:
+        set = ''
+
+    return render_template(
+        'instructions.html',
+        download=True,
+        error=request.args.get('error'),
+        set=set
+    )
+
+
+# Show search results
+@instructions_page.route('/download', methods=['POST'])
+@login_required
+@exception_handler(__file__, post_redirect='instructions.download')
+def do_download() -> str:
+    # Grab the set number
+    try:
+        set = parse_set(request.form.get('download-set', ''))
+    except Exception:
+        set = ''
+
+    return render_template(
+        'instructions.html',
+        download=True,
+        instructions=BrickInstructions.find_instructions(set),
+        set=set,
+        path=current_app.config['SOCKET_PATH'],
+        namespace=current_app.config['SOCKET_NAMESPACE'],
+        messages=MESSAGES
+    )

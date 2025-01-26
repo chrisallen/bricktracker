@@ -1,21 +1,28 @@
 from datetime import datetime, timezone
 import logging
 import os
-from typing import TYPE_CHECKING
+from shutil import copyfileobj
+import traceback
+from typing import Tuple, TYPE_CHECKING
 
+from bs4 import BeautifulSoup
 from flask import current_app, g, url_for
 import humanize
+import requests
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 
-from .exceptions import ErrorException
+from .exceptions import ErrorException, DownloadException
 if TYPE_CHECKING:
     from .rebrickable_set import RebrickableSet
+    from .socket import BrickSocket
 
 logger = logging.getLogger(__name__)
 
 
 class BrickInstructions(object):
+    socket: 'BrickSocket'
+
     allowed: bool
     rebrickable: 'RebrickableSet | None'
     extension: str
@@ -25,9 +32,22 @@ class BrickInstructions(object):
     name: str
     size: int
 
-    def __init__(self, file: os.DirEntry | str, /):
+    def __init__(
+        self,
+        file: os.DirEntry | str,
+        /,
+        *,
+        socket: 'BrickSocket | None' = None,
+    ):
+        # Save the socket
+        if socket is not None:
+            self.socket = socket
+
         if isinstance(file, str):
             self.filename = file
+
+            if self.filename == '':
+                raise ErrorException('An instruction filename cannot be empty')
         else:
             self.filename = file.name
 
@@ -66,6 +86,90 @@ class BrickInstructions(object):
     # Delete an instruction file
     def delete(self, /) -> None:
         os.remove(self.path())
+
+    # Download an instruction file
+    def download(self, path: str, /) -> None:
+        try:
+            # Just to make sure that the progress is initiated
+            self.socket.progress(
+                message='Downloading {file}'.format(
+                    file=self.filename,
+                )
+            )
+
+            target = self.path(filename=secure_filename(self.filename))
+
+            # Skipping rather than failing here
+            if os.path.isfile(target):
+                self.socket.complete(
+                    message='File {file} already exists, skipped'.format(
+                        file=self.filename,
+                    )
+                )
+
+            else:
+                url = current_app.config['REBRICKABLE_LINK_INSTRUCTIONS_PATTERN'].format(  # noqa: E501
+                    path=path
+                )
+                trimmed_url = current_app.config['REBRICKABLE_LINK_INSTRUCTIONS_PATTERN'].format(  # noqa: E501
+                    path=path.partition('/')[0]
+                )
+
+                # Request the file
+                self.socket.progress(
+                    message='Requesting {url}'.format(
+                        url=trimmed_url,
+                    )
+                )
+
+                response = requests.get(url, stream=True)
+                if response.ok:
+
+                    # Store the content header as size
+                    try:
+                        self.size = int(
+                            response.headers.get('Content-length', 0)
+                        )
+                    except Exception:
+                        self.size = 0
+
+                    # Downloading the file
+                    self.socket.progress(
+                        message='Downloading {url} ({size})'.format(
+                            url=trimmed_url,
+                            size=self.human_size(),
+                        )
+                    )
+
+                    with open(target, 'wb') as f:
+                        copyfileobj(response.raw, f)
+                else:
+                    raise DownloadException('failed to download: {code}'.format(  # noqa: E501
+                        code=response.status_code
+                    ))
+
+                # Info
+                logger.info('The instruction file {file} has been downloaded'.format(  # noqa: E501
+                    file=self.filename
+                ))
+
+                # Complete
+                self.socket.complete(
+                    message='File {file} downloaded ({size})'.format(  # noqa: E501
+                        file=self.filename,
+                        size=self.human_size()
+                    )
+                )
+
+        except Exception as e:
+            self.socket.fail(
+                message='Error while downloading instruction {file}: {error}'.format(  # noqa: E501
+                    file=self.filename,
+                    error=e,
+                )
+            )
+
+            logger.debug(traceback.format_exc())
 
     # Display the size in a human format
     def human_size(self) -> str:
@@ -142,3 +246,44 @@ class BrickInstructions(object):
             return 'file-image-line'
         else:
             return 'file-line'
+
+    # Find the instructions for a set
+    @staticmethod
+    def find_instructions(set: str, /) -> list[Tuple[str, str]]:
+        response = requests.get(
+            current_app.config['REBRICKABLE_LINK_INSTRUCTIONS_PATTERN'].format(
+                path=set,
+            ),
+            headers={
+                'User-Agent': current_app.config['REBRICKABLE_USER_AGENT']
+            }
+        )
+
+        if not response.ok:
+            raise ErrorException('Failed to load the Rebrickable instructions page. Status code: {code}'.format(  # noqa: E501
+                code=response.status_code
+            ))
+
+        # Parse the HTML content
+        soup = BeautifulSoup(response.content, 'html.parser')
+
+        # Collect all <img> tags with "LEGO Building Instructions" in the
+        # alt attribute
+        found_tags: list[Tuple[str, str]] = []
+        for a_tag in soup.find_all('a', href=True):
+            img_tag = a_tag.find('img', alt=True)
+            if img_tag and "LEGO Building Instructions" in img_tag['alt']:
+                found_tags.append(
+                    (
+                        img_tag['alt'].removeprefix('LEGO Building Instructions for '),  # noqa: E501
+                        a_tag['href']
+                    )
+                )  # Save alt and href
+
+        # Raise an error if nothing found
+        if not len(found_tags):
+            raise ErrorException('No instruction found for set {set}'.format(
+                set=set
+            ))
+
+        return found_tags
