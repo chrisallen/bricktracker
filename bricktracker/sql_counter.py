@@ -22,6 +22,7 @@ class BrickCounter(object):
     table: str
     icon: str
     count: int
+    legacy: bool
 
     def __init__(
         self,
@@ -44,3 +45,5 @@ class BrickCounter(object):
                 self.name = name
 
             self.icon = icon
+
+        self.legacy = '(legacy)' in self.name
