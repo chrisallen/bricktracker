@@ -47,8 +47,8 @@ def update_status(*, id: str, checkbox_id: str) -> Response:
     brickset.update_status(checkbox, value)
 
     # Info
-    logger.info('Set {number} ({id}): status "{status}" changed to "{state}"'.format(  # noqa: E501
-        number=brickset.fields.set,
+    logger.info('Set {set} ({id}): status "{status}" changed to "{state}"'.format(  # noqa: E501
+        set=brickset.fields.set,
         id=brickset.fields.id,
         status=checkbox.fields.name,
         state=value,
@@ -77,8 +77,8 @@ def do_delete(*, id: str) -> Response:
     brickset.delete()
 
     # Info
-    logger.info('Set {number} ({id}): deleted'.format(
-        number=brickset.fields.set,
+    logger.info('Set {set} ({id}): deleted'.format(
+        set=brickset.fields.set,
         id=brickset.fields.id,
     ))
 
@@ -125,8 +125,8 @@ def missing_minifigure_part(*, id: str, figure: str, part: str) -> Response:
     brickpart.update_missing(missing)
 
     # Info
-    logger.info('Set {number} ({id}): updated minifigure ({figure}) part ({part}) missing count to {missing}'.format(  # noqa: E501
-        number=brickset.fields.set,
+    logger.info('Set {set} ({id}): updated minifigure ({figure}) part ({part}) missing count to {missing}'.format(  # noqa: E501
+        set=brickset.fields.set,
         id=brickset.fields.id,
         figure=brickminifigure.fields.figure,
         part=brickpart.fields.id,
@@ -149,8 +149,8 @@ def missing_part(*, id: str, part: str) -> Response:
     brickpart.update_missing(missing)
 
     # Info
-    logger.info('Set {number} ({id}): updated part ({part}) missing count to {missing}'.format(  # noqa: E501
-        number=brickset.fields.set,
+    logger.info('Set {set} ({id}): updated part ({part}) missing count to {missing}'.format(  # noqa: E501
+        set=brickset.fields.set,
         id=brickset.fields.id,
         part=brickpart.fields.id,
         missing=missing,
