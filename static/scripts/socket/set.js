@@ -5,6 +5,7 @@ class BrickSetSocket extends BrickSocket {
 
         // Listeners
         this.add_listener = undefined;
+        this.input_listener = undefined;
         this.confirm_listener = undefined;
 
         // Form elements (built based on the initial id)
@@ -23,24 +24,15 @@ class BrickSetSocket extends BrickSocket {
         this.html_card_dismiss = document.getElementById(`${id}-card-dismiss`);
 
         if (this.html_button) {
-            this.add_listener = ((bricksocket) => (e) => {
-                if (!bricksocket.disabled && bricksocket.socket !== undefined && bricksocket.socket.connected) {
-                    bricksocket.toggle(false);
+            this.add_listener = this.html_button.addEventListener("click", ((bricksocket) => (e) => {
+                bricksocket.execute();
+            })(this));
 
-                    // Split and save the list if bulk
-                    if (bricksocket.bulk) {
-                        bricksocket.read_set_list()
-                    }
-
-                    if (bricksocket.bulk || (bricksocket.html_no_confim && bricksocket.html_no_confim.checked)) {
-                        bricksocket.import_set(true);
-                    } else {
-                        bricksocket.load_set();
-                    }
+            this.input_listener = this.html_input.addEventListener("keyup", ((bricksocket) => (e) => {
+                if (e.key === 'Enter') {
+                    bricksocket.execute();
                 }
-            })(this);
-
-            this.html_button.addEventListener("click", this.add_listener);
+            })(this))
         }
 
         if (this.html_card_dismiss && this.html_card) {
@@ -77,6 +69,24 @@ class BrickSetSocket extends BrickSocket {
         if (this.bulk) {
             // Import the next set
             this.import_set(true, undefined, true);
+        }
+    }
+
+    // Execute the action
+    execute() {
+        if (!this.disabled && this.socket !== undefined && this.socket.connected) {
+            this.toggle(false);
+
+            // Split and save the list if bulk
+            if (this.bulk) {
+                this.read_set_list();
+            }
+
+            if (this.bulk || (this.html_no_confim && this.html_no_confim.checked)) {
+                this.import_set(true);
+            } else {
+                this.load_set();
+            }
         }
     }
 
