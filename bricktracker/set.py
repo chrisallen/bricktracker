@@ -1,6 +1,6 @@
 import logging
 import traceback
-from typing import Any, Self
+from typing import Any, Self, TYPE_CHECKING
 from uuid import uuid4
 
 from flask import current_app, url_for
@@ -14,6 +14,8 @@ from .rebrickable_set import RebrickableSet
 from .set_checkbox import BrickSetCheckbox
 from .set_checkbox_list import BrickSetCheckboxList
 from .sql import BrickSQL
+if TYPE_CHECKING:
+    from .socket import BrickSocket
 
 logger = logging.getLogger(__name__)
 
@@ -33,14 +35,14 @@ class BrickSet(RebrickableSet):
         )
 
     # Import a set into the database
-    def download(self, data: dict[str, Any], /) -> None:
+    def download(self, socket: 'BrickSocket', data: dict[str, Any], /) -> None:
         # Load the set
-        if not self.load(data, from_download=True):
+        if not self.load(socket, data, from_download=True):
             return
 
         try:
             # Insert into the database
-            self.socket.auto_progress(
+            socket.auto_progress(
                 message='Set {set}: inserting into database'.format(
                     set=self.fields.set
                 ),
@@ -57,13 +59,13 @@ class BrickSet(RebrickableSet):
             self.insert_rebrickable()
 
             # Load the inventory
-            RebrickableParts(self.socket, self).download()
+            RebrickableParts(socket, self).download()
 
             # Load the minifigures
-            RebrickableMinifigures(self.socket, self).download()
+            RebrickableMinifigureList(socket, self).download()
 
             # Commit the transaction to the database
-            self.socket.auto_progress(
+            socket.auto_progress(
                 message='Set {set}: writing to the database'.format(
                     set=self.fields.set
                 ),
@@ -79,7 +81,7 @@ class BrickSet(RebrickableSet):
             ))
 
             # Complete
-            self.socket.complete(
+            socket.complete(
                 message='Set {set}: imported (<a href="{url}">Go to the set</a>)'.format(  # noqa: E501
                     set=self.fields.set,
                     url=self.url()
@@ -88,7 +90,7 @@ class BrickSet(RebrickableSet):
             )
 
         except Exception as e:
-            self.socket.fail(
+            socket.fail(
                 message='Error while importing set {set}: {error}'.format(
                     set=self.fields.set,
                     error=e,

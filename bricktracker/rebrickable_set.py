@@ -21,7 +21,6 @@ logger = logging.getLogger(__name__)
 
 # A set from Rebrickable
 class RebrickableSet(BrickRecord):
-    socket: 'BrickSocket'
     theme: 'BrickTheme'
     instructions: list[BrickInstructions]
 
@@ -36,17 +35,12 @@ class RebrickableSet(BrickRecord):
         self,
         /,
         *,
-        socket: 'BrickSocket | None' = None,
         record: Row | dict[str, Any] | None = None
     ):
         super().__init__()
 
         # Placeholders
         self.instructions = []
-
-        # Save the socket
-        if socket is not None:
-            self.socket = socket
 
         # Ingest the record if it has one
         if record is not None:
@@ -92,20 +86,21 @@ class RebrickableSet(BrickRecord):
     # Load the set from Rebrickable
     def load(
         self,
+        socket: 'BrickSocket',
         data: dict[str, Any],
         /,
         *,
         from_download=False,
     ) -> bool:
         # Reset the progress
-        self.socket.progress_count = 0
-        self.socket.progress_total = 2
+        socket.progress_count = 0
+        socket.progress_total = 2
 
         try:
-            self.socket.auto_progress(message='Parsing set number')
+            socket.auto_progress(message='Parsing set number')
             set = parse_set(str(data['set']))
 
-            self.socket.auto_progress(
+            socket.auto_progress(
                 message='Set {set}: loading from Rebrickable'.format(
                     set=set,
                 ),
@@ -122,12 +117,12 @@ class RebrickableSet(BrickRecord):
                 instance=self,
             ).get()
 
-            self.socket.emit('SET_LOADED', self.short(
+            socket.emit('SET_LOADED', self.short(
                 from_download=from_download
             ))
 
             if not from_download:
-                self.socket.complete(
+                socket.complete(
                     message='Set {set}: loaded from Rebrickable'.format(
                         set=self.fields.set
                     )
@@ -136,7 +131,7 @@ class RebrickableSet(BrickRecord):
             return True
 
         except Exception as e:
-            self.socket.fail(
+            socket.fail(
                 message='Could not load the set from Rebrickable: {error}. Data: {data}'.format(  # noqa: E501
                     error=str(e),
                     data=data,
