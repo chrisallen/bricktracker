@@ -3,6 +3,7 @@ from typing import Tuple
 # Some table aliases to make it look cleaner (id: (name, icon))
 ALIASES: dict[str, Tuple[str, str]] = {
     'bricktracker_minifigures': ('Bricktracker minifigures', 'group-line'),
+    'bricktracker_set_checkboxes': ('Bricktracker set checkboxes', 'checkbox-line'),  # noqa: E501
     'bricktracker_set_statuses': ('Bricktracker sets status', 'checkbox-line'),
     'bricktracker_sets': ('Bricktracker sets', 'hashtag'),
     'bricktracker_wishes': ('Bricktracker wishes', 'gift-line'),
