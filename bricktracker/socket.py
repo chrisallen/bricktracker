@@ -1,14 +1,13 @@
 import logging
 from typing import Any, Final, Tuple
 
-from flask import copy_current_request_context, Flask, request
+from flask import Flask, request
 from flask_socketio import SocketIO
 
-from .configuration_list import BrickConfigurationList
 from .instructions import BrickInstructions
 from .instructions_list import BrickInstructionsList
-from .login import LoginManager
 from .set import BrickSet
+from .socket_decorator import authenticated_socket, rebrickable_socket
 from .sql import close as sql_close
 
 logger = logging.getLogger(__name__)
@@ -87,12 +86,8 @@ class BrickSocket(object):
             self.disconnected()
 
         @self.socket.on(MESSAGES['DOWNLOAD_INSTRUCTIONS'], namespace=self.namespace)  # noqa: E501
+        @authenticated_socket(self)
         def download_instructions(data: dict[str, Any], /) -> None:
-            # Needs to be authenticated
-            if LoginManager.is_not_authenticated():
-                self.fail(message='You need to be authenticated')
-                return
-
             instructions = BrickInstructions(
                 '{name}.pdf'.format(name=data.get('alt', '')),
                 socket=self
@@ -107,71 +102,18 @@ class BrickSocket(object):
             except Exception:
                 pass
 
-            # Start it in a thread if requested
-            if self.threaded:
-                @copy_current_request_context
-                def do_download() -> None:
-                    instructions.download(path)
+            instructions.download(path)
 
-                    BrickInstructionsList(force=True)
-
-                self.socket.start_background_task(do_download)
-            else:
-                instructions.download(path)
-
-                BrickInstructionsList(force=True)
+            BrickInstructionsList(force=True)
 
         @self.socket.on(MESSAGES['IMPORT_SET'], namespace=self.namespace)
+        @rebrickable_socket(self)
         def import_set(data: dict[str, Any], /) -> None:
-            # Needs to be authenticated
-            if LoginManager.is_not_authenticated():
-                self.fail(message='You need to be authenticated')
-                return
-
-            # Needs the Rebrickable API key
-            try:
-                BrickConfigurationList.error_unless_is_set('REBRICKABLE_API_KEY')  # noqa: E501
-            except Exception as e:
-                self.fail(message=str(e))
-                return
-
-            brickset = BrickSet(socket=self)
-
-            # Start it in a thread if requested
-            if self.threaded:
-                @copy_current_request_context
-                def do_download() -> None:
-                    brickset.download(data)
-
-                self.socket.start_background_task(do_download)
-            else:
-                brickset.download(data)
+            BrickSet(socket=self).download(data)
 
         @self.socket.on(MESSAGES['LOAD_SET'], namespace=self.namespace)
         def load_set(data: dict[str, Any], /) -> None:
-            # Needs to be authenticated
-            if LoginManager.is_not_authenticated():
-                self.fail(message='You need to be authenticated')
-                return
-
-            # Needs the Rebrickable API key
-            try:
-                BrickConfigurationList.error_unless_is_set('REBRICKABLE_API_KEY')  # noqa: E501
-            except Exception as e:
-                self.fail(message=str(e))
-                return
-
-            brickset = BrickSet(socket=self)
-
-            # Start it in a thread if requested
-            if self.threaded:
-                @copy_current_request_context
-                def do_load() -> None:
-                    brickset.load(data)
-
-                self.socket.start_background_task(do_load)
-            else:
-                brickset.load(data)
+            BrickSet(socket=self).load(data)
 
     # Update the progress auto-incrementing
     def auto_progress(
