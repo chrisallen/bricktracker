@@ -2,13 +2,15 @@ from typing import Tuple
 
 # Some table aliases to make it look cleaner (id: (name, icon))
 ALIASES: dict[str, Tuple[str, str]] = {
-    'bricktracker_set_checkboxes': ('Checkboxes', 'checkbox-line'),
+    'bricktracker_minifigures': ('Bricktracker minifigures', 'group-line'),
     'bricktracker_set_statuses': ('Bricktracker sets status', 'checkbox-line'),
     'bricktracker_sets': ('Bricktracker sets', 'hashtag'),
     'bricktracker_wishes': ('Bricktracker wishes', 'gift-line'),
     'inventory': ('Parts', 'shapes-line'),
     'minifigures': ('Minifigures', 'group-line'),
+    'minifigures_old': ('Minifigures (legacy)', 'group-line'),
     'missing': ('Missing', 'error-warning-line'),
+    'rebrickable_minifigures': ('Rebrickable minifigures', 'group-line'),
     'rebrickable_sets': ('Rebrickable sets', 'hashtag'),
     'sets': ('Sets', 'hashtag'),
     'sets_old': ('Sets (legacy)', 'hashtag'),

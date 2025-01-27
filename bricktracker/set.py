@@ -8,7 +8,6 @@ from flask import current_app, url_for
 from .exceptions import DatabaseException, NotFoundException
 from .minifigure_list import BrickMinifigureList
 from .part_list import BrickPartList
-from .rebrickable_minifigures import RebrickableMinifigures
 from .rebrickable_parts import RebrickableParts
 from .rebrickable_set import RebrickableSet
 from .set_checkbox import BrickSetCheckbox
@@ -55,14 +54,14 @@ class BrickSet(RebrickableSet):
             # Insert into database
             self.insert(commit=False)
 
-            # Execute the parent download method
+            # Insert the rebrickable set into database
             self.insert_rebrickable()
 
             # Load the inventory
             RebrickableParts(socket, self).download()
 
             # Load the minifigures
-            RebrickableMinifigureList(socket, self).download()
+            BrickMinifigureList.download(socket, self)
 
             # Commit the transaction to the database
             socket.auto_progress(

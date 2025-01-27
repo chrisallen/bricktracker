@@ -5,11 +5,11 @@ SUM(IFNULL("missing"."quantity", 0)) AS "total_missing",
 {% endblock %}
 
 {% block total_sets %}
-COUNT("inventory"."u_id")  - COUNT("minifigures"."u_id") AS "total_sets",
+COUNT("inventory"."u_id")  - COUNT("bricktracker_minifigures"."bricktracker_set_id") AS "total_sets",
 {% endblock %}
 
 {% block total_minifigures %}
-SUM(IFNULL("minifigures"."quantity", 0)) AS "total_minifigures"
+SUM(IFNULL("bricktracker_minifigures"."quantity", 0)) AS "total_minifigures"
 {% endblock %}
 
 {% block join %}
@@ -21,9 +21,9 @@ AND "missing"."color_id" IS NOT DISTINCT FROM "inventory"."color_id"
 AND "missing"."element_id" IS NOT DISTINCT FROM "inventory"."element_id"
 AND "missing"."u_id" IS NOT DISTINCT FROM "inventory"."u_id"
 
-LEFT JOIN "minifigures"
-ON "missing"."set_num" IS NOT DISTINCT FROM "minifigures"."fig_num"
-AND "missing"."u_id" IS NOT DISTINCT FROM "minifigures"."u_id"
+LEFT JOIN "bricktracker_minifigures"
+ON "inventory"."set_num" IS NOT DISTINCT FROM "bricktracker_minifigures"."rebrickable_figure"
+AND "inventory"."u_id" IS NOT DISTINCT FROM "bricktracker_minifigures"."bricktracker_set_id"
 {% endblock %}
 
 {% block group %}

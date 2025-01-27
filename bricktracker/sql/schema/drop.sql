@@ -1,12 +1,15 @@
 BEGIN transaction;
 
+DROP TABLE IF EXISTS "bricktracker_minifigures";
 DROP TABLE IF EXISTS "bricktracker_sets";
 DROP TABLE IF EXISTS "bricktracker_set_checkboxes";
 DROP TABLE IF EXISTS "bricktracker_set_statuses";
 DROP TABLE IF EXISTS "bricktracker_wishes";
 DROP TABLE IF EXISTS "inventory";
 DROP TABLE IF EXISTS "minifigures";
+DROP TABLE IF EXISTS "minifigures_old";
 DROP TABLE IF EXISTS "missing";
+DROP TABLE IF EXISTS "rebrickable_minifigures";
 DROP TABLE IF EXISTS "rebrickable_sets";
 DROP TABLE IF EXISTS "sets";
 DROP TABLE IF EXISTS "sets_old";

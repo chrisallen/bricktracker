@@ -1,11 +1,17 @@
+import logging
+import traceback
 from typing import Any, Self, TYPE_CHECKING
 
 from flask import current_app
 
 from .minifigure import BrickMinifigure
+from .rebrickable import Rebrickable
 from .record_list import BrickRecordList
 if TYPE_CHECKING:
     from .set import BrickSet
+    from .socket import BrickSocket
+
+logger = logging.getLogger(__name__)
 
 
 # Lego minifigures
@@ -47,7 +53,7 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
         if current_app.config['RANDOM']:
             order = 'RANDOM()'
         else:
-            order = 'minifigures.rowid DESC'
+            order = '"bricktracker_minifigures"."rowid" DESC'
 
         for record in self.select(
             override_query=self.last_query,
@@ -72,16 +78,6 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
             self.records.append(minifigure)
 
         return self
-
-    # Return a dict with common SQL parameters for a minifigures list
-    def sql_parameters(self, /) -> dict[str, Any]:
-        parameters: dict[str, Any] = super().sql_parameters()
-
-        if self.brickset is not None:
-            parameters['u_id'] = self.brickset.fields.id
-            parameters['set_num'] = self.brickset.fields.set
-
-        return parameters
 
     # Minifigures missing a part
     def missing_part(
@@ -132,3 +128,51 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
             self.records.append(minifigure)
 
         return self
+
+    # Return a dict with common SQL parameters for a minifigures list
+    def sql_parameters(self, /) -> dict[str, Any]:
+        parameters: dict[str, Any] = super().sql_parameters()
+
+        if self.brickset is not None:
+            parameters['bricktracker_set_id'] = self.brickset.fields.id
+
+        return parameters
+
+    # Import the minifigures from Rebrickable
+    @staticmethod
+    def download(socket: 'BrickSocket', brickset: 'BrickSet', /) -> None:
+        try:
+            socket.auto_progress(
+                message='Set {set}: loading minifigures from Rebrickable'.format(  # noqa: E501
+                    set=brickset.fields.set,
+                ),
+                increment_total=True,
+            )
+
+            logger.debug('rebrick.lego.get_set_minifigs("{set}")'.format(
+                set=brickset.fields.set,
+            ))
+
+            minifigures = Rebrickable[BrickMinifigure](
+                'get_set_minifigs',
+                brickset.fields.set,
+                BrickMinifigure,
+                socket=socket,
+                brickset=brickset,
+            ).list()
+
+            # Process each minifigure
+            socket.update_total(len(minifigures), add=True)
+
+            for minifigure in minifigures:
+                minifigure.download(socket)
+
+        except Exception as e:
+            socket.fail(
+                message='Error while importing set {set} minifigure list: {error}'.format(  # noqa: E501
+                    set=brickset.fields.set,
+                    error=e,
+                )
+            )
+
+            logger.debug(traceback.format_exc())

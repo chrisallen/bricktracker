@@ -137,7 +137,7 @@ class BrickPart(BrickRecord):
 
         if 'set_num' not in parameters:
             if self.minifigure is not None:
-                parameters['set_num'] = self.minifigure.fields.fig_num
+                parameters['set_num'] = self.minifigure.fields.figure
 
             elif self.brickset is not None:
                 parameters['set_num'] = self.brickset.fields.set
@@ -215,14 +215,14 @@ class BrickPart(BrickRecord):
             return url_for(
                 'set.missing_minifigure_part',
                 id=self.fields.u_id,
-                minifigure_id=self.minifigure.fields.fig_num,
-                part_id=self.fields.id,
+                figure=self.minifigure.fields.figure,
+                part=self.fields.id,
             )
 
         return url_for(
             'set.missing_part',
             id=self.fields.u_id,
-            part_id=self.fields.id
+            part=self.fields.id
         )
 
     # Compute the url for the rebrickable page

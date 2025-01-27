@@ -57,7 +57,7 @@
         {{ accordion.footer() }}
         {{ accordion.table(item.parts(), 'Parts', 'parts-inventory', 'set-details', 'part/table.html', icon='shapes-line')}}
         {% for minifigure in item.minifigures() %}
-          {{ accordion.table(minifigure.parts(), minifigure.fields.name, minifigure.fields.fig_num, 'set-details', 'part/table.html', quantity=minifigure.fields.quantity, icon='group-line', image=minifigure.url_for_image(), alt=minifigure.fields.fig_num, details=minifigure.url())}}
+          {{ accordion.table(minifigure.parts(), minifigure.fields.name, minifigure.fields.figure, 'set-details', 'part/table.html', quantity=minifigure.fields.quantity, icon='group-line', image=minifigure.url_for_image(), alt=minifigure.fields.figure, details=minifigure.url())}}
         {% endfor %}
       {% endif %}
       {% if g.login.is_authenticated() %}

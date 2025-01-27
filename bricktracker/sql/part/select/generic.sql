@@ -5,11 +5,11 @@ SUM(IFNULL("missing"."quantity", 0)) AS "total_missing",
 {% endblock %}
 
 {% block total_quantity %}
-SUM((NOT "inventory"."is_spare") * "inventory"."quantity" * IFNULL("minifigures"."quantity", 1)) AS "total_quantity",
+SUM((NOT "inventory"."is_spare") * "inventory"."quantity" * IFNULL("bricktracker_minifigures"."quantity", 1)) AS "total_quantity",
 {% endblock %}
 
 {% block total_spare %}
-SUM("inventory"."is_spare" * "inventory"."quantity" * IFNULL("minifigures"."quantity", 1)) AS "total_spare",
+SUM("inventory"."is_spare" * "inventory"."quantity" * IFNULL("bricktracker_minifigures"."quantity", 1)) AS "total_spare",
 {% endblock %}
 
 {% block join %}
@@ -21,9 +21,9 @@ AND "inventory"."color_id" IS NOT DISTINCT FROM "missing"."color_id"
 AND "inventory"."element_id" IS NOT DISTINCT FROM "missing"."element_id"
 AND "inventory"."u_id" IS NOT DISTINCT FROM "missing"."u_id"
 
-LEFT JOIN "minifigures"
-ON "inventory"."set_num" IS NOT DISTINCT FROM "minifigures"."fig_num"
-AND "inventory"."u_id" IS NOT DISTINCT FROM "minifigures"."u_id"
+LEFT JOIN "bricktracker_minifigures"
+ON "inventory"."set_num" IS NOT DISTINCT FROM "bricktracker_minifigures"."rebrickable_figure"
+AND "inventory"."u_id" IS NOT DISTINCT FROM "bricktracker_minifigures"."bricktracker_set_id"
 {% endblock %}
 
 {% block where %}

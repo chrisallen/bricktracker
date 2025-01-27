@@ -120,7 +120,7 @@ class BrickPartList(BrickRecordList[BrickPart]):
         # Use the minifigure number if present,
         # otherwise use the set number
         if self.minifigure is not None:
-            parameters['set_num'] = self.minifigure.fields.fig_num
+            parameters['set_num'] = self.minifigure.fields.figure
         elif self.brickset is not None:
             parameters['set_num'] = self.brickset.fields.set
 

@@ -1,11 +1,11 @@
-{% extends 'minifigure/base/select.sql' %}
+{% extends 'minifigure/base/base.sql' %}
 
 {% block total_quantity %}
-SUM("minifigures"."quantity") AS "total_quantity",
+SUM("bricktracker_minifigures"."quantity") AS "total_quantity",
 {% endblock %}
 
 {% block where %}
-WHERE "minifigures"."fig_num" IN (
+WHERE "rebrickable_minifigures"."figure" IN (
     SELECT
         "inventory"."set_num"
     FROM "inventory"
@@ -20,5 +20,5 @@ WHERE "minifigures"."fig_num" IN (
 
 {% block group %}
 GROUP BY
-    "minifigures"."fig_num"
+    "rebrickable_minifigures"."figure"
 {% endblock %}

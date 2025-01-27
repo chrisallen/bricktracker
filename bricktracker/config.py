@@ -32,7 +32,7 @@ CONFIG: Final[list[dict[str, Any]]] = [
     {'n': 'HIDE_MISSING_PARTS', 'c': bool},
     {'n': 'HIDE_SET_INSTRUCTIONS', 'c': bool},
     {'n': 'HIDE_WISHES', 'c': bool},
-    {'n': 'MINIFIGURES_DEFAULT_ORDER', 'd': '"minifigures"."name" ASC'},
+    {'n': 'MINIFIGURES_DEFAULT_ORDER', 'd': '"rebrickable_minifigures"."name" ASC'},  # noqa: E501
     {'n': 'MINIFIGURES_FOLDER', 'd': 'minifigs', 's': True},
     {'n': 'NO_THREADED_SOCKET', 'c': bool},
     {'n': 'PARTS_DEFAULT_ORDER', 'd': '"inventory"."name" ASC, "inventory"."color_name" ASC, "inventory"."is_spare" ASC'},  # noqa: E501
@@ -42,7 +42,7 @@ CONFIG: Final[list[dict[str, Any]]] = [
     {'n': 'REBRICKABLE_API_KEY', 'e': 'REBRICKABLE_API_KEY', 'd': ''},
     {'n': 'REBRICKABLE_IMAGE_NIL', 'd': 'https://rebrickable.com/static/img/nil.png'},  # noqa: E501
     {'n': 'REBRICKABLE_IMAGE_NIL_MINIFIGURE', 'd': 'https://rebrickable.com/static/img/nil_mf.jpg'},  # noqa: E501
-    {'n': 'REBRICKABLE_LINK_MINIFIGURE_PATTERN', 'd': 'https://rebrickable.com/minifigs/{number}'},  # noqa: E501
+    {'n': 'REBRICKABLE_LINK_MINIFIGURE_PATTERN', 'd': 'https://rebrickable.com/minifigs/{figure}'},  # noqa: E501
     {'n': 'REBRICKABLE_LINK_PART_PATTERN', 'd': 'https://rebrickable.com/parts/{number}/_/{color}'},  # noqa: E501
     {'n': 'REBRICKABLE_LINK_INSTRUCTIONS_PATTERN', 'd': 'https://rebrickable.com/instructions/{path}'},  # noqa: E501
     {'n': 'REBRICKABLE_USER_AGENT', 'd': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'},  # noqa: E501

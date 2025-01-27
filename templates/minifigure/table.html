@@ -6,7 +6,7 @@
     <tbody>
       {% for item in table_collection %}
       <tr>
-        {{ table.image(item.url_for_image(), caption=item.fields.name, alt=item.fields.fig_num) }}
+        {{ table.image(item.url_for_image(), caption=item.fields.name, alt=item.fields.figure) }}
         <td >
           <a class="text-reset" href="{{ item.url() }}" style="max-width:auto">{{ item.fields.name }}</a>
           {% if all %}

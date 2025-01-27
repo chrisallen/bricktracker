@@ -6,7 +6,7 @@ WHERE "bricktracker_sets"."id" IN (
         "missing"."u_id"
     FROM "missing"
 
-    WHERE "missing"."set_num" IS NOT DISTINCT FROM :fig_num
+    WHERE "missing"."set_num" IS NOT DISTINCT FROM :figure
 
     GROUP BY "missing"."u_id"
 )

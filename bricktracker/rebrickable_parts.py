@@ -40,7 +40,7 @@ class RebrickableParts(object):
         self.minifigure = minifigure
 
         if self.minifigure is not None:
-            self.number = self.minifigure.fields.fig_num
+            self.number = self.minifigure.fields.figure
             self.kind = 'Minifigure'
             self.method = 'get_minifig_elements'
         else:

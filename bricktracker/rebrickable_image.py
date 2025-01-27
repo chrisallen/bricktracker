@@ -8,7 +8,7 @@ from shutil import copyfileobj
 
 from .exceptions import DownloadException
 if TYPE_CHECKING:
-    from .minifigure import BrickMinifigure
+    from .rebrickable_minifigure import RebrickableMinifigure
     from .part import BrickPart
     from .rebrickable_set import RebrickableSet
 
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 # A set, part or minifigure image from Rebrickable
 class RebrickableImage(object):
     set: 'RebrickableSet'
-    minifigure: 'BrickMinifigure | None'
+    minifigure: 'RebrickableMinifigure | None'
     part: 'BrickPart | None'
 
     extension: str | None
@@ -26,7 +26,7 @@ class RebrickableImage(object):
         set: 'RebrickableSet',
         /,
         *,
-        minifigure: 'BrickMinifigure | None' = None,
+        minifigure: 'RebrickableMinifigure | None' = None,
         part: 'BrickPart | None' = None,
     ):
         # Save all objects
@@ -87,10 +87,10 @@ class RebrickableImage(object):
                 return self.part.fields.part_img_url_id
 
         if self.minifigure is not None:
-            if self.minifigure.fields.set_img_url is None:
+            if self.minifigure.fields.image is None:
                 return RebrickableImage.nil_minifigure_name()
             else:
-                return self.minifigure.fields.fig_num
+                return self.minifigure.fields.figure
 
         return self.set.fields.set
 
@@ -111,10 +111,10 @@ class RebrickableImage(object):
                 return self.part.fields.part_img_url
 
         if self.minifigure is not None:
-            if self.minifigure.fields.set_img_url is None:
+            if self.minifigure.fields.image is None:
                 return current_app.config['REBRICKABLE_IMAGE_NIL_MINIFIGURE']
             else:
-                return self.minifigure.fields.set_img_url
+                return self.minifigure.fields.image
 
         return self.set.fields.image
 

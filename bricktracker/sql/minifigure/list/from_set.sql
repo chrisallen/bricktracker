@@ -1,6 +1,5 @@
-{% extends 'minifigure/base/select.sql' %}
+{% extends 'minifigure/base/base.sql' %}
 
 {% block where %}
-WHERE "minifigures"."u_id" IS NOT DISTINCT FROM :u_id
-AND "minifigures"."set_num" IS NOT DISTINCT FROM :set_num
+WHERE "bricktracker_minifigures"."bricktracker_set_id" IS NOT DISTINCT FROM :bricktracker_set_id
 {% endblock %}

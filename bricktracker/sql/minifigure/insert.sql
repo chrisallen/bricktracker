@@ -1,15 +1,9 @@
-INSERT INTO "minifigures" (
-    "fig_num",
-    "set_num",
-    "name",
-    "quantity",
-    "set_img_url",
-    "u_id"
+INSERT INTO "bricktracker_minifigures" (
+    "bricktracker_set_id",
+    "rebrickable_figure",
+    "quantity"
 ) VALUES (
-    :fig_num,
-    :set_num,
-    :name,
-    :quantity,
-    :set_img_url,
-    :u_id
+    :bricktracker_set_id,
+    :figure,
+    :quantity
 )

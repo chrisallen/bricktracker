@@ -128,7 +128,7 @@ def missing_minifigure_part(*, id: str, figure: str, part: str) -> Response:
     logger.info('Set {number} ({id}): updated minifigure ({figure}) part ({part}) missing count to {missing}'.format(  # noqa: E501
         number=brickset.fields.set,
         id=brickset.fields.id,
-        figure=brickminifigure.fields.fig_num,
+        figure=brickminifigure.fields.figure,
         part=brickpart.fields.id,
         missing=missing,
     ))

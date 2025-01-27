@@ -82,13 +82,9 @@ class BrickSetList(BrickRecordList[BrickSet]):
         return self
 
     # Sets missing a minifigure
-    def missing_minifigure(
-        self,
-        fig_num: str,
-        /
-    ) -> Self:
+    def missing_minifigure(self, figure: str, /) -> Self:
         # Save the parameters to the fields
-        self.fields.fig_num = fig_num
+        self.fields.figure = figure
 
         # Load the sets from the database
         for record in self.select(
@@ -127,13 +123,9 @@ class BrickSetList(BrickRecordList[BrickSet]):
         return self
 
     # Sets using a minifigure
-    def using_minifigure(
-        self,
-        fig_num: str,
-        /
-    ) -> Self:
+    def using_minifigure(self, figure: str, /) -> Self:
         # Save the parameters to the fields
-        self.fields.fig_num = fig_num
+        self.fields.figure = figure
 
         # Load the sets from the database
         for record in self.select(

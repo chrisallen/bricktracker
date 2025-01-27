@@ -1,10 +1,10 @@
 SELECT
-    "minifigures"."fig_num",
-    "minifigures"."set_num",
-    "minifigures"."name",
-    "minifigures"."quantity",
-    "minifigures"."set_img_url",
-    "minifigures"."u_id",
+    {% block set %}{% endblock %}
+    "bricktracker_minifigures"."quantity",
+    "rebrickable_minifigures"."figure",
+    "rebrickable_minifigures"."number",
+    "rebrickable_minifigures"."name",
+    "rebrickable_minifigures"."image",
     {% block total_missing %}
     NULL AS "total_missing", -- dummy for order: total_missing
     {% endblock %}
@@ -14,7 +14,10 @@ SELECT
     {% block total_sets %}
     NULL AS "total_sets" -- dummy for order: total_sets
     {% endblock %}
-FROM "minifigures"
+FROM "bricktracker_minifigures"
+
+INNER JOIN "rebrickable_minifigures"
+ON "bricktracker_minifigures"."rebrickable_figure" IS NOT DISTINCT FROM "rebrickable_minifigures"."figure"
 
 {% block join %}{% endblock %}
 

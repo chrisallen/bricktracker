@@ -32,11 +32,11 @@ ON "bricktracker_sets"."id" IS NOT DISTINCT FROM "missing_join"."u_id"
 -- LEFT JOIN + SELECT to avoid messing the total
 LEFT JOIN (
     SELECT
-       "minifigures"."u_id",
-       SUM("minifigures"."quantity") AS "total"
-    FROM "minifigures"
+       "bricktracker_minifigures"."bricktracker_set_id",
+       SUM("bricktracker_minifigures"."quantity") AS "total"
+    FROM "bricktracker_minifigures"
     {% block where_minifigures %}{% endblock %}
-    GROUP BY "u_id"
+    GROUP BY "bricktracker_minifigures"."bricktracker_set_id"
 ) "minifigures_join"
-ON "bricktracker_sets"."id" IS NOT DISTINCT FROM "minifigures_join"."u_id"
+ON "bricktracker_sets"."id" IS NOT DISTINCT FROM "minifigures_join"."bricktracker_set_id"
 {% endblock %}
