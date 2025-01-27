@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.1: PDF Instructions Download
+
+### Instructions
+
+- Added buttons for instructions download from Rebrickable
+
+
 ## 1.1.0: Deduped sets, custom checkboxes and database upgrade
 
 ### Database
