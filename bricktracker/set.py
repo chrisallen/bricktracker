@@ -97,10 +97,6 @@ class BrickSet(RebrickableSet):
 
             logger.debug(traceback.format_exc())
 
-    # Insert a Rebrickable set
-    def insert_rebrickable(self, /) -> None:
-        self.insert()
-
     # Minifigures
     def minifigures(self, /) -> BrickMinifigureList:
         return BrickMinifigureList().load(self)
