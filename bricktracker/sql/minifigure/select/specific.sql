@@ -2,5 +2,5 @@
 
 {% block where %}
 WHERE "rebrickable_minifigures"."figure" IS NOT DISTINCT FROM :figure
-AND "bricktracker_minifigures"."bricktracker_set_id" IS NOT DISTINCT FROM :bricktracker_set_id
+AND "bricktracker_minifigures"."id" IS NOT DISTINCT FROM :id
 {% endblock %}

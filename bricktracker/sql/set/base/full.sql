@@ -15,7 +15,7 @@ IFNULL("minifigures_join"."total", 0) AS "total_minifigures"
 {% block join %}
 {% if statuses %}
 LEFT JOIN "bricktracker_set_statuses"
-ON "bricktracker_sets"."id" IS NOT DISTINCT FROM "bricktracker_set_statuses"."bricktracker_set_id"
+ON "bricktracker_sets"."id" IS NOT DISTINCT FROM "bricktracker_set_statuses"."id"
 {% endif %}
 
 -- LEFT JOIN + SELECT to avoid messing the total
@@ -32,11 +32,11 @@ ON "bricktracker_sets"."id" IS NOT DISTINCT FROM "missing_join"."u_id"
 -- LEFT JOIN + SELECT to avoid messing the total
 LEFT JOIN (
     SELECT
-       "bricktracker_minifigures"."bricktracker_set_id",
+       "bricktracker_minifigures"."id",
        SUM("bricktracker_minifigures"."quantity") AS "total"
     FROM "bricktracker_minifigures"
     {% block where_minifigures %}{% endblock %}
-    GROUP BY "bricktracker_minifigures"."bricktracker_set_id"
+    GROUP BY "bricktracker_minifigures"."id"
 ) "minifigures_join"
-ON "bricktracker_sets"."id" IS NOT DISTINCT FROM "minifigures_join"."bricktracker_set_id"
+ON "bricktracker_sets"."id" IS NOT DISTINCT FROM "minifigures_join"."id"
 {% endblock %}

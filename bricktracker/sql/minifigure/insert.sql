@@ -1,9 +1,9 @@
 INSERT INTO "bricktracker_minifigures" (
-    "bricktracker_set_id",
-    "rebrickable_figure",
+    "id",
+    "figure",
     "quantity"
 ) VALUES (
-    :bricktracker_set_id,
+    :id,
     :figure,
     :quantity
 )

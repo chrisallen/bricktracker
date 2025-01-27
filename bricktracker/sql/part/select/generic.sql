@@ -22,8 +22,8 @@ AND "inventory"."element_id" IS NOT DISTINCT FROM "missing"."element_id"
 AND "inventory"."u_id" IS NOT DISTINCT FROM "missing"."u_id"
 
 LEFT JOIN "bricktracker_minifigures"
-ON "inventory"."set_num" IS NOT DISTINCT FROM "bricktracker_minifigures"."rebrickable_figure"
-AND "inventory"."u_id" IS NOT DISTINCT FROM "bricktracker_minifigures"."bricktracker_set_id"
+ON "inventory"."set_num" IS NOT DISTINCT FROM "bricktracker_minifigures"."figure"
+AND "inventory"."u_id" IS NOT DISTINCT FROM "bricktracker_minifigures"."id"
 {% endblock %}
 
 {% block where %}

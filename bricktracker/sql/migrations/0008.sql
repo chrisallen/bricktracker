@@ -1,32 +1,30 @@
--- description: Migrate the Bricktracker minifigures
-
-PRAGMA foreign_keys = ON;
+-- description: Creation of the deduplicated table of Rebrickable minifigures
 
 BEGIN TRANSACTION;
 
--- Create a Bricktable minifigures table: an amount of minifigures linked to a Bricktracker set
-CREATE TABLE "bricktracker_minifigures" (
-    "bricktracker_set_id" TEXT NOT NULL,
-    "rebrickable_figure" TEXT NOT NULL,
-    "quantity" INTEGER NOT NULL,
-    PRIMARY KEY("bricktracker_set_id", "rebrickable_figure"),
-    FOREIGN KEY("bricktracker_set_id") REFERENCES "bricktracker_sets"("id"),
-    FOREIGN KEY("rebrickable_figure") REFERENCES "rebrickable_minifigures"("figure")
+-- Create a Rebrickable minifigures table: each unique minifigure imported from Rebrickable
+CREATE TABLE "rebrickable_minifigures" (
+    "figure" TEXT NOT NULL,
+    "number" INTEGER NOT NULL,
+    "name" TEXT NOT NULL,
+    "image" TEXT,
+    PRIMARY KEY("figure")
 );
 
 -- Insert existing sets into the new table
-INSERT INTO "bricktracker_minifigures" (
-    "bricktracker_set_id",
-    "rebrickable_figure",
-    "quantity"
+INSERT INTO "rebrickable_minifigures" (
+    "figure",
+    "number",
+    "name",
+    "image"
 )
 SELECT
-    "minifigures"."u_id",
     "minifigures"."fig_num",
-    "minifigures"."quantity"
-FROM "minifigures";
-
--- Rename the original table (don't delete it yet?)
-ALTER TABLE "minifigures" RENAME TO "minifigures_old";
+    CAST(SUBSTR("minifigures"."fig_num", 5) AS INTEGER),
+    "minifigures"."name",
+    "minifigures"."set_img_url"
+FROM "minifigures"
+GROUP BY
+    "minifigures"."fig_num";
 
 COMMIT;

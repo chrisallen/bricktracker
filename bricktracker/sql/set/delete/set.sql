@@ -7,10 +7,10 @@ DELETE FROM "bricktracker_sets"
 WHERE "bricktracker_sets"."id" IS NOT DISTINCT FROM '{{ id }}';
 
 DELETE FROM "bricktracker_set_statuses"
-WHERE "bricktracker_set_statuses"."bricktracker_set_id" IS NOT DISTINCT FROM '{{ id }}';
+WHERE "bricktracker_set_statuses"."id" IS NOT DISTINCT FROM '{{ id }}';
 
 DELETE FROM "bricktracker_minifigures"
-WHERE "bricktracker_minifigures"."bricktracker_set_id" IS NOT DISTINCT FROM '{{ id }}';
+WHERE "bricktracker_minifigures"."id" IS NOT DISTINCT FROM '{{ id }}';
 
 DELETE FROM "missing"
 WHERE "missing"."u_id" IS NOT DISTINCT FROM '{{ id }}';

@@ -134,7 +134,7 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
         parameters: dict[str, Any] = super().sql_parameters()
 
         if self.brickset is not None:
-            parameters['bricktracker_set_id'] = self.brickset.fields.id
+            parameters['id'] = self.brickset.fields.id
 
         return parameters
 

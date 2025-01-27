@@ -75,9 +75,8 @@ class RebrickableMinifigure(BrickRecord):
         parameters = super().sql_parameters()
 
         # Supplement from the brickset
-        if self.brickset is not None:
-            if 'bricktracker_set_id' not in parameters:
-                parameters['bricktracker_set_id'] = self.brickset.fields.id
+        if self.brickset is not None and 'id' not in parameters:
+            parameters['id'] = self.brickset.fields.id
 
         return parameters
 

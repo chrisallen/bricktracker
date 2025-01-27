@@ -1,10 +1,10 @@
 INSERT INTO "bricktracker_set_statuses" (
-    "bricktracker_set_id",
+    "id",
     "{{name}}"
 ) VALUES (
     :id,
     :status
 )
-ON CONFLICT("bricktracker_set_id")
+ON CONFLICT("id")
 DO UPDATE SET "{{name}}" = :status
-WHERE "bricktracker_set_statuses"."bricktracker_set_id" IS NOT DISTINCT FROM :id
+WHERE "bricktracker_set_statuses"."id" IS NOT DISTINCT FROM :id

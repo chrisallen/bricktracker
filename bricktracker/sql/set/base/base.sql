@@ -21,7 +21,7 @@ SELECT
 FROM "bricktracker_sets"
 
 INNER JOIN "rebrickable_sets"
-ON "bricktracker_sets"."rebrickable_set" IS NOT DISTINCT FROM "rebrickable_sets"."set"
+ON "bricktracker_sets"."set" IS NOT DISTINCT FROM "rebrickable_sets"."set"
 
 {% block join %}{% endblock %}
 

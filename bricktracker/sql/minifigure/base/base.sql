@@ -17,7 +17,7 @@ SELECT
 FROM "bricktracker_minifigures"
 
 INNER JOIN "rebrickable_minifigures"
-ON "bricktracker_minifigures"."rebrickable_figure" IS NOT DISTINCT FROM "rebrickable_minifigures"."figure"
+ON "bricktracker_minifigures"."figure" IS NOT DISTINCT FROM "rebrickable_minifigures"."figure"
 
 {% block join %}{% endblock %}
 
