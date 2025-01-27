@@ -101,7 +101,7 @@ class BrickSet(RebrickableSet):
 
     # Minifigures
     def minifigures(self, /) -> BrickMinifigureList:
-        return BrickMinifigureList().load(self)
+        return BrickMinifigureList().from_set(self)
 
     # Parts
     def parts(self, /) -> BrickPartList:

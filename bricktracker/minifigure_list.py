@@ -61,7 +61,7 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
         return self
 
     # Load minifigures from a brickset
-    def load(self, brickset: 'BrickSet', /) -> Self:
+    def from_set(self, brickset: 'BrickSet', /) -> Self:
         # Save the brickset
         self.brickset = brickset
 
