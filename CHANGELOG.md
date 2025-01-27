@@ -1,5 +1,32 @@
 # Changelog
 
+## Unreleased
+
+## Code
+
+- General cleanup
+
+- Minifigure
+    - Deduplicate
+
+- Socket
+    - Add decorator for rebrickable, authenticated and threaded socket actions
+
+- SQL
+    - Allow for advanced migration scenarios through companion python files
+
+### UI
+
+- Add
+    - Allow adding or bulk adding by pressing Enter in the input field
+
+- Admin
+    - Grey out legacy tables in the database view
+
+- Sets
+    - Add a flag to hide instructions in a set
+
+
 ## 1.1.1: PDF Instructions Download
 
 ### Instructions
