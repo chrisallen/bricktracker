@@ -31,8 +31,8 @@ class BrickWish(RebrickableSet):
         # Load from database
         if not self.select():
             raise NotFoundException(
-                'Wish with number {number} was not found in the database'.format(  # noqa: E501
-                    number=self.fields.set,
+                'Wish for set {set} was not found in the database'.format(  # noqa: E501
+                    set=self.fields.set,
                 ),
             )
 

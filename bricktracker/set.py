@@ -41,8 +41,8 @@ class BrickSet(RebrickableSet):
         try:
             # Insert into the database
             self.socket.auto_progress(
-                message='Set {number}: inserting into database'.format(
-                    number=self.fields.set
+                message='Set {set}: inserting into database'.format(
+                    set=self.fields.set
                 ),
                 increment_total=True,
             )
@@ -64,8 +64,8 @@ class BrickSet(RebrickableSet):
 
             # Commit the transaction to the database
             self.socket.auto_progress(
-                message='Set {number}: writing to the database'.format(
-                    number=self.fields.set
+                message='Set {set}: writing to the database'.format(
+                    set=self.fields.set
                 ),
                 increment_total=True,
             )
@@ -73,15 +73,15 @@ class BrickSet(RebrickableSet):
             BrickSQL().commit()
 
             # Info
-            logger.info('Set {number}: imported (id: {id})'.format(
-                number=self.fields.set,
+            logger.info('Set {set}: imported (id: {id})'.format(
+                set=self.fields.set,
                 id=self.fields.id,
             ))
 
             # Complete
             self.socket.complete(
-                message='Set {number}: imported (<a href="{url}">Go to the set</a>)'.format(  # noqa: E501
-                    number=self.fields.set,
+                message='Set {set}: imported (<a href="{url}">Go to the set</a>)'.format(  # noqa: E501
+                    set=self.fields.set,
                     url=self.url()
                 ),
                 download=True
@@ -89,8 +89,8 @@ class BrickSet(RebrickableSet):
 
         except Exception as e:
             self.socket.fail(
-                message='Error while importing set {number}: {error}'.format(
-                    number=self.fields.set,
+                message='Error while importing set {set}: {error}'.format(
+                    set=self.fields.set,
                     error=e,
                 )
             )
@@ -155,9 +155,9 @@ class BrickSet(RebrickableSet):
         )
 
         if rows != 1:
-            raise DatabaseException('Could not update the status "{status}" for set {number} ({id})'.format(  # noqa: E501
+            raise DatabaseException('Could not update the status "{status}" for set {set} ({id})'.format(  # noqa: E501
                 status=checkbox.fields.name,
-                number=self.fields.set,
+                set=self.fields.set,
                 id=self.fields.id,
             ))
 
