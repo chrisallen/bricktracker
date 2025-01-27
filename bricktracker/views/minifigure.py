@@ -19,12 +19,12 @@ def list() -> str:
 
 
 # Minifigure details
-@minifigure_page.route('/<number>/details')
+@minifigure_page.route('/<figure>/details')
 @exception_handler(__file__)
-def details(*, number: str) -> str:
+def details(*, figure: str) -> str:
     return render_template(
         'minifigure.html',
-        item=BrickMinifigure().select_generic(number),
-        using=BrickSetList().using_minifigure(number),
-        missing=BrickSetList().missing_minifigure(number),
+        item=BrickMinifigure().select_generic(figure),
+        using=BrickSetList().using_minifigure(figure),
+        missing=BrickSetList().missing_minifigure(figure),
     )

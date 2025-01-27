@@ -108,33 +108,28 @@ def details(*, id: str) -> str:
 
 
 # Update the missing pieces of a minifig part
-@set_page.route('/<id>/minifigures/<minifigure_id>/parts/<part_id>/missing', methods=['POST'])  # noqa: E501
+@set_page.route('/<id>/minifigures/<figure>/parts/<part>/missing', methods=['POST'])  # noqa: E501
 @login_required
 @exception_handler(__file__, json=True)
-def missing_minifigure_part(
-    *,
-    id: str,
-    minifigure_id: str,
-    part_id: str
-) -> Response:
+def missing_minifigure_part(*, id: str, figure: str, part: str) -> Response:
     brickset = BrickSet().select_specific(id)
-    minifigure = BrickMinifigure().select_specific(brickset, minifigure_id)
-    part = BrickPart().select_specific(
+    brickminifigure = BrickMinifigure().select_specific(brickset, figure)
+    brickpart = BrickPart().select_specific(
         brickset,
-        part_id,
-        minifigure=minifigure,
+        part,
+        minifigure=brickminifigure,
     )
 
     missing = request.json.get('missing', '')  # type: ignore
 
-    part.update_missing(missing)
+    brickpart.update_missing(missing)
 
     # Info
-    logger.info('Set {number} ({id}): updated minifigure ({minifigure}) part ({part}) missing count to {missing}'.format(  # noqa: E501
+    logger.info('Set {number} ({id}): updated minifigure ({figure}) part ({part}) missing count to {missing}'.format(  # noqa: E501
         number=brickset.fields.set,
         id=brickset.fields.id,
-        minifigure=minifigure.fields.fig_num,
-        part=part.fields.id,
+        figure=brickminifigure.fields.fig_num,
+        part=brickpart.fields.id,
         missing=missing,
     ))
 
@@ -142,22 +137,22 @@ def missing_minifigure_part(
 
 
 # Update the missing pieces of a part
-@set_page.route('/<id>/parts/<part_id>/missing', methods=['POST'])
+@set_page.route('/<id>/parts/<part>/missing', methods=['POST'])
 @login_required
 @exception_handler(__file__, json=True)
-def missing_part(*, id: str, part_id: str) -> Response:
+def missing_part(*, id: str, part: str) -> Response:
     brickset = BrickSet().select_specific(id)
-    part = BrickPart().select_specific(brickset, part_id)
+    brickpart = BrickPart().select_specific(brickset, part)
 
     missing = request.json.get('missing', '')  # type: ignore
 
-    part.update_missing(missing)
+    brickpart.update_missing(missing)
 
     # Info
     logger.info('Set {number} ({id}): updated part ({part}) missing count to {missing}'.format(  # noqa: E501
         number=brickset.fields.set,
         id=brickset.fields.id,
-        part=part.fields.id,
+        part=brickpart.fields.id,
         missing=missing,
     ))
 
