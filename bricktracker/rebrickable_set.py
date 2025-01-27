@@ -52,8 +52,8 @@ class RebrickableSet(BrickRecord):
         if record is not None:
             self.ingest(record)
 
-    # Import the set from Rebrickable
-    def download_rebrickable(self, /) -> None:
+    # Insert the set from Rebrickable
+    def insert_rebrickable(self, /) -> bool:
         # Insert the Rebrickable set to the database
         rows, _ = self.insert(
             commit=False,
@@ -61,9 +61,13 @@ class RebrickableSet(BrickRecord):
             override_query=RebrickableSet.insert_query
         )
 
-        if rows > 0:
+        inserted = rows > 0
+
+        if inserted:
             if not current_app.config['USE_REMOTE_IMAGES']:
                 RebrickableImage(self).download()
+
+        return inserted
 
     # Ingest a set
     def ingest(self, record: Row | dict[str, Any], /):

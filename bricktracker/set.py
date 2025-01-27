@@ -54,7 +54,7 @@ class BrickSet(RebrickableSet):
             self.insert(commit=False)
 
             # Execute the parent download method
-            self.download_rebrickable()
+            self.insert_rebrickable()
 
             # Load the inventory
             RebrickableParts(self.socket, self).download()
