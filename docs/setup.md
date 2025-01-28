@@ -1,7 +1,7 @@
 # Setup
 
 > **Note**
-> The following page is based on version `1.0.0` of BrickTracker.
+> The following page is based on version `1.1.1` of BrickTracker.
 
 ## Prerequisites
 
@@ -53,6 +53,8 @@ services:
 The [.env.sample](../.env.sample) file provides ample documentation on all the configurable options. Have a look at it.
 You can make a copy of `.env.sample` as `.env` with your options or create an `.env` file from scratch.
 
+[Environment Variables Reference](docs/env.md) contains a table of the available variables.
+
 ## Database file
 
 To accomodate for the original version of BrickTracker, the default database path is `./app.db`.
@@ -88,6 +90,24 @@ Some CSV files are used to resolve informations like theme names or retired set 
 In the original version of BrickTracker they were either shipped with the container or residing at the root of the application, meaning that any update to it would not survive a container update.
 
 You can use the `BK_RETIRED_SET_PATH` and `BK_THEMES_PATH` to relocate them into a volume.
+
+## Directory Structure
+
+Updated directory structure showing data volume organization:
+```
+bricktracker/
+├── data/                  # Persistent data
+│   ├── app.db             # Database file
+│   ├── retired_sets.csv   # Retired sets data
+│   └── themes.csv         # Themes data
+├── static/                # Static files
+│   ├── instructions/      # PDF and other instruction files
+│   ├── minifigures/       # Minifigure images
+│   ├── parts/             # Part images
+│   └── sets/              # Set images
+├── .env                   # Environment configuration
+└── compose.yaml     # Docker compose configuration
+```
 
 ## Authentication
 

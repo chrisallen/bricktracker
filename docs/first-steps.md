@@ -1,7 +1,7 @@
 # First steps
 
 > **Note**
-> The following page is based on version `1.0.0` of BrickTracker.
+> The following page is based on version `1.1.1` of BrickTracker.
 
 ## Database initialization
 

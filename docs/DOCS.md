@@ -9,6 +9,7 @@ This page helps you navigate the documentation of BrickTracker.
 ## Installation
 
 - [Setup](setup.md)
+- [Variables overview](env.md)
 
 ## Usage
 

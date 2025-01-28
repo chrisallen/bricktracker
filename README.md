@@ -18,7 +18,9 @@ A web application for organizing and tracking LEGO sets, parts, and minifigures.
 
 Use the provided [compose.yaml](compose.yaml) file.
 
-See [setup](docs/setup.md).
+See [Quickstart](docs/quickstart.md) to get up and running right away.
+
+See [Setup](docs/setup.md) for a more setup guide.
 
 ## Usage
 
