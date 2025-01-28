@@ -30,9 +30,6 @@ class RebrickableMinifigure(BrickRecord):
     ):
         super().__init__()
 
-        # Placeholders
-        self.instructions = []
-
         # Save the brickset
         self.brickset = brickset
 
