@@ -1,7 +1,10 @@
 // Set Socket class
 class BrickSetSocket extends BrickSocket {
-    constructor(id, path, namespace, messages, bulk=false) {
+    constructor(id, path, namespace, messages, bulk=false, refresh=false) {
         super(id, path, namespace, messages, bulk);
+
+        // Refresh mode
+        this.refresh = true
 
         // Listeners
         this.add_listener = undefined;
@@ -82,7 +85,7 @@ class BrickSetSocket extends BrickSocket {
                 this.read_set_list();
             }
 
-            if (this.bulk || (this.html_no_confim && this.html_no_confim.checked)) {
+            if (this.bulk || this.refresh || (this.html_no_confim && this.html_no_confim.checked)) {
                 this.import_set(true);
             } else {
                 this.load_set();
@@ -140,6 +143,7 @@ class BrickSetSocket extends BrickSocket {
 
             this.socket.emit(this.messages.IMPORT_SET, {
                 set: (set !== undefined) ? set : this.html_input.value,
+                refresh: this.refresh
             });
         } else {
             this.fail("Could not find the input field for the set number");

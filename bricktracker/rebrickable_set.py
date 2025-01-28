@@ -47,21 +47,16 @@ class RebrickableSet(BrickRecord):
             self.ingest(record)
 
     # Insert the set from Rebrickable
-    def insert_rebrickable(self, /) -> bool:
+    def insert_rebrickable(self, /) -> None:
         # Insert the Rebrickable set to the database
-        rows, _ = self.insert(
+        self.insert(
             commit=False,
             no_defer=True,
             override_query=RebrickableSet.insert_query
         )
 
-        inserted = rows > 0
-
-        if inserted:
-            if not current_app.config['USE_REMOTE_IMAGES']:
-                RebrickableImage(self).download()
-
-        return inserted
+        if not current_app.config['USE_REMOTE_IMAGES']:
+            RebrickableImage(self).download()
 
     # Ingest a set
     def ingest(self, record: Row | dict[str, Any], /):

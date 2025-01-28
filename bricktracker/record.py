@@ -1,5 +1,5 @@
 from sqlite3 import Row
-from typing import Any, ItemsView, Tuple
+from typing import Any, ItemsView
 
 from .fields import BrickRecordFields
 from .sql import BrickSQL
@@ -31,14 +31,14 @@ class BrickRecord(object):
         commit=True,
         no_defer=False,
         override_query: str | None = None
-    ) -> Tuple[int, str]:
+    ) -> None:
         if override_query:
             query = override_query
         else:
             query = self.insert_query
 
         database = BrickSQL()
-        rows, q = database.execute(
+        database.execute(
             query,
             parameters=self.sql_parameters(),
             defer=not commit and not no_defer,
@@ -46,8 +46,6 @@ class BrickRecord(object):
 
         if commit:
             database.commit()
-
-        return rows, q
 
     # Shorthand to field items
     def items(self, /) -> ItemsView[str, Any]:

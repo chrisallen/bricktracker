@@ -9,3 +9,9 @@ INSERT OR IGNORE INTO "rebrickable_minifigures" (
     :name,
     :image
 )
+ON CONFLICT("figure")
+DO UPDATE SET
+"number" = :number,
+"name" = :name,
+"image" = :image
+WHERE "rebrickable_minifigures"."figure" IS NOT DISTINCT FROM :figure

@@ -34,7 +34,7 @@ class BrickPart(RebrickablePart):
             self.kind = 'Set'
 
     # Import a part into the database
-    def download(self, socket: 'BrickSocket') -> bool:
+    def download(self, socket: 'BrickSocket', refresh: bool = False) -> bool:
         if self.brickset is None:
             raise ErrorException('Importing a part from Rebrickable outside of a set is not supported')  # noqa: E501
 
@@ -48,8 +48,9 @@ class BrickPart(RebrickablePart):
                 )
             )
 
-            # Insert into database
-            self.insert(commit=False)
+            if not refresh:
+                # Insert into database
+                self.insert(commit=False)
 
             # Insert the rebrickable set into database
             self.insert_rebrickable()

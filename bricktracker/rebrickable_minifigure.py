@@ -38,27 +38,22 @@ class RebrickableMinifigure(BrickRecord):
             self.ingest(record)
 
     # Insert the minifigure from Rebrickable
-    def insert_rebrickable(self, /) -> bool:
+    def insert_rebrickable(self, /) -> None:
         if self.brickset is None:
             raise ErrorException('Importing a minifigure from Rebrickable outside of a set is not supported')  # noqa: E501
 
         # Insert the Rebrickable minifigure to the database
-        rows, _ = self.insert(
+        self.insert(
             commit=False,
             no_defer=True,
             override_query=RebrickableMinifigure.insert_query
         )
 
-        inserted = rows > 0
-
-        if inserted:
-            if not current_app.config['USE_REMOTE_IMAGES']:
-                RebrickableImage(
-                    self.brickset,
-                    minifigure=self,
-                ).download()
-
-        return inserted
+        if not current_app.config['USE_REMOTE_IMAGES']:
+            RebrickableImage(
+                self.brickset,
+                minifigure=self,
+            ).download()
 
     # Return a dict with common SQL parameters for a minifigure
     def sql_parameters(self, /) -> dict[str, Any]:

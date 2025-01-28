@@ -47,21 +47,25 @@ class BrickSet(RebrickableSet):
                 increment_total=True,
             )
 
+            # Grabbing the refresh flag
+            refresh: bool = bool(data.get('refresh', False))
+
             # Generate an UUID for self
             self.fields.id = str(uuid4())
 
-            # Insert into database
-            self.insert(commit=False)
+            if not refresh:
+                # Insert into database
+                self.insert(commit=False)
 
             # Insert the rebrickable set into database
             self.insert_rebrickable()
 
             # Load the inventory
-            if not BrickPartList.download(socket, self):
+            if not BrickPartList.download(socket, self, refresh=refresh):
                 return False
 
             # Load the minifigures
-            if not BrickMinifigureList.download(socket, self):
+            if not BrickMinifigureList.download(socket, self, refresh=refresh):
                 return False
 
             # Commit the transaction to the database
@@ -74,20 +78,34 @@ class BrickSet(RebrickableSet):
 
             BrickSQL().commit()
 
-            # Info
-            logger.info('Set {set}: imported (id: {id})'.format(
-                set=self.fields.set,
-                id=self.fields.id,
-            ))
-
-            # Complete
-            socket.complete(
-                message='Set {set}: imported (<a href="{url}">Go to the set</a>)'.format(  # noqa: E501
+            if refresh:
+                # Info
+                logger.info('Set {set}: imported (id: {id})'.format(
                     set=self.fields.set,
-                    url=self.url()
-                ),
-                download=True
-            )
+                    id=self.fields.id,
+                ))
+
+                # Complete
+                socket.complete(
+                    message='Set {set}: refreshed'.format(  # noqa: E501
+                        set=self.fields.set,
+                    ),
+                    download=True
+                )
+            else:
+                # Info
+                logger.info('Set {set}: refreshed'.format(
+                    set=self.fields.set,
+                ))
+
+                # Complete
+                socket.complete(
+                    message='Set {set}: imported (<a href="{url}">Go to the set</a>)'.format(  # noqa: E501
+                        set=self.fields.set,
+                        url=self.url()
+                    ),
+                    download=True
+                )
 
         except Exception as e:
             socket.fail(
@@ -192,3 +210,10 @@ class BrickSet(RebrickableSet):
             )
         else:
             return ''
+
+    # Compute the url for the refresh button
+    def url_for_refresh(self, /) -> str:
+        return url_for(
+            'set.refresh',
+            id=self.fields.id,
+        )

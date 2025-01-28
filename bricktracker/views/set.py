@@ -2,6 +2,7 @@ import logging
 
 from flask import (
     Blueprint,
+    current_app,
     jsonify,
     render_template,
     redirect,
@@ -17,6 +18,7 @@ from ..part import BrickPart
 from ..set import BrickSet
 from ..set_checkbox_list import BrickSetCheckboxList
 from ..set_list import BrickSetList
+from ..socket import MESSAGES
 
 logger = logging.getLogger(__name__)
 
@@ -154,3 +156,16 @@ def missing_part(
     ))
 
     return jsonify({'missing': missing})
+
+
+# Refresh a set
+@set_page.route('/<id>/refresh', methods=['GET'])
+@exception_handler(__file__)
+def refresh(*, id: str) -> str:
+    return render_template(
+        'refresh.html',
+        item=BrickSet().select_specific(id),
+        path=current_app.config['SOCKET_PATH'],
+        namespace=current_app.config['SOCKET_NAMESPACE'],
+        messages=MESSAGES
+    )

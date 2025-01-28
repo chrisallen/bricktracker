@@ -1,12 +1,19 @@
 <script type="text/javascript">
   document.addEventListener("DOMContentLoaded", () => {
-    new BrickSetSocket('add', '{{ path }}', '{{ namespace }}', {
-      COMPLETE: '{{ messages['COMPLETE'] }}',
-      FAIL: '{{ messages['FAIL'] }}',
-      IMPORT_SET: '{{ messages['IMPORT_SET'] }}',
-      LOAD_SET: '{{ messages['LOAD_SET'] }}',
-      PROGRESS: '{{ messages['PROGRESS'] }}',
-      SET_LOADED: '{{ messages['SET_LOADED'] }}',
-    }{% if bulk %}, true{% endif %});
+    new BrickSetSocket(
+      '{{ id }}',
+      '{{ path }}',
+      '{{ namespace }}',
+      {
+        COMPLETE: '{{ messages['COMPLETE'] }}',
+        FAIL: '{{ messages['FAIL'] }}',
+        IMPORT_SET: '{{ messages['IMPORT_SET'] }}',
+        LOAD_SET: '{{ messages['LOAD_SET'] }}',
+        PROGRESS: '{{ messages['PROGRESS'] }}',
+        SET_LOADED: '{{ messages['SET_LOADED'] }}',
+      },
+      {% if bulk %}true{% else %}false{% endif %},
+      {% if refresh %}true{% else %}false{% endif %}
+    );
   });
 </script>

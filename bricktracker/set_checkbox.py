@@ -1,5 +1,5 @@
 from sqlite3 import Row
-from typing import Any, Self, Tuple
+from typing import Any, Self
 from uuid import uuid4
 
 from flask import url_for
@@ -60,7 +60,7 @@ class BrickSetCheckbox(BrickRecord):
         return self
 
     # Insert into database
-    def insert(self, **_) -> Tuple[int, str]:
+    def insert(self, **_) -> None:
         # Generate an ID for the checkbox (with underscores to make it
         # column name friendly)
         self.fields.id = str(uuid4()).replace('-', '_')
@@ -71,9 +71,6 @@ class BrickSetCheckbox(BrickRecord):
             name=self.fields.safe_name,
             displayed_on_grid=self.fields.displayed_on_grid
         )
-
-        # To accomodate the parent().insert we have overriden
-        return 0, ''
 
     # Rename the checkbox
     def rename(self, /) -> None:

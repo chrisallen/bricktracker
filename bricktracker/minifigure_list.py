@@ -134,7 +134,13 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
 
     # Import the minifigures from Rebrickable
     @staticmethod
-    def download(socket: 'BrickSocket', brickset: 'BrickSet', /) -> bool:
+    def download(
+        socket: 'BrickSocket',
+        brickset: 'BrickSet',
+        /,
+        *,
+        refresh: bool = False
+    ) -> bool:
         try:
             socket.auto_progress(
                 message='Set {set}: loading minifigures from Rebrickable'.format(  # noqa: E501
@@ -157,7 +163,7 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
 
             # Process each minifigure
             for minifigure in minifigures:
-                if not minifigure.download(socket):
+                if not minifigure.download(socket, refresh=refresh):
                     return False
 
             return True

@@ -68,5 +68,7 @@
     </div>
   </div>
 </div>
-{% include 'set/socket.html' %}
+{% with id='add' %}
+  {% include 'set/socket.html' %}
+{% endwith %}
 {% endblock %}

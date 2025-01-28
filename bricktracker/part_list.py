@@ -139,6 +139,7 @@ class BrickPartList(BrickRecordList[BrickPart]):
         /,
         *,
         minifigure: 'BrickMinifigure | None' = None,
+        refresh: bool = False
     ) -> bool:
         if minifigure is not None:
             identifier = minifigure.fields.figure
@@ -174,7 +175,7 @@ class BrickPartList(BrickRecordList[BrickPart]):
 
             # Process each part
             for part in inventory:
-                if not part.download(socket):
+                if not part.download(socket, refresh=refresh):
                     return False
 
         except Exception as e:
