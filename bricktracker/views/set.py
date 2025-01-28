@@ -107,16 +107,34 @@ def details(*, id: str) -> str:
     )
 
 
-# Update the missing pieces of a minifig part
-@set_page.route('/<id>/minifigures/<figure>/parts/<part>/missing', methods=['POST'])  # noqa: E501
+# Update the missing pieces of a part
+@set_page.route('/<id>/parts/<part>/<int:color>/<int:spare>/missing', defaults={'figure': None}, methods=['POST'])  # noqa: E501
+@set_page.route('/<id>/minifigures/<figure>/parts/<part>/<int:color>/<int:spare>/missing', methods=['POST'])  # noqa: E501
 @login_required
 @exception_handler(__file__, json=True)
-def missing_minifigure_part(*, id: str, figure: str, part: str) -> Response:
+def missing_part(
+    *,
+    id: str,
+    figure: str | None,
+    part: str,
+    color: int,
+    spare: int,
+) -> Response:
+    from pprint import pprint
+    pprint(locals())
+
     brickset = BrickSet().select_specific(id)
-    brickminifigure = BrickMinifigure().select_specific(brickset, figure)
+
+    if figure is not None:
+        brickminifigure = BrickMinifigure().select_specific(brickset, figure)
+    else:
+        brickminifigure = None
+
     brickpart = BrickPart().select_specific(
         brickset,
         part,
+        color,
+        spare,
         minifigure=brickminifigure,
     )
 
@@ -125,35 +143,14 @@ def missing_minifigure_part(*, id: str, figure: str, part: str) -> Response:
     brickpart.update_missing(missing)
 
     # Info
-    logger.info('Set {set} ({id}): updated minifigure ({figure}) part ({part}) missing count to {missing}'.format(  # noqa: E501
+    logger.info('Set {set} ({id}): updated part ({part} color: {color}, spare: {spare}, minifigure: {figure}) missing count to {missing}'.format(  # noqa: E501
         set=brickset.fields.set,
         id=brickset.fields.id,
-        figure=brickminifigure.fields.figure,
-        part=brickpart.fields.id,
-        missing=missing,
-    ))
-
-    return jsonify({'missing': missing})
-
-
-# Update the missing pieces of a part
-@set_page.route('/<id>/parts/<part>/missing', methods=['POST'])
-@login_required
-@exception_handler(__file__, json=True)
-def missing_part(*, id: str, part: str) -> Response:
-    brickset = BrickSet().select_specific(id)
-    brickpart = BrickPart().select_specific(brickset, part)
-
-    missing = request.json.get('missing', '')  # type: ignore
-
-    brickpart.update_missing(missing)
-
-    # Info
-    logger.info('Set {set} ({id}): updated part ({part}) missing count to {missing}'.format(  # noqa: E501
-        set=brickset.fields.set,
-        id=brickset.fields.id,
-        part=brickpart.fields.id,
-        missing=missing,
+        figure=figure,
+        part=brickpart.fields.part,
+        color=brickpart.fields.color,
+        spare=brickpart.fields.spare,
+        missing=brickpart.fields.missing,
     ))
 
     return jsonify({'missing': missing})

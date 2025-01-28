@@ -30,31 +30,26 @@ def missing() -> str:
 
 
 # Part details
-@part_page.route('/<number>/<int:color>/details', defaults={'element': None}, methods=['GET'])  # noqa: E501
-@part_page.route('/<number>/<int:color>/<int:element>/details', methods=['GET'])  # noqa: E501
+@part_page.route('/<part>/<int:color>/details', methods=['GET'])  # noqa: E501
 @exception_handler(__file__)
-def details(*, number: str, color: int, element: int | None) -> str:
+def details(*, part: str, color: int) -> str:
     return render_template(
         'part.html',
-        item=BrickPart().select_generic(number, color, element_id=element),
+        item=BrickPart().select_generic(part, color),
         sets_using=BrickSetList().using_part(
-            number,
-            color,
-            element_id=element
+            part,
+            color
         ),
         sets_missing=BrickSetList().missing_part(
-            number,
-            color,
-            element_id=element
+            part,
+            color
         ),
         minifigures_using=BrickMinifigureList().using_part(
-            number,
-            color,
-            element_id=element
+            part,
+            color
         ),
         minifigures_missing=BrickMinifigureList().missing_part(
-            number,
-            color,
-            element_id=element
+            part,
+            color
         ),
     )

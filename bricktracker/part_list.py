@@ -1,12 +1,18 @@
+import logging
 from typing import Any, Self, TYPE_CHECKING
+import traceback
 
 from flask import current_app
 
 from .part import BrickPart
+from .rebrickable import Rebrickable
 from .record_list import BrickRecordList
 if TYPE_CHECKING:
     from .minifigure import BrickMinifigure
     from .set import BrickSet
+    from .socket import BrickSocket
+
+logger = logging.getLogger(__name__)
 
 
 # Lego set or minifig parts
@@ -20,7 +26,7 @@ class BrickPartList(BrickRecordList[BrickPart]):
     last_query: str = 'part/list/last'
     minifigure_query: str = 'part/list/from_minifigure'
     missing_query: str = 'part/list/missing'
-    select_query: str = 'part/list/from_set'
+    select_query: str = 'part/list/specific'
 
     def __init__(self, /):
         super().__init__()
@@ -44,8 +50,8 @@ class BrickPartList(BrickRecordList[BrickPart]):
 
         return self
 
-    # Load parts from a brickset or minifigure
-    def load(
+    # List specific parts from a brickset or minifigure
+    def list_specific(
         self,
         brickset: 'BrickSet',
         /,
@@ -64,7 +70,7 @@ class BrickPartList(BrickRecordList[BrickPart]):
                 record=record,
             )
 
-            if current_app.config['SKIP_SPARE_PARTS'] and part.fields.is_spare:
+            if current_app.config['SKIP_SPARE_PARTS'] and part.fields.spare:
                 continue
 
             self.records.append(part)
@@ -90,7 +96,7 @@ class BrickPartList(BrickRecordList[BrickPart]):
                 record=record,
             )
 
-            if current_app.config['SKIP_SPARE_PARTS'] and part.fields.is_spare:
+            if current_app.config['SKIP_SPARE_PARTS'] and part.fields.spare:
                 continue
 
             self.records.append(part)
@@ -115,13 +121,73 @@ class BrickPartList(BrickRecordList[BrickPart]):
 
         # Set id
         if self.brickset is not None:
-            parameters['u_id'] = self.brickset.fields.id
+            parameters['id'] = self.brickset.fields.id
 
         # Use the minifigure number if present,
-        # otherwise use the set number
         if self.minifigure is not None:
-            parameters['set_num'] = self.minifigure.fields.figure
-        elif self.brickset is not None:
-            parameters['set_num'] = self.brickset.fields.set
+            parameters['figure'] = self.minifigure.fields.figure
+        else:
+            parameters['figure'] = None
 
         return parameters
+
+    # Import the parts from Rebrickable
+    @staticmethod
+    def download(
+        socket: 'BrickSocket',
+        brickset: 'BrickSet',
+        /,
+        *,
+        minifigure: 'BrickMinifigure | None' = None,
+    ) -> bool:
+        if minifigure is not None:
+            identifier = minifigure.fields.figure
+            kind = 'Minifigure'
+            method = 'get_minifig_elements'
+        else:
+            identifier = brickset.fields.set
+            kind = 'Set'
+            method = 'get_set_elements'
+
+        try:
+            socket.auto_progress(
+                message='{kind} {identifier}: loading parts inventory from Rebrickable'.format(  # noqa: E501
+                    kind=kind,
+                    identifier=identifier,
+                ),
+                increment_total=True,
+            )
+
+            logger.debug('rebrick.lego.{method}("{identifier}")'.format(
+                method=method,
+                identifier=identifier,
+            ))
+
+            inventory = Rebrickable[BrickPart](
+                method,
+                identifier,
+                BrickPart,
+                socket=socket,
+                brickset=brickset,
+                minifigure=minifigure,
+            ).list()
+
+            # Process each part
+            for part in inventory:
+                if not part.download(socket):
+                    return False
+
+        except Exception as e:
+            socket.fail(
+                message='Error while importing {kind} {identifier} parts list: {error}'.format(  # noqa: E501
+                    kind=kind,
+                    identifier=identifier,
+                    error=e,
+                )
+            )
+
+            logger.debug(traceback.format_exc())
+
+            return False
+
+        return True

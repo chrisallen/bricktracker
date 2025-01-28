@@ -3,15 +3,20 @@ from typing import Tuple
 # Some table aliases to make it look cleaner (id: (name, icon))
 ALIASES: dict[str, Tuple[str, str]] = {
     'bricktracker_minifigures': ('Bricktracker minifigures', 'group-line'),
+    'bricktracker_parts': ('Bricktracker parts', 'shapes-line'),
     'bricktracker_set_checkboxes': ('Bricktracker set checkboxes', 'checkbox-line'),  # noqa: E501
-    'bricktracker_set_statuses': ('Bricktracker sets status', 'checkbox-line'),
+    'bricktracker_set_statuses': ('Bricktracker sets status', 'checkbox-circle-line'),  # noqa: E501
+    'bricktracker_set_storages': ('Bricktracker sets storages', 'archive-2-line'),  # noqa: E501
     'bricktracker_sets': ('Bricktracker sets', 'hashtag'),
     'bricktracker_wishes': ('Bricktracker wishes', 'gift-line'),
     'inventory': ('Parts', 'shapes-line'),
+    'inventory_old': ('Parts (legacy)', 'shapes-line'),
     'minifigures': ('Minifigures', 'group-line'),
     'minifigures_old': ('Minifigures (legacy)', 'group-line'),
     'missing': ('Missing', 'error-warning-line'),
+    'missing_old': ('Missing (legacy)', 'error-warning-line'),
     'rebrickable_minifigures': ('Rebrickable minifigures', 'group-line'),
+    'rebrickable_parts': ('Rebrickable parts', 'shapes-line'),
     'rebrickable_sets': ('Rebrickable sets', 'hashtag'),
     'sets': ('Sets', 'hashtag'),
     'sets_old': ('Sets (legacy)', 'hashtag'),

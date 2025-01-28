@@ -21,13 +21,13 @@ ON "bricktracker_sets"."id" IS NOT DISTINCT FROM "bricktracker_set_statuses"."id
 -- LEFT JOIN + SELECT to avoid messing the total
 LEFT JOIN (
     SELECT
-        "missing"."u_id",
-        SUM("missing"."quantity") AS "total"
-    FROM "missing"
+        "bricktracker_parts"."id",
+        SUM("bricktracker_parts"."missing") AS "total"
+    FROM "bricktracker_parts"
     {% block where_missing %}{% endblock %}
-    GROUP BY "u_id"
+    GROUP BY "bricktracker_parts"."id"
 ) "missing_join"
-ON "bricktracker_sets"."id" IS NOT DISTINCT FROM "missing_join"."u_id"
+ON "bricktracker_sets"."id" IS NOT DISTINCT FROM "missing_join"."id"
 
 -- LEFT JOIN + SELECT to avoid messing the total
 LEFT JOIN (

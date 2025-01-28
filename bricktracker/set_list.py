@@ -100,16 +100,13 @@ class BrickSetList(BrickRecordList[BrickSet]):
     # Sets missing a part
     def missing_part(
         self,
-        part_num: str,
-        color_id: int,
-        /,
-        *,
-        element_id: int | None = None,
+        part: str,
+        color: int,
+        /
     ) -> Self:
         # Save the parameters to the fields
-        self.fields.part_num = part_num
-        self.fields.color_id = color_id
-        self.fields.element_id = element_id
+        self.fields.part = part
+        self.fields.color = color
 
         # Load the sets from the database
         for record in self.select(
@@ -141,16 +138,13 @@ class BrickSetList(BrickRecordList[BrickSet]):
     # Sets using a part
     def using_part(
         self,
-        part_num: str,
-        color_id: int,
-        /,
-        *,
-        element_id: int | None = None,
+        part: str,
+        color: int,
+        /
     ) -> Self:
         # Save the parameters to the fields
-        self.fields.part_num = part_num
-        self.fields.color_id = color_id
-        self.fields.element_id = element_id
+        self.fields.part = part
+        self.fields.color = color
 
         # Load the sets from the database
         for record in self.select(

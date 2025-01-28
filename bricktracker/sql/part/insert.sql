@@ -1,27 +1,19 @@
-INSERT INTO inventory (
-    "set_num",
+INSERT INTO "bricktracker_parts" (
     "id",
-    "part_num",
-    "name",
-    "part_img_url",
-    "part_img_url_id",
-    "color_id",
-    "color_name",
+    "figure",
+    "part",
+    "color",
+    "spare",
     "quantity",
-    "is_spare",
-    "element_id",
-    "u_id"
+    "element",
+    "rebrickable_inventory"
 ) VALUES (
-    :set_num,
     :id,
-    :part_num,
-    :name,
-    :part_img_url,
-    :part_img_url_id,
-    :color_id,
-    :color_name,
+    :figure,
+    :part,
+    :color,
+    :spare,
     :quantity,
-    :is_spare,
-    :element_id,
-    :u_id
+    :element,
+    :rebrickable_inventory
 )

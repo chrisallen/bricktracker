@@ -2,14 +2,11 @@
 
 {% block where %}
 WHERE "bricktracker_sets"."id" IN (
-    SELECT
-        "missing"."u_id"
-    FROM "missing"
-
-    WHERE "missing"."color_id" IS NOT DISTINCT FROM :color_id
-    AND "missing"."element_id" IS NOT DISTINCT FROM :element_id
-    AND "missing"."part_num" IS NOT DISTINCT FROM :part_num
-
-    GROUP BY "missing"."u_id"
+    SELECT "bricktracker_parts"."id"
+    FROM "bricktracker_parts"
+    WHERE "bricktracker_parts"."part" IS NOT DISTINCT FROM :part
+    AND "bricktracker_parts"."color" IS NOT DISTINCT FROM :color
+    AND "bricktracker_parts"."missing" > 0
+    GROUP BY "bricktracker_parts"."id"
 )
 {% endblock %}

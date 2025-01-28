@@ -1,7 +1,7 @@
 {% extends 'minifigure/base/base.sql' %}
 
 {% block total_missing %}
-SUM(IFNULL("missing"."quantity", 0)) AS "total_missing",
+IFNULL("missing_join"."total", 0) AS "total_missing",
 {% endblock %}
 
 {% block total_quantity %}
@@ -13,9 +13,16 @@ COUNT(DISTINCT "bricktracker_minifigures"."id") AS "total_sets"
 {% endblock %}
 
 {% block join %}
-LEFT JOIN "missing"
-ON "rebrickable_minifigures"."figure" IS NOT DISTINCT FROM "missing"."set_num"
-AND "bricktracker_minifigures"."id" IS NOT DISTINCT FROM "missing"."u_id"
+-- LEFT JOIN + SELECT to avoid messing the total
+LEFT JOIN (
+    SELECT
+        "bricktracker_parts"."figure",
+        SUM("bricktracker_parts"."missing") AS "total"
+    FROM "bricktracker_parts"
+    WHERE "bricktracker_parts"."figure" IS NOT DISTINCT FROM :figure
+    GROUP BY "bricktracker_parts"."figure"
+) "missing_join"
+ON "rebrickable_minifigures"."figure" IS NOT DISTINCT FROM "missing_join"."figure"
 {% endblock %}
 
 {% block where %}

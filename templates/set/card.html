@@ -11,8 +11,8 @@
     {% for checkbox in brickset_checkboxes %}data-{{ checkbox.as_dataset() }}="{{ item.fields[checkbox.as_column()] }}" {% endfor %}
   {% endif %}
 >
-  {{ card.header(item, item.fields.name, solo=solo, number=item.fields.number) }}
-  {{ card.image(item, solo=solo, last=last, caption=item.fields.name, alt=item.fields.number) }}
+  {{ card.header(item, item.fields.name, solo=solo, identifier=item.fields.set) }}
+  {{ card.image(item, solo=solo, last=last, caption=item.fields.name, alt=item.fields.set) }}
   <div class="card-body border-bottom-0 {% if not solo %}p-1{% endif %}">
     {{ badge.theme(item.theme.name, solo=solo, last=last) }}
     {{ badge.year(item.fields.year, solo=solo, last=last) }}

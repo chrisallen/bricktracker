@@ -82,16 +82,13 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
     # Minifigures missing a part
     def missing_part(
         self,
-        part_num: str,
-        color_id: int,
+        part: str,
+        color: int,
         /,
-        *,
-        element_id: int | None = None,
     ) -> Self:
         # Save the parameters to the fields
-        self.fields.part_num = part_num
-        self.fields.color_id = color_id
-        self.fields.element_id = element_id
+        self.fields.part = part
+        self.fields.color = color
 
         # Load the minifigures from the database
         for record in self.select(
@@ -107,16 +104,13 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
     # Minifigure using a part
     def using_part(
         self,
-        part_num: str,
-        color_id: int,
+        part: str,
+        color: int,
         /,
-        *,
-        element_id: int | None = None,
     ) -> Self:
         # Save the parameters to the fields
-        self.fields.part_num = part_num
-        self.fields.color_id = color_id
-        self.fields.element_id = element_id
+        self.fields.part = part
+        self.fields.color = color
 
         # Load the minifigures from the database
         for record in self.select(
@@ -140,7 +134,7 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
 
     # Import the minifigures from Rebrickable
     @staticmethod
-    def download(socket: 'BrickSocket', brickset: 'BrickSet', /) -> None:
+    def download(socket: 'BrickSocket', brickset: 'BrickSet', /) -> bool:
         try:
             socket.auto_progress(
                 message='Set {set}: loading minifigures from Rebrickable'.format(  # noqa: E501
@@ -162,10 +156,11 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
             ).list()
 
             # Process each minifigure
-            socket.update_total(len(minifigures), add=True)
-
             for minifigure in minifigures:
-                minifigure.download(socket)
+                if not minifigure.download(socket):
+                    return False
+
+            return True
 
         except Exception as e:
             socket.fail(
@@ -176,3 +171,5 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
             )
 
             logger.debug(traceback.format_exc())
+
+            return False

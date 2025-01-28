@@ -8,7 +8,6 @@ from flask import current_app, url_for
 from .exceptions import DatabaseException, NotFoundException
 from .minifigure_list import BrickMinifigureList
 from .part_list import BrickPartList
-from .rebrickable_parts import RebrickableParts
 from .rebrickable_set import RebrickableSet
 from .set_checkbox import BrickSetCheckbox
 from .set_checkbox_list import BrickSetCheckboxList
@@ -34,10 +33,10 @@ class BrickSet(RebrickableSet):
         )
 
     # Import a set into the database
-    def download(self, socket: 'BrickSocket', data: dict[str, Any], /) -> None:
+    def download(self, socket: 'BrickSocket', data: dict[str, Any], /) -> bool:
         # Load the set
         if not self.load(socket, data, from_download=True):
-            return
+            return False
 
         try:
             # Insert into the database
@@ -58,10 +57,12 @@ class BrickSet(RebrickableSet):
             self.insert_rebrickable()
 
             # Load the inventory
-            RebrickableParts(socket, self).download()
+            if not BrickPartList.download(socket, self):
+                return False
 
             # Load the minifigures
-            BrickMinifigureList.download(socket, self)
+            if not BrickMinifigureList.download(socket, self):
+                return False
 
             # Commit the transaction to the database
             socket.auto_progress(
@@ -98,13 +99,17 @@ class BrickSet(RebrickableSet):
 
             logger.debug(traceback.format_exc())
 
+            return False
+
+        return True
+
     # Minifigures
     def minifigures(self, /) -> BrickMinifigureList:
         return BrickMinifigureList().from_set(self)
 
     # Parts
     def parts(self, /) -> BrickPartList:
-        return BrickPartList().load(self)
+        return BrickPartList().list_specific(self)
 
     # Select a light set (with an id)
     def select_light(self, id: str, /) -> Self:

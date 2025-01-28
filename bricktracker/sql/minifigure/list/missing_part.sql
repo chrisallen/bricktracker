@@ -1,26 +1,24 @@
 {% extends 'minifigure/base/base.sql' %}
 
 {% block total_missing %}
-SUM(IFNULL("missing"."quantity", 0)) AS "total_missing",
+SUM("bricktracker_parts"."missing") AS "total_missing",
 {% endblock %}
 
 {% block join %}
-LEFT JOIN "missing"
-ON "rebrickable_minifigures"."figure" IS NOT DISTINCT FROM "missing"."set_num"
-AND "bricktracker_minifigures"."id" IS NOT DISTINCT FROM "missing"."u_id"
+LEFT JOIN "bricktracker_parts"
+ON "bricktracker_minifigures"."id" IS NOT DISTINCT FROM "bricktracker_parts"."id"
+AND "rebrickable_minifigures"."figure" IS NOT DISTINCT FROM "bricktracker_parts"."figure"
 {% endblock %}
 
 {% block where %}
 WHERE "rebrickable_minifigures"."figure" IN (
-    SELECT
-        "missing"."set_num"
-    FROM "missing"
-
-    WHERE "missing"."color_id" IS NOT DISTINCT FROM :color_id
-    AND "missing"."element_id" IS NOT DISTINCT FROM :element_id
-    AND "missing"."part_num" IS NOT DISTINCT FROM :part_num
-
-    GROUP BY "missing"."set_num"
+    SELECT "bricktracker_parts"."figure"
+    FROM "bricktracker_parts"
+    WHERE "bricktracker_parts"."part" IS NOT DISTINCT FROM :part
+    AND "bricktracker_parts"."color" IS NOT DISTINCT FROM :color
+    AND "bricktracker_parts"."figure" IS NOT NULL
+    AND "bricktracker_parts"."missing" > 0
+    GROUP BY "bricktracker_parts"."figure"
 )
 {% endblock %}
 

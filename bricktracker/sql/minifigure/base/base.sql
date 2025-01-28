@@ -1,5 +1,4 @@
 SELECT
-    {% block set %}{% endblock %}
     "bricktracker_minifigures"."quantity",
     "rebrickable_minifigures"."figure",
     "rebrickable_minifigures"."number",

@@ -6,15 +6,12 @@ SUM("bricktracker_minifigures"."quantity") AS "total_quantity",
 
 {% block where %}
 WHERE "rebrickable_minifigures"."figure" IN (
-    SELECT
-        "inventory"."set_num"
-    FROM "inventory"
-
-    WHERE "inventory"."color_id" IS NOT DISTINCT FROM :color_id
-    AND "inventory"."element_id" IS NOT DISTINCT FROM :element_id
-    AND "inventory"."part_num" IS NOT DISTINCT FROM :part_num
-
-    GROUP BY "inventory"."set_num"
+    SELECT "bricktracker_parts"."figure"
+    FROM "bricktracker_parts"
+    WHERE "bricktracker_parts"."part" IS NOT DISTINCT FROM :part
+    AND "bricktracker_parts"."color" IS NOT DISTINCT FROM :color
+    AND "bricktracker_parts"."figure" IS NOT NULL
+    GROUP BY "bricktracker_parts"."figure"
 )
 {% endblock %}
 

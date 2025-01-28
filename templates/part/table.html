@@ -6,10 +6,10 @@
     <tbody>
       {% for item in table_collection %}
       <tr>
-        {{ table.image(item.url_for_image(), caption=item.fields.name, alt=item.fields.part_num, accordion=solo) }}
+        {{ table.image(item.url_for_image(), caption=item.fields.name, alt=item.fields.part, accordion=solo) }}
         <td>
           <a class="text-reset" href="{{ item.url() }}">{{ item.fields.name }}</a>
-          {% if item.fields.is_spare %}<span class="badge rounded-pill text-bg-warning fw-normal"><i class="ri-loop-left-line"></i> Spare</span>{% endif %}
+          {% if item.fields.spare %}<span class="badge rounded-pill text-bg-warning fw-normal"><i class="ri-loop-left-line"></i> Spare</span>{% endif %}
           {% if all %}
             {{ table.rebrickable(item) }}
             {{ table.bricklink(item) }}
@@ -24,15 +24,15 @@
           {% endif %}
         {% endif %}
         {% if not no_missing %}
-          <td {% if not all %}id="sort-part-{{ item.fields.u_id }}-{{ item.fields.id }}" data-sort="{{ item.fields.total_missing }}"{% endif %} class="table-td-missing">
+          <td {% if not all %}id="sort-part-{{ item.fields.id }}-{{ item.html_id() }}" data-sort="{{ item.fields.total_missing }}"{% endif %} class="table-td-missing">
             {% if all or read_only_missing %}
               {{ item.fields.total_missing }}
             {% else %}
             <div class="input-group">
               {% if g.login.is_authenticated() %}
                 <input class="form-control form-control-sm flex-shrink-1" type="text" {% if item.fields.total_missing %}value="{{ item.fields.total_missing }}"{% endif %}
-                  onchange="change_part_missing_amount(this, '{{ item.fields.u_id }}', '{{ item.fields.id }}', '{{ item.url_for_missing() }}')" autocomplete="off">
-                <span id="status-part-{{ item.fields.u_id }}-{{ item.fields.id }}" class="input-group-text ri-save-line"></span>
+                  onchange="change_part_missing_amount(this, '{{ item.fields.id }}', '{{ item.html_id() }}', '{{ item.url_for_missing() }}')" autocomplete="off">
+                <span id="status-part-{{ item.fields.id }}-{{ item.html_id() }}" class="input-group-text ri-save-line"></span>
                 {% else %}
                 <input class="form-control form-control-sm" type="text" {% if item.fields.total_missing %}value="{{ item.fields.total_missing }}"{% endif %}
                   disabled autocomplete="off">

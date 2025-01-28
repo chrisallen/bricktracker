@@ -4,7 +4,6 @@ from typing import Self, TYPE_CHECKING
 
 from .exceptions import ErrorException, NotFoundException
 from .part_list import BrickPartList
-from .rebrickable_parts import RebrickableParts
 from .rebrickable_minifigure import RebrickableMinifigure
 if TYPE_CHECKING:
     from .set import BrickSet
@@ -20,7 +19,8 @@ class BrickMinifigure(RebrickableMinifigure):
     generic_query: str = 'minifigure/select/generic'
     select_query: str = 'minifigure/select/specific'
 
-    def download(self, socket: 'BrickSocket'):
+    # Import a minifigure into the database
+    def download(self, socket: 'BrickSocket') -> bool:
         if self.brickset is None:
             raise ErrorException('Importing a minifigure from Rebrickable outside of a set is not supported')  # noqa: E501
 
@@ -40,11 +40,12 @@ class BrickMinifigure(RebrickableMinifigure):
             self.insert_rebrickable()
 
             # Load the inventory
-            RebrickableParts(
+            if not BrickPartList.download(
                 socket,
                 self.brickset,
-                minifigure=self,
-            ).download()
+                minifigure=self
+            ):
+                return False
 
         except Exception as e:
             socket.fail(
@@ -57,6 +58,10 @@ class BrickMinifigure(RebrickableMinifigure):
 
             logger.debug(traceback.format_exc())
 
+            return False
+
+        return True
+
     # Parts
     def generic_parts(self, /) -> BrickPartList:
         return BrickPartList().from_minifigure(self)
@@ -68,7 +73,7 @@ class BrickMinifigure(RebrickableMinifigure):
                 figure=self.fields.figure,
             ))
 
-        return BrickPartList().load(self.brickset, minifigure=self)
+        return BrickPartList().list_specific(self.brickset, minifigure=self)
 
     # Select a generic minifigure
     def select_generic(self, figure: str, /) -> Self:

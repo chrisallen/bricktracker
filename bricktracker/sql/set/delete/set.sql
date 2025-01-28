@@ -12,10 +12,7 @@ WHERE "bricktracker_set_statuses"."id" IS NOT DISTINCT FROM '{{ id }}';
 DELETE FROM "bricktracker_minifigures"
 WHERE "bricktracker_minifigures"."id" IS NOT DISTINCT FROM '{{ id }}';
 
-DELETE FROM "missing"
-WHERE "missing"."u_id" IS NOT DISTINCT FROM '{{ id }}';
-
-DELETE FROM "inventory"
-WHERE "inventory"."u_id" IS NOT DISTINCT FROM '{{ id }}';
+DELETE FROM "bricktracker_parts"
+WHERE "bricktracker_parts"."id" IS NOT DISTINCT FROM '{{ id }}';
 
 COMMIT;
