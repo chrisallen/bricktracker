@@ -1,4 +1,4 @@
--- description: Renaming various complicated field names to something simpler
+-- description: Renaming various complicated field names to something simpler, and add a bunch of extra fields for later
 
 PRAGMA foreign_keys = ON;
 
@@ -7,12 +7,25 @@ BEGIN TRANSACTION;
 -- Rename sets table
 ALTER TABLE "bricktracker_sets" RENAME TO "bricktracker_sets_old";
 
--- Re-Create a Bricktable set table with the simplified name
+-- Create a Bricktracker set storage table for later
+CREATE TABLE "bricktracker_set_storages" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    PRIMARY KEY("id")
+);
+
+-- Re-Create a Bricktracker set table with the simplified name
 CREATE TABLE "bricktracker_sets" (
     "id" TEXT NOT NULL,
     "set" TEXT NOT NULL,
+    "description" TEXT,
+    "theme" TEXT, -- Custom theme name
+    "storage" TEXT, -- Storage bin location
+    "purchase_date" INTEGER, -- Purchase data
+    "purchase_price" REAL, -- Purchase price
     PRIMARY KEY("id"),
-    FOREIGN KEY("set") REFERENCES "rebrickable_sets"("set")
+    FOREIGN KEY("set") REFERENCES "rebrickable_sets"("set"),
+    FOREIGN KEY("storage") REFERENCES "bricktracker_set_storages"("id")
 );
 
 -- Insert existing sets into the new table
