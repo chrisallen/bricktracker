@@ -9,9 +9,14 @@ ALTER TABLE "bricktracker_sets" RENAME TO "bricktracker_sets_old";
 
 -- Create a Bricktracker set storage table for later
 CREATE TABLE "bricktracker_set_storages" (
-    "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    PRIMARY KEY("id")
+    PRIMARY KEY("name")
+);
+
+-- Create a Bricktracker set storage table for later
+CREATE TABLE "bricktracker_set_purchase_locations" (
+    "name" TEXT NOT NULL,
+    PRIMARY KEY("name")
 );
 
 -- Re-Create a Bricktracker set table with the simplified name
@@ -22,10 +27,12 @@ CREATE TABLE "bricktracker_sets" (
     "theme" TEXT, -- Custom theme name
     "storage" TEXT, -- Storage bin location
     "purchase_date" INTEGER, -- Purchase data
+    "purchase_location" TEXT, -- Purchase location
     "purchase_price" REAL, -- Purchase price
     PRIMARY KEY("id"),
     FOREIGN KEY("set") REFERENCES "rebrickable_sets"("set"),
-    FOREIGN KEY("storage") REFERENCES "bricktracker_set_storages"("id")
+    FOREIGN KEY("storage") REFERENCES "bricktracker_set_storages"("name"),
+    FOREIGN KEY("purchase_location") REFERENCES "bricktracker_set_purchase_locations"("name")
 );
 
 -- Insert existing sets into the new table
