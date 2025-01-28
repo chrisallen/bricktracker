@@ -122,9 +122,6 @@ def missing_part(
     color: int,
     spare: int,
 ) -> Response:
-    from pprint import pprint
-    pprint(locals())
-
     brickset = BrickSet().select_specific(id)
 
     if figure is not None:
