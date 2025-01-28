@@ -4,7 +4,7 @@ PRAGMA foreign_keys = ON;
 
 BEGIN TRANSACTION;
 
--- Create a Bricktable minifigures table: an amount of minifigures linked to a Bricktracker set
+-- Create a Bricktracker minifigures table: an amount of minifigures linked to a Bricktracker set
 CREATE TABLE "bricktracker_minifigures" (
     "id" TEXT NOT NULL,
     "figure" TEXT NOT NULL,

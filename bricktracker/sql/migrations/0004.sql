@@ -4,7 +4,7 @@ PRAGMA foreign_keys = ON;
 
 BEGIN TRANSACTION;
 
--- Create a Bricktable set table: with their unique IDs, and a reference to the Rebrickable set
+-- Create a Bricktracker set table: with their unique IDs, and a reference to the Rebrickable set
 CREATE TABLE "bricktracker_sets" (
     "id" TEXT NOT NULL,
     "rebrickable_set" TEXT NOT NULL,
