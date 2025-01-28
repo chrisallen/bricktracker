@@ -9,14 +9,12 @@ from .rebrickable_image import RebrickableImage
 from .record import BrickRecord
 if TYPE_CHECKING:
     from .set import BrickSet
-    from .socket import BrickSocket
 
 logger = logging.getLogger(__name__)
 
 
 # A minifigure from Rebrickable
 class RebrickableMinifigure(BrickRecord):
-    socket: 'BrickSocket'
     brickset: 'BrickSet | None'
 
     # Queries
@@ -28,7 +26,6 @@ class RebrickableMinifigure(BrickRecord):
         /,
         *,
         brickset: 'BrickSet | None' = None,
-        socket: 'BrickSocket | None' = None,
         record: Row | dict[str, Any] | None = None
     ):
         super().__init__()
@@ -38,10 +35,6 @@ class RebrickableMinifigure(BrickRecord):
 
         # Save the brickset
         self.brickset = brickset
-
-        # Save the socket
-        if socket is not None:
-            self.socket = socket
 
         # Ingest the record if it has one
         if record is not None:
