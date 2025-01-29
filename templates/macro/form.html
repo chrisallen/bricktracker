@@ -15,3 +15,18 @@
     {{ text }}
   {% endif %}
 {% endmacro %}
+
+{% macro input(id, html_id, url, value) %}
+  <input class="form-control form-control-sm flex-shrink-1" type="text" value="{% if value %}{{ value }}{% endif %}"
+  {% if g.login.is_authenticated() %}
+      onchange="change_part_missing_amount(this, '{{ id }}', '{{ html_id }}', '{{ url }}')"
+  {% else %}
+      disabled
+  {% endif %}
+      autocomplete="off">
+  {% if g.login.is_authenticated() %}
+    <span id="status-part-{{ id }}-{{ html_id }}" class="input-group-text ri-save-line"></span>
+  {% else %}
+    <span class="input-group-text ri-prohibited-line"></span>
+  {% endif %}
+{% endmacro %}
