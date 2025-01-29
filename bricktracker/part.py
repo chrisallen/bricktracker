@@ -143,7 +143,9 @@ class BrickPart(RebrickablePart):
         return self
 
     # Update the missing part
-    def update_missing(self, missing: Any, /) -> None:
+    def update_missing(self, json: Any | None, /) -> None:
+        missing = json.get('value', '')  # type: ignore
+
         # We need a positive integer
         try:
             missing = int(missing)

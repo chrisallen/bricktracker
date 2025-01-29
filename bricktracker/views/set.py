@@ -137,9 +137,7 @@ def missing_part(
         minifigure=brickminifigure,
     )
 
-    missing = request.json.get('missing', '')  # type: ignore
-
-    brickpart.update_missing(missing)
+    brickpart.update_missing(request.json)
 
     # Info
     logger.info('Set {set} ({id}): updated part ({part} color: {color}, spare: {spare}, minifigure: {figure}) missing count to {missing}'.format(  # noqa: E501
@@ -152,7 +150,7 @@ def missing_part(
         missing=brickpart.fields.missing,
     ))
 
-    return jsonify({'missing': missing})
+    return jsonify({'missing': brickpart.fields.missing})
 
 
 # Refresh a set

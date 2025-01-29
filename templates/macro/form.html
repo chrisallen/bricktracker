@@ -24,7 +24,7 @@
     <div class="input-group">
       <input class="form-control form-control-sm flex-shrink-1" type="text" id="{{ prefix }}-{{ id }}" value="{% if value %}{{ value }}{% endif %}"
   {% if g.login.is_authenticated() %}
-      onchange="change_part_missing_amount(this, '{{ id }}', '{{ html_id }}', '{{ url }}')"
+        data-changer-id="{{ id }}" data-changer-prefix="{{ prefix }}" data-changer-url="{{ url }}"
   {% else %}
       disabled
   {% endif %}

@@ -15,8 +15,10 @@ class BrickChanger {
         // Register an event depending on the type
         if (this.html_type == "checkbox") {
             var listener = "change";
+        } else if(this.html_type == "text") {
+            var listener = "change";
         } else {
-            var listener = "click";
+            throw Error("Unsupported input type for BrickChanger");
         }
 
         this.html_element.addEventListener(listener, ((changer) => (e) => {
@@ -70,8 +72,10 @@ class BrickChanger {
             // Grab the value depending on the type
             if (this.html_type == "checkbox") {
                 var value = this.html_element.checked;
-            } else {
+            } else if(this.html_type == "text") {
                 var value = this.html_element.value;
+            } else {
+                throw Error("Unsupported input type for BrickChanger");
             }
 
             const response = await fetch(this.url, {
