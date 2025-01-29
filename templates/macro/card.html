@@ -8,7 +8,7 @@
       {% if item.fields.color_name %}
         <span class="badge bg-white text-black fw-normal border"><i class="ri-palette-line"></i>
           {% if item.fields.color_rgb %}
-            <span class="color-rgb align-bottom border border-black" style="background-color: #{{ item.fields.color_rgb }};"></span>
+            <span class="color-rgb {% if item.fields.color == 9999 %}color-any{% endif %} align-bottom border border-black" {% if item.fields.color != 9999 %}style="background-color: #{{ item.fields.color_rgb }};"{% endif %}></span>
           {% endif %}
           {{ item.fields.color_name }}
         </span>
