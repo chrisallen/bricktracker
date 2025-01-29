@@ -28,6 +28,7 @@ def exception_handler(
     *,
     json: bool = False,
     post_redirect: str | None = None,
+    error_name: str = 'error',
     **superkwargs,
 ) -> Callable[[ViewCallable], ViewCallable]:
     def outer(function: ViewCallable, /) -> ViewCallable:
@@ -42,6 +43,7 @@ def exception_handler(
                     file,
                     json=json,
                     post_redirect=post_redirect,
+                    error_name=error_name,
                     **kwargs,
                     **superkwargs,
                 )
