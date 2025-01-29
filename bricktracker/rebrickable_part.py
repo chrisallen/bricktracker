@@ -138,10 +138,17 @@ class RebrickablePart(BrickRecord):
     def url_for_rebrickable(self, /) -> str:
         if current_app.config['REBRICKABLE_LINKS']:
             try:
-                return current_app.config['REBRICKABLE_LINK_PART_PATTERN'].format(  # noqa: E501
-                    part=self.fields.part,
-                    color=self.fields.color,
-                )
+                if self.fields.url is not None:
+                    # The URL does not contain color info...
+                    return '{url}{color}'.format(
+                        url=self.fields.url,
+                        color=self.fields.color
+                    )
+                else:
+                    return current_app.config['REBRICKABLE_LINK_PART_PATTERN'].format(  # noqa: E501
+                        part=self.fields.part,
+                        color=self.fields.color,
+                    )
             except Exception:
                 pass
 
