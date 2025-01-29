@@ -148,6 +148,9 @@ class BrickPart(RebrickablePart):
 
         # We need a positive integer
         try:
+            if missing == '':
+                missing = 0
+
             missing = int(missing)
 
             if missing < 0:
