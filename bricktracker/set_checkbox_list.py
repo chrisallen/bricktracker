@@ -58,7 +58,7 @@ class BrickSetCheckboxList(BrickRecordList[BrickSetCheckbox]):
         if id not in self.checkboxes:
             raise NotFoundException(
                 'Checkbox with ID {id} was not found in the database'.format(
-                    id=self.fields.id,
+                    id=id,
                 ),
             )
 
