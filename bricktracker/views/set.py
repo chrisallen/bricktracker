@@ -73,6 +73,7 @@ def delete(*, id: str) -> str:
 
 # Actually delete of a set
 @set_page.route('/<id>/delete', methods=['POST'])
+@login_required
 @exception_handler(__file__, post_redirect='set.delete')
 def do_delete(*, id: str) -> Response:
     brickset = BrickSet().select_light(id)
@@ -89,6 +90,7 @@ def do_delete(*, id: str) -> Response:
 
 # Set is deleted
 @set_page.route('/<id>/deleted', methods=['GET'])
+@login_required
 @exception_handler(__file__)
 def deleted(*, id: str) -> str:
     return render_template(
@@ -155,6 +157,7 @@ def missing_part(
 
 # Refresh a set
 @set_page.route('/<id>/refresh', methods=['GET'])
+@login_required
 @exception_handler(__file__)
 def refresh(*, id: str) -> str:
     return render_template(
