@@ -5,7 +5,7 @@ if TYPE_CHECKING:
 
 
 # Grab the list of checkboxes to create a list of SQL columns
-def migration_0007(self: 'BrickSQL') -> dict[str, Any]:
+def migration_0007(self: 'BrickSQL', /) -> dict[str, Any]:
     records = self.fetchall('checkbox/list')
 
     return {

@@ -74,7 +74,7 @@ class BrickPart(RebrickablePart):
         return True
 
     # A identifier for HTML component
-    def html_id(self) -> str:
+    def html_id(self, /) -> str:
         components: list[str] = ['part']
 
         if self.fields.figure is not None:
