@@ -2,23 +2,28 @@
 {% import 'macro/badge.html' as badge %}
 {% import 'macro/card.html' as card %}
 
-<div class="card mb-3 flex-fill card-solo">
+<div class="card mb-3 flex-fill {% if solo %}card-solo{% endif %}">
   {{ card.header(item, item.fields.name, solo=solo, identifier=item.fields.part, icon='shapes-line') }}
   {{ card.image(item, solo=solo, last=last, caption=item.fields.name, alt=item.fields.image_id, medium=true) }}
-  <div class="card-body border-bottom {% if not solo %}p-1{% endif %}">
+  <div class="card-body border-bottom-0 {% if not solo %}p-1{% endif %}">
     {{ badge.total_sets(sets_using | length, solo=solo, last=last) }}
     {{ badge.total_minifigures(minifigures_using | length, solo=solo, last=last) }}
     {{ badge.total_quantity(item.fields.total_quantity, solo=solo, last=last) }}
     {{ badge.total_spare(item.fields.total_spare, solo=solo, last=last) }}
     {{ badge.total_missing(item.fields.total_missing, solo=solo, last=last) }}
-    {{ badge.rebrickable(item, solo=solo, last=last) }}
-    {{ badge.bricklink(item, solo=solo, last=last) }}
+    {% if not last %}
+      {{ badge.rebrickable(item, solo=solo, last=last) }}
+      {{ badge.bricklink(item, solo=solo, last=last) }}
+    {% endif %}
   </div>
-  <div class="accordion accordion-flush" id="part-details">
-    {{ accordion.cards(sets_using, 'Sets using this part', 'sets-using-inventory', 'part-details', 'set/card.html', icon='hashtag') }}
-    {{ accordion.cards(sets_missing, 'Sets missing this part', 'sets-missing-inventory', 'part-details', 'set/card.html', icon='error-warning-line') }}
-    {{ accordion.cards(minifigures_using, 'Minifigures using this part', 'minifigures-using-inventory', 'part-details', 'minifigure/card.html', icon='group-line') }}
-    {{ accordion.cards(minifigures_missing, 'Minifigures missing this part', 'minifigures-missing-inventory', 'part-details', 'minifigure/card.html', icon='error-warning-line') }}
-  </div>
-  <div class="card-footer"></div>
+  {% if solo %}
+    <div class="accordion accordion-flush border-top" id="part-details">
+      {{ accordion.cards(sets_using, 'Sets using this part', 'sets-using-inventory', 'part-details', 'set/card.html', icon='hashtag') }}
+      {{ accordion.cards(sets_missing, 'Sets missing this part', 'sets-missing-inventory', 'part-details', 'set/card.html', icon='error-warning-line') }}
+      {{ accordion.cards(minifigures_using, 'Minifigures using this part', 'minifigures-using-inventory', 'part-details', 'minifigure/card.html', icon='group-line') }}
+      {{ accordion.cards(minifigures_missing, 'Minifigures missing this part', 'minifigures-missing-inventory', 'part-details', 'minifigure/card.html', icon='error-warning-line') }}
+      {{ accordion.cards(similar_prints, 'Prints using the same base', 'similar-prints', 'part-details', 'part/card.html', icon='palette-line') }}
+    </div>
+    <div class="card-footer"></div>
+  {% endif %}
 </div>

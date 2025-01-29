@@ -33,9 +33,11 @@ def missing() -> str:
 @part_page.route('/<part>/<int:color>/details', methods=['GET'])  # noqa: E501
 @exception_handler(__file__)
 def details(*, part: str, color: int) -> str:
+    brickpart = BrickPart().select_generic(part, color)
+
     return render_template(
         'part.html',
-        item=BrickPart().select_generic(part, color),
+        item=brickpart,
         sets_using=BrickSetList().using_part(
             part,
             color
@@ -52,4 +54,5 @@ def details(*, part: str, color: int) -> str:
             part,
             color
         ),
+        similar_prints=BrickPartList().from_print(brickpart)
     )

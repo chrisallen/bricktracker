@@ -26,6 +26,7 @@ class BrickPartList(BrickRecordList[BrickPart]):
     last_query: str = 'part/list/last'
     minifigure_query: str = 'part/list/from_minifigure'
     missing_query: str = 'part/list/missing'
+    print_query: str = 'part/list/from_print'
     select_query: str = 'part/list/specific'
 
     def __init__(self, /):
@@ -103,6 +104,40 @@ class BrickPartList(BrickRecordList[BrickPart]):
 
         return self
 
+    # Load generic parts from a print
+    def from_print(
+        self,
+        brickpart: BrickPart,
+        /,
+    ) -> Self:
+        # Save the part and print
+        if brickpart.fields.print is not None:
+            self.fields.print = brickpart.fields.print
+        else:
+            self.fields.print = brickpart.fields.part
+
+        self.fields.part = brickpart.fields.part
+        self.fields.color = brickpart.fields.color
+
+        # Load the parts from the database
+        for record in self.select(
+            override_query=self.print_query,
+            order=self.order
+        ):
+            part = BrickPart(
+                record=record,
+            )
+
+            if (
+                current_app.config['SKIP_SPARE_PARTS'] and
+                part.fields.spare
+            ):
+                continue
+
+            self.records.append(part)
+
+        return self
+
     # Load missing parts
     def missing(self, /) -> Self:
         for record in self.select(
@@ -117,7 +152,7 @@ class BrickPartList(BrickRecordList[BrickPart]):
 
     # Return a dict with common SQL parameters for a parts list
     def sql_parameters(self, /) -> dict[str, Any]:
-        parameters: dict[str, Any] = {}
+        parameters: dict[str, Any] = super().sql_parameters()
 
         # Set id
         if self.brickset is not None:
