@@ -1,5 +1,11 @@
 {% if g.login.is_authenticated() %}
-{{ accordion.header('Management', 'management', 'set-details', icon='settings-4-line', class='text-end') }}
+{{ accordion.header('Management', 'management', 'set-details', expanded=true, icon='settings-4-line') }}
+    <h5>Theme override</h5>
+    <p>
+      You can override the current theme ({{ badge.theme(item.theme.name, solo=solo, last=last) }}) with any string you want.
+      {{ form.input('Theme', item.fields.id, item.html_id('theme'), item.url_for_theme(), item.fields.theme, all=all, read_only=read_only) }}
+    </p>
+    <h5 class="border-bottom">Data</h5>
     <a href="{{ item.url_for_refresh() }}" class="btn btn-primary" role="button"><i class="ri-refresh-line"></i> Refresh the set data</a>
 {{ accordion.footer() }}
 {% endif %}

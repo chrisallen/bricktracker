@@ -1,14 +1,14 @@
 # Lego set theme
 class BrickTheme(object):
-    id: int
+    id: str
     name: str
-    parent: int | None
+    parent: str | None
 
-    def __init__(self, id: str | int, name: str, parent: str | None = None, /):
-        self.id = int(id)
+    def __init__(self, id: str, name: str, parent: str | None = None, /):
+        self.id = id
         self.name = name
 
         if parent is not None and parent != '':
-            self.parent = int(parent)
+            self.parent = parent
         else:
             self.parent = None

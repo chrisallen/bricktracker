@@ -1,11 +1,12 @@
 import logging
+from sqlite3 import Row
 import traceback
 from typing import Any, Self, TYPE_CHECKING
 from uuid import uuid4
 
 from flask import current_app, url_for
 
-from .exceptions import DatabaseException, NotFoundException
+from .exceptions import DatabaseException, ErrorException, NotFoundException
 from .minifigure_list import BrickMinifigureList
 from .part_list import BrickPartList
 from .rebrickable_set import RebrickableSet
@@ -121,6 +122,29 @@ class BrickSet(RebrickableSet):
 
         return True
 
+    # Ingest a set
+    def ingest(self, record: Row | dict[str, Any], /):
+        # Super charge the record with theme override
+        if 'theme' in record.keys() and record['theme'] is not None:
+            if isinstance(record, Row):
+                record = dict(record)
+
+            record['theme_id'] = record['theme']
+            record['theme_name'] = record['theme']
+
+        super().ingest(record)
+
+    # A identifier for HTML component
+    def html_id(self, prefix: str | None = None, /) -> str:
+        components: list[str] = []
+
+        if prefix is not None:
+            components.append(prefix)
+
+        components.append(self.fields.id)
+
+        return '-'.join(components)
+
     # Minifigures
     def minifigures(self, /) -> BrickMinifigureList:
         return BrickMinifigureList().from_set(self)
@@ -185,6 +209,36 @@ class BrickSet(RebrickableSet):
                 id=self.fields.id,
             ))
 
+    # Update theme
+    def update_theme(self, json: Any | None, /) -> None:
+        theme: str | None = json.get('value', '')  # type: ignore
+
+        # We need a string
+        try:
+            theme = str(theme)
+            theme = theme.strip()
+        except Exception:
+            raise ErrorException('"{theme}" is not a valid string'.format(
+                theme=theme
+            ))
+
+        if theme == '':
+            theme = None
+
+        self.fields.theme = theme
+
+        # Update the status
+        rows, _ = BrickSQL().execute_and_commit(
+            'set/update/theme',
+            parameters=self.sql_parameters()
+        )
+
+        if rows != 1:
+            raise DatabaseException('Could not update the theme override for set {set} ({id})'.format(  # noqa: E501
+                set=self.fields.set,
+                id=self.fields.id,
+            ))
+
     # Self url
     def url(self, /) -> str:
         return url_for('set.details', id=self.fields.id)
@@ -215,5 +269,12 @@ class BrickSet(RebrickableSet):
     def url_for_refresh(self, /) -> str:
         return url_for(
             'set.refresh',
+            id=self.fields.id,
+        )
+
+    # Compute the url for the theme override
+    def url_for_theme(self, /) -> str:
+        return url_for(
+            'set.update_theme',
             id=self.fields.id,
         )

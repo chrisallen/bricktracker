@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 # Lego sets themes
 class BrickThemeList(object):
-    themes: dict[int, BrickTheme]
+    themes: dict[str, BrickTheme]
     mtime: datetime | None
     size: int | None
     exception: Exception | None
@@ -57,12 +57,15 @@ class BrickThemeList(object):
                 BrickThemeList.mtime = None
 
     # Get a theme
-    def get(self, id: int, /) -> BrickTheme:
+    def get(self, id: str, /, *, name: str | None = None) -> BrickTheme:
         # Seed a fake entry if missing
         if id not in self.themes:
+            if name is None:
+                name = 'Unknown ({id})'.format(id=id)
+
             BrickThemeList.themes[id] = BrickTheme(
                 id,
-                'Unknown ({id})'.format(id=id)
+                name,
             )
 
         return self.themes[id]
