@@ -29,7 +29,7 @@
         {% endif %}
         {% if not no_missing %}
           <td data-sort="{{ item.fields.total_missing }}" class="table-td-input">
-            {{ form.input('Missing', item.fields.id, item.html_id(), item.url_for_missing(), item.fields.total_missing, all=all, read_only=read_only_missing) }}
+            {{ form.input('Missing', item.fields.id, item.html_id(), item.url_for_missing(), item.fields.total_missing, all=all, read_only=read_only) }}
           </td>
         {% endif %}
         {% if all %}

@@ -19,7 +19,7 @@
   </div>
   {% if solo %}
     <div class="accordion accordion-flush" id="minifigure-details">
-      {{ accordion.table(item.generic_parts(), 'Parts', item.fields.figure, 'minifigure-details', 'part/table.html', icon='shapes-line', alt=item.fields.figure, read_only_missing=read_only_missing)}}
+      {{ accordion.table(item.generic_parts(), 'Parts', item.fields.figure, 'minifigure-details', 'part/table.html', icon='shapes-line', alt=item.fields.figure, read_only=read_only)}}
       {{ accordion.cards(using, 'Sets using this minifigure', 'using-inventory', 'minifigure-details', 'set/card.html', icon='hashtag') }}
       {{ accordion.cards(missing, 'Sets missing parts of this minifigure', 'missing-inventory', 'minifigure-details', 'set/card.html', icon='error-warning-line') }}
     </div>

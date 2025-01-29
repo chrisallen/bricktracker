@@ -43,7 +43,7 @@
   {% endif %}
 {% endmacro %}
 
-{% macro table(table_collection, title, id, parent, target, quantity=none, icon=none, image=none, alt=none, details=none, no_missing=none, read_only_missing=none) %}
+{% macro table(table_collection, title, id, parent, target, quantity=none, icon=none, image=none, alt=none, details=none, no_missing=none, read_only=none) %}
   {% set size=table_collection | length %}
   {% if size %}
     {{ header(title, id, parent, quantity=quantity, icon=icon, class='p-0', image=image, alt=alt) }}
