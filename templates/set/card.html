@@ -61,11 +61,7 @@
         {% for minifigure in item.minifigures() %}
           {{ accordion.table(minifigure.parts(), minifigure.fields.name, minifigure.fields.figure, 'set-details', 'part/table.html', quantity=minifigure.fields.quantity, icon='group-line', image=minifigure.url_for_image(), alt=minifigure.fields.figure, details=minifigure.url())}}
         {% endfor %}
-        {% if g.login.is_authenticated() %}
-          {{ accordion.header('Management', 'management', 'set-details', icon='settings-4-line', class='text-end') }}
-              <a href="{{ item.url_for_refresh() }}" class="btn btn-primary" role="button"><i class="ri-refresh-line"></i> Refresh the set</a>
-          {{ accordion.footer() }}
-        {% endif %}
+        {% include 'set/management.html' %}
       {% endif %}
       {% if g.login.is_authenticated() %}
         {{ accordion.header('Danger zone', 'danger-zone', 'set-details', expanded=delete, danger=true, class='text-end') }}

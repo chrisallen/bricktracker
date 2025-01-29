@@ -1,0 +1,5 @@
+{% if g.login.is_authenticated() %}
+{{ accordion.header('Management', 'management', 'set-details', icon='settings-4-line', class='text-end') }}
+    <a href="{{ item.url_for_refresh() }}" class="btn btn-primary" role="button"><i class="ri-refresh-line"></i> Refresh the set data</a>
+{{ accordion.footer() }}
+{% endif %}
