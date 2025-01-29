@@ -1,12 +1,12 @@
 {% macro checkbox(prefix, id, text, url, checked, delete=false) %}
   {% if g.login.is_authenticated() %}
     <input class="form-check-input" type="checkbox" id="{{ prefix }}-{{ id }}" {% if checked %}checked{% endif %}
-        {% if not delete %}
-          data-changer-id="{{ id }}" data-changer-prefix="{{ prefix }}" data-changer-url="{{ url }}" data-changer-parent="set"
-        {% else %}
-          disabled
-        {% endif %}
-    autocomplete="off">
+    {% if not delete %}
+      data-changer-id="{{ id }}" data-changer-prefix="{{ prefix }}" data-changer-url="{{ url }}" data-changer-parent="set"
+    {% else %}
+      disabled
+    {% endif %}
+      autocomplete="off">
     <label class="form-check-label" for="{{ prefix }}-{{ id }}">
       {{ text }} <i id="status-{{ prefix }}-{{ id }}" class="mb-1"></i>
     </label>
@@ -23,16 +23,17 @@
     <label class="visually-hidden" for="{{ prefix }}-{{ id }}">{{ name }}</label>
     <div class="input-group">
       <input class="form-control form-control-sm flex-shrink-1" type="text" id="{{ prefix }}-{{ id }}" value="{% if value %}{{ value }}{% endif %}"
-  {% if g.login.is_authenticated() %}
+      {% if g.login.is_authenticated() %}
         data-changer-id="{{ id }}" data-changer-prefix="{{ prefix }}" data-changer-url="{{ url }}"
-  {% else %}
-      disabled
-  {% endif %}
-      autocomplete="off">
-  {% if g.login.is_authenticated() %}
+      {% else %}
+        disabled
+      {% endif %}
+        autocomplete="off">
+      {% if g.login.is_authenticated() %}
         <span id="status-{{ prefix }}-{{ id }}" class="input-group-text ri-save-line"></span>
-  {% else %}
-    <span class="input-group-text ri-prohibited-line"></span>
+        <button id="clear-{{ prefix }}-{{ id }}" type="button" class="btn btn-sm btn-light btn-outline-danger border"><i class="ri-eraser-line"></i></button>
+      {% else %}
+        <span class="input-group-text ri-prohibited-line"></span>
       {% endif %}
     </div>
   {% endif %}

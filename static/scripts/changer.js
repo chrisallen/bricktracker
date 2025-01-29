@@ -3,6 +3,7 @@ class BrickChanger {
     constructor(prefix, id, url, parent = undefined) {
         this.prefix = prefix
         this.html_element = document.getElementById(`${prefix}-${id}`);
+        this.html_clear = document.getElementById(`clear-${prefix}-${id}`);
         this.html_status = document.getElementById(`status-${prefix}-${id}`);
         this.html_type = this.html_element.getAttribute("type");
         this.url = url;
@@ -24,6 +25,13 @@ class BrickChanger {
         this.html_element.addEventListener(listener, ((changer) => (e) => {
             changer.change();
         })(this));
+
+        if (this.html_clear) {
+            this.html_clear.addEventListener("click", ((changer) => (e) => {
+                changer.html_element.value = "";
+                changer.change();
+            })(this));
+        }
     }
 
     // Clean the status
