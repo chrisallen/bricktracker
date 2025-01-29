@@ -1,10 +1,12 @@
 // Generic state changer with visual feedback
+// Tooltips require boostrap.Tooltip
 class BrickChanger {
     constructor(prefix, id, url, parent = undefined) {
         this.prefix = prefix
         this.html_element = document.getElementById(`${prefix}-${id}`);
         this.html_clear = document.getElementById(`clear-${prefix}-${id}`);
         this.html_status = document.getElementById(`status-${prefix}-${id}`);
+        this.html_status_tooltip = undefined;
         this.html_type = this.html_element.getAttribute("type");
         this.url = url;
 
@@ -46,14 +48,24 @@ class BrickChanger {
             if (to_remove.length) {
                 this.html_status.classList.remove(...to_remove);
             }
+
+            if (this.html_status_tooltip) {
+                this.html_status_tooltip.dispose();
+                this.html_status_tooltip = undefined;
+            }
         }
     }
 
     // Set the status to Error
-    status_error() {
+    status_error(message) {
         if (this.html_status) {
             this.status_clean();
             this.html_status.classList.add("ri-alert-line", "text-danger");
+
+            this.html_status_tooltip = new bootstrap.Tooltip(this.html_status, {
+                "title": message,
+            })
+            this.html_status_tooltip.show();
         }
     }
 
@@ -98,7 +110,7 @@ class BrickChanger {
             });
 
             if (!response.ok) {
-                throw new Error(`Response status: ${response.status}`);
+                throw new Error(`Response status: ${response.status} (${response.statusText})`);
             }
 
             const json = await response.json();
@@ -121,7 +133,7 @@ class BrickChanger {
         } catch (error) {
             console.log(error.message);
 
-            this.status_error();
+            this.status_error(error.message);
         }
     }
 }
