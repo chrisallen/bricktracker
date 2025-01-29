@@ -117,23 +117,6 @@ class RebrickablePart(BrickRecord):
             else:
                 return self.fields.image
 
-    # Compute the url for missing part
-    def url_for_missing(self, /) -> str:
-        # Different URL for a minifigure part
-        if self.minifigure is not None:
-            figure = self.minifigure.fields.figure
-        else:
-            figure = None
-
-        return url_for(
-            'set.missing_part',
-            id=self.fields.id,
-            figure=figure,
-            part=self.fields.part,
-            color=self.fields.color,
-            spare=self.fields.spare,
-        )
-
     # Compute the url for the original of the printed part
     def url_for_print(self, /) -> str:
         return url_for(

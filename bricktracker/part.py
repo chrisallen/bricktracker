@@ -2,6 +2,8 @@ import logging
 from typing import Any, Self, TYPE_CHECKING
 import traceback
 
+from flask import url_for
+
 from .exceptions import ErrorException, NotFoundException
 from .rebrickable_part import RebrickablePart
 from .sql import BrickSQL
@@ -168,4 +170,21 @@ class BrickPart(RebrickablePart):
         BrickSQL().execute_and_commit(
             'part/update/missing',
             parameters=self.sql_parameters()
+        )
+
+    # Compute the url for missing part
+    def url_for_missing(self, /) -> str:
+        # Different URL for a minifigure part
+        if self.minifigure is not None:
+            figure = self.minifigure.fields.figure
+        else:
+            figure = None
+
+        return url_for(
+            'set.missing_part',
+            id=self.fields.id,
+            figure=figure,
+            part=self.fields.part,
+            color=self.fields.color,
+            spare=self.fields.spare,
         )
