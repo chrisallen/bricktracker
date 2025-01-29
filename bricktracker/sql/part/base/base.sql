@@ -19,7 +19,7 @@ SELECT
     "rebrickable_parts"."image",
     "rebrickable_parts"."image_id",
     "rebrickable_parts"."url",
-    --"rebrickable_parts"."print",
+    "rebrickable_parts"."print",
     {% block total_missing %}
     NULL AS "total_missing", -- dummy for order: total_missing
     {% endblock %}

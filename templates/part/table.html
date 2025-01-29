@@ -15,7 +15,10 @@
             {{ table.bricklink(item) }}
           {% endif %}
         </td>
-        <td>{{ item.fields.color_name }}</td>
+        <td>
+          {% if item.fields.color_rgb %}<span class="color-rgb align-middle border border-black" style="background-color: #{{ item.fields.color_rgb }};"></span>{% endif %}
+          <span class="align-middle">{{ item.fields.color_name }}</span>
+        </td>
         {% if not no_quantity %}
           {% if all %}
             <td>{{ item.fields.total_quantity }}</td>

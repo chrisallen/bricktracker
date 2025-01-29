@@ -3,7 +3,7 @@
 {% import 'macro/card.html' as card %}
 
 <div class="card mb-3 flex-fill card-solo">
-  {{ card.header(item, item.fields.name, solo=solo, identifier=item.fields.part, color=item.fields.color, icon='shapes-line') }}
+  {{ card.header(item, item.fields.name, solo=solo, identifier=item.fields.part, icon='shapes-line') }}
   {{ card.image(item, solo=solo, last=last, caption=item.fields.name, alt=item.fields.image_id, medium=true) }}
   <div class="card-body border-bottom {% if not solo %}p-1{% endif %}">
     {{ badge.total_sets(sets_using | length, solo=solo, last=last) }}

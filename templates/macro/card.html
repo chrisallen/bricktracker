@@ -1,11 +1,20 @@
-{% macro header(item, name, solo=false, identifier=none, color=none, icon='hashtag') %}
+{% macro header(item, name, solo=false, identifier=none, icon='hashtag') %}
   <div class="card-header">
     {% if not solo %}
       <a class="text-decoration-none text-reset" href="{{ item.url() }}" data-bs-toggle="tooltip" title="{{ name }}">
     {% endif %}
     <h5 class="mb-0 {% if not solo %}fs-6 text-nowrap overflow-x-hidden text-truncate{% endif %}">
       {% if identifier %}<span class="badge text-bg-secondary fw-normal"><i class="ri-{{ icon }}"></i>{{ identifier }}</span>{% endif %}
-      {% if color %}<span class="badge text-bg-light fw-normal border"><i class="ri-palette-line"></i> {{ color }}</span>{% endif %}
+      {% if item.fields.color_name %}
+        <span class="badge bg-white text-black fw-normal border"><i class="ri-palette-line"></i>
+          {% if item.fields.color_rgb %}
+            <span class="color-rgb align-bottom border border-black" style="background-color: #{{ item.fields.color_rgb }};"></span>
+          {% endif %}
+          {{ item.fields.color_name }}
+        </span>
+      {% endif %}
+      {% if item.fields.color_transparent %}<span class="badge text-bg-light fw-normal border"><i class="ri-blur-off-line"></i> Transparent</span>{% endif %}
+      {% if item.fields.print %}<span class="badge text-bg-light fw-normal border"><a class="text-reset" href="{{ item.url_for_print() }}"><i class="ri-paint-brush-line"></i> Print</a></span>{% endif %}
       {{ name }}
     </h5>
     {% if not solo %}

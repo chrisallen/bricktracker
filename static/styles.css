@@ -59,3 +59,9 @@
 .sortable thead th {
     font-weight: bold !important;
 }
+
+.color-rgb {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+}
