@@ -167,22 +167,3 @@ def refresh(*, id: str) -> str:
         namespace=current_app.config['SOCKET_NAMESPACE'],
         messages=MESSAGES
     )
-
-
-# Change the theme override
-@set_page.route('/<id>/theme', methods=['POST'])
-@login_required
-@exception_handler(__file__, json=True)
-def update_theme(*, id: str) -> Response:
-    brickset = BrickSet().select_light(id)
-
-    brickset.update_theme(request.json)
-
-    # Info
-    logger.info('Set {set} ({id}): theme override changed to "{theme}"'.format(  # noqa: E501
-        set=brickset.fields.set,
-        id=brickset.fields.id,
-        theme=brickset.fields.theme,
-    ))
-
-    return jsonify({'value': brickset.fields.theme})

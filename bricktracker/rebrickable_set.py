@@ -11,10 +11,10 @@ from .parser import parse_set
 from .rebrickable import Rebrickable
 from .rebrickable_image import RebrickableImage
 from .record import BrickRecord
-from .theme import BrickTheme
 from .theme_list import BrickThemeList
 if TYPE_CHECKING:
     from .socket import BrickSocket
+    from .theme import BrickTheme
 
 logger = logging.getLogger(__name__)
 
@@ -66,13 +66,7 @@ class RebrickableSet(BrickRecord):
         if not hasattr(self.fields, 'theme_id'):
             self.fields.theme_id = 0
 
-        if not hasattr(self.fields, 'theme_name'):
-            self.fields.theme_name = None
-
-        self.theme = BrickThemeList().get(
-            str(self.fields.theme_id),
-            name=self.fields.theme_name
-        )
+        self.theme = BrickThemeList().get(self.fields.theme_id)
 
         # Resolve instructions
         if self.resolve_instructions:

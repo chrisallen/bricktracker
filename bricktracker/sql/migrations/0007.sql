@@ -24,7 +24,6 @@ CREATE TABLE "bricktracker_sets" (
     "id" TEXT NOT NULL,
     "set" TEXT NOT NULL,
     "description" TEXT,
-    "theme" TEXT, -- Custom theme name
     "storage" TEXT, -- Storage bin location
     "purchase_date" INTEGER, -- Purchase data
     "purchase_location" TEXT, -- Purchase location
