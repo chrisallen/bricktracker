@@ -16,8 +16,13 @@
   {% endif %}
 {% endmacro %}
 
-{% macro input(id, html_id, url, value) %}
-  <input class="form-control form-control-sm flex-shrink-1" type="text" value="{% if value %}{{ value }}{% endif %}"
+{% macro input(name, id, prefix, url, value, all=none, read_only=none) %}
+  {% if all or read_only %}
+    {{ value }}
+  {% else %}
+    <label class="visually-hidden" for="{{ prefix }}-{{ id }}">{{ name }}</label>
+    <div class="input-group">
+      <input class="form-control form-control-sm flex-shrink-1" type="text" id="{{ prefix }}-{{ id }}" value="{% if value %}{{ value }}{% endif %}"
   {% if g.login.is_authenticated() %}
       onchange="change_part_missing_amount(this, '{{ id }}', '{{ html_id }}', '{{ url }}')"
   {% else %}
@@ -25,8 +30,10 @@
   {% endif %}
       autocomplete="off">
   {% if g.login.is_authenticated() %}
-    <span id="status-part-{{ id }}-{{ html_id }}" class="input-group-text ri-save-line"></span>
+        <span id="status-{{ prefix }}-{{ id }}" class="input-group-text ri-save-line"></span>
   {% else %}
     <span class="input-group-text ri-prohibited-line"></span>
+      {% endif %}
+    </div>
   {% endif %}
 {% endmacro %}
