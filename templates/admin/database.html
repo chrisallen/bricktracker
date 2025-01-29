@@ -36,7 +36,7 @@
 {{ accordion.footer() }}
 
 {{ accordion.header('Database danger zone', 'database-danger', 'admin', danger=true, class='text-end') }}
-{% if error %}<div class="alert alert-danger text-start" role="alert"><strong>Error:</strong> {{ error }}.</div>{% endif %}
+{% if database_error %}<div class="alert alert-danger text-start" role="alert"><strong>Error:</strong> {{ database_error }}.</div>{% endif %}
 <a href="{{ url_for('admin_database.upload') }}" class="btn btn-warning" role="button"><i class="ri-upload-line"></i> Import a database file</a>
 <a href="{{ url_for('admin_database.drop') }}" class="btn btn-danger" role="button"><i class="ri-close-line"></i> Drop the database</a>
 <a href="{{ url_for('admin_database.delete') }}" class="btn btn-danger" role="button"><i class="ri-delete-bin-2-line"></i> Delete the database file</a>

@@ -83,7 +83,7 @@ def admin() -> str:
         configuration=BrickConfigurationList.list(),
         brickset_checkboxes=brickset_checkboxes,
         database_counters=database_counters,
-        database_error=request.args.get('error'),
+        database_error=request.args.get('database_error'),
         database_exception=database_exception,
         database_upgrade_needed=database_upgrade_needed,
         database_version=database_version,

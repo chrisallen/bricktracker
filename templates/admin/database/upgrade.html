@@ -2,7 +2,7 @@
 
 {{ accordion.header('Database', 'database', 'admin', expanded=true, icon='database-2-line') }}
 <form action="{{ url_for('admin_database.do_upgrade') }}" method="post">
-  {% if error %}<div class="alert alert-danger text-start" role="alert"><strong>Error:</strong> {{ error }}.</div>{% endif %}
+  {% if database_error %}<div class="alert alert-danger text-start" role="alert"><strong>Error:</strong> {{ database_error }}.</div>{% endif %}
   <div class="alert alert-warning text-center" role="alert">
     You are about to <strong>upgrade your database file</strong>. This action is irreversible.<br>
     The process shold be lossless, but just to be sure, grab a copy of your database before proceeding.<br>
