@@ -13,28 +13,6 @@
         <input id="grid-search" class="form-control form-control-sm" type="text" placeholder="Set name, set number, set theme or number of parts..." value="">
       </div>
     </div>
-    <div class="col-12 flex-grow-1">
-      <label class="visually-hidden" for="grid-filter">Filter</label>
-      <div class="input-group">
-        <span class="input-group-text"><i class="ri-dropdown-list"></i><span class="ms-1 d-none d-xl-inline"> Filter</span></span>
-        <select id="grid-filter" class="form-select form-select-sm" autocomplete="off">
-          <option value="" selected>All sets</option>
-          <option value="-has-missing">Set is complete</option>
-          <option value="has-missing">Set has missing pieces</option>
-          <option value="has-missing-instructions">Set has missing instructions</option>
-          {% for status in brickset_statuses %}
-            <option value="{{ status.as_dataset() }}">{{ status.fields.name }}</option>
-            <option value="-{{ status.as_dataset() }}">NOT: {{ status.fields.name }}</option>
-          {% endfor %}
-        </select>
-        <select id="grid-theme" class="form-select form-select-sm" autocomplete="off">
-          <option value="" selected>All themes</option>
-          {% for theme in collection.themes %}
-          <option value="{{ theme | lower }}">{{ theme }}</option>
-          {% endfor %}
-        </select>
-      </div>
-    </div>
     <div class="col-12">
       <div id="grid-sort" class="input-group">
         <span class="input-group-text"><i class="ri-sort-asc"></i><span class="ms-1 d-none d-xxl-inline"> Sort</span></span>
@@ -57,7 +35,36 @@
       </div>
     </div>
   </div>
-
+  <div class="row row-cols-lg-auto g-1 justify-content-center align-items-center pb-2">
+    <div class="col-12 flex-grow-1">
+      <label class="visually-hidden" for="grid-status">Status</label>
+      <div class="input-group">
+        <span class="input-group-text"><i class="ri-checkbox-line"></i><span class="ms-1 d-none d-xl-inline"> Status</span></span>
+        <select id="grid-status" class="form-select form-select-sm" autocomplete="off">
+          <option value="" selected>All</option>
+          <option value="-has-missing">Set is complete</option>
+          <option value="has-missing">Set has missing pieces</option>
+          <option value="has-missing-instructions">Set has missing instructions</option>
+          {% for status in brickset_statuses %}
+            <option value="{{ status.as_dataset() }}">{{ status.fields.name }}</option>
+            <option value="-{{ status.as_dataset() }}">NOT: {{ status.fields.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="col-12 flex-grow-1">
+      <label class="visually-hidden" for="grid-theme">Theme</label>
+      <div class="input-group">
+        <span class="input-group-text"><i class="ri-price-tag-3-line"></i><span class="ms-1 d-none d-xl-inline"> Theme</span></span>
+        <select id="grid-theme" class="form-select form-select-sm" autocomplete="off">
+          <option value="" selected>All</option>
+          {% for theme in collection.themes %}
+          <option value="{{ theme | lower }}">{{ theme }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  </div>
   <div class="row" data-grid="true" id="grid">
   {% for item in collection %}
     <div class="col-md-6 col-xl-3 d-flex align-items-stretch">

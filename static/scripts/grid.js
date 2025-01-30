@@ -57,7 +57,7 @@ class BrickGrid {
         this.html_grid = document.getElementById(this.id);
         this.html_sort = document.getElementById(`${this.id}-sort`);
         this.html_search = document.getElementById(`${this.id}-search`);
-        this.html_filter = document.getElementById(`${this.id}-filter`);
+        this.html_status = document.getElementById(`${this.id}-status`);
         this.html_theme = document.getElementById(`${this.id}-theme`);
 
         // Sort buttons
@@ -83,8 +83,8 @@ class BrickGrid {
             })(this));
         }
 
-        if (this.html_filter) {
-            this.html_filter.addEventListener("change", ((grid) => () => {
+        if (this.html_status) {
+            this.html_status.addEventListener("change", ((grid) => () => {
                 grid.filter();
             })(this));
         }
@@ -147,12 +147,12 @@ class BrickGrid {
         }
 
         // Check if there is a set filter
-        if (this.html_filter && this.html_filter.value != "") {
-            if (this.html_filter.value.startsWith("-")) {
-                filters["filter"] = this.html_filter.value.substring(1);
+        if (this.html_status && this.html_status.value != "") {
+            if (this.html_status.value.startsWith("-")) {
+                filters["filter"] = this.html_status.value.substring(1);
                 filters["filter-target"] = "0";
             } else {
-                filters["filter"] = this.html_filter.value;
+                filters["filter"] = this.html_status.value;
                 filters["filter-target"] = "1";
             }
         }
