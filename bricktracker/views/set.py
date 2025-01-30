@@ -16,6 +16,7 @@ from .exceptions import exception_handler
 from ..minifigure import BrickMinifigure
 from ..part import BrickPart
 from ..set import BrickSet
+from ..set_status import BrickSetStatus
 from ..set_status_list import BrickSetStatusList
 from ..set_list import BrickSetList
 from ..socket import MESSAGES
@@ -32,7 +33,7 @@ def list() -> str:
     return render_template(
         'sets.html',
         collection=BrickSetList().all(),
-        brickset_statuses=BrickSetStatusList().list(),
+        brickset_statuses=BrickSetStatusList(BrickSetStatus).list(),
     )
 
 
@@ -42,7 +43,7 @@ def list() -> str:
 @exception_handler(__file__, json=True)
 def update_status(*, id: str, metadata_id: str) -> Response:
     brickset = BrickSet().select_light(id)
-    status = BrickSetStatusList().get(metadata_id)
+    status = BrickSetStatusList(BrickSetStatus).get(metadata_id)
 
     state = status.update_set_state(brickset, request.json)
 
@@ -97,7 +98,7 @@ def details(*, id: str) -> str:
         'set.html',
         item=BrickSet().select_specific(id),
         open_instructions=request.args.get('open_instructions'),
-        brickset_statuses=BrickSetStatusList().list(all=True),
+        brickset_statuses=BrickSetStatusList(BrickSetStatus).list(all=True),
     )
 
 

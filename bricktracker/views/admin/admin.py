@@ -41,7 +41,7 @@ def admin() -> str:
         database_version = database.version
         database_counters = BrickSQL().count_records()
 
-        metadata_statuses = BrickSetStatusList().list(all=True)
+        metadata_statuses = BrickSetStatusList(BrickSetStatus).list(all=True)
     except Exception as e:
         database_exception = e
 

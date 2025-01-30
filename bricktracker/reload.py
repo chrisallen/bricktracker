@@ -1,5 +1,6 @@
 from .instructions_list import BrickInstructionsList
 from .retired_list import BrickRetiredList
+from .set_status import BrickSetStatus
 from .set_status_list import BrickSetStatusList
 from .theme_list import BrickThemeList
 
@@ -12,7 +13,7 @@ def reload() -> None:
         BrickInstructionsList(force=True)
 
         # Reload the set statuses
-        BrickSetStatusList(force=True)
+        BrickSetStatusList(BrickSetStatus, force=True)
 
         # Reload retired sets
         BrickRetiredList(force=True)
