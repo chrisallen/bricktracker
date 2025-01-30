@@ -50,8 +50,9 @@ class BrickGridSortButton {
 
 // Grid class
 class BrickGrid {
-    constructor(grid) {
+    constructor(grid, target = "div#grid>div") {
         this.id = grid.id;
+        this.target = target;
 
         // Grid elements (built based on the initial id)
         this.html_grid = document.getElementById(this.id);
@@ -72,7 +73,7 @@ class BrickGrid {
         this.html_clear = document.querySelector("button[data-sort-clear]")
         if (this.html_clear) {
             this.html_clear.addEventListener("click", ((grid) => (e) => {
-                grid.clear(e.currentTarget)
+                grid.clear();
             })(this))
         }
 
@@ -117,7 +118,7 @@ class BrickGrid {
     }
 
     // Clear
-    clear(current) {
+    clear() {
         // Cleanup all
         for (const [id, button] of Object.entries(this.html_sort_buttons)) {
             button.toggle();
@@ -129,7 +130,7 @@ class BrickGrid {
         document.cookie = `sort-order=""; Path=/; SameSite=strict`;
 
         // Reset sorting
-        tinysort(current.dataset.sortTarget, {
+        tinysort(this.target, {
             selector: "div",
             attr: "data-index",
             order: "asc",
@@ -204,7 +205,6 @@ class BrickGrid {
 
     // Sort
     sort(current, no_flip=false) {
-        const target = current.data.sortTarget;
         const attribute = current.data.sortAttribute;
         const natural = current.data.sortNatural;
 
@@ -217,7 +217,7 @@ class BrickGrid {
         }
 
         // Sort
-        if (target && attribute) {
+        if (attribute) {
             let order = current.data.sortOrder;
 
             // First ordering
@@ -242,7 +242,7 @@ class BrickGrid {
             document.cookie = `sort-order="${encodeURIComponent(order)}"; Path=/; SameSite=strict`;
 
             // Do the sorting
-            tinysort(target, {
+            tinysort(this.target, {
                 selector: "div",
                 attr: "data-" + attribute,
                 natural: natural == "true",
