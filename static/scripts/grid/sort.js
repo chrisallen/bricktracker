@@ -20,8 +20,8 @@ class BrickGridSort {
             // Clear button
             this.html_clear = this.html_sort.querySelector("button[data-sort-clear]")
             if (this.html_clear) {
-                this.html_clear.addEventListener("click", ((grid) => () => {
-                    grid.clear();
+                this.html_clear.addEventListener("click", ((gridsort) => () => {
+                    gridsort.clear();
                 })(this))
             }
 
