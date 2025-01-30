@@ -30,7 +30,7 @@
     <ul class="list-group list-group-flush card-check border-bottom-0">
       {% for checkbox in brickset_checkboxes %}
         <li class="list-group-item {% if not solo %}p-1{% endif %}">
-          {{ form.checkbox(checkbox.as_dataset(), item.fields.id, checkbox.fields.name, checkbox.status_url(item.fields.id), item.fields[checkbox.as_column()], delete=delete) }}
+          {{ form.checkbox(checkbox.as_dataset(), item.fields.id, checkbox.fields.name, checkbox.url_for_set_state(item.fields.id), item.fields[checkbox.as_column()], delete=delete) }}
         </li>
       {% endfor %}
     </ul>

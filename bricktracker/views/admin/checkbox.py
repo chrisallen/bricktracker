@@ -1,5 +1,3 @@
-import logging
-
 from flask import (
     Blueprint,
     jsonify,
@@ -14,8 +12,6 @@ from werkzeug.wrappers.response import Response
 from ..exceptions import exception_handler
 from ...reload import reload
 from ...set_checkbox import BrickSetCheckbox
-
-logger = logging.getLogger(__name__)
 
 admin_checkbox_page = Blueprint(
     'admin_checkbox',
@@ -71,23 +67,13 @@ def do_delete(*, id: str) -> Response:
     return redirect(url_for('admin.admin', open_checkbox=True))
 
 
-# Change the status of a checkbox
-@admin_checkbox_page.route('/<id>/status/<name>', methods=['POST'])
+# Change the field of a checkbox
+@admin_checkbox_page.route('/<id>/field/<name>', methods=['POST'])
 @login_required
 @exception_handler(__file__, json=True)
-def update_status(*, id: str, name: str) -> Response:
-    value: bool = request.json.get('value', False)  # type: ignore
-
+def update_field(*, id: str, name: str) -> Response:
     checkbox = BrickSetCheckbox().select_specific(id)
-    checkbox.update_status(name, value)
-
-    # Info
-    logger.info('Checkbox {name} ({id}): status "{status}" changed to "{state}"'.format(  # noqa: E501
-        name=checkbox.fields.name,
-        id=checkbox.fields.id,
-        status=name,
-        state=value,
-    ))
+    value = checkbox.update_field(name, json=request.json)
 
     reload()
 

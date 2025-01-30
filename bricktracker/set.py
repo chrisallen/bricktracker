@@ -5,11 +5,10 @@ from uuid import uuid4
 
 from flask import current_app, url_for
 
-from .exceptions import DatabaseException, NotFoundException
+from .exceptions import NotFoundException
 from .minifigure_list import BrickMinifigureList
 from .part_list import BrickPartList
 from .rebrickable_set import RebrickableSet
-from .set_checkbox import BrickSetCheckbox
 from .set_checkbox_list import BrickSetCheckboxList
 from .sql import BrickSQL
 if TYPE_CHECKING:
@@ -171,30 +170,6 @@ class BrickSet(RebrickableSet):
             )
 
         return self
-
-    # Update a status
-    def update_status(
-        self,
-        checkbox: BrickSetCheckbox,
-        status: bool,
-        /
-    ) -> None:
-        parameters = self.sql_parameters()
-        parameters['status'] = status
-
-        # Update the status
-        rows, _ = BrickSQL().execute_and_commit(
-            'set/update/status',
-            parameters=parameters,
-            name=checkbox.as_column(),
-        )
-
-        if rows != 1:
-            raise DatabaseException('Could not update the status "{status}" for set {set} ({id})'.format(  # noqa: E501
-                status=checkbox.fields.name,
-                set=self.fields.set,
-                id=self.fields.id,
-            ))
 
     # Self url
     def url(self, /) -> str:

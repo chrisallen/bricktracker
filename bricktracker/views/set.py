@@ -37,26 +37,16 @@ def list() -> str:
 
 
 # Change the status of a checkbox
-@set_page.route('/<id>/status/<checkbox_id>', methods=['POST'])
+@set_page.route('/<id>/status/<metadata_id>', methods=['POST'])
 @login_required
 @exception_handler(__file__, json=True)
-def update_status(*, id: str, checkbox_id: str) -> Response:
-    value: bool = request.json.get('value', False)  # type: ignore
-
+def update_status(*, id: str, metadata_id: str) -> Response:
     brickset = BrickSet().select_light(id)
-    checkbox = BrickSetCheckboxList().get(checkbox_id)
+    checkbox = BrickSetCheckboxList().get(metadata_id)
 
-    brickset.update_status(checkbox, value)
+    state = checkbox.update_set_state(brickset, request.json)
 
-    # Info
-    logger.info('Set {set} ({id}): status "{status}" changed to "{state}"'.format(  # noqa: E501
-        set=brickset.fields.set,
-        id=brickset.fields.id,
-        status=checkbox.fields.name,
-        state=value,
-    ))
-
-    return jsonify({'value': value})
+    return jsonify({'value': state})
 
 
 # Ask for deletion of a set

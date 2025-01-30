@@ -1,3 +1,3 @@
 UPDATE "bricktracker_set_checkboxes"
-SET "name" = :safe_name
+SET "{{field}}" = :value
 WHERE "bricktracker_set_checkboxes"."id" IS NOT DISTINCT FROM :id
