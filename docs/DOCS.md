@@ -15,7 +15,7 @@ This page helps you navigate the documentation of BrickTracker.
 
 - [First steps](first-steps.md)
 - [Managing your sets](set.md)
-- [Managing your set checkboxes](checkbox.md)
+- [Managing your set statuses](set-statuses.md)
 
 ## Specific procedures
 

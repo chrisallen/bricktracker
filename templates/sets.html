@@ -22,9 +22,9 @@
           <option value="-has-missing">Set is complete</option>
           <option value="has-missing">Set has missing pieces</option>
           <option value="has-missing-instructions">Set has missing instructions</option>
-          {% for checkbox in brickset_checkboxes %}
-            <option value="{{ checkbox.as_dataset() }}">{{ checkbox.fields.name }}</option>
-            <option value="-{{ checkbox.as_dataset() }}">NOT: {{ checkbox.fields.name }}</option>
+          {% for status in brickset_statuses %}
+            <option value="{{ status.as_dataset() }}">{{ status.fields.name }}</option>
+            <option value="-{{ status.as_dataset() }}">NOT: {{ status.fields.name }}</option>
           {% endfor %}
         </select>
         <select id="grid-theme" class="form-select form-select-sm" autocomplete="off">

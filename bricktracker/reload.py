@@ -1,6 +1,6 @@
 from .instructions_list import BrickInstructionsList
 from .retired_list import BrickRetiredList
-from .set_checkbox_list import BrickSetCheckboxList
+from .set_status_list import BrickSetStatusList
 from .theme_list import BrickThemeList
 
 
@@ -11,8 +11,8 @@ def reload() -> None:
         # Reload the instructions
         BrickInstructionsList(force=True)
 
-        # Reload the checkboxes
-        BrickSetCheckboxList(force=True)
+        # Reload the set statuses
+        BrickSetStatusList(force=True)
 
         # Reload retired sets
         BrickRetiredList(force=True)

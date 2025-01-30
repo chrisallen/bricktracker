@@ -8,8 +8,8 @@ from ..exceptions import exception_handler
 from ...instructions_list import BrickInstructionsList
 from ...rebrickable_image import RebrickableImage
 from ...retired_list import BrickRetiredList
-from ...set_checkbox import BrickSetCheckbox
-from ...set_checkbox_list import BrickSetCheckboxList
+from ...set_status import BrickSetStatus
+from ...set_status_list import BrickSetStatusList
 from ...sql_counter import BrickCounter
 from ...sql import BrickSQL
 from ...theme_list import BrickThemeList
@@ -24,11 +24,11 @@ admin_page = Blueprint('admin', __name__, url_prefix='/admin')
 @login_required
 @exception_handler(__file__)
 def admin() -> str:
-    brickset_checkboxes: list[BrickSetCheckbox] = []
     database_counters: list[BrickCounter] = []
     database_exception: Exception | None = None
     database_upgrade_needed: bool = False
     database_version: int = -1
+    metadata_statuses: list[BrickSetStatus] = []
     nil_minifigure_name: str = ''
     nil_minifigure_url: str = ''
     nil_part_name: str = ''
@@ -41,7 +41,7 @@ def admin() -> str:
         database_version = database.version
         database_counters = BrickSQL().count_records()
 
-        brickset_checkboxes = BrickSetCheckboxList().list(all=True)
+        metadata_statuses = BrickSetStatusList().list(all=True)
     except Exception as e:
         database_exception = e
 
@@ -62,38 +62,38 @@ def admin() -> str:
         'PARTS_FOLDER'
     )
 
-    open_checkbox = request.args.get('open_checkbox', None)
     open_image = request.args.get('open_image', None)
     open_instructions = request.args.get('open_instructions', None)
     open_logout = request.args.get('open_logout', None)
     open_retired = request.args.get('open_retired', None)
+    open_status = request.args.get('open_status', None)
     open_theme = request.args.get('open_theme', None)
 
     open_database = (
-        open_checkbox is None and
         open_image is None and
         open_instructions is None and
         open_logout is None and
         open_retired is None and
+        open_status is None and
         open_theme is None
     )
 
     return render_template(
         'admin.html',
         configuration=BrickConfigurationList.list(),
-        brickset_checkboxes=brickset_checkboxes,
-        checkbox_error=request.args.get('checkbox_error'),
+        status_error=request.args.get('status_error'),
         database_counters=database_counters,
         database_error=request.args.get('database_error'),
         database_exception=database_exception,
         database_upgrade_needed=database_upgrade_needed,
         database_version=database_version,
         instructions=BrickInstructionsList(),
+        metadata_statuses=metadata_statuses,
         nil_minifigure_name=nil_minifigure_name,
         nil_minifigure_url=nil_minifigure_url,
         nil_part_name=nil_part_name,
         nil_part_url=nil_part_url,
-        open_checkbox=open_checkbox,
+        open_status=open_status,
         open_database=open_database,
         open_image=open_image,
         open_instructions=open_instructions,

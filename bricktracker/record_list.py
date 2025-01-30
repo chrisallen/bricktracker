@@ -8,13 +8,13 @@ if TYPE_CHECKING:
     from .part import BrickPart
     from .rebrickable_set import RebrickableSet
     from .set import BrickSet
-    from .set_checkbox import BrickSetCheckbox
+    from .set_status import BrickSetStatus
     from .wish import BrickWish
 
 T = TypeVar(
     'T',
     'BrickSet',
-    'BrickSetCheckbox',
+    'BrickSetStatus',
     'BrickPart',
     'BrickMinifigure',
     'BrickWish',

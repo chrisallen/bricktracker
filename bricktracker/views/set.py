@@ -16,7 +16,7 @@ from .exceptions import exception_handler
 from ..minifigure import BrickMinifigure
 from ..part import BrickPart
 from ..set import BrickSet
-from ..set_checkbox_list import BrickSetCheckboxList
+from ..set_status_list import BrickSetStatusList
 from ..set_list import BrickSetList
 from ..socket import MESSAGES
 
@@ -32,19 +32,19 @@ def list() -> str:
     return render_template(
         'sets.html',
         collection=BrickSetList().all(),
-        brickset_checkboxes=BrickSetCheckboxList().list(),
+        brickset_statuses=BrickSetStatusList().list(),
     )
 
 
-# Change the status of a checkbox
+# Change the status of a status
 @set_page.route('/<id>/status/<metadata_id>', methods=['POST'])
 @login_required
 @exception_handler(__file__, json=True)
 def update_status(*, id: str, metadata_id: str) -> Response:
     brickset = BrickSet().select_light(id)
-    checkbox = BrickSetCheckboxList().get(metadata_id)
+    status = BrickSetStatusList().get(metadata_id)
 
-    state = checkbox.update_set_state(brickset, request.json)
+    state = status.update_set_state(brickset, request.json)
 
     return jsonify({'value': state})
 
@@ -97,7 +97,7 @@ def details(*, id: str) -> str:
         'set.html',
         item=BrickSet().select_specific(id),
         open_instructions=request.args.get('open_instructions'),
-        brickset_checkboxes=BrickSetCheckboxList().list(all=True),
+        brickset_statuses=BrickSetStatusList().list(all=True),
     )
 
 

@@ -8,7 +8,7 @@
     data-index="{{ index }}" data-number="{{ item.fields.set }}" data-name="{{ item.fields.name | lower }}" data-parts="{{ item.fields.number_of_parts }}"
     data-year="{{ item.fields.year }}" data-theme="{{ item.theme.name | lower }}" data-minifigures="{{ item.fields.total_minifigures }}" data-has-minifigures="{{ (item.fields.total_minifigures > 0) | int }}"
     data-has-missing="{{ (item.fields.total_missing > 0) | int }}" data-has-missing-instructions="{{ (not (item.instructions | length)) | int }}" data-missing="{{ item.fields.total_missing }}"
-    {% for checkbox in brickset_checkboxes %}data-{{ checkbox.as_dataset() }}="{{ item.fields[checkbox.as_column()] }}" {% endfor %}
+    {% for status in brickset_statuses %}data-{{ status.as_dataset() }}="{{ item.fields[status.as_column()] }}" {% endfor %}
   {% endif %}
 >
   {{ card.header(item, item.fields.name, solo=solo, identifier=item.fields.set) }}
@@ -26,11 +26,11 @@
       {{ badge.rebrickable(item, solo=solo, last=last) }}
     {% endif %}
   </div>
-  {% if not tiny and brickset_checkboxes | length %}
+  {% if not tiny and brickset_statuses | length %}
     <ul class="list-group list-group-flush card-check border-bottom-0">
-      {% for checkbox in brickset_checkboxes %}
+      {% for status in brickset_statuses %}
         <li class="list-group-item {% if not solo %}p-1{% endif %}">
-          {{ form.checkbox(checkbox.as_dataset(), item.fields.id, checkbox.fields.name, checkbox.url_for_set_state(item.fields.id), item.fields[checkbox.as_column()], delete=delete) }}
+          {{ form.checkbox(status.as_dataset(), item.fields.id, status.fields.name, status.url_for_set_state(item.fields.id), item.fields[status.as_column()], delete=delete) }}
         </li>
       {% endfor %}
     </ul>

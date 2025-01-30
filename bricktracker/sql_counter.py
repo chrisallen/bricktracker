@@ -2,11 +2,12 @@ from typing import Tuple
 
 # Some table aliases to make it look cleaner (id: (name, icon))
 ALIASES: dict[str, Tuple[str, str]] = {
+    'bricktracker_metadata_statuses': ('Bricktracker set status metadata', 'checkbox-line'),  # noqa: E501
     'bricktracker_minifigures': ('Bricktracker minifigures', 'group-line'),
     'bricktracker_parts': ('Bricktracker parts', 'shapes-line'),
-    'bricktracker_set_checkboxes': ('Bricktracker set checkboxes', 'checkbox-line'),  # noqa: E501
-    'bricktracker_set_statuses': ('Bricktracker sets status', 'checkbox-circle-line'),  # noqa: E501
-    'bricktracker_set_storages': ('Bricktracker sets storages', 'archive-2-line'),  # noqa: E501
+    'bricktracker_set_checkboxes': ('Bricktracker set checkboxes (legacy)', 'checkbox-line'),  # noqa: E501
+    'bricktracker_set_statuses': ('Bricktracker set statuses', 'checkbox-line'),  # noqa: E501
+    'bricktracker_set_storages': ('Bricktracker set storages', 'archive-2-line'),  # noqa: E501
     'bricktracker_sets': ('Bricktracker sets', 'hashtag'),
     'bricktracker_wishes': ('Bricktracker wishes', 'gift-line'),
     'inventory': ('Parts', 'shapes-line'),

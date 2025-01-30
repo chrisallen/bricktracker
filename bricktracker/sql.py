@@ -318,13 +318,18 @@ class BrickSQL(object):
                         ),
                         package='bricktracker'
                     )
+                except Exception:
+                    module = None
 
+                # If a module has been loaded, we need to fail if an error
+                # occured while executing the migration function
+                if module is not None:
                     function = getattr(module, 'migration_{name}'.format(
                         name=pending.name
                     ))
 
                     context: dict[str, Any] = function(self)
-                except Exception:
+                else:
                     context: dict[str, Any] = {}
 
                 self.executescript(pending.get_query(), **context)

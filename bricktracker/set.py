@@ -9,7 +9,7 @@ from .exceptions import NotFoundException
 from .minifigure_list import BrickMinifigureList
 from .part_list import BrickPartList
 from .rebrickable_set import RebrickableSet
-from .set_checkbox_list import BrickSetCheckboxList
+from .set_status_list import BrickSetStatusList
 from .sql import BrickSQL
 if TYPE_CHECKING:
     from .socket import BrickSocket
@@ -161,7 +161,7 @@ class BrickSet(RebrickableSet):
 
         # Load from database
         if not self.select(
-            statuses=BrickSetCheckboxList().as_columns(solo=True)
+            statuses=BrickSetStatusList().as_columns(solo=True)
         ):
             raise NotFoundException(
                 'Set with ID {id} was not found in the database'.format(

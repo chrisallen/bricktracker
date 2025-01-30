@@ -1,5 +1,6 @@
 BEGIN transaction;
 
+DROP TABLE IF EXISTS "bricktracker_metadata_statuses";
 DROP TABLE IF EXISTS "bricktracker_minifigures";
 DROP TABLE IF EXISTS "bricktracker_parts";
 DROP TABLE IF EXISTS "bricktracker_sets";

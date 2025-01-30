@@ -3,7 +3,7 @@ from typing import Self
 from flask import current_app
 
 from .record_list import BrickRecordList
-from .set_checkbox_list import BrickSetCheckboxList
+from .set_status_list import BrickSetStatusList
 from .set import BrickSet
 
 
@@ -37,7 +37,7 @@ class BrickSetList(BrickRecordList[BrickSet]):
         # Load the sets from the database
         for record in self.select(
             order=self.order,
-            statuses=BrickSetCheckboxList().as_columns()
+            statuses=BrickSetStatusList().as_columns()
         ):
             brickset = BrickSet(record=record)
 
@@ -73,7 +73,7 @@ class BrickSetList(BrickRecordList[BrickSet]):
         for record in self.select(
             order=order,
             limit=limit,
-            statuses=BrickSetCheckboxList().as_columns()
+            statuses=BrickSetStatusList().as_columns()
         ):
             brickset = BrickSet(record=record)
 

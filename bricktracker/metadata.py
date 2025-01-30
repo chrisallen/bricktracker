@@ -93,7 +93,7 @@ class BrickMetadata(BrickRecord):
             metadata_id=self.fields.id
         )
 
-    # Select a specific checkbox (with an id)
+    # Select a specific metadata (with an id)
     def select_specific(self, id: str, /) -> Self:
         # Save the parameters to the fields
         self.fields.id = id

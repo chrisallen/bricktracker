@@ -13,7 +13,7 @@ from bricktracker.sql import close
 from bricktracker.version import __version__
 from bricktracker.views.add import add_page
 from bricktracker.views.admin.admin import admin_page
-from bricktracker.views.admin.checkbox import admin_checkbox_page
+from bricktracker.views.admin.status import admin_status_page
 from bricktracker.views.admin.database import admin_database_page
 from bricktracker.views.admin.image import admin_image_page
 from bricktracker.views.admin.instructions import admin_instructions_page
@@ -78,7 +78,7 @@ def setup_app(app: Flask) -> None:
 
     # Register admin routes
     app.register_blueprint(admin_page)
-    app.register_blueprint(admin_checkbox_page)
+    app.register_blueprint(admin_status_page)
     app.register_blueprint(admin_database_page)
     app.register_blueprint(admin_image_page)
     app.register_blueprint(admin_instructions_page)
