@@ -2,7 +2,7 @@
 
 {{ accordion.header('Set statuses danger zone', 'status-danger', 'admin', expanded=true, danger=true, class='text-end') }}
 <form action="{{ url_for('admin_status.do_delete', id=status.fields.id) }}" method="post">
-  {% if error %}<div class="alert alert-danger text-start" role="alert"><strong>Error:</strong> {{ error }}.</div>{% endif %}
+  {% if status_error %}<div class="alert alert-danger text-start" role="alert"><strong>Error:</strong> {{ status_error }}.</div>{% endif %}
   <div class="alert alert-danger text-center" role="alert">You are about to <strong>delete a set status</strong>. This action is irreversible.</div>
   <div class="row row-cols-lg-auto g-3 align-items-center">
     <div class="col-12 flex-grow-1">

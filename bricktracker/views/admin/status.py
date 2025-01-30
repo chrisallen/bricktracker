@@ -46,7 +46,7 @@ def delete(*, id: str) -> str:
         'admin.html',
         delete_status=True,
         status=BrickSetStatus().select_specific(id),
-        error=request.args.get('status_error')
+        status_error=request.args.get('status_error')
     )
 
 
