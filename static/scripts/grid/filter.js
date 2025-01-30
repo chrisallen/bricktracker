@@ -5,20 +5,24 @@ class BrickGridFilter {
 
         // Grid sort elements (built based on the initial id)
         this.html_search = document.getElementById(`${this.grid.id}-search`);
-        this.html_status = document.getElementById(`${this.grid.id}-status`);
-        this.html_theme = document.getElementById(`${this.grid.id}-theme`);
+        this.html_filter = document.getElementById(`${this.grid.id}-filter`);
 
-        // Filter setup
+        // Search setup
         if (this.html_search) {
-            this.html_search.addEventListener("keyup", ((grid) => () => {
-                grid.filter();
+            this.html_search.addEventListener("keyup", ((gridfilter) => () => {
+                gridfilter.filter();
             })(this));
         }
 
-        if (this.html_status) {
-            this.html_status.addEventListener("change", ((grid) => () => {
-                grid.filter();
-            })(this));
+        // Filters setup
+        this.selects = [];
+        if (this.html_filter) {
+            this.html_filter.querySelectorAll("select[data-filter]").forEach(select => {
+                select.addEventListener("change", ((gridfilter) => () => {
+                    gridfilter.filter();
+                })(this));
+                this.selects.push(select);
+            });
         }
 
         if (this.html_theme) {
@@ -30,52 +34,62 @@ class BrickGridFilter {
 
     // Filter
     filter() {
-        var filters = {};
+        let options = {
+            search: undefined,
+            filters: [],
+        };
 
         // Check if there is a search filter
         if (this.html_search && this.html_search.value != "") {
-            filters["search"] = this.html_search.value.toLowerCase();
+            options.search = this.html_search.value.toLowerCase();
         }
 
-        // Check if there is a set filter
-        if (this.html_status && this.html_status.value != "") {
-            if (this.html_status.value.startsWith("-")) {
-                filters["filter"] = this.html_status.value.substring(1);
-                filters["filter-target"] = "0";
-            } else {
-                filters["filter"] = this.html_status.value;
-                filters["filter-target"] = "1";
+        // Build filters
+        for (const select of this.selects) {
+            if (select.value != "") {
+                // Multi-attribute filter
+                switch (select.dataset.filter) {
+                    // List contains values
+                    case "solo":
+                        options.filters.push({
+                            attribute: select.dataset.filterAttribute,
+                            value: select.value,
+                        })
+                    break;
+
+                    // List contains attribute name, looking for true/false
+                    case "status":
+                        if (select.value.startsWith("-")) {
+                            options.filters.push({
+                                attribute: select.value.substring(1),
+                                value: "0"
+                            })
+                        } else {
+                            options.filters.push({
+                                attribute: select.value,
+                                value: "1"
+                            })
+                        }
+                    break;
+                }
             }
-        }
-
-        // Check if there is a theme filter
-        if (this.html_theme && this.html_theme.value != "") {
-            filters["theme"] = this.html_theme.value;
         }
 
         // Filter all cards
         const cards = this.grid.html_grid.querySelectorAll(`${this.grid.target} > .card`);
         cards.forEach(current => {
-            // Set filter
-            if ("filter" in filters) {
-                if (current.getAttribute("data-" + filters["filter"]) != filters["filter-target"]) {
-                    current.parentElement.classList.add("d-none");
-                    return;
-                }
-            }
-
-            // Theme filter
-            if ("theme" in filters) {
-                if (current.getAttribute("data-theme") != filters["theme"]) {
+            // Process all filters
+            for (const filter of options.filters) {
+                if (current.getAttribute(`data-${filter.attribute}`) != filter.value) {
                     current.parentElement.classList.add("d-none");
                     return;
                 }
             }
 
             // Check all searchable fields for a match
-            if ("search" in filters) {
+            if (options.search) {
                 for (let attribute of ["data-name", "data-number", "data-parts", "data-theme", "data-year"]) {
-                    if (current.getAttribute(attribute).includes(filters["search"])) {
+                    if (current.getAttribute(attribute).includes(options.search)) {
                         current.parentElement.classList.remove("d-none");
                         return;
                     }
