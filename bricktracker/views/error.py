@@ -138,7 +138,7 @@ def error_404(
     post_redirect: str | None = None,
     error_name: str = 'error',
     **kwargs,
-) -> Tuple[str | Response, int]:
+) -> Response | Tuple[str | Response, int]:
     # Warning
     logger.warning('Not found: {error} (path: {path})'.format(
         error=str(error),
@@ -156,7 +156,7 @@ def error_404(
             error=str(error),
             error_name=error_name,
             **kwargs,
-        ), 404
+        )
     else:
         return render_template('404.html', error=str(error)), 404
 
