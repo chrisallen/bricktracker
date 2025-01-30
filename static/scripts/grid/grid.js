@@ -6,26 +6,12 @@ class BrickGrid {
 
         // Grid elements (built based on the initial id)
         this.html_grid = document.getElementById(this.id);
-        this.html_sort = document.getElementById(`${this.id}-sort`);
         this.html_search = document.getElementById(`${this.id}-search`);
         this.html_status = document.getElementById(`${this.id}-status`);
         this.html_theme = document.getElementById(`${this.id}-theme`);
 
-        // Sort buttons
-        this.html_sort_buttons = {};
-        if (this.html_sort) {
-            this.html_sort.querySelectorAll("button[data-sort-attribute]").forEach(button => {
-                this.html_sort_buttons[button.id] = new BrickGridSortButton(button, this);
-            });
-        }
-
-        // Clear button
-        this.html_clear = document.querySelector("button[data-sort-clear]")
-        if (this.html_clear) {
-            this.html_clear.addEventListener("click", ((grid) => (e) => {
-                grid.clear();
-            })(this))
-        }
+        // Sort setup
+        this.sort = new BrickGridSort(this);
 
         // Filter setup
         if (this.html_search) {
@@ -45,46 +31,6 @@ class BrickGrid {
                 grid.filter();
             })(this));
         }
-
-        // Cookie setup
-        const cookies = document.cookie.split(";").reduce((acc, cookieString) => {
-            const [key, value] = cookieString.split("=").map(s => s.trim().replace(/^"|"$/g, ""));
-            if (key && value) {
-                acc[key] = decodeURIComponent(value);
-            }
-            return acc;
-        }, {});
-
-        // Initial sort
-        if ("sort-id" in cookies && cookies["sort-id"] in this.html_sort_buttons) {
-            const current = this.html_sort_buttons[cookies["sort-id"]];
-
-            if("sort-order" in cookies) {
-                current.button.setAttribute("data-sort-order", cookies["sort-order"]);
-            }
-
-            this.sort(current, true);
-        }
-    }
-
-    // Clear
-    clear() {
-        // Cleanup all
-        for (const [id, button] of Object.entries(this.html_sort_buttons)) {
-            button.toggle();
-            button.inactive();
-        }
-
-        // Clear cookies
-        document.cookie = `sort-id=""; Path=/; SameSite=strict`;
-        document.cookie = `sort-order=""; Path=/; SameSite=strict`;
-
-        // Reset sorting
-        tinysort(this.target, {
-            selector: "div",
-            attr: "data-index",
-            order: "asc",
-        });
 
     }
 
@@ -153,53 +99,6 @@ class BrickGrid {
         }
     }
 
-    // Sort
-    sort(current, no_flip=false) {
-        const attribute = current.data.sortAttribute;
-        const natural = current.data.sortNatural;
-
-        // Cleanup all
-        for (const [id, button] of Object.entries(this.html_sort_buttons)) {
-            if (button != current) {
-                button.toggle();
-                button.inactive();
-            }
-        }
-
-        // Sort
-        if (attribute) {
-            let order = current.data.sortOrder;
-
-            // First ordering
-            if (!no_flip) {
-                if(!order) {
-                    if (current.data.sortDesc) {
-                        order = "desc"
-                    } else {
-                        order = "asc"
-                    }
-                } else {
-                    // Flip the sorting order
-                    order = (order == "desc") ? "asc" : "desc";
-                }
-            }
-
-            // Toggle the ordering
-            current.toggle(order);
-
-            // Store cookies
-            document.cookie = `sort-id="${encodeURIComponent(current.button.id)}"; Path=/; SameSite=strict`;
-            document.cookie = `sort-order="${encodeURIComponent(order)}"; Path=/; SameSite=strict`;
-
-            // Do the sorting
-            tinysort(this.target, {
-                selector: "div",
-                attr: "data-" + attribute,
-                natural: natural == "true",
-                order: order,
-            });
-        }
-    }
 }
 
 // Helper to setup the grids
