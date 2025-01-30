@@ -60,6 +60,17 @@ class BrickMetadata(BrickRecord):
             id=self.fields.id,
         )
 
+    # Grab data from a form
+    def from_form(self, form: dict[str, str], /) -> Self:
+        name = form.get('name', None)
+
+        if name is None or name == '':
+            raise ErrorException('Status name cannot be empty')
+
+        self.fields.name = name
+
+        return self
+
     # Insert into database
     def insert(self, /, **context) -> None:
         self.safe()
