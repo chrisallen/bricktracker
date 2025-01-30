@@ -7,7 +7,6 @@ from .metadata import BrickMetadata
 # Lego set status metadata
 class BrickSetStatus(BrickMetadata):
     kind: str = 'status'
-    prefix: str = 'status'
 
     # Set state endpoint
     set_state_endpoint: str = 'set.update_status'

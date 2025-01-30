@@ -17,7 +17,6 @@ logger = logging.getLogger(__name__)
 # Lego set metadata (customizable list of entries that can be checked)
 class BrickMetadata(BrickRecord):
     kind: str
-    prefix: str
 
     # Set state endpoint
     set_state_endpoint: str
@@ -43,7 +42,10 @@ class BrickMetadata(BrickRecord):
 
     # SQL column name
     def as_column(self, /) -> str:
-        return '{prefix}_{id}'.format(id=self.fields.id, prefix=self.prefix)
+        return '{kind}_{id}'.format(
+            id=self.fields.id,
+            kind=self.kind.lower()
+        )
 
     # HTML dataset name
     def as_dataset(self, /) -> str:
