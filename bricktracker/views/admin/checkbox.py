@@ -27,7 +27,12 @@ admin_checkbox_page = Blueprint(
 # Add a checkbox
 @admin_checkbox_page.route('/add', methods=['POST'])
 @login_required
-@exception_handler(__file__, post_redirect='admin.admin', open_checkbox=True)
+@exception_handler(
+    __file__,
+    post_redirect='admin.admin',
+    error_name='checkbox_error',
+    open_checkbox=True
+)
 def add() -> Response:
     BrickSetCheckbox().from_form(request.form).insert()
 
@@ -45,14 +50,18 @@ def delete(*, id: str) -> str:
         'admin.html',
         delete_checkbox=True,
         checkbox=BrickSetCheckbox().select_specific(id),
-        error=request.args.get('error')
+        error=request.args.get('checkbox_error')
     )
 
 
 # Actually delete the checkbox
 @admin_checkbox_page.route('<id>/delete', methods=['POST'])
 @login_required
-@exception_handler(__file__, post_redirect='admin_checkbox.delete')
+@exception_handler(
+    __file__,
+    post_redirect='admin_checkbox.delete',
+    error_name='checkbox_error'
+)
 def do_delete(*, id: str) -> Response:
     checkbox = BrickSetCheckbox().select_specific(id)
     checkbox.delete()
@@ -88,7 +97,12 @@ def update_status(*, id: str, name: str) -> Response:
 # Rename the checkbox
 @admin_checkbox_page.route('<id>/rename', methods=['POST'])
 @login_required
-@exception_handler(__file__, post_redirect='admin.admin', open_checkbox=True)
+@exception_handler(
+    __file__,
+    post_redirect='admin.admin',
+    error_name='checkbox_error',
+    open_checkbox=True
+)
 def rename(*, id: str) -> Response:
     checkbox = BrickSetCheckbox().select_specific(id)
     checkbox.from_form(request.form).rename()

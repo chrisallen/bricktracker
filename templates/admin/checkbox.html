@@ -1,8 +1,7 @@
 {% import 'macro/accordion.html' as accordion %}
 
 {{ accordion.header('Checkboxes', 'checkbox', 'admin', expanded=open_checkbox, icon='checkbox-line', class='p-0') }}
-{% if error %}<div class="alert alert-danger m-2" role="alert"><strong>Error:</strong> {{ error }}.</div>{% endif %}
-{% if database_error %}<div class="alert alert-danger m-2" role="alert"><strong>Error:</strong> {{ database_error }}.</div>{% endif %}
+{% if checkbox_error %}<div class="alert alert-danger m-2" role="alert"><strong>Error:</strong> {{ checkbox_error }}.</div>{% endif %}
 <ul class="list-group list-group-flush">
   {% if brickset_checkboxes | length %}
     {% for checkbox in brickset_checkboxes %}

@@ -82,6 +82,7 @@ def admin() -> str:
         'admin.html',
         configuration=BrickConfigurationList.list(),
         brickset_checkboxes=brickset_checkboxes,
+        checkbox_error=request.args.get('checkbox_error'),
         database_counters=database_counters,
         database_error=request.args.get('database_error'),
         database_exception=database_exception,
