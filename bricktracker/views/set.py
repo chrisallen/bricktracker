@@ -64,7 +64,7 @@ def update_status(*, id: str, metadata_id: str) -> Response:
     brickset = BrickSet().select_light(id)
     status = BrickSetStatusList(BrickSetStatus).get(metadata_id)
 
-    state = status.update_set_state(brickset, request.json)
+    state = status.update_set_state(brickset, json=request.json)
 
     return jsonify({'value': state})
 

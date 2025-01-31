@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 # Lego sets status list
-class BrickSetStatusList(BrickMetadataList):
+class BrickSetStatusList(BrickMetadataList[BrickSetStatus]):
     kind: str = 'set statuses'
 
     # Database table
