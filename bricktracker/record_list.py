@@ -8,12 +8,14 @@ if TYPE_CHECKING:
     from .part import BrickPart
     from .rebrickable_set import RebrickableSet
     from .set import BrickSet
+    from .set_owner import BrickSetOwner
     from .set_status import BrickSetStatus
     from .wish import BrickWish
 
 T = TypeVar(
     'T',
     'BrickSet',
+    'BrickSetOwner',
     'BrickSetStatus',
     'BrickPart',
     'BrickMinifigure',

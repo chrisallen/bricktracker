@@ -13,6 +13,11 @@ IFNULL("minifigures_join"."total", 0) AS "total_minifigures"
 {% endblock %}
 
 {% block join %}
+{% if owners %}
+LEFT JOIN "bricktracker_set_owners"
+ON "bricktracker_sets"."id" IS NOT DISTINCT FROM "bricktracker_set_owners"."id"
+{% endif %}
+
 {% if statuses %}
 LEFT JOIN "bricktracker_set_statuses"
 ON "bricktracker_sets"."id" IS NOT DISTINCT FROM "bricktracker_set_statuses"."id"

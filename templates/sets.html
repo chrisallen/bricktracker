@@ -10,7 +10,7 @@
       <label class="visually-hidden" for="grid-search">Search</label>
       <div class="input-group">
         <span class="input-group-text"><i class="ri-search-line"></i><span class="ms-1 d-none d-xl-inline"> Search</span></span>
-        <input id="grid-search" data-search-exact="name,number,parts,theme,year" class="form-control form-control-sm" type="text" placeholder="Set name, set number, set theme or number of parts..." value="">
+        <input id="grid-search" data-search-exact="name,number,parts,theme,year" data-search-list="owner" class="form-control form-control-sm" type="text" placeholder="Set, name, number of parts, theme, year, owner" value="">
       </div>
     </div>
     <div class="col-12">
@@ -71,6 +71,20 @@
           <option value="" selected>All</option>
           {% for theme in collection.themes %}
           <option value="{{ theme | lower }}">{{ theme }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="col-12 flex-grow-1">
+      <label class="visually-hidden" for="grid-owner">Owner</label>
+      <div class="input-group">
+        <span class="input-group-text"><i class="ri-user-line"></i><span class="ms-1 d-none d-xl-inline"> Owner</span></span>
+        <select id="grid-owner" class="form-select"
+          data-filter="metadata"
+          autocomplete="off">
+          <option value="" selected>All</option>
+          {% for owner in brickset_owners %}
+            <option value="{{ owner.as_dataset() }}">{{ owner.fields.name }}</option>
           {% endfor %}
         </select>
       </div>

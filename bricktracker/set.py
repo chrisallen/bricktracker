@@ -9,6 +9,8 @@ from .exceptions import NotFoundException
 from .minifigure_list import BrickMinifigureList
 from .part_list import BrickPartList
 from .rebrickable_set import RebrickableSet
+from .set_owner import BrickSetOwner
+from .set_owner_list import BrickSetOwnerList
 from .set_status import BrickSetStatus
 from .set_status_list import BrickSetStatusList
 from .sql import BrickSQL
@@ -67,6 +69,13 @@ class BrickSet(RebrickableSet):
             # Load the minifigures
             if not BrickMinifigureList.download(socket, self, refresh=refresh):
                 return False
+
+            # Save the owners
+            owners: list[str] = list(data.get('owners', []))
+
+            for id in owners:
+                owner = BrickSetOwnerList(BrickSetOwner).get(id)
+                owner.update_set_state(self, state=True)
 
             # Commit the transaction to the database
             socket.auto_progress(
@@ -162,6 +171,7 @@ class BrickSet(RebrickableSet):
 
         # Load from database
         if not self.select(
+            owners=BrickSetOwnerList(BrickSetOwner).as_columns(),
             statuses=BrickSetStatusList(BrickSetStatus).as_columns(all=True)
         ):
             raise NotFoundException(

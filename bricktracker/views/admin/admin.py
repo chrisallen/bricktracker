@@ -8,6 +8,8 @@ from ..exceptions import exception_handler
 from ...instructions_list import BrickInstructionsList
 from ...rebrickable_image import RebrickableImage
 from ...retired_list import BrickRetiredList
+from ...set_owner import BrickSetOwner
+from ...set_owner_list import BrickSetOwnerList
 from ...set_status import BrickSetStatus
 from ...set_status_list import BrickSetStatusList
 from ...sql_counter import BrickCounter
@@ -28,6 +30,7 @@ def admin() -> str:
     database_exception: Exception | None = None
     database_upgrade_needed: bool = False
     database_version: int = -1
+    metadata_owners: list[BrickSetOwner] = []
     metadata_statuses: list[BrickSetStatus] = []
     nil_minifigure_name: str = ''
     nil_minifigure_url: str = ''
@@ -41,6 +44,7 @@ def admin() -> str:
         database_version = database.version
         database_counters = BrickSQL().count_records()
 
+        metadata_owners = BrickSetOwnerList(BrickSetOwner).list()
         metadata_statuses = BrickSetStatusList(BrickSetStatus).list(all=True)
     except Exception as e:
         database_exception = e
@@ -65,6 +69,7 @@ def admin() -> str:
     open_image = request.args.get('open_image', None)
     open_instructions = request.args.get('open_instructions', None)
     open_logout = request.args.get('open_logout', None)
+    open_owner = request.args.get('open_owner', None)
     open_retired = request.args.get('open_retired', None)
     open_status = request.args.get('open_status', None)
     open_theme = request.args.get('open_theme', None)
@@ -73,6 +78,7 @@ def admin() -> str:
         open_image is None and
         open_instructions is None and
         open_logout is None and
+        open_owner is None and
         open_retired is None and
         open_status is None and
         open_theme is None
@@ -81,13 +87,13 @@ def admin() -> str:
     return render_template(
         'admin.html',
         configuration=BrickConfigurationList.list(),
-        status_error=request.args.get('status_error'),
         database_counters=database_counters,
         database_error=request.args.get('database_error'),
         database_exception=database_exception,
         database_upgrade_needed=database_upgrade_needed,
         database_version=database_version,
         instructions=BrickInstructionsList(),
+        metadata_owners=metadata_owners,
         metadata_statuses=metadata_statuses,
         nil_minifigure_name=nil_minifigure_name,
         nil_minifigure_url=nil_minifigure_url,
@@ -98,8 +104,11 @@ def admin() -> str:
         open_image=open_image,
         open_instructions=open_instructions,
         open_logout=open_logout,
+        open_owner=open_owner,
         open_retired=open_retired,
         open_theme=open_theme,
+        owner_error=request.args.get('owner_error'),
+        status_error=request.args.get('status_error'),
         retired=BrickRetiredList(),
         theme=BrickThemeList(),
     )

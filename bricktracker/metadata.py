@@ -176,8 +176,16 @@ class BrickMetadata(BrickRecord):
         return value
 
     # Update the selected state of this metadata item for a set
-    def update_set_state(self, brickset: 'BrickSet', json: Any | None) -> Any:
-        state: bool = json.get('value', False)  # type: ignore
+    def update_set_state(
+        self,
+        brickset: 'BrickSet',
+        /,
+        *,
+        json: Any | None = None,
+        state: bool | None = None,
+    ) -> Any:
+        if state is None:
+            state = json.get('value', False)  # type: ignore
 
         parameters = self.sql_parameters()
         parameters['set_id'] = brickset.fields.id

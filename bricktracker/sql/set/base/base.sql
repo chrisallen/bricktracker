@@ -9,6 +9,9 @@ SELECT
     "rebrickable_sets"."number_of_parts",
     "rebrickable_sets"."image",
     "rebrickable_sets"."url",
+    {% block owners %}
+        {% if owners %}{{ owners }},{% endif %}
+    {% endblock %}
     {% block statuses %}
         {% if statuses %}{{ statuses }},{% endif %}
     {% endblock %}

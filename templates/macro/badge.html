@@ -50,9 +50,18 @@
   {{ badge(check=quantity, solo=solo, last=last, color='success', icon='close-line', collapsible='Quantity:', text=quantity, alt='Quantity') }}
 {% endmacro %}
 
+{% macro owner(item, owner, solo=false, last=false) %}
+  {% if last  %}
+    {% set tooltip=owner.fields.name %}
+  {% else %}
+    {% set text=owner.fields.name %}
+  {% endif %}
+  {{ badge(check=item.fields[owner.as_column()], solo=solo, last=last, color='light text-success-emphasis bg-success-subtle border border-success-subtle', icon='user-line', text=text, alt='Owner', tooltip=tooltip) }}
+{% endmacro %}
+
 {% macro print(item, solo=false, last=false, header=false) %}
   {% if item.fields.print %}
-  {{ badge(url=item.url_for_print(), solo=solo, last=last, color='light border', icon='paint-brush-line', collapsible='Print') }}
+    {{ badge(url=item.url_for_print(), solo=solo, last=last, color='light border', icon='paint-brush-line', collapsible='Print') }}
   {% endif %}
 {% endmacro %}
 

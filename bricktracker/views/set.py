@@ -16,6 +16,8 @@ from .exceptions import exception_handler
 from ..minifigure import BrickMinifigure
 from ..part import BrickPart
 from ..set import BrickSet
+from ..set_owner import BrickSetOwner
+from ..set_owner_list import BrickSetOwnerList
 from ..set_status import BrickSetStatus
 from ..set_status_list import BrickSetStatusList
 from ..set_list import BrickSetList
@@ -33,11 +35,25 @@ def list() -> str:
     return render_template(
         'sets.html',
         collection=BrickSetList().all(),
+        brickset_owners=BrickSetOwnerList(BrickSetOwner).list(),
         brickset_statuses=BrickSetStatusList(BrickSetStatus).list(),
     )
 
 
-# Change the status of a status
+# Change the state of a owner
+@set_page.route('/<id>/owner/<metadata_id>', methods=['POST'])
+@login_required
+@exception_handler(__file__, json=True)
+def update_owner(*, id: str, metadata_id: str) -> Response:
+    brickset = BrickSet().select_light(id)
+    owner = BrickSetOwnerList(BrickSetOwner).get(metadata_id)
+
+    state = owner.update_set_state(brickset, json=request.json)
+
+    return jsonify({'value': state})
+
+
+# Change the state of a status
 @set_page.route('/<id>/status/<metadata_id>', methods=['POST'])
 @login_required
 @exception_handler(__file__, json=True)
@@ -98,6 +114,7 @@ def details(*, id: str) -> str:
         'set.html',
         item=BrickSet().select_specific(id),
         open_instructions=request.args.get('open_instructions'),
+        brickset_owners=BrickSetOwnerList(BrickSetOwner).list(),
         brickset_statuses=BrickSetStatusList(BrickSetStatus).list(all=True),
     )
 

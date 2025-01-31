@@ -1,14 +1,15 @@
 import logging
-from typing import Type
+from typing import Type, TypeVar
 
 from .exceptions import NotFoundException
 from .fields import BrickRecordFields
 from .record_list import BrickRecordList
+from .set_owner import BrickSetOwner
 from .set_status import BrickSetStatus
 
 logger = logging.getLogger(__name__)
 
-T = BrickSetStatus
+T = TypeVar('T', 'BrickSetStatus', 'BrickSetOwner')
 
 
 # Lego sets metadata list

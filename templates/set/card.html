@@ -9,6 +9,12 @@
     data-year="{{ item.fields.year }}" data-theme="{{ item.theme.name | lower }}" data-minifigures="{{ item.fields.total_minifigures }}" data-has-minifigures="{{ (item.fields.total_minifigures > 0) | int }}"
     data-has-missing="{{ (item.fields.total_missing > 0) | int }}" data-has-missing-instructions="{{ (not (item.instructions | length)) | int }}" data-missing="{{ item.fields.total_missing }}"
     {% for status in brickset_statuses %}data-{{ status.as_dataset() }}="{{ item.fields[status.as_column()] }}" {% endfor %}
+    {% for owner in brickset_owners %}
+      {% with checked=item.fields[owner.as_column()] %}
+        data-{{ owner.as_dataset() }}="{{ checked }}"
+        {% if checked %} data-owner-{{ loop.index }}="{{ owner.fields.name | lower }}"{% endif %}
+      {% endwith %}
+    {% endfor %}
   {% endif %}
 >
   {{ card.header(item, item.fields.name, solo=solo, identifier=item.fields.set) }}
@@ -19,6 +25,9 @@
     {{ badge.parts(item.fields.number_of_parts, solo=solo, last=last) }}
     {{ badge.total_minifigures(item.fields.total_minifigures, solo=solo, last=last) }}
     {{ badge.total_missing(item.fields.total_missing, solo=solo, last=last) }}
+    {% for owner in brickset_owners %}
+      {{ badge.owner(item, owner, solo=solo, last=last) }}
+    {% endfor %}
     {% if not last %}
       {% if not solo %}
         {{ badge.instructions(item, solo=solo, last=last) }}

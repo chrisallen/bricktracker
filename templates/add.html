@@ -33,6 +33,19 @@
               Add without confirmation
             </label>
           </div>
+          {% if brickset_owners | length %}
+            <h5 class="border-bottom mt-2">Owners</h5>
+            <div id="add-owners">
+            {% for owner in brickset_owners %}
+              {% with id=owner.as_dataset() %}
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" value="{{ owner.fields.id }}" id="{{ id }}" autocomplete="off">
+                  <label class="form-check-label" for="{{ id }}">{{ owner.fields.name }}</label>
+                </div>
+              {% endwith %}
+            {% endfor %}
+            </div>
+          {% endif %}
           <hr>
           <div class="mb-3">
             <p>

@@ -6,6 +6,9 @@ BEGIN TRANSACTION;
 DELETE FROM "bricktracker_sets"
 WHERE "bricktracker_sets"."id" IS NOT DISTINCT FROM '{{ id }}';
 
+DELETE FROM "bricktracker_set_owners"
+WHERE "bricktracker_set_owners"."id" IS NOT DISTINCT FROM '{{ id }}';
+
 DELETE FROM "bricktracker_set_statuses"
 WHERE "bricktracker_set_statuses"."id" IS NOT DISTINCT FROM '{{ id }}';
 
