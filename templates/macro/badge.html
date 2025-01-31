@@ -1,14 +1,15 @@
-{% macro badge(check=none, url=none, solo=false, last=false, color='primary', blank=none, icon=none, alt=none, collapsible=none, text=none, tooltip=none) %}
+{% macro badge(check=none, url=none, solo=false, last=false, header=false, color='primary', rgb=none, blank=none, icon=none, alt=none, collapsible=none, text=none, tooltip=none) %}
   {% if check or url %}
     {% if url %}
       <a href="{{ url }}" {% if blank %}target="_blank"{% endif %}
     {% else %}
       <span
     {% endif %}
-      class="badge text-bg-{{ color }} fw-normal mb-1 {% if solo %}fs-6{% endif %}" {% if alt %}alt="{{ alt }}"{% endif %}
+      class="badge text-bg-{{ color }} fw-normal {% if not header %}mb-1{% endif %} {% if solo and not header %}fs-6{% endif %}" {% if alt %}alt="{{ alt }}"{% endif %}
       {% if tooltip %} data-bs-toggle="tooltip" title="{{ tooltip }}"{% endif %}
     >
     {% if icon %}<i class="ri-{{ icon }}"></i>{% endif %}
+    {% if rgb %}<span class="color-rgb {% if rgb == 'any' %}color-any{% endif %} align-bottom border border-black" {% if rgb != 'any' %}style="background-color: #{{ rgb }};"{% endif %}></span>{% endif %}
     {% if collapsible and not last %}<span {% if not solo %}class="d-none d-md-inline"{% endif %}> {{ collapsible }} </span>{% endif %}
     {% if text %}{{ text }}{% endif %}
     {% if url %}
@@ -23,6 +24,20 @@
   {{ badge(url=item.url_for_bricklink(), solo=solo, last=last, blank=true, color='light border', icon='external-link-line', collapsible='Bricklink', alt='Bricklink') }}
 {% endmacro %}
 
+{% macro color(item, icon=none, solo=false, last=false, header=false) %}
+  {% if item.fields.color == 9999 %}
+    {% set rgb = 'any' %}
+  {% else %}
+      {% set rgb = item.fields.color_rgb %}
+  {% endif %}
+  {{ badge(check=item.fields.color_name, solo=solo, last=last, header=header, color=' bg-white text-black border', rgb=rgb, icon='palette-line', collapsible=item.fields.color_name) }}
+  {{ badge(check=item.fields.color_transparent, solo=solo, last=last, header=header, color='light border', icon='blur-off-line', collapsible='Transparent') }}
+{% endmacro %}
+
+{% macro identifier(id, icon=none, solo=false, last=false, header=false) %}
+  {{ badge(check=id, solo=solo, last=last, header=header, color='secondary', icon=icon, text=id) }}
+{% endmacro %}
+
 {% macro instructions(item, solo=false, last=false) %}
   {{ badge(url=item.url_for_instructions(), solo=solo, last=last, blank=true, color='light border', icon='file-line', collapsible='Instructions:', text=item.instructions | length, alt='Instructions') }}
 {% endmacro %}
@@ -33,6 +48,10 @@
 
 {% macro quantity(quantity, solo=false, last=false) %}
   {{ badge(check=quantity, solo=solo, last=last, color='success', icon='close-line', collapsible='Quantity:', text=quantity, alt='Quantity') }}
+{% endmacro %}
+
+{% macro print(item, solo=false, last=false, header=false) %}
+  {{ badge(url=item.url_for_print(), solo=solo, last=last, color='light border', icon='paint-brush-line', collapsible='Print') }}
 {% endmacro %}
 
 {% macro set(set, solo=false, last=false, url=None, id=None) %}

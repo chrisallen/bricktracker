@@ -119,11 +119,14 @@ class RebrickablePart(BrickRecord):
 
     # Compute the url for the original of the printed part
     def url_for_print(self, /) -> str:
-        return url_for(
-            'part.details',
-            part=self.fields.print,
-            color=self.fields.color,
-        )
+        if self.fields.print is not None:
+            return url_for(
+                'part.details',
+                part=self.fields.print,
+                color=self.fields.color,
+            )
+        else:
+            return ''
 
     # Compute the url for the rebrickable page
     def url_for_rebrickable(self, /) -> str:
