@@ -112,7 +112,7 @@ class BrickGridFilter {
                     } else {
                         // List search
                         for (const list of this.search_list) {
-                            if (set.startsWith(this.search_list)) {
+                            if (set.startsWith(list)) {
                                 if (current.dataset[set].includes(options.search)) {
                                     current.parentElement.classList.remove("d-none");
                                     return;
