@@ -2,18 +2,38 @@
 
 ## Unreleased
 
+> **Warning**
+> "Missing" part has been renamed to "Problems" to accomodate for missing and damaged parts.
+> The associated environment variables have changed named (the old names are still valid)
+
 ## Code
+
+- Form
+    - Migrate missing input fields to BrickChanger
 
 - General cleanup
 
+- Metadata
+    - Underlying class to implement more metadata-like features
+
 - Minifigure
     - Deduplicate
+
+Parts
+    - Damaged parts
+
+- Sets
+    - Refresh data from Rebrickable
+    - Fix missing @login_required for set deletion
+    - Ownership
+    - Tags
 
 - Socket
     - Add decorator for rebrickable, authenticated and threaded socket actions
 
 - SQL
     - Allow for advanced migration scenarios through companion python files
+    - Add a bunch of the requested fields into the database for future implementation
 
 ### UI
 
@@ -22,10 +42,33 @@
 
 - Admin
     - Grey out legacy tables in the database view
+    - Checkboxes renamed to Set statuses
+
+- Cards
+    - Use macros for badge in the card header
+
+- Form
+    - Add a clear button for dynamic text inputs
+    - Add error message in a tooltip for dynamic inputs
+
+- Parts
+    - Use Rebrickable URL if stored (+ color code)
+    - Display color and transparency
+    - Display if print of another part
+    - Display prints using the same base
+    - Damaged parts
 
 - Sets
     - Add a flag to hide instructions in a set
+    - Make checkbox clickable on the whole width of the card
+    - Management
+        - Ownership
+        - Tags
+        - Refresh
 
+- Sets grid
+    - Collapsible controls depending on screen size
+    - Manually collapsible filters (with configuration variable for default state)
 
 ## 1.1.1: PDF Instructions Download
 
