@@ -24,7 +24,7 @@ LEFT JOIN (
     GROUP BY
         "bricktracker_parts"."id",
         "bricktracker_parts"."figure"
-) missing_join
+) "missing_join"
 ON "bricktracker_minifigures"."id" IS NOT DISTINCT FROM "missing_join"."id"
 AND "rebrickable_minifigures"."figure" IS NOT DISTINCT FROM "missing_join"."figure"
 {% endblock %}
