@@ -27,7 +27,7 @@
       <a class="list-group-item list-group-item-action" href="{{ url_for('admin.admin', open_tag=true) }}"><i class="ri-settings-4-line"></i> Manage the set tags</a>
     </div>
   {{ accordion.footer() }}
-  {{ accordion.header('Management', 'management', 'set-details', expanded=true, icon='settings-4-line') }}
+  {{ accordion.header('Management', 'management', 'set-details', icon='settings-4-line') }}
     <h5 class="border-bottom">Data</h5>
     <a href="{{ item.url_for_refresh() }}" class="btn btn-primary" role="button"><i class="ri-refresh-line"></i> Refresh the set data</a>
   {{ accordion.footer() }}
