@@ -7,6 +7,8 @@ from .set_owner import BrickSetOwner
 from .set_owner_list import BrickSetOwnerList
 from .set_status import BrickSetStatus
 from .set_status_list import BrickSetStatusList
+from .set_tag import BrickSetTag
+from .set_tag_list import BrickSetTagList
 from .set import BrickSet
 
 
@@ -41,7 +43,8 @@ class BrickSetList(BrickRecordList[BrickSet]):
         for record in self.select(
             order=self.order,
             owners=BrickSetOwnerList(BrickSetOwner).as_columns(),
-            statuses=BrickSetStatusList(BrickSetStatus).as_columns()
+            statuses=BrickSetStatusList(BrickSetStatus).as_columns(),
+            tags=BrickSetTagList(BrickSetTag).as_columns(),
         ):
             brickset = BrickSet(record=record)
 
@@ -78,7 +81,8 @@ class BrickSetList(BrickRecordList[BrickSet]):
             order=order,
             limit=limit,
             owners=BrickSetOwnerList(BrickSetOwner).as_columns(),
-            statuses=BrickSetStatusList(BrickSetStatus).as_columns()
+            statuses=BrickSetStatusList(BrickSetStatus).as_columns(),
+            tags=BrickSetTagList(BrickSetTag).as_columns(),
         ):
             brickset = BrickSet(record=record)
 

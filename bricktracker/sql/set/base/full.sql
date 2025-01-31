@@ -23,6 +23,11 @@ LEFT JOIN "bricktracker_set_statuses"
 ON "bricktracker_sets"."id" IS NOT DISTINCT FROM "bricktracker_set_statuses"."id"
 {% endif %}
 
+{% if tags %}
+LEFT JOIN "bricktracker_set_tags"
+ON "bricktracker_sets"."id" IS NOT DISTINCT FROM "bricktracker_set_tags"."id"
+{% endif %}
+
 -- LEFT JOIN + SELECT to avoid messing the total
 LEFT JOIN (
     SELECT

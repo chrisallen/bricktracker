@@ -10,6 +10,7 @@ if TYPE_CHECKING:
     from .set import BrickSet
     from .set_owner import BrickSetOwner
     from .set_status import BrickSetStatus
+    from .set_tag import BrickSetTag
     from .wish import BrickWish
 
 T = TypeVar(
@@ -17,6 +18,7 @@ T = TypeVar(
     'BrickSet',
     'BrickSetOwner',
     'BrickSetStatus',
+    'BrickSetTag',
     'BrickPart',
     'BrickMinifigure',
     'BrickWish',

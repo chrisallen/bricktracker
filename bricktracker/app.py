@@ -19,6 +19,7 @@ from bricktracker.views.admin.instructions import admin_instructions_page
 from bricktracker.views.admin.owner import admin_owner_page
 from bricktracker.views.admin.retired import admin_retired_page
 from bricktracker.views.admin.status import admin_status_page
+from bricktracker.views.admin.tag import admin_tag_page
 from bricktracker.views.admin.theme import admin_theme_page
 from bricktracker.views.error import error_404
 from bricktracker.views.index import index_page
@@ -85,6 +86,7 @@ def setup_app(app: Flask) -> None:
     app.register_blueprint(admin_retired_page)
     app.register_blueprint(admin_owner_page)
     app.register_blueprint(admin_status_page)
+    app.register_blueprint(admin_tag_page)
     app.register_blueprint(admin_theme_page)
 
     # An helper to make global variables available to the

@@ -10,7 +10,7 @@
       <label class="visually-hidden" for="grid-search">Search</label>
       <div class="input-group">
         <span class="input-group-text"><i class="ri-search-line"></i><span class="ms-1 d-none d-xl-inline"> Search</span></span>
-        <input id="grid-search" data-search-exact="name,number,parts,theme,year" data-search-list="owner" class="form-control form-control-sm" type="text" placeholder="Set, name, number of parts, theme, year, owner" value="">
+        <input id="grid-search" data-search-exact="name,number,parts,theme,year" data-search-list="searchOwner,searchTag" class="form-control form-control-sm" type="text" placeholder="Set, name, number of parts, theme, year, owner, tag" value="">
       </div>
     </div>
     <div class="col-12">
@@ -85,6 +85,20 @@
           <option value="" selected>All</option>
           {% for owner in brickset_owners %}
             <option value="{{ owner.as_dataset() }}">{{ owner.fields.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="col-12 flex-grow-1">
+      <label class="visually-hidden" for="grid-tag">Tag</label>
+      <div class="input-group">
+        <span class="input-group-text"><i class="ri-price-tag-2-line"></i><span class="ms-1 d-none d-xl-inline"> Tag</span></span>
+        <select id="grid-tag" class="form-select"
+          data-filter="metadata"
+          autocomplete="off">
+          <option value="" selected>All</option>
+          {% for tag in brickset_tags %}
+            <option value="{{ tag.as_dataset() }}">{{ tag.fields.name }}</option>
           {% endfor %}
         </select>
       </div>

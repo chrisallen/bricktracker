@@ -12,6 +12,9 @@ SELECT
     {% block owners %}
         {% if owners %}{{ owners }},{% endif %}
     {% endblock %}
+    {% block tags %}
+        {% if tags %}{{ tags }},{% endif %}
+    {% endblock %}
     {% block statuses %}
         {% if statuses %}{{ statuses }},{% endif %}
     {% endblock %}

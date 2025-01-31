@@ -13,6 +13,8 @@ from .set_owner import BrickSetOwner
 from .set_owner_list import BrickSetOwnerList
 from .set_status import BrickSetStatus
 from .set_status_list import BrickSetStatusList
+from .set_tag import BrickSetTag
+from .set_tag_list import BrickSetTagList
 from .sql import BrickSQL
 if TYPE_CHECKING:
     from .socket import BrickSocket
@@ -76,6 +78,13 @@ class BrickSet(RebrickableSet):
             for id in owners:
                 owner = BrickSetOwnerList(BrickSetOwner).get(id)
                 owner.update_set_state(self, state=True)
+
+            # Save the tags
+            tags: list[str] = list(data.get('tags', []))
+
+            for id in tags:
+                tag = BrickSetTagList(BrickSetTag).get(id)
+                tag.update_set_state(self, state=True)
 
             # Commit the transaction to the database
             socket.auto_progress(
@@ -172,7 +181,8 @@ class BrickSet(RebrickableSet):
         # Load from database
         if not self.select(
             owners=BrickSetOwnerList(BrickSetOwner).as_columns(),
-            statuses=BrickSetStatusList(BrickSetStatus).as_columns(all=True)
+            statuses=BrickSetStatusList(BrickSetStatus).as_columns(all=True),
+            tags=BrickSetTagList(BrickSetTag).as_columns(),
         ):
             raise NotFoundException(
                 'Set with ID {id} was not found in the database'.format(

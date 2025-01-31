@@ -18,6 +18,8 @@
             {% include 'admin/owner/delete.html' %}
             {% elif delete_status %}
             {% include 'admin/status/delete.html' %}
+            {% elif delete_tag %}
+            {% include 'admin/tag/delete.html' %}
             {% elif drop_database %}
             {% include 'admin/database/drop.html' %}
             {% elif import_database %}
@@ -34,6 +36,7 @@
               {% include 'admin/retired.html' %}
               {% include 'admin/owner.html' %}
               {% include 'admin/status.html' %}
+              {% include 'admin/tag.html' %}
               {% include 'admin/database.html' %}
               {% include 'admin/configuration.html' %}
             {% endif %}

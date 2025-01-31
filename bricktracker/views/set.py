@@ -16,11 +16,13 @@ from .exceptions import exception_handler
 from ..minifigure import BrickMinifigure
 from ..part import BrickPart
 from ..set import BrickSet
+from ..set_list import BrickSetList
 from ..set_owner import BrickSetOwner
 from ..set_owner_list import BrickSetOwnerList
 from ..set_status import BrickSetStatus
 from ..set_status_list import BrickSetStatusList
-from ..set_list import BrickSetList
+from ..set_tag import BrickSetTag
+from ..set_tag_list import BrickSetTagList
 from ..socket import MESSAGES
 
 logger = logging.getLogger(__name__)
@@ -37,6 +39,7 @@ def list() -> str:
         collection=BrickSetList().all(),
         brickset_owners=BrickSetOwnerList(BrickSetOwner).list(),
         brickset_statuses=BrickSetStatusList(BrickSetStatus).list(),
+        brickset_tags=BrickSetTagList(BrickSetTag).list(),
     )
 
 
@@ -62,6 +65,19 @@ def update_status(*, id: str, metadata_id: str) -> Response:
     status = BrickSetStatusList(BrickSetStatus).get(metadata_id)
 
     state = status.update_set_state(brickset, request.json)
+
+    return jsonify({'value': state})
+
+
+# Change the state of a tag
+@set_page.route('/<id>/tag/<metadata_id>', methods=['POST'])
+@login_required
+@exception_handler(__file__, json=True)
+def update_tag(*, id: str, metadata_id: str) -> Response:
+    brickset = BrickSet().select_light(id)
+    tag = BrickSetTagList(BrickSetTag).get(metadata_id)
+
+    state = tag.update_set_state(brickset, json=request.json)
 
     return jsonify({'value': state})
 
@@ -116,6 +132,7 @@ def details(*, id: str) -> str:
         open_instructions=request.args.get('open_instructions'),
         brickset_owners=BrickSetOwnerList(BrickSetOwner).list(),
         brickset_statuses=BrickSetStatusList(BrickSetStatus).list(all=True),
+        brickset_tags=BrickSetTagList(BrickSetTag).list(),
     )
 
 

@@ -46,6 +46,19 @@
             {% endfor %}
             </div>
           {% endif %}
+          {% if brickset_tags | length %}
+            <h5 class="border-bottom mt-2">Tags</h5>
+            <div id="add-tags">
+            {% for tag in brickset_tags %}
+              {% with id=tag.as_dataset() %}
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" value="{{ tag.fields.id }}" id="{{ id }}" autocomplete="off">
+                  <label class="form-check-label" for="{{ id }}">{{ tag.fields.name }}</label>
+                </div>
+              {% endwith %}
+            {% endfor %}
+            </div>
+          {% endif %}
           <hr>
           <div class="mb-3">
             <p>

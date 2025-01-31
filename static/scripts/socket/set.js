@@ -16,6 +16,7 @@ class BrickSetSocket extends BrickSocket {
         this.html_input = document.getElementById(`${id}-set`);
         this.html_no_confim = document.getElementById(`${id}-no-confirm`);
         this.html_owners = document.getElementById(`${id}-owners`);
+        this.html_tags = document.getElementById(`${id}-tags`);
 
         // Card elements
         this.html_card = document.getElementById(`${id}-card`);
@@ -150,11 +151,22 @@ class BrickSetSocket extends BrickSocket {
                 });
             }
 
+            // Grab the tags
+            const tags = [];
+            if (this.html_tags) {
+                this.html_tags.querySelectorAll('input').forEach(input => {
+                    if (input.checked) {
+                        tags.push(input.value);
+                    }
+                });
+            }
+
             this.spinner(true);
 
             this.socket.emit(this.messages.IMPORT_SET, {
                 set: (set !== undefined) ? set : this.html_input.value,
                 owners: owners,
+                tags: tags,
                 refresh: this.refresh
             });
         } else {
@@ -265,6 +277,10 @@ class BrickSetSocket extends BrickSocket {
 
         if (this.html_owners) {
             this.html_owners.querySelectorAll('input').forEach(input => input.disabled = !enabled);
+        }
+
+        if (this.html_tags) {
+            this.html_tags.querySelectorAll('input').forEach(input => input.disabled = !enabled);
         }
 
         if (this.html_card_confirm) {

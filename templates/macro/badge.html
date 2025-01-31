@@ -51,7 +51,7 @@
 {% endmacro %}
 
 {% macro owner(item, owner, solo=false, last=false) %}
-  {% if last  %}
+  {% if last %}
     {% set tooltip=owner.fields.name %}
   {% else %}
     {% set text=owner.fields.name %}
@@ -72,8 +72,17 @@
   {{ badge(check=set, url=url, solo=solo, last=last, color='secondary', icon='hashtag', collapsible='Set:', text=set, alt='Set') }}
 {% endmacro %}
 
+{% macro tag(item, tag, solo=false, last=false) %}
+  {% if last %}
+    {% set tooltip=tag.fields.name %}
+  {% else %}
+    {% set text=tag.fields.name %}
+  {% endif %}
+  {{ badge(check=item.fields[tag.as_column()], solo=solo, last=last, color='light text-primary-emphasis bg-primary-subtle border border-primary-subtle', icon='price-tag-2-line', text=text, alt='Tag', tooltip=tooltip) }}
+{% endmacro %}
+
 {% macro theme(theme, solo=false, last=false) %}
-  {% if last  %}
+  {% if last %}
     {% set tooltip=theme %}
   {% else %}
     {% set text=theme %}

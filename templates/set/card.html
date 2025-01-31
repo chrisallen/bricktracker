@@ -12,7 +12,13 @@
     {% for owner in brickset_owners %}
       {% with checked=item.fields[owner.as_column()] %}
         data-{{ owner.as_dataset() }}="{{ checked }}"
-        {% if checked %} data-owner-{{ loop.index }}="{{ owner.fields.name | lower }}"{% endif %}
+        {% if checked %} data-search-owner-{{ loop.index }}="{{ owner.fields.name | lower }}"{% endif %}
+      {% endwith %}
+    {% endfor %}
+    {% for tag in brickset_tags %}
+      {% with checked=item.fields[tag.as_column()] %}
+        data-{{ tag.as_dataset() }}="{{ checked }}"
+        {% if checked %} data-search-tag-{{ loop.index }}="{{ tag.fields.name | lower }}"{% endif %}
       {% endwith %}
     {% endfor %}
   {% endif %}
@@ -21,6 +27,9 @@
   {{ card.image(item, solo=solo, last=last, caption=item.fields.name, alt=item.fields.set) }}
   <div class="card-body border-bottom-0 {% if not solo %}p-1{% endif %}">
     {{ badge.theme(item.theme.name, solo=solo, last=last) }}
+    {% for tag in brickset_tags %}
+      {{ badge.tag(item, tag, solo=solo, last=last) }}
+    {% endfor %}
     {{ badge.year(item.fields.year, solo=solo, last=last) }}
     {{ badge.parts(item.fields.number_of_parts, solo=solo, last=last) }}
     {{ badge.total_minifigures(item.fields.total_minifigures, solo=solo, last=last) }}

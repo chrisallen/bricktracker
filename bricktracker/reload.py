@@ -4,6 +4,8 @@ from .set_owner import BrickSetOwner
 from .set_owner_list import BrickSetOwnerList
 from .set_status import BrickSetStatus
 from .set_status_list import BrickSetStatusList
+from .set_tag import BrickSetTag
+from .set_tag_list import BrickSetTagList
 from .theme_list import BrickThemeList
 
 
@@ -19,6 +21,9 @@ def reload() -> None:
 
         # Reload the set statuses
         BrickSetStatusList(BrickSetStatus, force=True)
+
+        # Reload the set tags
+        BrickSetTagList(BrickSetTag, force=True)
 
         # Reload retired sets
         BrickRetiredList(force=True)

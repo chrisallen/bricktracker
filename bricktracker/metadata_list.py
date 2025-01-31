@@ -6,10 +6,11 @@ from .fields import BrickRecordFields
 from .record_list import BrickRecordList
 from .set_owner import BrickSetOwner
 from .set_status import BrickSetStatus
+from .set_tag import BrickSetTag
 
 logger = logging.getLogger(__name__)
 
-T = TypeVar('T', 'BrickSetStatus', 'BrickSetOwner')
+T = TypeVar('T', BrickSetStatus, BrickSetOwner, BrickSetTag)
 
 
 # Lego sets metadata list

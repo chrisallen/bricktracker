@@ -12,6 +12,9 @@ WHERE "bricktracker_set_owners"."id" IS NOT DISTINCT FROM '{{ id }}';
 DELETE FROM "bricktracker_set_statuses"
 WHERE "bricktracker_set_statuses"."id" IS NOT DISTINCT FROM '{{ id }}';
 
+DELETE FROM "bricktracker_set_tags"
+WHERE "bricktracker_set_tags"."id" IS NOT DISTINCT FROM '{{ id }}';
+
 DELETE FROM "bricktracker_minifigures"
 WHERE "bricktracker_minifigures"."id" IS NOT DISTINCT FROM '{{ id }}';
 

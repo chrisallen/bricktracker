@@ -5,6 +5,8 @@ from ..configuration_list import BrickConfigurationList
 from .exceptions import exception_handler
 from ..set_owner import BrickSetOwner
 from ..set_owner_list import BrickSetOwnerList
+from ..set_tag import BrickSetTag
+from ..set_tag_list import BrickSetTagList
 from ..socket import MESSAGES
 
 add_page = Blueprint('add', __name__, url_prefix='/add')
@@ -20,6 +22,7 @@ def add() -> str:
     return render_template(
         'add.html',
         brickset_owners=BrickSetOwnerList(BrickSetOwner).list(),
+        brickset_tags=BrickSetTagList(BrickSetTag).list(),
         path=current_app.config['SOCKET_PATH'],
         namespace=current_app.config['SOCKET_NAMESPACE'],
         messages=MESSAGES
@@ -36,6 +39,7 @@ def bulk() -> str:
     return render_template(
         'add.html',
         brickset_owners=BrickSetOwnerList(BrickSetOwner).list(),
+        brickset_tags=BrickSetTagList(BrickSetTag).list(),
         path=current_app.config['SOCKET_PATH'],
         namespace=current_app.config['SOCKET_NAMESPACE'],
         messages=MESSAGES,

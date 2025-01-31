@@ -9,6 +9,7 @@ ALIASES: dict[str, Tuple[str, str]] = {
     'bricktracker_set_owners': ('Bricktracker set owners', 'checkbox-line'),  # noqa: E501
     'bricktracker_set_statuses': ('Bricktracker set statuses', 'user-line'),  # noqa: E501
     'bricktracker_set_storages': ('Bricktracker set storages', 'archive-2-line'),  # noqa: E501
+    'bricktracker_set_tags': ('Bricktracker set tags', 'price-tag-2-line'),  # noqa: E501
     'bricktracker_sets': ('Bricktracker sets', 'hashtag'),
     'bricktracker_wishes': ('Bricktracker wishes', 'gift-line'),
     'inventory': ('Parts', 'shapes-line'),
