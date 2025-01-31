@@ -36,13 +36,13 @@
     </div>
     <div class="col-12">
       <div class="input-group">
-        <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#grid-filter" aria-expanded="false" aria-controls="grid-filter">
+        <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#grid-filter" aria-expanded="{% if config['SHOW_GRID_FILTERS'] %}true{% else %}false{% endif %}" aria-controls="grid-filter">
           <i class="ri-filter-line"></i> Filters
         </button>
       </div>
     </div>
   </div>
-  <div id="grid-filter" class="collapse row row-cols-lg-auto g-1 justify-content-center align-items-center pb-2">
+  <div id="grid-filter" class="collapse {% if config['SHOW_GRID_FILTERS'] %}show{% endif %} row row-cols-lg-auto g-1 justify-content-center align-items-center pb-2">
     <div class="col-12 flex-grow-1">
       <label class="visually-hidden" for="grid-status">Status</label>
       <div class="input-group">
