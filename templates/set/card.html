@@ -8,17 +8,25 @@
     data-index="{{ index }}" data-number="{{ item.fields.set }}" data-name="{{ item.fields.name | lower }}" data-parts="{{ item.fields.number_of_parts }}"
     data-year="{{ item.fields.year }}" data-theme="{{ item.theme.name | lower }}" data-minifigures="{{ item.fields.total_minifigures }}" data-has-minifigures="{{ (item.fields.total_minifigures > 0) | int }}"
     data-has-missing="{{ (item.fields.total_missing > 0) | int }}" data-has-missing-instructions="{{ (not (item.instructions | length)) | int }}" data-missing="{{ item.fields.total_missing }}"
-    {% for status in brickset_statuses %}data-{{ status.as_dataset() }}="{{ item.fields[status.as_column()] }}" {% endfor %}
+    {% for status in brickset_statuses %}
+      {% with checked=item.fields[status.as_column()] %}
+        {% if checked %}
+          data-{{ status.as_dataset() }}="{{ checked }}"
+        {% endif %}
+      {% endwith %}
+    {% endfor %}
     {% for owner in brickset_owners %}
       {% with checked=item.fields[owner.as_column()] %}
-        data-{{ owner.as_dataset() }}="{{ checked }}"
-        {% if checked %} data-search-owner-{{ loop.index }}="{{ owner.fields.name | lower }}"{% endif %}
+        {% if checked %}
+          data-{{ owner.as_dataset() }}="{{ checked }}" data-search-owner-{{ loop.index }}="{{ owner.fields.name | lower }}"
+        {% endif %}
       {% endwith %}
     {% endfor %}
     {% for tag in brickset_tags %}
       {% with checked=item.fields[tag.as_column()] %}
-        data-{{ tag.as_dataset() }}="{{ checked }}"
-        {% if checked %} data-search-tag-{{ loop.index }}="{{ tag.fields.name | lower }}"{% endif %}
+        {% if checked %}
+          data-{{ tag.as_dataset() }}="{{ checked }}" data-search-tag-{{ loop.index }}="{{ tag.fields.name | lower }}"
+        {% endif %}
       {% endwith %}
     {% endfor %}
   {% endif %}

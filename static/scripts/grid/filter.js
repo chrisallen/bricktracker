@@ -75,11 +75,13 @@ class BrickGridFilter {
                         if (select.value.startsWith("-")) {
                             options.filters.push({
                                 attribute: select.value.substring(1),
+                                bool: true,
                                 value: "0"
                             })
                         } else {
                             options.filters.push({
                                 attribute: select.value,
+                                bool: true,
                                 value: "1"
                             })
                         }
@@ -93,7 +95,20 @@ class BrickGridFilter {
         cards.forEach(current => {
             // Process all filters
             for (const filter of options.filters) {
-                if (current.getAttribute(`data-${filter.attribute}`) != filter.value) {
+                const attribute = current.getAttribute(`data-${filter.attribute}`);
+
+                // Bool check
+                // Attribute not equal value, or undefined and value is truthy
+                if (filter.bool) {
+                    if ((attribute != null && attribute != filter.value) || (attribute == null && filter.value == "1")) {
+                        current.parentElement.classList.add("d-none");
+                        return;
+                    }
+                }
+
+                // Value check
+                // Attribute not equal value, or attribute undefined
+                else if ((attribute != null && attribute != filter.value) || attribute == null) {
                     current.parentElement.classList.add("d-none");
                     return;
                 }
