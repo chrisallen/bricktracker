@@ -9,6 +9,19 @@ class BrickGridFilter {
 
         // Search setup
         if (this.html_search) {
+            // Exact attributes
+            if (this.html_search.dataset.searchExact) {
+                this.search_exact = new Set(this.html_search.dataset.searchExact.split(",").map(el => el.trim()));
+            } else {
+                this.search_exact = new Set();
+            }
+
+            // List attributes
+            this.search_list = [];
+            if (this.html_search.dataset.searchList) {
+                this.search_list = this.html_search.dataset.searchList.split(",").map(el => el.trim());
+            }
+
             this.html_search.addEventListener("keyup", ((gridfilter) => () => {
                 gridfilter.filter();
             })(this));
@@ -88,10 +101,24 @@ class BrickGridFilter {
 
             // Check all searchable fields for a match
             if (options.search) {
-                for (let attribute of ["data-name", "data-number", "data-parts", "data-theme", "data-year"]) {
-                    if (current.getAttribute(attribute).includes(options.search)) {
-                        current.parentElement.classList.remove("d-none");
-                        return;
+                // Browse the whole dataset
+                for (const set in current.dataset) {
+                    // Exact attribute
+                    if (this.search_exact.has(set)) {
+                        if (current.dataset[set].includes(options.search)) {
+                            current.parentElement.classList.remove("d-none");
+                            return;
+                        }
+                    } else {
+                        // List search
+                        for (const list of this.search_list) {
+                            if (set.startsWith(this.search_list)) {
+                                if (current.dataset[set].includes(options.search)) {
+                                    current.parentElement.classList.remove("d-none");
+                                    return;
+                                }
+                            }
+                        }
                     }
                 }
 
