@@ -31,8 +31,9 @@ def bulk() -> str:
     BrickConfigurationList.error_unless_is_set('REBRICKABLE_API_KEY')
 
     return render_template(
-        'bulk.html',
+        'add.html',
         path=current_app.config['SOCKET_PATH'],
         namespace=current_app.config['SOCKET_NAMESPACE'],
-        messages=MESSAGES
+        messages=MESSAGES,
+        bulk=True
     )

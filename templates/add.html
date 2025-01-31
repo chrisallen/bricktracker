@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 
-{% block title %} - Add a set{% endblock %}
+{% block title %} - {% if not bulk %}Add a set{% else %}Bulk add sets{% endif %}{% endblock %}
 
 {% block main %}
 <div class="container">
-  {% if not config['HIDE_ADD_BULK_SET'] %}
+  {% if not bulk and not config['HIDE_ADD_BULK_SET'] %}
   <div class="alert alert-primary" role="alert">
     <h4 class="alert-heading">Too many to add?</h4>
     <p class="mb-0">You can import multiple sets at once with <a href="{{ url_for('add.bulk') }}" class="btn btn-primary"><i class="ri-function-add-line"></i> Bulk add</a>.</p>
@@ -14,17 +14,21 @@
     <div class="col-12">
       <div class="card mb-3">
         <div class="card-header">
-          <h5 class="mb-0"><i class="ri-add-circle-line"></i> Add a set</h5>
+          <h5 class="mb-0"><i class="ri-add-circle-line"></i> {% if not bulk %}Add a set{% else %}Bulk add sets{% endif %}</h5>
         </div>
         <div class="card-body">
           <div id="add-fail" class="alert alert-danger d-none" role="alert"></div>
-          <div id="add-complete" class="alert alert-success d-none" role="alert"></div>
+          {% if not bulk %}
+            <div id="add-complete" class="alert alert-success d-none" role="alert"></div>
+          {% else %}
+            <div id="add-complete"></div>
+          {% endif %}
           <div class="mb-3">
-            <label for="add-set" class="form-label">Set number (only one)</label>
-            <input type="text" class="form-control" id="add-set" placeholder="107-1 or 1642-1 or ...">
+            <label for="add-set" class="form-label">{% if not bulk %}Set number (only one){% else %}List of sets (separated by a comma){% endif %}</label>
+            <input type="text" class="form-control" id="add-set" placeholder="{% if not bulk %}107-1 or 1642-1 or ...{% else %}107-1, 1642-1, ...{% endif %}">
           </div>
           <div class="form-check">
-            <input type="checkbox" class="form-check-input" id="add-no-confirm">
+            <input type="checkbox" class="form-check-input" id="add-no-confirm" {% if bulk %}checked disabled{% endif %}>
             <label class="form-check-label" for="add-no-confirm">
               Add without confirmation
             </label>
@@ -54,21 +58,24 @@
               <div id="add-card-image-container" class="card-img">
                 <img id="add-card-image" loading="lazy">
               </div>
-              <div id="add-card-footer" class="card-footer text-end d-none">
-                <button id="add-card-dismiss" type="button" class="btn btn-danger"><i class="ri-close-line"></i> Dismiss</button>
-                <button id="add-card-confirm" type="button" class="btn btn-primary"><i class="ri-check-double-line"></i> Confirm add</button>
-              </div>
+              {% if not bulk %}
+                <div id="add-card-footer" class="card-footer text-end d-none">
+                  <button id="add-card-dismiss" type="button" class="btn btn-danger"><i class="ri-close-line"></i> Dismiss</button>
+                  <button id="add-card-confirm" type="button" class="btn btn-primary"><i class="ri-check-double-line"></i> Confirm add</button>
+                </div>
+              {% endif %}
             </div>
           </div>
         </div>
         <div class="card-footer text-end">
-          <span id="add-status-icon" class="me-1"></span><span id="add-status" class="me-1"></span><button id="add" type="button" class="btn btn-primary"><i class="ri-add-circle-line"></i> Add</button>
+          <span id="add-status-icon" class="me-1"></span><span id="add-status" class="me-1"></span>
+          <button id="add" type="button" class="btn btn-primary">{% if not bulk %}<i class="ri-add-circle-line"></i> Add{% else %}<i class="ri-function-add-line"></i> Bulk add{% endif %}</button>
         </div>
       </div>
     </div>
   </div>
 </div>
-{% with id='add' %}
+{% with id='add', bulk=bulk %}
   {% include 'set/socket.html' %}
 {% endwith %}
 {% endblock %}
