@@ -6,6 +6,10 @@
   {{ card.header(item, item.fields.name, solo=solo, identifier=item.fields.part, icon='shapes-line') }}
   {{ card.image(item, solo=solo, last=last, caption=item.fields.name, alt=item.fields.image_id, medium=true) }}
   <div class="card-body border-bottom-0 {% if not solo %}p-1{% endif %}">
+    {% if not solo %}
+      {{ badge.color(item) }}
+      {{ badge.print(item) }}
+    {% endif %}
     {{ badge.total_sets(sets_using | length, solo=solo, last=last) }}
     {{ badge.total_minifigures(minifigures_using | length, solo=solo, last=last) }}
     {{ badge.total_quantity(item.fields.total_quantity, solo=solo, last=last) }}
