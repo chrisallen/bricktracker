@@ -259,6 +259,10 @@ class BrickSetSocket extends BrickSocket {
             this.html_input.disabled = !enabled;
         }
 
+        if (this.html_no_confim) {
+            this.html_no_confim.disabled = !enabled;
+        }
+
         if (this.html_owners) {
             this.html_owners.querySelectorAll('input').forEach(input => input.disabled = !enabled);
         }
