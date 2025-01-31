@@ -31,11 +31,18 @@
         <button id="sort-missing" type="button" class="btn btn-outline-primary"
           data-sort-attribute="missing" data-sort-desc="true"><i class="ri-error-warning-line"></i><span class="d-none d-xxl-inline"> Missing</span></button>
         <button id="sort-clear" type="button" class="btn btn-outline-dark"
-          data-sort-clear="true"><i class="ri-filter-off-line"></i><span class="d-none d-xxl-inline"> Clear</span></button>
+          data-sort-clear="true"><i class="ri-close-circle-line"></i><span class="d-none d-xxl-inline"> Clear</span></button>
+      </div>
+    </div>
+    <div class="col-12">
+      <div class="input-group">
+        <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#grid-filter" aria-expanded="false" aria-controls="grid-filter">
+          <i class="ri-filter-line"></i> Filters
+        </button>
       </div>
     </div>
   </div>
-  <div id="grid-filter" class="row row-cols-lg-auto g-1 justify-content-center align-items-center pb-2">
+  <div id="grid-filter" class="collapse row row-cols-lg-auto g-1 justify-content-center align-items-center pb-2">
     <div class="col-12 flex-grow-1">
       <label class="visually-hidden" for="grid-status">Status</label>
       <div class="input-group">
