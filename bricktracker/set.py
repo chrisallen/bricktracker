@@ -139,17 +139,6 @@ class BrickSet(RebrickableSet):
 
         return True
 
-    # A identifier for HTML component
-    def html_id(self, prefix: str | None = None, /) -> str:
-        components: list[str] = []
-
-        if prefix is not None:
-            components.append(prefix)
-
-        components.append(self.fields.id)
-
-        return '-'.join(components)
-
     # Minifigures
     def minifigures(self, /) -> BrickMinifigureList:
         return BrickMinifigureList().from_set(self)
