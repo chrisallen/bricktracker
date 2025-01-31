@@ -103,12 +103,7 @@ class BrickSetList(BrickRecordList[BrickSet]):
         return self
 
     # Sets missing a part
-    def missing_part(
-        self,
-        part: str,
-        color: int,
-        /
-    ) -> Self:
+    def missing_part(self, part: str, color: int, /) -> Self:
         # Save the parameters to the fields
         self.fields.part = part
         self.fields.color = color
@@ -141,12 +136,7 @@ class BrickSetList(BrickRecordList[BrickSet]):
         return self
 
     # Sets using a part
-    def using_part(
-        self,
-        part: str,
-        color: int,
-        /
-    ) -> Self:
+    def using_part(self, part: str, color: int, /) -> Self:
         # Save the parameters to the fields
         self.fields.part = part
         self.fields.color = color
