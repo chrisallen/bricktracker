@@ -63,15 +63,15 @@ class BrickGridFilter {
                 // Multi-attribute filter
                 switch (select.dataset.filter) {
                     // List contains values
-                    case "solo":
+                    case "value":
                         options.filters.push({
                             attribute: select.dataset.filterAttribute,
                             value: select.value,
                         })
                     break;
 
-                    // List contains attribute name, looking for true/false
-                    case "status":
+                    // List contains metadata attribute name, looking for true/false
+                    case "metadata":
                         if (select.value.startsWith("-")) {
                             options.filters.push({
                                 attribute: select.value.substring(1),
