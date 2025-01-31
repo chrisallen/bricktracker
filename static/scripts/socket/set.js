@@ -4,7 +4,7 @@ class BrickSetSocket extends BrickSocket {
         super(id, path, namespace, messages, bulk);
 
         // Refresh mode
-        this.refresh = true
+        this.refresh = refresh
 
         // Listeners
         this.add_listener = undefined;
