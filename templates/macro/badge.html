@@ -51,7 +51,9 @@
 {% endmacro %}
 
 {% macro print(item, solo=false, last=false, header=false) %}
+  {% if item.fields.print %}
   {{ badge(url=item.url_for_print(), solo=solo, last=last, color='light border', icon='paint-brush-line', collapsible='Print') }}
+  {% endif %}
 {% endmacro %}
 
 {% macro set(set, solo=false, last=false, url=None, id=None) %}
