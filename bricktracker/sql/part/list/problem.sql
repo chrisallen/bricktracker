@@ -4,6 +4,10 @@
 SUM("bricktracker_parts"."missing") AS "total_missing",
 {% endblock %}
 
+{% block total_damaged %}
+SUM("bricktracker_parts"."damaged") AS "total_damaged",
+{% endblock %}
+
 {% block total_sets %}
 COUNT("bricktracker_parts"."id")  - COUNT("bricktracker_parts"."figure") AS "total_sets",
 {% endblock %}
@@ -20,6 +24,7 @@ AND "bricktracker_parts"."figure" IS NOT DISTINCT FROM "bricktracker_minifigures
 
 {% block where %}
 WHERE "bricktracker_parts"."missing" > 0
+OR "bricktracker_parts"."damaged" > 0
 {% endblock %}
 
 {% block group %}

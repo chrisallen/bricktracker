@@ -1,8 +1,9 @@
 
 {% extends 'part/base/base.sql' %}
 
-{% block total_missing %}
-{% endblock %}
+{% block total_missing %}{% endblock %}
+
+{% block total_damaged %}{% endblock %}
 
 {% block where %}
 WHERE "rebrickable_parts"."print" IS NOT DISTINCT FROM :print

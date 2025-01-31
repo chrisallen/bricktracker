@@ -18,6 +18,8 @@ class BrickSetList(BrickRecordList[BrickSet]):
     order: str
 
     # Queries
+    damaged_minifigure_query: str = 'set/list/damaged_minifigure'
+    damaged_part_query: str = 'set/list/damaged_part'
     generic_query: str = 'set/list/generic'
     light_query: str = 'set/list/light'
     missing_minifigure_query: str = 'set/list/missing_minifigure'
@@ -57,6 +59,39 @@ class BrickSetList(BrickRecordList[BrickSet]):
 
         return self
 
+    # Sets with a minifigure part damaged
+    def damaged_minifigure(self, figure: str, /) -> Self:
+        # Save the parameters to the fields
+        self.fields.figure = figure
+
+        # Load the sets from the database
+        for record in self.select(
+            override_query=self.damaged_minifigure_query,
+            order=self.order
+        ):
+            brickset = BrickSet(record=record)
+
+            self.records.append(brickset)
+
+        return self
+
+    # Sets with a part damaged
+    def damaged_part(self, part: str, color: int, /) -> Self:
+        # Save the parameters to the fields
+        self.fields.part = part
+        self.fields.color = color
+
+        # Load the sets from the database
+        for record in self.select(
+            override_query=self.damaged_part_query,
+            order=self.order
+        ):
+            brickset = BrickSet(record=record)
+
+            self.records.append(brickset)
+
+        return self
+
     # A generic list of the different sets
     def generic(self, /) -> Self:
         for record in self.select(
@@ -90,7 +125,7 @@ class BrickSetList(BrickRecordList[BrickSet]):
 
         return self
 
-    # Sets missing a minifigure
+    # Sets missing a minifigure part
     def missing_minifigure(self, figure: str, /) -> Self:
         # Save the parameters to the fields
         self.fields.figure = figure

@@ -136,18 +136,19 @@ def details(*, id: str) -> str:
     )
 
 
-# Update the missing pieces of a part
-@set_page.route('/<id>/parts/<part>/<int:color>/<int:spare>/missing', defaults={'figure': None}, methods=['POST'])  # noqa: E501
-@set_page.route('/<id>/minifigures/<figure>/parts/<part>/<int:color>/<int:spare>/missing', methods=['POST'])  # noqa: E501
+# Update problematic pieces of a set
+@set_page.route('/<id>/parts/<part>/<int:color>/<int:spare>/<problem>', defaults={'figure': None}, methods=['POST'])  # noqa: E501
+@set_page.route('/<id>/minifigures/<figure>/parts/<part>/<int:color>/<int:spare>/<problem>', methods=['POST'])  # noqa: E501
 @login_required
 @exception_handler(__file__, json=True)
-def missing_part(
+def problem_part(
     *,
     id: str,
     figure: str | None,
     part: str,
     color: int,
     spare: int,
+    problem: str,
 ) -> Response:
     brickset = BrickSet().select_specific(id)
 
@@ -164,20 +165,21 @@ def missing_part(
         minifigure=brickminifigure,
     )
 
-    brickpart.update_missing(request.json)
+    amount = brickpart.update_problem(problem, request.json)
 
     # Info
-    logger.info('Set {set} ({id}): updated part ({part} color: {color}, spare: {spare}, minifigure: {figure}) missing count to {missing}'.format(  # noqa: E501
+    logger.info('Set {set} ({id}): updated part ({part} color: {color}, spare: {spare}, minifigure: {figure}) {problem} count to {amount}'.format(  # noqa: E501
         set=brickset.fields.set,
         id=brickset.fields.id,
         figure=figure,
         part=brickpart.fields.part,
         color=brickpart.fields.color,
         spare=brickpart.fields.spare,
-        missing=brickpart.fields.missing,
+        problem=problem,
+        amount=amount
     ))
 
-    return jsonify({'missing': brickpart.fields.missing})
+    return jsonify({problem: amount})
 
 
 # Refresh a set

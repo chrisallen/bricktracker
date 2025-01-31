@@ -1,4 +1,4 @@
-{% macro header(color=false, quantity=false, missing=false, missing_parts=false, sets=false, minifigures=false) %}
+{% macro header(color=false, quantity=false, missing_parts=false, damaged_parts=false, sets=false, minifigures=false) %}
   <thead>
     <tr>
       <th data-table-no-sort="true" class="no-sort" scope="col"><i class="ri-image-line fw-normal"></i> Image</th>
@@ -9,12 +9,8 @@
       {% if quantity %}
         <th data-table-number="true" scope="col"><i class="ri-functions fw-normal"></i> Quantity</th>
       {% endif %}
-      {% if missing %}
-        <th data-table-number="true" scope="col"><i class="ri-error-warning-line fw-normal"></i> Missing</th>
-      {% endif %}
-      {% if missing_parts %}
-        <th data-table-number="true" scope="col"><i class="ri-error-warning-line fw-normal"></i> Missing parts</th>
-      {% endif %}
+      <th data-table-number="true" scope="col"><i class="ri-question-line fw-normal"></i> Missing{% if missing_parts %} parts{% endif %}</th>
+      <th data-table-number="true" scope="col"><i class="ri-error-warning-line fw-normal"></i> Damaged{% if damaged_parts %} parts{% endif %}</th>
       {% if sets %}
         <th data-table-number="true" scope="col"><i class="ri-hashtag fw-normal"></i> Sets</th>
       {% endif %}

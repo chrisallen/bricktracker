@@ -21,6 +21,9 @@ SELECT
     {% block total_missing %}
     NULL AS "total_missing", -- dummy for order: total_missing
     {% endblock %}
+    {% block total_damaged %}
+    NULL AS "total_damaged", -- dummy for order: total_damaged
+    {% endblock %}
     {% block total_quantity %}
     NULL AS "total_quantity", -- dummy for order: total_quantity
     {% endblock %}

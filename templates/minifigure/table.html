@@ -2,7 +2,7 @@
 
 <div class="table-responsive-sm">
   <table data-table="{% if all %}true{% endif %}" class="table table-striped align-middle" id="minifigures">
-    {{ table.header(quantity=true, missing_parts=true, sets=true) }}
+    {{ table.header(quantity=true, missing_parts=true, damaged_parts=true, sets=true) }}
     <tbody>
       {% for item in table_collection %}
       <tr>
@@ -15,6 +15,7 @@
         </td>
         <td>{{ item.fields.total_quantity }}</td>
         <td>{{ item.fields.total_missing }}</td>
+        <td>{{ item.fields.total_damaged }}</td>
         <td>{{ item.fields.total_sets }}</td>
       </tr>
       {% endfor %}

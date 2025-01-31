@@ -21,10 +21,11 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
 
     # Queries
     all_query: str = 'minifigure/list/all'
+    damaged_part_query: str = 'minifigure/list/damaged_part'
     last_query: str = 'minifigure/list/last'
+    missing_part_query: str = 'minifigure/list/missing_part'
     select_query: str = 'minifigure/list/from_set'
     using_part_query: str = 'minifigure/list/using_part'
-    missing_part_query: str = 'minifigure/list/missing_part'
 
     def __init__(self, /):
         super().__init__()
@@ -39,6 +40,23 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
     def all(self, /) -> Self:
         for record in self.select(
             override_query=self.all_query,
+            order=self.order
+        ):
+            minifigure = BrickMinifigure(record=record)
+
+            self.records.append(minifigure)
+
+        return self
+
+    # Minifigures with a part damaged part
+    def damaged_part(self, part: str, color: int, /) -> Self:
+        # Save the parameters to the fields
+        self.fields.part = part
+        self.fields.color = color
+
+        # Load the minifigures from the database
+        for record in self.select(
+            override_query=self.damaged_part_query,
             order=self.order
         ):
             minifigure = BrickMinifigure(record=record)
@@ -80,12 +98,7 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
         return self
 
     # Minifigures missing a part
-    def missing_part(
-        self,
-        part: str,
-        color: int,
-        /,
-    ) -> Self:
+    def missing_part(self, part: str, color: int, /) -> Self:
         # Save the parameters to the fields
         self.fields.part = part
         self.fields.color = color
@@ -102,12 +115,7 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
         return self
 
     # Minifigure using a part
-    def using_part(
-        self,
-        part: str,
-        color: int,
-        /,
-    ) -> Self:
+    def using_part(self, part: str, color: int, /) -> Self:
         # Save the parameters to the fields
         self.fields.part = part
         self.fields.color = color

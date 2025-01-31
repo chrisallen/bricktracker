@@ -74,8 +74,11 @@ class BrickPart(RebrickablePart):
         return True
 
     # A identifier for HTML component
-    def html_id(self, /) -> str:
+    def html_id(self, prefix: str | None = None, /) -> str:
         components: list[str] = ['part']
+
+        if prefix is not None:
+            components.append(prefix)
 
         if self.fields.figure is not None:
             components.append(self.fields.figure)
@@ -144,36 +147,38 @@ class BrickPart(RebrickablePart):
 
         return self
 
-    # Update the missing part
-    def update_missing(self, json: Any | None, /) -> None:
-        missing: str | int = json.get('value', '')  # type: ignore
+    # Update a problematic part
+    def update_problem(self, problem: str, json: Any | None, /) -> int:
+        amount: str | int = json.get('value', '')  # type: ignore
 
         # We need a positive integer
         try:
-            if missing == '':
-                missing = 0
+            if amount == '':
+                amount = 0
 
-            missing = int(missing)
+            amount = int(amount)
 
-            if missing < 0:
-                missing = 0
+            if amount < 0:
+                amount = 0
         except Exception:
-            raise ErrorException('"{missing}" is not a valid integer'.format(
-                missing=missing
+            raise ErrorException('"{amount}" is not a valid integer'.format(
+                amount=amount
             ))
 
-        if missing < 0:
-            raise ErrorException('Cannot set a negative missing value')
+        if amount < 0:
+            raise ErrorException('Cannot set a negative amount')
 
-        self.fields.missing = missing
+        setattr(self.fields, problem, amount)
 
         BrickSQL().execute_and_commit(
-            'part/update/missing',
+            'part/update/{problem}'.format(problem=problem),
             parameters=self.sql_parameters()
         )
 
-    # Compute the url for missing part
-    def url_for_missing(self, /) -> str:
+        return amount
+
+    # Compute the url for problematic part
+    def url_for_problem(self, problem: str, /) -> str:
         # Different URL for a minifigure part
         if self.minifigure is not None:
             figure = self.minifigure.fields.figure
@@ -181,10 +186,11 @@ class BrickPart(RebrickablePart):
             figure = None
 
         return url_for(
-            'set.missing_part',
+            'set.problem_part',
             id=self.fields.id,
             figure=figure,
             part=self.fields.part,
             color=self.fields.color,
             spare=self.fields.spare,
+            problem=problem,
         )

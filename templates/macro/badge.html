@@ -90,6 +90,10 @@
   {{ badge(check=theme, solo=solo, last=last, color='primary', icon='price-tag-3-line', text=text, alt='Theme', tooltip=tooltip) }}
 {% endmacro %}
 
+{% macro total_damaged(damaged, solo=false, last=false) %}
+  {{ badge(check=damaged, solo=solo, last=last, color='danger', icon='error-warning-line', collapsible='Damaged:', text=damaged, alt='Damaged') }}
+{% endmacro %}
+
 {% macro total_quantity(quantity, solo=false, last=false) %}
   {{ badge(check=quantity, solo=solo, last=last, color='success', icon='functions', collapsible='Quantity:', text=quantity, alt='Quantity') }}
 {% endmacro %}
@@ -99,7 +103,7 @@
 {% endmacro %}
 
 {% macro total_missing(missing, solo=false, last=false) %}
-  {{ badge(check=missing, solo=solo, last=last, color='danger', icon='error-warning-line', collapsible='Missing:', text=missing, alt='Missing') }}
+  {{ badge(check=missing, solo=solo, last=last, color='light text-danger-emphasis bg-danger-subtle border border-danger-subtle', icon='question-line', collapsible='Missing:', text=missing, alt='Missing') }}
 {% endmacro %}
 
 {% macro total_sets(sets, solo=false, last=false) %}

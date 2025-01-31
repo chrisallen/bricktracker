@@ -29,7 +29,9 @@
         <button id="sort-parts" type="button" class="btn btn-outline-primary"
           data-sort-attribute="parts" data-sort-desc="true"><i class="ri-shapes-line"></i><span class="d-none d-xxl-inline"> Parts</span></button>
         <button id="sort-missing" type="button" class="btn btn-outline-primary"
-          data-sort-attribute="missing" data-sort-desc="true"><i class="ri-error-warning-line"></i><span class="d-none d-xxl-inline"> Missing</span></button>
+          data-sort-attribute="missing" data-sort-desc="true"><i class="ri-question-line"></i><span class="d-none d-xxl-inline"> Missing</span></button>
+        <button id="sort-damaged" type="button" class="btn btn-outline-primary"
+          data-sort-attribute="damaged" data-sort-desc="true"><i class="ri-error-warning-line"></i><span class="d-none d-xxl-inline"> Damaged</span></button>
         <button id="sort-clear" type="button" class="btn btn-outline-dark"
           data-sort-clear="true"><i class="ri-close-circle-line"></i><span class="d-none d-xxl-inline"> Clear</span></button>
       </div>
@@ -53,6 +55,7 @@
           <option value="" selected>All</option>
           <option value="-has-missing">Set is complete</option>
           <option value="has-missing">Set has missing pieces</option>
+          <option value="has-damaged">Set has damaged pieces</option>
           <option value="has-missing-instructions">Set has missing instructions</option>
           {% for status in brickset_statuses %}
             <option value="{{ status.as_dataset() }}">{{ status.fields.name }}</option>

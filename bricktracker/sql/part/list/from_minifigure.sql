@@ -5,6 +5,10 @@
 SUM("bricktracker_parts"."missing") AS "total_missing",
 {% endblock %}
 
+{% block total_damaged %}
+SUM("bricktracker_parts"."damaged") AS "total_damaged",
+{% endblock %}
+
 {% block where %}
 WHERE "bricktracker_parts"."figure" IS NOT DISTINCT FROM :figure
 {% endblock %}

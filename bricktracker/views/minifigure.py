@@ -27,4 +27,5 @@ def details(*, figure: str) -> str:
         item=BrickMinifigure().select_generic(figure),
         using=BrickSetList().using_minifigure(figure),
         missing=BrickSetList().missing_minifigure(figure),
+        damaged=BrickSetList().damaged_minifigure(figure),
     )

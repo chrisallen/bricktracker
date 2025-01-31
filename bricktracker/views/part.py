@@ -19,13 +19,13 @@ def list() -> str:
     )
 
 
-# Missing
-@part_page.route('/missing', methods=['GET'])
+# Problem
+@part_page.route('/problem', methods=['GET'])
 @exception_handler(__file__)
-def missing() -> str:
+def problem() -> str:
     return render_template(
-        'missing.html',
-        table_collection=BrickPartList().missing()
+        'problem.html',
+        table_collection=BrickPartList().problem()
     )
 
 
@@ -46,11 +46,19 @@ def details(*, part: str, color: int) -> str:
             part,
             color
         ),
+        sets_damaged=BrickSetList().damaged_part(
+            part,
+            color
+        ),
         minifigures_using=BrickMinifigureList().using_part(
             part,
             color
         ),
         minifigures_missing=BrickMinifigureList().missing_part(
+            part,
+            color
+        ),
+        minifigures_damaged=BrickMinifigureList().damaged_part(
             part,
             color
         ),

@@ -29,7 +29,7 @@ CONFIG: Final[list[dict[str, Any]]] = [
     {'n': 'HIDE_ALL_MINIFIGURES', 'c': bool},
     {'n': 'HIDE_ALL_PARTS', 'c': bool},
     {'n': 'HIDE_ALL_SETS', 'c': bool},
-    {'n': 'HIDE_MISSING_PARTS', 'c': bool},
+    {'n': 'HIDE_PROBLEMS_PARTS', 'e': 'BK_HIDE_MISSING_PARTS', 'c': bool},
     {'n': 'HIDE_SET_INSTRUCTIONS', 'c': bool},
     {'n': 'HIDE_WISHES', 'c': bool},
     {'n': 'MINIFIGURES_DEFAULT_ORDER', 'd': '"rebrickable_minifigures"."name" ASC'},  # noqa: E501

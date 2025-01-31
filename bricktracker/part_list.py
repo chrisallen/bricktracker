@@ -25,7 +25,7 @@ class BrickPartList(BrickRecordList[BrickPart]):
     all_query: str = 'part/list/all'
     last_query: str = 'part/list/last'
     minifigure_query: str = 'part/list/from_minifigure'
-    missing_query: str = 'part/list/missing'
+    problem_query: str = 'part/list/problem'
     print_query: str = 'part/list/from_print'
     select_query: str = 'part/list/specific'
 
@@ -138,10 +138,10 @@ class BrickPartList(BrickRecordList[BrickPart]):
 
         return self
 
-    # Load missing parts
-    def missing(self, /) -> Self:
+    # Load problematic parts
+    def problem(self, /) -> Self:
         for record in self.select(
-            override_query=self.missing_query,
+            override_query=self.problem_query,
             order=self.order
         ):
             part = BrickPart(record=record)

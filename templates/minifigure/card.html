@@ -13,6 +13,7 @@
     {{ badge.quantity(item.fields.total_quantity, solo=solo, last=last) }}
     {{ badge.total_sets(using | length, solo=solo, last=last) }}
     {{ badge.total_missing(item.fields.total_missing, solo=solo, last=last) }}
+    {{ badge.total_damaged(item.fields.total_damaged, solo=solo, last=last) }}
     {% if not last %}
       {{ badge.rebrickable(item, solo=solo, last=last) }}
     {% endif %}
@@ -21,7 +22,8 @@
     <div class="accordion accordion-flush" id="minifigure-details">
       {{ accordion.table(item.generic_parts(), 'Parts', item.fields.figure, 'minifigure-details', 'part/table.html', icon='shapes-line', alt=item.fields.figure, read_only=read_only)}}
       {{ accordion.cards(using, 'Sets using this minifigure', 'using-inventory', 'minifigure-details', 'set/card.html', icon='hashtag') }}
-      {{ accordion.cards(missing, 'Sets missing parts of this minifigure', 'missing-inventory', 'minifigure-details', 'set/card.html', icon='error-warning-line') }}
+      {{ accordion.cards(missing, 'Sets missing parts for this minifigure', 'missing-inventory', 'minifigure-details', 'set/card.html', icon='question-line') }}
+      {{ accordion.cards(damaged, 'Sets with damaged parts for this minifigure', 'damaged-inventory', 'minifigure-details', 'set/card.html', icon='error-warning-line') }}
     </div>
     <div class="card-footer"></div>
   {% endif %}

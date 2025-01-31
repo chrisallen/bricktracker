@@ -4,6 +4,10 @@
 SUM("bricktracker_parts"."missing") AS "total_missing",
 {% endblock %}
 
+{% block total_damaged %}
+SUM("bricktracker_parts"."damaged") AS "total_damaged",
+{% endblock %}
+
 {% block total_quantity %}
 SUM((NOT "bricktracker_parts"."spare") * "bricktracker_parts"."quantity" * IFNULL("bricktracker_minifigures"."quantity", 1)) AS "total_quantity",
 {% endblock %}

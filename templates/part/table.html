@@ -3,7 +3,7 @@
 
 <div class="table-responsive-sm">
   <table data-table="{% if all %}true{% endif %}" class="table table-striped align-middle {% if not all %}sortable mb-0{% endif %}" {% if all %}id="parts"{% endif %}>
-    {{ table.header(color=true, quantity=not no_quantity, missing=not no_missing, sets=all, minifigures=all) }}
+    {{ table.header(color=true, quantity=not no_quantity, sets=all, minifigures=all) }}
     <tbody>
       {% for item in table_collection %}
       <tr>
@@ -27,11 +27,12 @@
             <td>{% if quantity %}{{ item.fields.quantity * quantity }}{% else %}{{ item.fields.quantity }}{% endif %}</td>
           {% endif %}
         {% endif %}
-        {% if not no_missing %}
-          <td data-sort="{{ item.fields.total_missing }}" class="table-td-input">
-            {{ form.input('Missing', item.fields.id, item.html_id(), item.url_for_missing(), item.fields.total_missing, all=all, read_only=read_only) }}
-          </td>
-        {% endif %}
+        <td data-sort="{{ item.fields.total_missing }}" class="table-td-input">
+          {{ form.input('Missing', item.fields.id, item.html_id('missing'), item.url_for_problem('missing'), item.fields.total_missing, all=all, read_only=read_only) }}
+        </td>
+        <td data-sort="{{ item.fields.total_damaged }}" class="table-td-input">
+          {{ form.input('Damaged', item.fields.id, item.html_id('damaged'), item.url_for_problem('damaged'), item.fields.total_damaged, all=all, read_only=read_only) }}
+        </td>
         {% if all %}
           <td>{{ item.fields.total_sets }}</td>
           <td>{{ item.fields.total_minifigures }}</td>

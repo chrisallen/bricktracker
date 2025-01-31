@@ -6,8 +6,11 @@
 <div {% if not solo %}id="set-{{ item.fields.id }}"{% endif %} class="card mb-3 flex-fill {% if solo %}card-solo{% endif %}"
   {% if not solo %}
     data-index="{{ index }}" data-number="{{ item.fields.set }}" data-name="{{ item.fields.name | lower }}" data-parts="{{ item.fields.number_of_parts }}"
-    data-year="{{ item.fields.year }}" data-theme="{{ item.theme.name | lower }}" data-minifigures="{{ item.fields.total_minifigures }}" data-has-minifigures="{{ (item.fields.total_minifigures > 0) | int }}"
-    data-has-missing="{{ (item.fields.total_missing > 0) | int }}" data-has-missing-instructions="{{ (not (item.instructions | length)) | int }}" data-missing="{{ item.fields.total_missing }}"
+    data-year="{{ item.fields.year }}" data-theme="{{ item.theme.name | lower }}"
+    data-has-missing-instructions="{{ (not (item.instructions | length)) | int }}"
+    data-has-minifigures="{{ (item.fields.total_minifigures > 0) | int }}" data-minifigures="{{ item.fields.total_minifigures }}"
+    data-has-missing="{{ (item.fields.total_missing > 0) | int }}" data-missing="{{ item.fields.total_missing }}"
+    data-has-damaged="{{ (item.fields.total_damaged > 0) | int }}" data-damaged="{{ item.fields.total_damaged }}"
     {% for status in brickset_statuses %}
       {% with checked=item.fields[status.as_column()] %}
         {% if checked %}
@@ -42,6 +45,7 @@
     {{ badge.parts(item.fields.number_of_parts, solo=solo, last=last) }}
     {{ badge.total_minifigures(item.fields.total_minifigures, solo=solo, last=last) }}
     {{ badge.total_missing(item.fields.total_missing, solo=solo, last=last) }}
+    {{ badge.total_damaged(item.fields.total_damaged, solo=solo, last=last) }}
     {% for owner in brickset_owners %}
       {{ badge.owner(item, owner, solo=solo, last=last) }}
     {% endfor %}
