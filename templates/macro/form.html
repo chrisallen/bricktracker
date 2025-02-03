@@ -9,7 +9,7 @@
     {% endif %}
       autocomplete="off">
     <label class="form-check-label flex-grow-1 ms-1" for="{{ prefix }}-{{ item.fields.id }}">
-      {{ metadata.fields.name }} <i id="status-{{ prefix }}-{{ item.fields.id }}" class="mb-1"></i>
+      {{ metadata.fields.name }} <i id="status-{{ prefix }}-{{ item.fields.id }}"></i>
     </label>
   {% else %}
     <input class="form-check-input text-reset" type="checkbox" {% if item.fields[metadata.as_column()] %}checked{% endif %} disabled>
