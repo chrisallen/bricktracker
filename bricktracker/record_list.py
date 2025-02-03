@@ -10,17 +10,19 @@ if TYPE_CHECKING:
     from .set import BrickSet
     from .set_owner import BrickSetOwner
     from .set_status import BrickSetStatus
+    from .set_storage import BrickSetStorage
     from .set_tag import BrickSetTag
     from .wish import BrickWish
 
 T = TypeVar(
     'T',
+    'BrickMinifigure',
+    'BrickPart',
     'BrickSet',
     'BrickSetOwner',
     'BrickSetStatus',
+    'BrickSetStorage',
     'BrickSetTag',
-    'BrickPart',
-    'BrickMinifigure',
     'BrickWish',
     'RebrickableSet'
 )

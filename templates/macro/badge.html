@@ -72,6 +72,18 @@
   {{ badge(check=set, url=url, solo=solo, last=last, color='secondary', icon='hashtag', collapsible='Set:', text=set, alt='Set') }}
 {% endmacro %}
 
+{% macro storage(item, storages, solo=false, last=false) %}
+  {% if item.fields.storage in storages.mapping %}
+    {% set storage = storages.mapping[item.fields.storage] %}
+    {% if last %}
+      {% set tooltip=storage.fields.name %}
+    {% else %}
+      {% set text=storage.fields.name %}
+    {% endif %}
+    {{ badge(check=storage, solo=solo, last=last, color='light text-warning-emphasis bg-warning-subtle border border-warning-subtle', icon='archive-2-line', text=text, alt='Storage', tooltip=tooltip) }}
+  {% endif %}
+{% endmacro %}
+
 {% macro tag(item, tag, solo=false, last=false) %}
   {% if last %}
     {% set tooltip=tag.fields.name %}

@@ -41,9 +41,9 @@ class BrickSetList(BrickRecordList[BrickSet]):
         # Load the sets from the database
         for record in self.select(
             order=self.order,
-            owners=BrickSetOwnerList.new().as_columns(),
-            statuses=BrickSetStatusList.new().as_columns(),
-            tags=BrickSetTagList.new().as_columns(),
+            owners=BrickSetOwnerList.as_columns(),
+            statuses=BrickSetStatusList.as_columns(),
+            tags=BrickSetTagList.as_columns(),
         ):
             brickset = BrickSet(record=record)
 
@@ -112,9 +112,9 @@ class BrickSetList(BrickRecordList[BrickSet]):
         for record in self.select(
             order=order,
             limit=limit,
-            owners=BrickSetOwnerList.new().as_columns(),
-            statuses=BrickSetStatusList.new().as_columns(),
-            tags=BrickSetTagList.new().as_columns(),
+            owners=BrickSetOwnerList.as_columns(),
+            statuses=BrickSetStatusList.as_columns(),
+            tags=BrickSetTagList.as_columns(),
         ):
             brickset = BrickSet(record=record)
 

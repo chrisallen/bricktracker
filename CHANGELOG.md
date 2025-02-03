@@ -34,6 +34,7 @@ Parts
     - Fix missing @login_required for set deletion
     - Ownership
     - Tags
+    - Storage
 
 - Socket
     - Add decorator for rebrickable, authenticated and threaded socket actions
@@ -76,6 +77,7 @@ Parts
         - Ownership
         - Tags
         - Refresh
+        - Storage
 
 - Sets grid
     - Collapsible controls depending on screen size

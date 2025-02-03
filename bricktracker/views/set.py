@@ -19,6 +19,7 @@ from ..set import BrickSet
 from ..set_list import BrickSetList
 from ..set_owner_list import BrickSetOwnerList
 from ..set_status_list import BrickSetStatusList
+from ..set_storage_list import BrickSetStorageList
 from ..set_tag_list import BrickSetTagList
 from ..socket import MESSAGES
 
@@ -34,9 +35,10 @@ def list() -> str:
     return render_template(
         'sets.html',
         collection=BrickSetList().all(),
-        brickset_owners=BrickSetOwnerList.new().list(),
-        brickset_statuses=BrickSetStatusList.new().list(),
-        brickset_tags=BrickSetTagList.new().list(),
+        brickset_owners=BrickSetOwnerList.list(),
+        brickset_statuses=BrickSetStatusList.list(),
+        brickset_storages=BrickSetStorageList.list(as_class=True),
+        brickset_tags=BrickSetTagList.list(),
     )
 
 
@@ -46,7 +48,7 @@ def list() -> str:
 @exception_handler(__file__, json=True)
 def update_owner(*, id: str, metadata_id: str) -> Response:
     brickset = BrickSet().select_light(id)
-    owner = BrickSetOwnerList.new().get(metadata_id)
+    owner = BrickSetOwnerList.get(metadata_id)
 
     state = owner.update_set_state(brickset, json=request.json)
 
@@ -59,9 +61,25 @@ def update_owner(*, id: str, metadata_id: str) -> Response:
 @exception_handler(__file__, json=True)
 def update_status(*, id: str, metadata_id: str) -> Response:
     brickset = BrickSet().select_light(id)
-    status = BrickSetStatusList.new().get(metadata_id)
+    status = BrickSetStatusList.get(metadata_id)
 
     state = status.update_set_state(brickset, json=request.json)
+
+    return jsonify({'value': state})
+
+
+# Change the state of a storage
+@set_page.route('/<id>/storage', methods=['POST'])
+@login_required
+@exception_handler(__file__, json=True)
+def update_storage(*, id: str) -> Response:
+    brickset = BrickSet().select_light(id)
+    storage = BrickSetStorageList.get(
+        request.json.get('value', ''),  # type: ignore
+        allow_none=True
+    )
+
+    state = storage.update_set_value(brickset, state=storage.fields.id)
 
     return jsonify({'value': state})
 
@@ -72,7 +90,7 @@ def update_status(*, id: str, metadata_id: str) -> Response:
 @exception_handler(__file__, json=True)
 def update_tag(*, id: str, metadata_id: str) -> Response:
     brickset = BrickSet().select_light(id)
-    tag = BrickSetTagList.new().get(metadata_id)
+    tag = BrickSetTagList.get(metadata_id)
 
     state = tag.update_set_state(brickset, json=request.json)
 
@@ -127,9 +145,10 @@ def details(*, id: str) -> str:
         'set.html',
         item=BrickSet().select_specific(id),
         open_instructions=request.args.get('open_instructions'),
-        brickset_owners=BrickSetOwnerList.new().list(),
-        brickset_statuses=BrickSetStatusList.new().list(all=True),
-        brickset_tags=BrickSetTagList.new().list(),
+        brickset_owners=BrickSetOwnerList.list(),
+        brickset_statuses=BrickSetStatusList.list(all=True),
+        brickset_storages=BrickSetStorageList.list(as_class=True),
+        brickset_tags=BrickSetTagList.list(),
     )
 
 

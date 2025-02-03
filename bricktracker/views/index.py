@@ -4,6 +4,7 @@ from .exceptions import exception_handler
 from ..minifigure_list import BrickMinifigureList
 from ..set_owner_list import BrickSetOwnerList
 from ..set_status_list import BrickSetStatusList
+from ..set_storage_list import BrickSetStorageList
 from ..set_tag_list import BrickSetTagList
 from ..set_list import BrickSetList
 
@@ -17,8 +18,9 @@ def index() -> str:
     return render_template(
         'index.html',
         brickset_collection=BrickSetList().last(),
-        brickset_owners=BrickSetOwnerList.new().list(),
-        brickset_statuses=BrickSetStatusList.new().list(),
-        brickset_tags=BrickSetTagList.new().list(),
+        brickset_owners=BrickSetOwnerList.list(),
+        brickset_statuses=BrickSetStatusList.list(),
+        brickset_storages=BrickSetStorageList.list(as_class=True),
+        brickset_tags=BrickSetTagList.list(),
         minifigure_collection=BrickMinifigureList().last(),
     )

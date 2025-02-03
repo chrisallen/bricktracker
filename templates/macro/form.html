@@ -39,3 +39,27 @@
     </div>
   {% endif %}
 {% endmacro %}
+
+{% macro select(name, item, field, metadata_list, nullable=true, icon=none, delete=false) %}
+  {% if g.login.is_authenticated() %}
+    {% set prefix=metadata_list.as_prefix() %}
+    <label class="visually-hidden" for="{{ prefix }}-{{ item.fields.id }}">{{ name }}</label>
+    <div class="input-group">
+      {% if icon %}<span class="input-group-text"><i class="ri-{{ icon }}"></i></span>{% endif %}
+      <select id="{{ prefix }}-{{ item.fields.id }}" class="form-select"
+        {% if not delete %}
+          data-changer-id="{{ item.fields.id }}" data-changer-prefix="{{ prefix }}" data-changer-url="{{ metadata_list.url_for_set_state(item.fields.id) }}"
+        {% else %}
+          disabled
+        {% endif %}
+        autocomplete="off">
+        {% if nullable %}<option value="" {% if item.fields[field] is none %}selected{% endif %}><i>None</i></option>{% endif %}
+        {% for metadata in metadata_list %}
+          <option value="{{ metadata.fields.id }}" {% if metadata.fields.id == item.fields[field] %}selected{% endif %}>{{ metadata.fields.name }}</option>
+        {% endfor %}
+      </select>
+      <span id="status-{{ prefix }}-{{ item.fields.id }}" class="input-group-text ri-save-line"></span>
+      <button id="clear-{{ prefix }}-{{ item.fields.id }}" type="button" class="btn btn-sm btn-light btn-outline-danger border"><i class="ri-eraser-line"></i></button>
+    </div>
+  {% endif %}
+{% endmacro %}

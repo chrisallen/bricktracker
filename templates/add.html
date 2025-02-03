@@ -51,6 +51,19 @@
               </div>
               {{ accordion.footer() }}
             {% endif %}
+            {% if brickset_storages | length %}
+              {{ accordion.header('Storage', 'storage', 'metadata', icon='archive-2-line') }}
+              <label class="visually-hidden" for="storage">{{ name }}</label>
+              <div class="input-group">
+                <select id="add-storage" class="form-select" autocomplete="off">
+                  <option value="" selected><i>None</i></option>
+                  {% for storage in brickset_storages %}
+                    <option value="{{ storage.fields.id }}">{{ storage.fields.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              {{ accordion.footer() }}
+            {% endif %}
             {% if brickset_tags | length %}
               {{ accordion.header('Tags', 'tags', 'metadata', icon='price-tag-2-line') }}
               <div id="add-tags">

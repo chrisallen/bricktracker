@@ -48,7 +48,8 @@
     {{ badge.total_damaged(item.fields.total_damaged, solo=solo, last=last) }}
     {% for owner in brickset_owners %}
       {{ badge.owner(item, owner, solo=solo, last=last) }}
-    {% endfor %}
+      {% endfor %}
+    {{ badge.storage(item, brickset_storages, solo=solo, last=last) }}
     {% if not last %}
       {% if not solo %}
         {{ badge.instructions(item, solo=solo, last=last) }}

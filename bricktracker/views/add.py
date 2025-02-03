@@ -4,6 +4,7 @@ from flask_login import login_required
 from ..configuration_list import BrickConfigurationList
 from .exceptions import exception_handler
 from ..set_owner_list import BrickSetOwnerList
+from ..set_storage_list import BrickSetStorageList
 from ..set_tag_list import BrickSetTagList
 from ..socket import MESSAGES
 
@@ -19,8 +20,9 @@ def add() -> str:
 
     return render_template(
         'add.html',
-        brickset_owners=BrickSetOwnerList.new().list(),
-        brickset_tags=BrickSetTagList.new().list(),
+        brickset_owners=BrickSetOwnerList.list(),
+        brickset_storages=BrickSetStorageList.list(),
+        brickset_tags=BrickSetTagList.list(),
         path=current_app.config['SOCKET_PATH'],
         namespace=current_app.config['SOCKET_NAMESPACE'],
         messages=MESSAGES
@@ -36,8 +38,9 @@ def bulk() -> str:
 
     return render_template(
         'add.html',
-        brickset_owners=BrickSetOwnerList.new().list(),
-        brickset_tags=BrickSetTagList.new().list(),
+        brickset_owners=BrickSetOwnerList.list(),
+        brickset_storages=BrickSetStorageList.list(),
+        brickset_tags=BrickSetTagList.list(),
         path=current_app.config['SOCKET_PATH'],
         namespace=current_app.config['SOCKET_NAMESPACE'],
         messages=MESSAGES,

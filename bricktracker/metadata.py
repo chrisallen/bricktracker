@@ -36,6 +36,9 @@ class BrickMetadata(BrickRecord):
     ):
         super().__init__()
 
+        # Defined an empty ID
+        self.fields.id = None
+
         # Ingest the record if it has one
         if record is not None:
             self.ingest(record)
@@ -129,8 +132,8 @@ class BrickMetadata(BrickRecord):
         json: Any | None = None,
         value: Any | None = None
     ) -> Any:
-        if value is None:
-            value = json.get('value', None)  # type: ignore
+        if value is None and json is not None:
+            value = json.get('value', None)
 
         if value is None:
             raise ErrorException('"{field}" of a {kind} cannot be set to an empty value'.format(  # noqa: E501
@@ -180,16 +183,15 @@ class BrickMetadata(BrickRecord):
         /,
         *,
         json: Any | None = None,
-        state: bool | None = None,
+        state: Any | None = None
     ) -> Any:
-        if state is None:
-            state = json.get('value', False)  # type: ignore
+        if state is None and json is not None:
+            state = json.get('value', False)
 
         parameters = self.sql_parameters()
         parameters['set_id'] = brickset.fields.id
         parameters['state'] = state
 
-        # Update the status
         rows, _ = BrickSQL().execute_and_commit(
             self.update_set_state_query,
             parameters=parameters,
@@ -205,7 +207,53 @@ class BrickMetadata(BrickRecord):
             ))
 
         # Info
-        logger.info('{kind} "{name}" state change to "{state}" for set {set} ({id})'.format(  # noqa: E501
+        logger.info('{kind} "{name}" state changed to "{state}" for set {set} ({id})'.format(  # noqa: E501
+            kind=self.kind,
+            name=self.fields.name,
+            state=state,
+            set=brickset.fields.set,
+            id=brickset.fields.id,
+        ))
+
+        return state
+
+    # Update the selected value of this metadata item for a set
+    def update_set_value(
+        self,
+        brickset: 'BrickSet',
+        /,
+        *,
+        json: Any | None = None,
+        state: Any | None = None,
+    ) -> Any:
+        if state is None and json is not None:
+            state = json.get('value', '')
+
+        if state == '':
+            state = None
+
+        parameters = self.sql_parameters()
+        parameters['set_id'] = brickset.fields.id
+        parameters['state'] = state
+
+        rows, _ = BrickSQL().execute_and_commit(
+            self.update_set_state_query,
+            parameters=parameters,
+        )
+
+        # Update the status
+        if state is None and not hasattr(self.fields, 'name'):
+            self.fields.name = 'None'
+
+        if rows != 1:
+            raise DatabaseException('Could not update the {kind} value for set {set} ({id})'.format(  # noqa: E501
+                kind=self.kind,
+                set=brickset.fields.set,
+                id=brickset.fields.id,
+            ))
+
+        # Info
+        logger.info('{kind} value changed to "{name}" ({state}) for set {set} ({id})'.format(  # noqa: E501
             kind=self.kind,
             name=self.fields.name,
             state=state,

@@ -11,6 +11,7 @@ from .part_list import BrickPartList
 from .rebrickable_set import RebrickableSet
 from .set_owner_list import BrickSetOwnerList
 from .set_status_list import BrickSetStatusList
+from .set_storage_list import BrickSetStorageList
 from .set_tag_list import BrickSetTagList
 from .sql import BrickSQL
 if TYPE_CHECKING:
@@ -55,8 +56,29 @@ class BrickSet(RebrickableSet):
             self.fields.id = str(uuid4())
 
             if not refresh:
+                # Save the storage
+                storage = BrickSetStorageList.get(
+                    data.get('storage', ''),
+                    allow_none=True
+                )
+                self.fields.storage = storage.fields.id
+
                 # Insert into database
                 self.insert(commit=False)
+
+                # Save the owners
+                owners: list[str] = list(data.get('owners', []))
+
+                for id in owners:
+                    owner = BrickSetOwnerList.get(id)
+                    owner.update_set_state(self, state=True)
+
+                # Save the tags
+                tags: list[str] = list(data.get('tags', []))
+
+                for id in tags:
+                    tag = BrickSetTagList.get(id)
+                    tag.update_set_state(self, state=True)
 
             # Insert the rebrickable set into database
             self.insert_rebrickable()
@@ -68,20 +90,6 @@ class BrickSet(RebrickableSet):
             # Load the minifigures
             if not BrickMinifigureList.download(socket, self, refresh=refresh):
                 return False
-
-            # Save the owners
-            owners: list[str] = list(data.get('owners', []))
-
-            for id in owners:
-                owner = BrickSetOwnerList(BrickSetOwner).get(id)
-                owner.update_set_state(self, state=True)
-
-            # Save the tags
-            tags: list[str] = list(data.get('tags', []))
-
-            for id in tags:
-                tag = BrickSetTagList(BrickSetTag).get(id)
-                tag.update_set_state(self, state=True)
 
             # Commit the transaction to the database
             socket.auto_progress(
@@ -166,9 +174,9 @@ class BrickSet(RebrickableSet):
 
         # Load from database
         if not self.select(
-            owners=BrickSetOwnerList.new().as_columns(),
-            statuses=BrickSetStatusList.new().as_columns(all=True),
-            tags=BrickSetTagList.new().as_columns(),
+            owners=BrickSetOwnerList.as_columns(),
+            statuses=BrickSetStatusList.as_columns(all=True),
+            tags=BrickSetTagList.as_columns(),
         ):
             raise NotFoundException(
                 'Set with ID {id} was not found in the database'.format(
