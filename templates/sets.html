@@ -10,7 +10,7 @@
       <label class="visually-hidden" for="grid-search">Search</label>
       <div class="input-group">
         <span class="input-group-text"><i class="ri-search-line"></i><span class="ms-1 d-none d-xl-inline"> Search</span></span>
-        <input id="grid-search" data-search-exact="name,number,parts,theme,year" data-search-list="searchOwner,searchTag" class="form-control form-control-sm" type="text" placeholder="Set, name, number of parts, theme, year, owner, tag" value="">
+        <input id="grid-search" data-search-exact="name,number,parts,searchStorage,theme,year" data-search-list="searchOwner,searchTag" class="form-control form-control-sm" type="text" placeholder="Set, name, number of parts, theme, year, owner, storage, tag" value="">
       </div>
     </div>
     <div class="col-12">
@@ -57,6 +57,7 @@
           <option value="has-missing">Set has missing pieces</option>
           <option value="has-damaged">Set has damaged pieces</option>
           <option value="has-missing-instructions">Set has missing instructions</option>
+          {% if brickset_storage | length %}<option value="has-storage">Is in storage</option>{% endif %}
           {% for status in brickset_statuses %}
             <option value="{{ status.as_dataset() }}">{{ status.fields.name }}</option>
             <option value="-{{ status.as_dataset() }}">NOT: {{ status.fields.name }}</option>
@@ -92,6 +93,22 @@
         </select>
       </div>
     </div>
+    {% if brickset_storages | length %}
+      <div class="col-12 flex-grow-1">
+        <label class="visually-hidden" for="grid-owner">Storage</label>
+        <div class="input-group">
+          <span class="input-group-text"><i class="ri-archive-2-line"></i><span class="ms-1 d-none d-xl-inline"> Storage</span></span>
+          <select id="grid-storage" class="form-select"
+            data-filter="value" data-filter-attribute="storage"
+            autocomplete="off">
+            <option value="" selected>All</option>
+            {% for storage in brickset_storages %}
+              <option value="{{ storage.fields.id }}">{{ storage.fields.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    {% endif %}
     <div class="col-12 flex-grow-1">
       <label class="visually-hidden" for="grid-tag">Tag</label>
       <div class="input-group">
