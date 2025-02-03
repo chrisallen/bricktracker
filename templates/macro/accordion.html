@@ -26,10 +26,10 @@
   </div>
 {% endmacro %}
 
-{% macro cards(card_collection, title, id, parent, target, icon=none) %}
+{% macro cards(card_collection, title, id, parent, target, expanded=false, icon=none) %}
   {% set size=card_collection | length %}
   {% if size %}
-    {{ header(title, id, parent, icon=icon) }}
+    {{ header(title, id, parent, expanded=expanded, icon=icon) }}
       <div class="row">
         {% for item in card_collection %}
           <div class="col-md-6 col-xl-3 d-flex align-items-stretch">

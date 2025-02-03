@@ -1,6 +1,8 @@
 import logging
 from typing import Self
 
+from flask import current_app
+
 from .metadata_list import BrickMetadataList
 from .set_storage import BrickSetStorage
 
@@ -13,9 +15,24 @@ class BrickSetStorageList(BrickMetadataList[BrickSetStorage]):
 
     # Queries
     select_query = 'set/metadata/storage/list'
+    all_query = 'set/metadata/storage/all'
 
     # Set state endpoint
     set_state_endpoint: str = 'set.update_storage'
+
+    # Load all storages
+    @classmethod
+    def all(cls, /) -> Self:
+        new = cls.new()
+        new.override()
+
+        for record in new.select(
+            override_query=cls.all_query,
+            order=current_app.config['STORAGE_DEFAULT_ORDER']
+        ):
+            new.records.append(new.model(record=record))
+
+        return new
 
     # Instantiate the list with the proper class
     @classmethod

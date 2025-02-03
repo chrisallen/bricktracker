@@ -43,8 +43,7 @@ class BrickMetadataList(BrickRecordList[T]):
 
         # Records override (masking the class variables with instance ones)
         if records is not None:
-            self.records = []
-            self.mapping = {}
+            self.override()
 
             for metadata in records:
                 self.records.append(metadata)
@@ -78,6 +77,13 @@ class BrickMetadataList(BrickRecordList[T]):
     # Filter the list of records (this one does nothing)
     def filter(self) -> list[T]:
         return self.records
+
+    # Add a layer of override data
+    def override(self) -> None:
+        self.fields = BrickRecordFields()
+
+        self.records = []
+        self.mapping = {}
 
     # Return the items as columns for a select
     @classmethod

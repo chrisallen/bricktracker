@@ -13,6 +13,8 @@
 - Added: `BK_HIDE_TABLE_DAMAGED_PARTS`, hide the Damaged column in all tables
 - Added: `BK_SHOW_GRID_SORT`, show the sort options on the grid by default
 - Added: `BK_SHOW_GRID_FILTERS`, show the filter options on the grid by default
+- Added: `BK_HIDE_ALL_STORAGES`, hide the "Storages" menu entry
+- Added: `BK_MINIFIGURES_DEFAULT_ORDER`, ordering of storages
 
 ### Code
 
@@ -28,7 +30,7 @@
     - Deduplicate
     - Compute number of parts
 
-Parts
+- Parts
     - Damaged parts
 
 - Sets
@@ -37,6 +39,9 @@ Parts
     - Ownership
     - Tags
     - Storage
+
+- Storage
+    - Storage content and list
 
 - Socket
     - Add decorator for rebrickable, authenticated and threaded socket actions
@@ -85,6 +90,10 @@ Parts
     - Collapsible controls depending on screen size
     - Manually collapsible filters (with configuration variable for default state)
     - Manually collapsible sort (with configuration variable for default state)
+
+- Storage
+    - Storage list
+    - Storage content
 
 ## 1.1.1: PDF Instructions Download
 

@@ -5,6 +5,7 @@ from flask import current_app
 from .record_list import BrickRecordList
 from .set_owner_list import BrickSetOwnerList
 from .set_status_list import BrickSetStatusList
+from .set_storage import BrickSetStorage
 from .set_tag_list import BrickSetTagList
 from .set import BrickSet
 
@@ -24,6 +25,7 @@ class BrickSetList(BrickRecordList[BrickSet]):
     select_query: str = 'set/list/all'
     using_minifigure_query: str = 'set/list/using_minifigure'
     using_part_query: str = 'set/list/using_part'
+    using_storage_query: str = 'set/list/using_storage'
 
     def __init__(self, /):
         super().__init__()
@@ -149,5 +151,15 @@ class BrickSetList(BrickRecordList[BrickSet]):
 
         # Load the sets from the database
         self.list(override_query=self.using_part_query)
+
+        return self
+
+    # Sets using a storage
+    def using_storage(self, storage: BrickSetStorage, /) -> Self:
+        # Save the parameters to the fields
+        self.fields.storage = storage.fields.id
+
+        # Load the sets from the database
+        self.list(override_query=self.using_storage_query)
 
         return self

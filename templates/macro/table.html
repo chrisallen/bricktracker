@@ -1,7 +1,9 @@
-{% macro header(color=false, parts=false, quantity=false, missing_parts=false, damaged_parts=false, sets=false, minifigures=false) %}
+{% macro header(image=true, color=false, parts=false, quantity=false, missing=true, missing_parts=false, damaged=true, damaged_parts=false, sets=false, minifigures=false) %}
   <thead>
     <tr>
-      <th data-table-no-sort="true" class="no-sort" scope="col"><i class="ri-image-line fw-normal"></i> Image</th>
+      {% if image %}
+        <th data-table-no-sort="true" class="no-sort" scope="col"><i class="ri-image-line fw-normal"></i> Image</th>
+      {% endif %}
       <th scope="col"><i class="ri-pencil-line fw-normal"></i> Name</th>
       {% if color %}
         <th scope="col"><i class="ri-palette-line fw-normal"></i> Color</th>
@@ -12,10 +14,10 @@
       {% if quantity %}
         <th data-table-number="true" scope="col"><i class="ri-functions fw-normal"></i> Quantity</th>
       {% endif %}
-      {% if not config['HIDE_TABLE_MISSING_PARTS'] %}
+      {% if missing and not config['HIDE_TABLE_MISSING_PARTS'] %}
         <th data-table-number="true" scope="col"><i class="ri-question-line fw-normal"></i> Missing{% if missing_parts %} parts{% endif %}</th>
       {% endif %}
-      {% if not config['HIDE_TABLE_DAMAGED_PARTS'] %}
+      {% if damaged and not config['HIDE_TABLE_DAMAGED_PARTS'] %}
       <th data-table-number="true" scope="col"><i class="ri-error-warning-line fw-normal"></i> Damaged{% if damaged_parts %} parts{% endif %}</th>
       {% endif %}
       {% if sets %}

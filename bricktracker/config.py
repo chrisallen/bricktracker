@@ -29,6 +29,7 @@ CONFIG: Final[list[dict[str, Any]]] = [
     {'n': 'HIDE_ALL_MINIFIGURES', 'c': bool},
     {'n': 'HIDE_ALL_PARTS', 'c': bool},
     {'n': 'HIDE_ALL_SETS', 'c': bool},
+    {'n': 'HIDE_ALL_STORAGES', 'c': bool},
     {'n': 'HIDE_ALL_PROBLEMS_PARTS', 'e': 'BK_HIDE_MISSING_PARTS', 'c': bool},
     {'n': 'HIDE_SET_INSTRUCTIONS', 'c': bool},
     {'n': 'HIDE_TABLE_DAMAGED_PARTS', 'c': bool},
@@ -59,6 +60,7 @@ CONFIG: Final[list[dict[str, Any]]] = [
     {'n': 'SKIP_SPARE_PARTS', 'c': bool},
     {'n': 'SOCKET_NAMESPACE', 'd': 'bricksocket'},
     {'n': 'SOCKET_PATH', 'd': '/bricksocket/'},
+    {'n': 'STORAGE_DEFAULT_ORDER', 'd': '"bricktracker_metadata_storages"."name" ASC'},  # noqa: E501
     {'n': 'THEMES_FILE_URL', 'd': 'https://cdn.rebrickable.com/media/downloads/themes.csv.gz'},  # noqa: E501
     {'n': 'THEMES_PATH', 'd': './themes.csv'},
     {'n': 'TIMEZONE', 'd': 'Etc/UTC'},

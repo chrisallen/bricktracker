@@ -1,5 +1,7 @@
 from .metadata import BrickMetadata
 
+from flask import url_for
+
 
 # Lego set storage metadata
 class BrickSetStorage(BrickMetadata):
@@ -11,3 +13,10 @@ class BrickSetStorage(BrickMetadata):
     select_query: str = 'set/metadata/storage/select'
     update_field_query: str = 'set/metadata/storage/update/field'
     update_set_state_query: str = 'set/metadata/storage/update/state'
+
+    # Self url
+    def url(self, /) -> str:
+        return url_for(
+            'storage.details',
+            id=self.fields.id,
+        )

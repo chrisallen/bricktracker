@@ -214,7 +214,11 @@ class BrickSet(RebrickableSet):
 
     # Compute the url for the refresh button
     def url_for_refresh(self, /) -> str:
-        return url_for(
-            'set.refresh',
-            id=self.fields.id,
-        )
+        return url_for('set.refresh', id=self.fields.id)
+
+    # Compute the url for the set storage
+    def url_for_storage(self, /) -> str:
+        if self.fields.storage is not None:
+            return url_for('storage.details', id=self.fields.storage)
+        else:
+            return ''

@@ -80,7 +80,7 @@
     {% else %}
       {% set text=storage.fields.name %}
     {% endif %}
-    {{ badge(check=storage, solo=solo, last=last, color='light text-warning-emphasis bg-warning-subtle border border-warning-subtle', icon='archive-2-line', text=text, alt='Storage', tooltip=tooltip) }}
+    {{ badge(url=item.url_for_storage(), solo=solo, last=last, color='light text-warning-emphasis bg-warning-subtle border border-warning-subtle', icon='archive-2-line', text=text, alt='Storage', tooltip=tooltip) }}
   {% endif %}
 {% endmacro %}
 
