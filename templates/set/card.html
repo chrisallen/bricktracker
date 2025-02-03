@@ -4,7 +4,7 @@
 {% import 'macro/form.html' as form %}
 
 <div {% if not solo %}id="set-{{ item.fields.id }}"{% endif %} class="card mb-3 flex-fill {% if solo %}card-solo{% endif %}"
-  {% if not solo %}
+  {% if not solo and not tiny %}
     data-index="{{ index }}" data-number="{{ item.fields.set }}" data-name="{{ item.fields.name | lower }}" data-parts="{{ item.fields.number_of_parts }}"
     data-year="{{ item.fields.year }}" data-theme="{{ item.theme.name | lower }}"
     data-has-missing-instructions="{{ (not (item.instructions | length)) | int }}"
@@ -55,7 +55,7 @@
     {{ badge.total_damaged(item.fields.total_damaged, solo=solo, last=last) }}
     {% for owner in brickset_owners %}
       {{ badge.owner(item, owner, solo=solo, last=last) }}
-      {% endfor %}
+    {% endfor %}
     {{ badge.storage(item, brickset_storages, solo=solo, last=last) }}
     {% if not last %}
       {% if not solo %}
