@@ -3,15 +3,15 @@ from typing import Tuple
 # Some table aliases to make it look cleaner (id: (name, icon))
 ALIASES: dict[str, Tuple[str, str]] = {
     'bricktracker_metadata_owners': ('Bricktracker set owners metadata', 'user-line'),  # noqa: E501
+    'bricktracker_metadata_purchase_locations': ('Bricktracker set purchase locations metadata', 'building-line'),  # noqa: E501
     'bricktracker_metadata_statuses': ('Bricktracker set status metadata', 'checkbox-line'),  # noqa: E501
+    'bricktracker_metadata_storages': ('Bricktracker set storages metadata', 'archive-2-line'),  # noqa: E501
     'bricktracker_metadata_tags': ('Bricktracker set tags metadata', 'price-tag-2-line'),  # noqa: E501
     'bricktracker_minifigures': ('Bricktracker minifigures', 'group-line'),
     'bricktracker_parts': ('Bricktracker parts', 'shapes-line'),
     'bricktracker_set_checkboxes': ('Bricktracker set checkboxes (legacy)', 'checkbox-line'),  # noqa: E501
     'bricktracker_set_owners': ('Bricktracker set owners', 'checkbox-line'),  # noqa: E501
-    'bricktracker_set_purchase_locations': ('Bricktracker set purchase locations', 'building-line'),  # noqa: E501
     'bricktracker_set_statuses': ('Bricktracker set statuses', 'user-line'),  # noqa: E501
-    'bricktracker_set_storages': ('Bricktracker set storages', 'archive-2-line'),  # noqa: E501
     'bricktracker_set_tags': ('Bricktracker set tags', 'price-tag-2-line'),  # noqa: E501
     'bricktracker_sets': ('Bricktracker sets', 'hashtag'),
     'bricktracker_wishes': ('Bricktracker wishes', 'gift-line'),

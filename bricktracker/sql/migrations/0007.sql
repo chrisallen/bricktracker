@@ -7,16 +7,18 @@ BEGIN TRANSACTION;
 -- Rename sets table
 ALTER TABLE "bricktracker_sets" RENAME TO "bricktracker_sets_old";
 
--- Create a Bricktracker set storage table for later
-CREATE TABLE "bricktracker_set_storages" (
+-- Create a Bricktracker metadata storage table for later
+CREATE TABLE "bricktracker_metadata_storages" (
+    "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    PRIMARY KEY("name")
+    PRIMARY KEY("id")
 );
 
--- Create a Bricktracker set storage table for later
-CREATE TABLE "bricktracker_set_purchase_locations" (
+-- Create a Bricktracker metadata purchase location table for later
+CREATE TABLE "bricktracker_metadata_purchase_locations" (
+    "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    PRIMARY KEY("name")
+    PRIMARY KEY("id")
 );
 
 -- Re-Create a Bricktracker set table with the simplified name
@@ -30,8 +32,8 @@ CREATE TABLE "bricktracker_sets" (
     "purchase_price" REAL, -- Purchase price
     PRIMARY KEY("id"),
     FOREIGN KEY("set") REFERENCES "rebrickable_sets"("set"),
-    FOREIGN KEY("storage") REFERENCES "bricktracker_set_storages"("name"),
-    FOREIGN KEY("purchase_location") REFERENCES "bricktracker_set_purchase_locations"("name")
+    FOREIGN KEY("storage") REFERENCES "bricktracker_metadata_storages"("id"),
+    FOREIGN KEY("purchase_location") REFERENCES "bricktracker_metadata_purchase_locations"("id")
 );
 
 -- Insert existing sets into the new table
