@@ -55,6 +55,7 @@ CONFIG: Final[list[dict[str, Any]]] = [
     {'n': 'SETS_DEFAULT_ORDER', 'd': '"rebrickable_sets"."number" DESC, "rebrickable_sets"."version" ASC'},  # noqa: E501
     {'n': 'SETS_FOLDER', 'd': 'sets', 's': True},
     {'n': 'SHOW_GRID_FILTERS', 'c': bool},
+    {'n': 'SHOW_GRID_SORT', 'c': bool},
     {'n': 'SKIP_SPARE_PARTS', 'c': bool},
     {'n': 'SOCKET_NAMESPACE', 'd': 'bricksocket'},
     {'n': 'SOCKET_PATH', 'd': '/bricksocket/'},

@@ -11,6 +11,8 @@
 - Renamed: `BK_HIDE_MISSING_PARTS` -> `BK_HIDE_ALL_PROBLEMS_PARTS`
 - Added: `BK_HIDE_TABLE_MISSING_PARTS`, hide the Missing column in all tables
 - Added: `BK_HIDE_TABLE_DAMAGED_PARTS`, hide the Damaged column in all tables
+- Added: `BK_SHOW_GRID_SORT`, show the sort options on the grid by default
+- Added: `BK_SHOW_GRID_FILTERS`, show the filter options on the grid by default
 
 ### Code
 
@@ -82,6 +84,7 @@ Parts
 - Sets grid
     - Collapsible controls depending on screen size
     - Manually collapsible filters (with configuration variable for default state)
+    - Manually collapsible sort (with configuration variable for default state)
 
 ## 1.1.1: PDF Instructions Download
 

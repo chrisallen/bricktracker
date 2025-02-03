@@ -14,7 +14,23 @@
       </div>
     </div>
     <div class="col-12">
-      <div id="grid-sort" class="input-group">
+      <div class="input-group">
+        <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#grid-sort" aria-expanded="{% if config['SHOW_GRID_SORT'] %}true{% else %}false{% endif %}" aria-controls="grid-sort">
+          <i class="ri-sort-asc"></i> Sort
+        </button>
+      </div>
+    </div>
+    <div class="col-12">
+      <div class="input-group">
+        <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#grid-filter" aria-expanded="{% if config['SHOW_GRID_FILTERS'] %}true{% else %}false{% endif %}" aria-controls="grid-filter">
+          <i class="ri-filter-line"></i> Filters
+        </button>
+      </div>
+    </div>
+  </div>
+  <div id="grid-sort" class="collapse {% if config['SHOW_GRID_SORT'] %}show{% endif %} row row-cols-lg-auto g-1 justify-content-center align-items-center pb-2">
+    <div class="col-12 flex-grow-1">
+      <div class="input-group">
         <span class="input-group-text"><i class="ri-sort-asc"></i><span class="ms-1 d-none d-xxl-inline"> Sort</span></span>
         <button id="sort-number" type="button" class="btn btn-outline-primary"
           data-sort-attribute="number" data-sort-natural="true"><i class="ri-hashtag"></i><span class="d-none d-xxl-inline"> Set</span></button>
@@ -34,13 +50,6 @@
           data-sort-attribute="damaged" data-sort-desc="true"><i class="ri-error-warning-line"></i><span class="d-none d-xxl-inline"> Damaged</span></button>
         <button id="sort-clear" type="button" class="btn btn-outline-dark"
           data-sort-clear="true"><i class="ri-close-circle-line"></i><span class="d-none d-xxl-inline"> Clear</span></button>
-      </div>
-    </div>
-    <div class="col-12">
-      <div class="input-group">
-        <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#grid-filter" aria-expanded="{% if config['SHOW_GRID_FILTERS'] %}true{% else %}false{% endif %}" aria-controls="grid-filter">
-          <i class="ri-filter-line"></i> Filters
-        </button>
       </div>
     </div>
   </div>
