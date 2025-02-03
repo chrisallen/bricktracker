@@ -6,7 +6,7 @@
         <li class="d-flex list-group-item list-group-item-action text-nowrap">{{ form.checkbox(item, owner, delete=delete) }}</li>
       {% endfor %}
     {% else %}
-      <li class="list-group-item list-group-item-action"><i class="ri-error-warning-line"></i> No owner found.</li>
+      <li class="list-group-item list-group-item-action text-center"><i class="ri-error-warning-line"></i> No owner found.</li>
       {% endif %}
     </ul>
     <div class="list-group list-group-flush border-top">
@@ -20,7 +20,7 @@
         <li class="d-flex list-group-item list-group-item-action text-nowrap">{{ form.checkbox(item, tag, delete=delete) }}</li>
       {% endfor %}
     {% else %}
-      <li class="list-group-item list-group-item-action"><i class="ri-error-warning-line"></i> No tag found.</li>
+      <li class="list-group-item list-group-item-action text-center"><i class="ri-error-warning-line"></i> No tag found.</li>
       {% endif %}
     </ul>
     <div class="list-group list-group-flush border-top">
