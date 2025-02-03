@@ -1,10 +1,13 @@
-{% macro header(color=false, quantity=false, missing_parts=false, damaged_parts=false, sets=false, minifigures=false) %}
+{% macro header(color=false, parts=false, quantity=false, missing_parts=false, damaged_parts=false, sets=false, minifigures=false) %}
   <thead>
     <tr>
       <th data-table-no-sort="true" class="no-sort" scope="col"><i class="ri-image-line fw-normal"></i> Image</th>
       <th scope="col"><i class="ri-pencil-line fw-normal"></i> Name</th>
       {% if color %}
         <th scope="col"><i class="ri-palette-line fw-normal"></i> Color</th>
+      {% endif %}
+      {% if parts %}
+        <th data-table-number="true" scope="col"><i class="ri-shapes-line fw-normal"></i> Parts</th>
       {% endif %}
       {% if quantity %}
         <th data-table-number="true" scope="col"><i class="ri-functions fw-normal"></i> Quantity</th>

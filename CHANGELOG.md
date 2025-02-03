@@ -24,6 +24,7 @@
 
 - Minifigure
     - Deduplicate
+    - Compute number of parts
 
 Parts
     - Damaged parts
@@ -56,6 +57,9 @@ Parts
 - Form
     - Add a clear button for dynamic text inputs
     - Add error message in a tooltip for dynamic inputs
+
+- Minifigure
+    - Display number of parts
 
 - Parts
     - Use Rebrickable URL if stored (+ color code)

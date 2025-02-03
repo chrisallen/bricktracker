@@ -2,7 +2,7 @@
 
 <div class="table-responsive-sm">
   <table data-table="{% if all %}true{% endif %}" class="table table-striped align-middle" id="minifigures">
-    {{ table.header(quantity=true, missing_parts=true, damaged_parts=true, sets=true) }}
+    {{ table.header(parts=true, quantity=true, missing_parts=true, damaged_parts=true, sets=true) }}
     <tbody>
       {% for item in table_collection %}
       <tr>
@@ -13,6 +13,7 @@
             {{ table.rebrickable(item) }}
           {% endif %}
         </td>
+        <td>{{ item.fields.number_of_parts }}</td>
         <td>{{ item.fields.total_quantity }}</td>
         <td>{{ item.fields.total_missing }}</td>
         <td>{{ item.fields.total_damaged }}</td>

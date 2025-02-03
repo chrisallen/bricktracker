@@ -37,9 +37,6 @@ class BrickMinifigure(RebrickableMinifigure):
                 # Insert into database
                 self.insert(commit=False)
 
-            # Insert the rebrickable set into database
-            self.insert_rebrickable()
-
             # Load the inventory
             if not BrickPartList.download(
                 socket,
@@ -48,6 +45,9 @@ class BrickMinifigure(RebrickableMinifigure):
                 refresh=refresh
             ):
                 return False
+
+            # Insert the rebrickable set into database (after counting parts)
+            self.insert_rebrickable()
 
         except Exception as e:
             socket.fail(

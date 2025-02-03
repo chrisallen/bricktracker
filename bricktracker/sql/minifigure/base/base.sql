@@ -2,6 +2,7 @@ SELECT
     "bricktracker_minifigures"."quantity",
     "rebrickable_minifigures"."figure",
     "rebrickable_minifigures"."number",
+    "rebrickable_minifigures"."number_of_parts",
     "rebrickable_minifigures"."name",
     "rebrickable_minifigures"."image",
     {% block total_missing %}

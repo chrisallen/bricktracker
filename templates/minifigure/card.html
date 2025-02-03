@@ -6,6 +6,7 @@
   {{ card.header(item, item.fields.name, solo=solo, identifier=item.fields.figure, icon='user-line') }}
   {{ card.image(item, solo=solo, last=last, caption=item.fields.name, alt=item.fields.figure, medium=true) }}
   <div class="card-body border-bottom {% if not solo %}p-1{% endif %}">
+    {{ badge.parts(item.fields.number_of_parts, solo=solo, last=last) }}
     {% if last %}
       {{ badge.set(item.fields.set, solo=solo, last=last, id=item.fields.rebrickable_set_id) }}
       {{ badge.quantity(item.fields.quantity, solo=solo, last=last) }}

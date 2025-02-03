@@ -239,9 +239,17 @@ class BrickPartList(BrickRecordList[BrickPart]):
             ).list()
 
             # Process each part
+            number_of_parts: int = 0
             for part in inventory:
+                # Count the number of parts for minifigures
+                if minifigure is not None:
+                    number_of_parts += part.fields.quantity
+
                 if not part.download(socket, refresh=refresh):
                     return False
+
+            if minifigure is not None:
+                minifigure.fields.number_of_parts = number_of_parts
 
         except Exception as e:
             socket.fail(
