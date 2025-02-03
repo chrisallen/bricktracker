@@ -6,7 +6,13 @@
 > "Missing" part has been renamed to "Problems" to accomodate for missing and damaged parts.
 > The associated environment variables have changed named (the old names are still valid)
 
-## Code
+### Environment
+
+- Renamed: `BK_HIDE_MISSING_PARTS` -> `BK_HIDE_ALL_PROBLEMS_PARTS`
+- Added: `BK_HIDE_TABLE_MISSING_PARTS`, hide the Missing column in all tables
+- Added: `BK_HIDE_TABLE_DAMAGED_PARTS`, hide the Damaged column in all tables
+
+### Code
 
 - Form
     - Migrate missing input fields to BrickChanger

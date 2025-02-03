@@ -9,8 +9,12 @@
       {% if quantity %}
         <th data-table-number="true" scope="col"><i class="ri-functions fw-normal"></i> Quantity</th>
       {% endif %}
-      <th data-table-number="true" scope="col"><i class="ri-question-line fw-normal"></i> Missing{% if missing_parts %} parts{% endif %}</th>
+      {% if not config['HIDE_TABLE_MISSING_PARTS'] %}
+        <th data-table-number="true" scope="col"><i class="ri-question-line fw-normal"></i> Missing{% if missing_parts %} parts{% endif %}</th>
+      {% endif %}
+      {% if not config['HIDE_TABLE_DAMAGED_PARTS'] %}
       <th data-table-number="true" scope="col"><i class="ri-error-warning-line fw-normal"></i> Damaged{% if damaged_parts %} parts{% endif %}</th>
+      {% endif %}
       {% if sets %}
         <th data-table-number="true" scope="col"><i class="ri-hashtag fw-normal"></i> Sets</th>
       {% endif %}

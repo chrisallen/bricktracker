@@ -27,12 +27,16 @@
             <td>{% if quantity %}{{ item.fields.quantity * quantity }}{% else %}{{ item.fields.quantity }}{% endif %}</td>
           {% endif %}
         {% endif %}
-        <td data-sort="{{ item.fields.total_missing }}" class="table-td-input">
-          {{ form.input('Missing', item.fields.id, item.html_id('missing'), item.url_for_problem('missing'), item.fields.total_missing, all=all, read_only=read_only) }}
-        </td>
-        <td data-sort="{{ item.fields.total_damaged }}" class="table-td-input">
-          {{ form.input('Damaged', item.fields.id, item.html_id('damaged'), item.url_for_problem('damaged'), item.fields.total_damaged, all=all, read_only=read_only) }}
-        </td>
+        {% if not config['HIDE_TABLE_MISSING_PARTS'] %}
+          <td data-sort="{{ item.fields.total_missing }}" class="table-td-input">
+            {{ form.input('Missing', item.fields.id, item.html_id('missing'), item.url_for_problem('missing'), item.fields.total_missing, all=all, read_only=read_only) }}
+          </td>
+        {% endif %}
+        {% if not config['HIDE_TABLE_DAMAGED_PARTS'] %}
+          <td data-sort="{{ item.fields.total_damaged }}" class="table-td-input">
+            {{ form.input('Damaged', item.fields.id, item.html_id('damaged'), item.url_for_problem('damaged'), item.fields.total_damaged, all=all, read_only=read_only) }}
+          </td>
+        {% endif %}
         {% if all %}
           <td>{{ item.fields.total_sets }}</td>
           <td>{{ item.fields.total_minifigures }}</td>
