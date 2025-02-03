@@ -57,7 +57,10 @@
           <option value="has-missing">Set has missing pieces</option>
           <option value="has-damaged">Set has damaged pieces</option>
           <option value="has-missing-instructions">Set has missing instructions</option>
-          {% if brickset_storage | length %}<option value="has-storage">Is in storage</option>{% endif %}
+          {% if brickset_storages | length %}
+            <option value="has-storage">Is in storage</option>
+            <option value="-has-storage">Is NOT in storage</option>
+          {% endif %}
           {% for status in brickset_statuses %}
             <option value="{{ status.as_dataset() }}">{{ status.fields.name }}</option>
             <option value="-{{ status.as_dataset() }}">NOT: {{ status.fields.name }}</option>
