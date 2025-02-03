@@ -63,6 +63,7 @@ Parts
     - Display if print of another part
     - Display prints using the same base
     - Damaged parts
+    - Display same parts using a different color
 
 - Sets
     - Add a flag to hide instructions in a set

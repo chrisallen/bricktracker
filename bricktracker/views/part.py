@@ -62,5 +62,6 @@ def details(*, part: str, color: int) -> str:
             part,
             color
         ),
-        similar_prints=BrickPartList().from_print(brickpart)
+        different_color=BrickPartList().with_different_color(brickpart),
+        similar_prints=BrickPartList().from_print(brickpart),
     )

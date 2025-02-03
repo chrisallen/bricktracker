@@ -23,6 +23,7 @@ class BrickPartList(BrickRecordList[BrickPart]):
 
     # Queries
     all_query: str = 'part/list/all'
+    different_color_query = 'part/list/with_different_color'
     last_query: str = 'part/list/last'
     minifigure_query: str = 'part/list/from_minifigure'
     problem_query: str = 'part/list/problem'
@@ -165,6 +166,35 @@ class BrickPartList(BrickRecordList[BrickPart]):
             parameters['figure'] = None
 
         return parameters
+
+    # Load generic parts with same base but different color
+    def with_different_color(
+        self,
+        brickpart: BrickPart,
+        /,
+    ) -> Self:
+        # Save the part
+        self.fields.part = brickpart.fields.part
+        self.fields.color = brickpart.fields.color
+
+        # Load the parts from the database
+        for record in self.select(
+            override_query=self.different_color_query,
+            order=self.order
+        ):
+            part = BrickPart(
+                record=record,
+            )
+
+            if (
+                current_app.config['SKIP_SPARE_PARTS'] and
+                part.fields.spare
+            ):
+                continue
+
+            self.records.append(part)
+
+        return self
 
     # Import the parts from Rebrickable
     @staticmethod
