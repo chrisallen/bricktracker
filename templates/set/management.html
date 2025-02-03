@@ -13,6 +13,15 @@
       <a class="list-group-item list-group-item-action" href="{{ url_for('admin.admin', open_owner=true) }}"><i class="ri-settings-4-line"></i> Manage the set owners</a>
     </div>
   {{ accordion.footer() }}
+  {{ accordion.header('Storage', 'storage', 'set-details', icon='archive-2-line') }}
+    {% if brickset_storages | length %}
+      {{ form.select('Storage', item, 'storage', brickset_storages, delete=delete) }}
+    {% else %}
+      <p class="text-center"><i class="ri-error-warning-line"></i> No storage found.</p>
+    {% endif %}
+    <hr>
+    <a href="{{ url_for('admin.admin', open_tag=true) }}" class="btn btn-primary" role="button"><i class="ri-settings-4-line"></i> Manage the set storages</a>
+  {{ accordion.footer() }}
   {{ accordion.header('Tags', 'tag', 'set-details', icon='price-tag-2-line', class='p-0') }}
     <ul class="list-group list-group-flush">
     {% if brickset_tags | length %}
