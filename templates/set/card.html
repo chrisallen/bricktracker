@@ -46,7 +46,9 @@
     {% for tag in brickset_tags %}
       {{ badge.tag(item, tag, solo=solo, last=last) }}
     {% endfor %}
-    {{ badge.year(item.fields.year, solo=solo, last=last) }}
+    {% if not last %}
+      {{ badge.year(item.fields.year, solo=solo, last=last) }}
+    {% endif %}
     {{ badge.parts(item.fields.number_of_parts, solo=solo, last=last) }}
     {{ badge.total_minifigures(item.fields.total_minifigures, solo=solo, last=last) }}
     {{ badge.total_missing(item.fields.total_missing, solo=solo, last=last) }}
