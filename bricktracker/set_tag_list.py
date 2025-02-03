@@ -1,4 +1,5 @@
 import logging
+from typing import Self
 
 from .metadata_list import BrickMetadataList
 from .set_tag import BrickSetTag
@@ -15,3 +16,8 @@ class BrickSetTagList(BrickMetadataList[BrickSetTag]):
 
     # Queries
     select_query = 'set/metadata/tag/list'
+
+    # Instantiate the list with the proper class
+    @classmethod
+    def new(cls, /, *, force: bool = False) -> Self:
+        return cls(BrickSetTag, force=force)

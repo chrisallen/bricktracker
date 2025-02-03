@@ -1,4 +1,5 @@
 import logging
+from typing import Self
 
 from .metadata_list import BrickMetadataList
 from .set_status import BrickSetStatus
@@ -24,3 +25,8 @@ class BrickSetStatusList(BrickMetadataList[BrickSetStatus]):
             in self.records
             if all or record.fields.displayed_on_grid
         ]
+
+    # Instantiate the list with the proper class
+    @classmethod
+    def new(cls, /, *, force: bool = False) -> Self:
+        return cls(BrickSetStatus, force=force)

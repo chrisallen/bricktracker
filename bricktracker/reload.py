@@ -1,10 +1,7 @@
 from .instructions_list import BrickInstructionsList
 from .retired_list import BrickRetiredList
-from .set_owner import BrickSetOwner
 from .set_owner_list import BrickSetOwnerList
-from .set_status import BrickSetStatus
 from .set_status_list import BrickSetStatusList
-from .set_tag import BrickSetTag
 from .set_tag_list import BrickSetTagList
 from .theme_list import BrickThemeList
 
@@ -17,13 +14,13 @@ def reload() -> None:
         BrickInstructionsList(force=True)
 
         # Reload the set owners
-        BrickSetOwnerList(BrickSetOwner, force=True)
+        BrickSetOwnerList.new(force=True)
 
         # Reload the set statuses
-        BrickSetStatusList(BrickSetStatus, force=True)
+        BrickSetStatusList.new(force=True)
 
         # Reload the set tags
-        BrickSetTagList(BrickSetTag, force=True)
+        BrickSetTagList.new(force=True)
 
         # Reload retired sets
         BrickRetiredList(force=True)

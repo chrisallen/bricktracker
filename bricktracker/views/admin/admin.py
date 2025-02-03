@@ -47,9 +47,9 @@ def admin() -> str:
         database_version = database.version
         database_counters = BrickSQL().count_records()
 
-        metadata_owners = BrickSetOwnerList(BrickSetOwner).list()
-        metadata_statuses = BrickSetStatusList(BrickSetStatus).list(all=True)
-        metadata_tags = BrickSetTagList(BrickSetTag).list()
+        metadata_owners = BrickSetOwnerList.new().list()
+        metadata_statuses = BrickSetStatusList.new().list(all=True)
+        metadata_tags = BrickSetTagList.new().list()
     except Exception as e:
         database_exception = e
 

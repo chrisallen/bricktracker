@@ -17,11 +17,8 @@ from ..minifigure import BrickMinifigure
 from ..part import BrickPart
 from ..set import BrickSet
 from ..set_list import BrickSetList
-from ..set_owner import BrickSetOwner
 from ..set_owner_list import BrickSetOwnerList
-from ..set_status import BrickSetStatus
 from ..set_status_list import BrickSetStatusList
-from ..set_tag import BrickSetTag
 from ..set_tag_list import BrickSetTagList
 from ..socket import MESSAGES
 
@@ -37,9 +34,9 @@ def list() -> str:
     return render_template(
         'sets.html',
         collection=BrickSetList().all(),
-        brickset_owners=BrickSetOwnerList(BrickSetOwner).list(),
-        brickset_statuses=BrickSetStatusList(BrickSetStatus).list(),
-        brickset_tags=BrickSetTagList(BrickSetTag).list(),
+        brickset_owners=BrickSetOwnerList.new().list(),
+        brickset_statuses=BrickSetStatusList.new().list(),
+        brickset_tags=BrickSetTagList.new().list(),
     )
 
 
@@ -49,7 +46,7 @@ def list() -> str:
 @exception_handler(__file__, json=True)
 def update_owner(*, id: str, metadata_id: str) -> Response:
     brickset = BrickSet().select_light(id)
-    owner = BrickSetOwnerList(BrickSetOwner).get(metadata_id)
+    owner = BrickSetOwnerList.new().get(metadata_id)
 
     state = owner.update_set_state(brickset, json=request.json)
 
@@ -62,7 +59,7 @@ def update_owner(*, id: str, metadata_id: str) -> Response:
 @exception_handler(__file__, json=True)
 def update_status(*, id: str, metadata_id: str) -> Response:
     brickset = BrickSet().select_light(id)
-    status = BrickSetStatusList(BrickSetStatus).get(metadata_id)
+    status = BrickSetStatusList.new().get(metadata_id)
 
     state = status.update_set_state(brickset, json=request.json)
 
@@ -75,7 +72,7 @@ def update_status(*, id: str, metadata_id: str) -> Response:
 @exception_handler(__file__, json=True)
 def update_tag(*, id: str, metadata_id: str) -> Response:
     brickset = BrickSet().select_light(id)
-    tag = BrickSetTagList(BrickSetTag).get(metadata_id)
+    tag = BrickSetTagList.new().get(metadata_id)
 
     state = tag.update_set_state(brickset, json=request.json)
 
@@ -130,9 +127,9 @@ def details(*, id: str) -> str:
         'set.html',
         item=BrickSet().select_specific(id),
         open_instructions=request.args.get('open_instructions'),
-        brickset_owners=BrickSetOwnerList(BrickSetOwner).list(),
-        brickset_statuses=BrickSetStatusList(BrickSetStatus).list(all=True),
-        brickset_tags=BrickSetTagList(BrickSetTag).list(),
+        brickset_owners=BrickSetOwnerList.new().list(),
+        brickset_statuses=BrickSetStatusList.new().list(all=True),
+        brickset_tags=BrickSetTagList.new().list(),
     )
 
 
