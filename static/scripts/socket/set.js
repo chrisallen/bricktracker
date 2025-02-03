@@ -163,6 +163,10 @@ class BrickSetSocket extends BrickSocket {
 
             this.spinner(true);
 
+            if (this.html_progress_bar) {
+                this.html_progress_bar.scrollIntoView();
+            }
+
             this.socket.emit(this.messages.IMPORT_SET, {
                 set: (set !== undefined) ? set : this.html_input.value,
                 owners: owners,
@@ -240,6 +244,8 @@ class BrickSetSocket extends BrickSocket {
                         })(this, data["set"]);
 
                         this.html_card_confirm.addEventListener("click", this.confirm_listener);
+
+                        this.html_card_confirm.scrollIntoView();
                     }
                 }
             }
