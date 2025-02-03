@@ -126,7 +126,6 @@ class BrickMetadataList(BrickRecordList[T]):
         list = new.filter(**kwargs)
 
         if as_class:
-            print(list)
             # Return a copy of the metadata list with overriden records
             return cls(new.model, records=list)
         else:
