@@ -109,10 +109,20 @@ class BrickSocket(object):
         @self.socket.on(MESSAGES['IMPORT_SET'], namespace=self.namespace)
         @rebrickable_socket(self)
         def import_set(data: dict[str, Any], /) -> None:
+            logger.debug('Socket: IMPORT_SET={data} (from: {fr})'.format(
+                data=data,
+                fr=request.sid,  # type: ignore
+            ))
+
             BrickSet().download(self, data)
 
         @self.socket.on(MESSAGES['LOAD_SET'], namespace=self.namespace)
         def load_set(data: dict[str, Any], /) -> None:
+            logger.debug('Socket: LOAD_SET={data} (from: {fr})'.format(
+                data=data,
+                fr=request.sid,  # type: ignore
+            ))
+
             BrickSet().load(self, data)
 
     # Update the progress auto-incrementing
