@@ -38,13 +38,7 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
 
     # Load all minifigures
     def all(self, /) -> Self:
-        for record in self.select(
-            override_query=self.all_query,
-            order=self.order
-        ):
-            minifigure = BrickMinifigure(record=record)
-
-            self.records.append(minifigure)
+        self.list(override_query=self.all_query)
 
         return self
 
@@ -55,13 +49,7 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
         self.fields.color = color
 
         # Load the minifigures from the database
-        for record in self.select(
-            override_query=self.damaged_part_query,
-            order=self.order
-        ):
-            minifigure = BrickMinifigure(record=record)
-
-            self.records.append(minifigure)
+        self.list(override_query=self.damaged_part_query)
 
         return self
 
@@ -73,16 +61,37 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
         else:
             order = '"bricktracker_minifigures"."rowid" DESC'
 
-        for record in self.select(
-            override_query=self.last_query,
-            order=order,
-            limit=limit
-        ):
-            minifigure = BrickMinifigure(record=record)
-
-            self.records.append(minifigure)
+        self.list(override_query=self.last_query, order=order, limit=limit)
 
         return self
+
+    # Base minifigure list
+    def list(
+        self,
+        /,
+        *,
+        override_query: str | None = None,
+        order: str | None = None,
+        limit: int | None = None,
+        **context: Any,
+    ) -> None:
+        if order is None:
+            order = self.order
+
+        if hasattr(self, 'brickset'):
+            brickset = self.brickset
+        else:
+            brickset = None
+
+        # Load the sets from the database
+        for record in super().select(
+            override_query=override_query,
+            order=order,
+            limit=limit,
+        ):
+            minifigure = BrickMinifigure(brickset=brickset, record=record)
+
+            self.records.append(minifigure)
 
     # Load minifigures from a brickset
     def from_set(self, brickset: 'BrickSet', /) -> Self:
@@ -90,10 +99,7 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
         self.brickset = brickset
 
         # Load the minifigures from the database
-        for record in self.select(order=self.order):
-            minifigure = BrickMinifigure(brickset=self.brickset, record=record)
-
-            self.records.append(minifigure)
+        self.list()
 
         return self
 
@@ -104,13 +110,7 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
         self.fields.color = color
 
         # Load the minifigures from the database
-        for record in self.select(
-            override_query=self.missing_part_query,
-            order=self.order
-        ):
-            minifigure = BrickMinifigure(record=record)
-
-            self.records.append(minifigure)
+        self.list(override_query=self.missing_part_query)
 
         return self
 
@@ -121,13 +121,7 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
         self.fields.color = color
 
         # Load the minifigures from the database
-        for record in self.select(
-            override_query=self.using_part_query,
-            order=self.order
-        ):
-            minifigure = BrickMinifigure(record=record)
-
-            self.records.append(minifigure)
+        self.list(override_query=self.using_part_query)
 
         return self
 

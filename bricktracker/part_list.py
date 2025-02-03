@@ -42,15 +42,49 @@ class BrickPartList(BrickRecordList[BrickPart]):
 
     # Load all parts
     def all(self, /) -> Self:
-        for record in self.select(
-            override_query=self.all_query,
-            order=self.order
-        ):
-            part = BrickPart(record=record)
-
-            self.records.append(part)
+        self.list(override_query=self.all_query)
 
         return self
+
+    # Base part list
+    def list(
+        self,
+        /,
+        *,
+        override_query: str | None = None,
+        order: str | None = None,
+        limit: int | None = None,
+        **context: Any,
+    ) -> None:
+        if order is None:
+            order = self.order
+
+        if hasattr(self, 'brickset'):
+            brickset = self.brickset
+        else:
+            brickset = None
+
+        if hasattr(self, 'minifigure'):
+            minifigure = self.minifigure
+        else:
+            minifigure = None
+
+        # Load the sets from the database
+        for record in super().select(
+            override_query=override_query,
+            order=order,
+            limit=limit,
+        ):
+            part = BrickPart(
+                brickset=brickset,
+                minifigure=minifigure,
+                record=record,
+            )
+
+            if current_app.config['SKIP_SPARE_PARTS'] and part.fields.spare:
+                continue
+
+            self.records.append(part)
 
     # List specific parts from a brickset or minifigure
     def list_specific(
@@ -65,17 +99,7 @@ class BrickPartList(BrickRecordList[BrickPart]):
         self.minifigure = minifigure
 
         # Load the parts from the database
-        for record in self.select(order=self.order):
-            part = BrickPart(
-                brickset=self.brickset,
-                minifigure=minifigure,
-                record=record,
-            )
-
-            if current_app.config['SKIP_SPARE_PARTS'] and part.fields.spare:
-                continue
-
-            self.records.append(part)
+        self.list()
 
         return self
 
@@ -89,19 +113,7 @@ class BrickPartList(BrickRecordList[BrickPart]):
         self.minifigure = minifigure
 
         # Load the parts from the database
-        for record in self.select(
-            override_query=self.minifigure_query,
-            order=self.order
-        ):
-            part = BrickPart(
-                minifigure=minifigure,
-                record=record,
-            )
-
-            if current_app.config['SKIP_SPARE_PARTS'] and part.fields.spare:
-                continue
-
-            self.records.append(part)
+        self.list(override_query=self.minifigure_query)
 
         return self
 
@@ -121,33 +133,13 @@ class BrickPartList(BrickRecordList[BrickPart]):
         self.fields.color = brickpart.fields.color
 
         # Load the parts from the database
-        for record in self.select(
-            override_query=self.print_query,
-            order=self.order
-        ):
-            part = BrickPart(
-                record=record,
-            )
-
-            if (
-                current_app.config['SKIP_SPARE_PARTS'] and
-                part.fields.spare
-            ):
-                continue
-
-            self.records.append(part)
+        self.list(override_query=self.print_query)
 
         return self
 
     # Load problematic parts
     def problem(self, /) -> Self:
-        for record in self.select(
-            override_query=self.problem_query,
-            order=self.order
-        ):
-            part = BrickPart(record=record)
-
-            self.records.append(part)
+        self.list(override_query=self.problem_query)
 
         return self
 
@@ -178,21 +170,7 @@ class BrickPartList(BrickRecordList[BrickPart]):
         self.fields.color = brickpart.fields.color
 
         # Load the parts from the database
-        for record in self.select(
-            override_query=self.different_color_query,
-            order=self.order
-        ):
-            part = BrickPart(
-                record=record,
-            )
-
-            if (
-                current_app.config['SKIP_SPARE_PARTS'] and
-                part.fields.spare
-            ):
-                continue
-
-            self.records.append(part)
+        self.list(override_query=self.different_color_query)
 
         return self
 

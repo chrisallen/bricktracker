@@ -1,4 +1,4 @@
-from typing import Self
+from typing import Any, Self
 
 from flask import current_app
 
@@ -36,23 +36,8 @@ class BrickSetList(BrickRecordList[BrickSet]):
 
     # All the sets
     def all(self, /) -> Self:
-        themes = set()
-
         # Load the sets from the database
-        for record in self.select(
-            order=self.order,
-            owners=BrickSetOwnerList.as_columns(),
-            statuses=BrickSetStatusList.as_columns(),
-            tags=BrickSetTagList.as_columns(),
-        ):
-            brickset = BrickSet(record=record)
-
-            self.records.append(brickset)
-            themes.add(brickset.theme.name)
-
-        # Convert the set into a list and sort it
-        self.themes = list(themes)
-        self.themes.sort()
+        self.list(do_theme=True)
 
         return self
 
@@ -62,13 +47,7 @@ class BrickSetList(BrickRecordList[BrickSet]):
         self.fields.figure = figure
 
         # Load the sets from the database
-        for record in self.select(
-            override_query=self.damaged_minifigure_query,
-            order=self.order
-        ):
-            brickset = BrickSet(record=record)
-
-            self.records.append(brickset)
+        self.list(override_query=self.damaged_minifigure_query)
 
         return self
 
@@ -79,25 +58,7 @@ class BrickSetList(BrickRecordList[BrickSet]):
         self.fields.color = color
 
         # Load the sets from the database
-        for record in self.select(
-            override_query=self.damaged_part_query,
-            order=self.order
-        ):
-            brickset = BrickSet(record=record)
-
-            self.records.append(brickset)
-
-        return self
-
-    # A generic list of the different sets
-    def generic(self, /) -> Self:
-        for record in self.select(
-            override_query=self.generic_query,
-            order=self.order
-        ):
-            brickset = BrickSet(record=record)
-
-            self.records.append(brickset)
+        self.list(override_query=self.damaged_part_query)
 
         return self
 
@@ -109,7 +70,29 @@ class BrickSetList(BrickRecordList[BrickSet]):
         else:
             order = '"bricktracker_sets"."rowid" DESC'
 
-        for record in self.select(
+        self.list(order=order, limit=limit)
+
+        return self
+
+    # Base set list
+    def list(
+        self,
+        /,
+        *,
+        override_query: str | None = None,
+        order: str | None = None,
+        limit: int | None = None,
+        do_theme: bool = False,
+        **context: Any,
+    ) -> None:
+        themes = set()
+
+        if order is None:
+            order = self.order
+
+        # Load the sets from the database
+        for record in super().select(
+            override_query=override_query,
             order=order,
             limit=limit,
             owners=BrickSetOwnerList.as_columns(),
@@ -119,8 +102,13 @@ class BrickSetList(BrickRecordList[BrickSet]):
             brickset = BrickSet(record=record)
 
             self.records.append(brickset)
+            if do_theme:
+                themes.add(brickset.theme.name)
 
-        return self
+        # Convert the set into a list and sort it
+        if do_theme:
+            self.themes = list(themes)
+            self.themes.sort()
 
     # Sets missing a minifigure part
     def missing_minifigure(self, figure: str, /) -> Self:
@@ -128,16 +116,7 @@ class BrickSetList(BrickRecordList[BrickSet]):
         self.fields.figure = figure
 
         # Load the sets from the database
-        for record in self.select(
-            override_query=self.missing_minifigure_query,
-            order=self.order,
-            owners=BrickSetOwnerList.as_columns(),
-            statuses=BrickSetStatusList.as_columns(),
-            tags=BrickSetTagList.as_columns(),
-        ):
-            brickset = BrickSet(record=record)
-
-            self.records.append(brickset)
+        self.list(override_query=self.missing_minifigure_query)
 
         return self
 
@@ -148,16 +127,7 @@ class BrickSetList(BrickRecordList[BrickSet]):
         self.fields.color = color
 
         # Load the sets from the database
-        for record in self.select(
-            override_query=self.missing_part_query,
-            order=self.order,
-            owners=BrickSetOwnerList.as_columns(),
-            statuses=BrickSetStatusList.as_columns(),
-            tags=BrickSetTagList.as_columns(),
-        ):
-            brickset = BrickSet(record=record)
-
-            self.records.append(brickset)
+        self.list(override_query=self.missing_part_query)
 
         return self
 
@@ -167,16 +137,7 @@ class BrickSetList(BrickRecordList[BrickSet]):
         self.fields.figure = figure
 
         # Load the sets from the database
-        for record in self.select(
-            override_query=self.using_minifigure_query,
-            order=self.order,
-            owners=BrickSetOwnerList.as_columns(),
-            statuses=BrickSetStatusList.as_columns(),
-            tags=BrickSetTagList.as_columns(),
-        ):
-            brickset = BrickSet(record=record)
-
-            self.records.append(brickset)
+        self.list(override_query=self.using_minifigure_query)
 
         return self
 
@@ -187,15 +148,6 @@ class BrickSetList(BrickRecordList[BrickSet]):
         self.fields.color = color
 
         # Load the sets from the database
-        for record in self.select(
-            override_query=self.using_part_query,
-            order=self.order,
-            owners=BrickSetOwnerList.as_columns(),
-            statuses=BrickSetStatusList.as_columns(),
-            tags=BrickSetTagList.as_columns(),
-        ):
-            brickset = BrickSet(record=record)
-
-            self.records.append(brickset)
+        self.list(override_query=self.using_part_query)
 
         return self
