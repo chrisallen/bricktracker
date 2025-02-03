@@ -1,3 +1,5 @@
+{% import 'macro/accordion.html' as accordion %}
+
 {% extends 'base.html' %}
 
 {% block title %} - {% if not bulk %}Add a set{% else %}Bulk add sets{% endif %}{% endblock %}
@@ -33,32 +35,37 @@
               Add without confirmation
             </label>
           </div>
-          {% if brickset_owners | length %}
-            <h5 class="border-bottom mt-2">Owners</h5>
-            <div id="add-owners">
-            {% for owner in brickset_owners %}
-              {% with id=owner.as_dataset() %}
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" value="{{ owner.fields.id }}" id="{{ id }}" autocomplete="off">
-                  <label class="form-check-label" for="{{ id }}">{{ owner.fields.name }}</label>
-                </div>
-              {% endwith %}
-            {% endfor %}
-            </div>
-          {% endif %}
-          {% if brickset_tags | length %}
-            <h5 class="border-bottom mt-2">Tags</h5>
-            <div id="add-tags">
-            {% for tag in brickset_tags %}
-              {% with id=tag.as_dataset() %}
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" value="{{ tag.fields.id }}" id="{{ id }}" autocomplete="off">
-                  <label class="form-check-label" for="{{ id }}">{{ tag.fields.name }}</label>
-                </div>
-              {% endwith %}
-            {% endfor %}
-            </div>
-          {% endif %}
+          <h6 class="border-bottom mt-2">Metadata</h6>
+          <div class="accordion accordion" id="metadata">
+            {% if brickset_owners | length %}
+              {{ accordion.header('Owners', 'owners', 'metadata', icon='user-line') }}
+              <div id="add-owners">
+              {% for owner in brickset_owners %}
+                {% with id=owner.as_dataset() %}
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="{{ owner.fields.id }}" id="{{ id }}" autocomplete="off">
+                    <label class="form-check-label" for="{{ id }}">{{ owner.fields.name }}</label>
+                  </div>
+                {% endwith %}
+              {% endfor %}
+              </div>
+              {{ accordion.footer() }}
+            {% endif %}
+            {% if brickset_tags | length %}
+              {{ accordion.header('Tags', 'tags', 'metadata', icon='price-tag-2-line') }}
+              <div id="add-tags">
+              {% for tag in brickset_tags %}
+                {% with id=tag.as_dataset() %}
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="{{ tag.fields.id }}" id="{{ id }}" autocomplete="off">
+                    <label class="form-check-label" for="{{ id }}">{{ tag.fields.name }}</label>
+                  </div>
+                {% endwith %}
+              {% endfor %}
+              </div>
+              {{ accordion.footer() }}
+            {% endif %}
+          </div>
           <hr>
           <div class="mb-3">
             <p>
