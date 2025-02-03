@@ -49,9 +49,7 @@ class BrickMetadata(BrickRecord):
 
     # HTML dataset name
     def as_dataset(self, /) -> str:
-        return '{id}'.format(
-            id=self.as_column().replace('_', '-')
-        )
+        return self.as_column().replace('_', '-')
 
     # Delete from database
     def delete(self, /) -> None:
