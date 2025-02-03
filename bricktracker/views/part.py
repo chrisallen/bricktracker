@@ -4,7 +4,10 @@ from .exceptions import exception_handler
 from ..minifigure_list import BrickMinifigureList
 from ..part import BrickPart
 from ..part_list import BrickPartList
+from ..set_owner_list import BrickSetOwnerList
 from ..set_list import BrickSetList
+from ..set_storage_list import BrickSetStorageList
+from ..set_tag_list import BrickSetTagList
 
 part_page = Blueprint('part', __name__, url_prefix='/parts')
 
@@ -64,4 +67,7 @@ def details(*, part: str, color: int) -> str:
         ),
         different_color=BrickPartList().with_different_color(brickpart),
         similar_prints=BrickPartList().from_print(brickpart),
+        brickset_owners=BrickSetOwnerList.list(),
+        brickset_storages=BrickSetStorageList.list(as_class=True),
+        brickset_tags=BrickSetTagList.list(),
     )

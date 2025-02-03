@@ -130,7 +130,10 @@ class BrickSetList(BrickRecordList[BrickSet]):
         # Load the sets from the database
         for record in self.select(
             override_query=self.missing_minifigure_query,
-            order=self.order
+            order=self.order,
+            owners=BrickSetOwnerList.as_columns(),
+            statuses=BrickSetStatusList.as_columns(),
+            tags=BrickSetTagList.as_columns(),
         ):
             brickset = BrickSet(record=record)
 
@@ -147,7 +150,10 @@ class BrickSetList(BrickRecordList[BrickSet]):
         # Load the sets from the database
         for record in self.select(
             override_query=self.missing_part_query,
-            order=self.order
+            order=self.order,
+            owners=BrickSetOwnerList.as_columns(),
+            statuses=BrickSetStatusList.as_columns(),
+            tags=BrickSetTagList.as_columns(),
         ):
             brickset = BrickSet(record=record)
 
@@ -163,7 +169,10 @@ class BrickSetList(BrickRecordList[BrickSet]):
         # Load the sets from the database
         for record in self.select(
             override_query=self.using_minifigure_query,
-            order=self.order
+            order=self.order,
+            owners=BrickSetOwnerList.as_columns(),
+            statuses=BrickSetStatusList.as_columns(),
+            tags=BrickSetTagList.as_columns(),
         ):
             brickset = BrickSet(record=record)
 
@@ -180,7 +189,10 @@ class BrickSetList(BrickRecordList[BrickSet]):
         # Load the sets from the database
         for record in self.select(
             override_query=self.using_part_query,
-            order=self.order
+            order=self.order,
+            owners=BrickSetOwnerList.as_columns(),
+            statuses=BrickSetStatusList.as_columns(),
+            tags=BrickSetTagList.as_columns(),
         ):
             brickset = BrickSet(record=record)
 

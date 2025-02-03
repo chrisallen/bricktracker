@@ -73,7 +73,7 @@
 {% endmacro %}
 
 {% macro storage(item, storages, solo=false, last=false) %}
-  {% if item.fields.storage in storages.mapping %}
+  {% if storages and item.fields.storage in storages.mapping %}
     {% set storage = storages.mapping[item.fields.storage] %}
     {% if last %}
       {% set tooltip=storage.fields.name %}
