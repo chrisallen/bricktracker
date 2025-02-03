@@ -1,4 +1,5 @@
 import logging
+from sqlite3 import Row
 from typing import Any, Self, TYPE_CHECKING
 import traceback
 
@@ -25,8 +26,19 @@ class BrickPart(RebrickablePart):
     generic_query: str = 'part/select/generic'
     select_query: str = 'part/select/specific'
 
-    def __init__(self, /, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(
+        self,
+        /,
+        *,
+        brickset: 'BrickSet | None' = None,
+        minifigure: 'BrickMinifigure | None' = None,
+        record: Row | dict[str, Any] | None = None
+    ):
+        super().__init__(
+            brickset=brickset,
+            minifigure=minifigure,
+            record=record
+        )
 
         if self.minifigure is not None:
             self.identifier = self.minifigure.fields.figure
