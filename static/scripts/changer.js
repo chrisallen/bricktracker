@@ -7,7 +7,7 @@ class BrickChanger {
         this.html_clear = document.getElementById(`clear-${prefix}-${id}`);
         this.html_status = document.getElementById(`status-${prefix}-${id}`);
         this.html_status_tooltip = undefined;
-        this.html_type = this.html_element.getAttribute("type");
+        this.html_type = undefined;
         this.url = url;
 
         if (parent) {
@@ -16,12 +16,29 @@ class BrickChanger {
         }
 
         // Register an event depending on the type
-        if (this.html_type == "checkbox") {
-            var listener = "change";
-        } else if(this.html_type == "text") {
-            var listener = "change";
-        } else {
-            throw Error("Unsupported input type for BrickChanger");
+        let listener = undefined;
+        switch (this.html_element.tagName) {
+            case "INPUT":
+                this.html_type = this.html_element.getAttribute("type");
+
+                switch (this.html_type) {
+                    case "checkbox":
+                    case "text":
+                        listener = "change";
+                    break;
+
+                    default:
+                        throw Error(`Unsupported input type for BrickChanger: ${this.html_type}`);
+                }
+            break;
+
+            case "SELECT":
+                this.html_type = "select";
+                listener = "change";
+            break;
+
+            default:
+                throw Error(`Unsupported HTML tag type for BrickChanger: ${this.html_element.tagName}`);
         }
 
         this.html_element.addEventListener(listener, ((changer) => (e) => {
@@ -90,12 +107,20 @@ class BrickChanger {
             this.status_unknown();
 
             // Grab the value depending on the type
-            if (this.html_type == "checkbox") {
-                var value = this.html_element.checked;
-            } else if(this.html_type == "text") {
-                var value = this.html_element.value;
-            } else {
-                throw Error("Unsupported input type for BrickChanger");
+            let value = undefined;
+
+            switch(this.html_type) {
+                case "checkbox":
+                    value = this.html_element.checked;
+                break;
+
+                case "text":
+                case "select":
+                    value = this.html_element.value;
+                break;
+
+                default:
+                    throw Error("Unsupported input type for BrickChanger");
             }
 
             const response = await fetch(this.url, {
