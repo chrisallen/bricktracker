@@ -13,7 +13,7 @@ SUM("bricktracker_parts"."quantity" * IFNULL("bricktracker_minifigures"."quantit
 {% endblock %}
 
 {% block total_sets %}
-COUNT(DISTINCT "bricktracker_parts"."id") AS "total_sets",
+IFNULL(COUNT(DISTINCT "bricktracker_parts"."id"), 0) AS "total_sets",
 {% endblock %}
 
 {% block total_minifigures %}

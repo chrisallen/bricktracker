@@ -9,7 +9,7 @@ SUM("bricktracker_parts"."damaged") AS "total_damaged",
 {% endblock %}
 
 {% block total_sets %}
-COUNT("bricktracker_parts"."id")  - COUNT("bricktracker_parts"."figure") AS "total_sets",
+IFNULL(COUNT("bricktracker_parts"."id"), 0)  - IFNULL(COUNT("bricktracker_parts"."figure"), 0) AS "total_sets",
 {% endblock %}
 
 {% block total_minifigures %}

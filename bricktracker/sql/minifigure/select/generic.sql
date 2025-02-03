@@ -13,7 +13,7 @@ SUM(IFNULL("bricktracker_minifigures"."quantity", 0)) AS "total_quantity",
 {% endblock %}
 
 {% block total_sets %}
-COUNT(DISTINCT "bricktracker_minifigures"."id") AS "total_sets"
+IFNULL(COUNT(DISTINCT "bricktracker_minifigures"."id"), 0) AS "total_sets"
 {% endblock %}
 
 {% block join %}
