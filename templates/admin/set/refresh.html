@@ -1,0 +1,34 @@
+{% import 'macro/table.html' as table %}
+{% import 'macro/badge.html' as badge %}
+
+<div class="alert alert-info m-2" role="alert">This page lists the sets that may need a refresh because they have some of their newer fields containing empty values.</div>
+<div class="table-responsive-sm">
+  <table data-table="true" class="table table-striped align-middle" id="wish">
+    <thead>
+      <tr>
+        <th data-table-no-sort-and-search="true" class="no-sort" scope="col"><i class="ri-image-line fw-normal"></i> Image</th>
+        <th scope="col"><i class="ri-hashtag fw-normal"></i> Set</th>
+        <th scope="col"><i class="ri-pencil-line fw-normal"></i> Name</th>
+        <th scope="col"><i class="ri-shapes-line fw-normal"></i> Parts</th>
+        <th data-table-number="true" scope="col"><i class="ri-error-warning-line fw-normal"></i> Empty RGB</th>
+        <th data-table-number="true" scope="col"><i class="ri-error-warning-line fw-normal"></i> Empty transparent</th>
+        <th data-table-number="true" scope="col"><i class="ri-error-warning-line fw-normal"></i> Empty URL</th>
+        <th data-table-no-sort-and-search="true" class="no-sort" scope="col"><i class="ri-settings-4-line fw-normal"></i> Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in table_collection %}
+        <tr>
+          {{ table.image(item.url_for_image(), caption=item.fields.name, alt=item.fields.set) }}
+          <td>{{ item.fields.set }} {{ table.rebrickable(item) }}</td>
+          <td>{{ item.fields.name }}</td>
+          <td>{{ item.fields.number_of_parts }}</td>
+          <td>{{ item.fields.null_rgb }}</td>
+          <td>{{ item.fields.null_transparent }}</td>
+          <td>{{ item.fields.null_url }}</td>
+          <td><a href="{{ item.url_for_refresh() }}" class="btn btn-primary" role="button"><i class="ri-refresh-line"></i> Refresh</a></td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

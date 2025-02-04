@@ -13,8 +13,10 @@ from flask_login import login_required
 from werkzeug.wrappers.response import Response
 
 from .exceptions import exception_handler
+from ..exceptions import ErrorException
 from ..minifigure import BrickMinifigure
 from ..part import BrickPart
+from ..rebrickable_set import RebrickableSet
 from ..set import BrickSet
 from ..set_list import BrickSetList, set_metadata_lists
 from ..set_owner_list import BrickSetOwnerList
@@ -241,13 +243,22 @@ def problem_part(
 
 
 # Refresh a set
+@set_page.route('/refresh/<set>/', methods=['GET'])
 @set_page.route('/<id>/refresh', methods=['GET'])
 @login_required
 @exception_handler(__file__)
-def refresh(*, id: str) -> str:
+def refresh(*, id: str | None = None, set: str | None = None) -> str:
+    if id is not None:
+        item = BrickSet().select_specific(id)
+    elif set is not None:
+        item = RebrickableSet().select_specific(set)
+    else:
+        raise ErrorException('Could not load any set to refresh')
+
     return render_template(
         'refresh.html',
-        item=BrickSet().select_specific(id),
+        id=id,
+        item=item,
         path=current_app.config['SOCKET_PATH'],
         namespace=current_app.config['SOCKET_NAMESPACE'],
         messages=MESSAGES

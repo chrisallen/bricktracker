@@ -32,6 +32,8 @@
             {% include 'admin/database/import.html' %}
             {% elif upgrade_database %}
             {% include 'admin/database/upgrade.html' %}
+            {% elif refresh_set %}
+            {% include 'admin/set/refresh.html' %}
             {% else %}
               {% include 'admin/logout.html' %}
               {% include 'admin/instructions.html' %}
@@ -47,6 +49,7 @@
                 {% include 'admin/storage.html' %}
                 {% include 'admin/tag.html' %}
               {{ accordion.footer() }}
+              {% include 'admin/refresh.html' %}
               {% include 'admin/database.html' %}
               {% include 'admin/configuration.html' %}
             {% endif %}

@@ -19,6 +19,7 @@ from bricktracker.views.admin.instructions import admin_instructions_page
 from bricktracker.views.admin.owner import admin_owner_page
 from bricktracker.views.admin.purchase_location import admin_purchase_location_page  # noqa: E501
 from bricktracker.views.admin.retired import admin_retired_page
+from bricktracker.views.admin.set import admin_set_page
 from bricktracker.views.admin.status import admin_status_page
 from bricktracker.views.admin.storage import admin_storage_page
 from bricktracker.views.admin.tag import admin_tag_page
@@ -90,6 +91,7 @@ def setup_app(app: Flask) -> None:
     app.register_blueprint(admin_retired_page)
     app.register_blueprint(admin_owner_page)
     app.register_blueprint(admin_purchase_location_page)
+    app.register_blueprint(admin_set_page)
     app.register_blueprint(admin_status_page)
     app.register_blueprint(admin_storage_page)
     app.register_blueprint(admin_tag_page)

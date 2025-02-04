@@ -51,7 +51,11 @@
         </div>
         <div class="card-footer text-end">
           <span id="refresh-status-icon" class="me-1"></span><span id="refresh-status" class="me-1"></span>
-          <a href="{{ url_for('set.details', id=item.fields.id) }}" class="btn btn-primary" role="button"><i class="ri-hashtag"></i> Back to the set details</a>
+          {% if id %}
+            <a href="{{ url_for('set.details', id=item.fields.id) }}" class="btn btn-primary" role="button"><i class="ri-hashtag"></i> Back to the set details</a>
+            {% else %}
+            <a href="{{ url_for('admin_set.refresh') }}" class="btn btn-danger" role="button"><i class="ri-hashtag"></i> List of sets to be refreshed</a>
+          {% endif %}
           <button id="refresh" type="button" class="btn btn-primary"><i class="ri-refresh-line"></i> Refresh</button>
         </div>
       </div>

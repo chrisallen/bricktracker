@@ -69,6 +69,7 @@
 - Admin
     - Grey out legacy tables in the database view
     - Checkboxes renamed to Set statuses
+    - List of sets that may need to be refreshed
 
 - Cards
     - Use macros for badge in the card header
@@ -102,6 +103,7 @@
     - Collapsible controls depending on screen size
     - Manually collapsible filters (with configuration variable for default state)
     - Manually collapsible sort (with configuration variable for default state)
+    - Clear search bar
 
 - Storage
     - Storage list

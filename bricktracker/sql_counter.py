@@ -10,11 +10,12 @@ ALIASES: dict[str, Tuple[str, str]] = {
     'bricktracker_minifigures': ('Bricktracker minifigures', 'group-line'),
     'bricktracker_parts': ('Bricktracker parts', 'shapes-line'),
     'bricktracker_set_checkboxes': ('Bricktracker set checkboxes (legacy)', 'checkbox-line'),  # noqa: E501
-    'bricktracker_set_owners': ('Bricktracker set owners', 'checkbox-line'),  # noqa: E501
-    'bricktracker_set_statuses': ('Bricktracker set statuses', 'user-line'),  # noqa: E501
-    'bricktracker_set_tags': ('Bricktracker set tags', 'price-tag-2-line'),  # noqa: E501
+    'bricktracker_set_owners': ('Bricktracker set owners', 'checkbox-line'),
+    'bricktracker_set_statuses': ('Bricktracker set statuses', 'user-line'),
+    'bricktracker_set_tags': ('Bricktracker set tags', 'price-tag-2-line'),
     'bricktracker_sets': ('Bricktracker sets', 'hashtag'),
     'bricktracker_wishes': ('Bricktracker wishes', 'gift-line'),
+    'bricktracker_wish_owners': ('Bricktracker wish owners', 'checkbox-line'),
     'inventory': ('Parts', 'shapes-line'),
     'inventory_old': ('Parts (legacy)', 'shapes-line'),
     'minifigures': ('Minifigures', 'group-line'),

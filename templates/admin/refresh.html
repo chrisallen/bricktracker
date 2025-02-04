@@ -1,0 +1,5 @@
+{% import 'macro/accordion.html' as accordion %}
+
+{{ accordion.header('Set refresh', 'refresh', 'admin', icon='refresh-line') }}
+<a href="{{ url_for('admin_set.refresh') }}" class="btn btn-primary" role="button"><i class="ri-refresh-line"></i> Check for sets that may need a refresh</a>
+{{ accordion.footer() }}

@@ -1,9 +1,9 @@
 import logging
 from sqlite3 import Row
 import traceback
-from typing import Any, TYPE_CHECKING
+from typing import Any, Self, TYPE_CHECKING
 
-from flask import current_app
+from flask import current_app, url_for
 
 from .exceptions import ErrorException, NotFoundException
 from .instructions import BrickInstructions
@@ -138,6 +138,21 @@ class RebrickableSet(BrickRecord):
 
         return False
 
+    # Select a specific set (with a set)
+    def select_specific(self, set: str, /) -> Self:
+        # Save the parameters to the fields
+        self.fields.set = set
+
+        # Load from database
+        if not self.select():
+            raise NotFoundException(
+                'Set with set {set} was not found in the database'.format(
+                    set=self.fields.set,
+                ),
+            )
+
+        return self
+
     # Return a short form of the Rebrickable set
     def short(self, /, *, from_download: bool = False) -> dict[str, Any]:
         return {
@@ -163,6 +178,10 @@ class RebrickableSet(BrickRecord):
             return self.fields.url
 
         return ''
+
+    # Compute the url for the refresh button
+    def url_for_refresh(self, /) -> str:
+        return url_for('set.refresh', set=self.fields.set)
 
     # Normalize from Rebrickable
     @staticmethod
