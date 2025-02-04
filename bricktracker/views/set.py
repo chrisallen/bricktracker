@@ -66,7 +66,7 @@ def update_status(*, id: str, metadata_id: str) -> Response:
     return jsonify({'value': state})
 
 
-# Change the state of a storage
+# Change the value of storage
 @set_page.route('/<id>/storage', methods=['POST'])
 @login_required
 @exception_handler(__file__, json=True)

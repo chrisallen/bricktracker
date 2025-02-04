@@ -17,8 +17,8 @@ class BrickSetStorageList(BrickMetadataList[BrickSetStorage]):
     select_query = 'set/metadata/storage/list'
     all_query = 'set/metadata/storage/all'
 
-    # Set state endpoint
-    set_state_endpoint: str = 'set.update_storage'
+    # Set value endpoint
+    set_value_endpoint: str = 'set.update_storage'
 
     # Load all storages
     @classmethod

@@ -28,8 +28,9 @@ class BrickMetadataList(BrickRecordList[T]):
     # Queries
     select_query: str
 
-    # Set state endpoint
+    # Set endpoints
     set_state_endpoint: str
+    set_value_endpoint: str
 
     def __init__(
         self,
@@ -147,5 +148,13 @@ class BrickMetadataList(BrickRecordList[T]):
     def url_for_set_state(cls, id: str, /) -> str:
         return url_for(
             cls.set_state_endpoint,
+            id=id,
+        )
+
+    # URL to change the selected value of this metadata item for a set
+    @classmethod
+    def url_for_set_value(cls, id: str, /) -> str:
+        return url_for(
+            cls.set_value_endpoint,
             id=id,
         )

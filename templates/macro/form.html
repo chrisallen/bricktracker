@@ -48,7 +48,7 @@
       {% if icon %}<span class="input-group-text"><i class="ri-{{ icon }}"></i></span>{% endif %}
       <select id="{{ prefix }}-{{ item.fields.id }}" class="form-select"
         {% if not delete %}
-          data-changer-id="{{ item.fields.id }}" data-changer-prefix="{{ prefix }}" data-changer-url="{{ metadata_list.url_for_set_state(item.fields.id) }}"
+          data-changer-id="{{ item.fields.id }}" data-changer-prefix="{{ prefix }}" data-changer-url="{{ metadata_list.url_for_set_value(item.fields.id) }}"
         {% else %}
           disabled
         {% endif %}
