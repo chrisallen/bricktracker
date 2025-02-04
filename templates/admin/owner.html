@@ -1,6 +1,6 @@
 {% import 'macro/accordion.html' as accordion %}
 
-{{ accordion.header('Set owners', 'owner', 'admin', expanded=open_owner, icon='user-line', class='p-0') }}
+{{ accordion.header('Set owners', 'owner', 'metadata', expanded=open_owner, icon='user-line', class='p-0') }}
 {% if owner_error %}<div class="alert alert-danger m-2" role="alert"><strong>Error:</strong> {{ owner_error }}.</div>{% endif %}
 <ul class="list-group list-group-flush">
   {% if metadata_owners | length %}

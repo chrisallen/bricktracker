@@ -1,6 +1,6 @@
 {% import 'macro/accordion.html' as accordion %}
 
-{{ accordion.header('Set statuses', 'status', 'admin', expanded=open_status, icon='checkbox-line', class='p-0') }}
+{{ accordion.header('Set statuses', 'status', 'metadata', expanded=open_status, icon='checkbox-line', class='p-0') }}
 {% if status_error %}<div class="alert alert-danger m-2" role="alert"><strong>Error:</strong> {{ status_error }}.</div>{% endif %}
 <ul class="list-group list-group-flush">
   {% if metadata_statuses | length %}

@@ -1,6 +1,6 @@
 {% import 'macro/accordion.html' as accordion %}
 
-{{ accordion.header('Set storages', 'storage', 'admin', expanded=open_storage, icon='archive-2-line', class='p-0') }}
+{{ accordion.header('Set storages', 'storage', 'metadata', expanded=open_storage, icon='archive-2-line', class='p-0') }}
 {% if storage_error %}<div class="alert alert-danger m-2" role="alert"><strong>Error:</strong> {{ storage_error }}.</div>{% endif %}
 <ul class="list-group list-group-flush">
   {% if metadata_storages | length %}

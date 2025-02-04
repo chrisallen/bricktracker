@@ -1,5 +1,6 @@
 {% if g.login.is_authenticated() %}
-  {{ accordion.header('Owners', 'owner', 'set-details', icon='group-line', class='p-0') }}
+  {{ accordion.header('Management', 'set-management', 'set-details', icon='settings-4-line', class='p-0') }}
+    {{ accordion.header('Owners', 'owner', 'set-management', icon='group-line', class='p-0') }}
     <ul class="list-group list-group-flush">
     {% if brickset_owners | length %}
       {% for owner in brickset_owners %}
@@ -13,7 +14,7 @@
       <a class="list-group-item list-group-item-action" href="{{ url_for('admin.admin', open_owner=true) }}"><i class="ri-settings-4-line"></i> Manage the set owners</a>
     </div>
   {{ accordion.footer() }}
-  {{ accordion.header('Storage', 'storage', 'set-details', icon='archive-2-line') }}
+    {{ accordion.header('Storage', 'storage', 'set-management', icon='archive-2-line') }}
     {% if brickset_storages | length %}
       {{ form.select('Storage', item, 'storage', brickset_storages, delete=delete) }}
     {% else %}
@@ -22,7 +23,7 @@
     <hr>
       <a href="{{ url_for('admin.admin', open_storage=true) }}" class="btn btn-primary" role="button"><i class="ri-settings-4-line"></i> Manage the set storages</a>
   {{ accordion.footer() }}
-  {{ accordion.header('Tags', 'tag', 'set-details', icon='price-tag-2-line', class='p-0') }}
+    {{ accordion.header('Tags', 'tag', 'set-management', icon='price-tag-2-line', class='p-0') }}
     <ul class="list-group list-group-flush">
     {% if brickset_tags | length %}
       {% for tag in brickset_tags %}
@@ -36,8 +37,8 @@
       <a class="list-group-item list-group-item-action" href="{{ url_for('admin.admin', open_tag=true) }}"><i class="ri-settings-4-line"></i> Manage the set tags</a>
     </div>
   {{ accordion.footer() }}
-  {{ accordion.header('Management', 'management', 'set-details', icon='settings-4-line') }}
-    <h5 class="border-bottom">Data</h5>
+    {{ accordion.header('Data', 'data', 'set-management', icon='database-2-line') }}
     <a href="{{ item.url_for_refresh() }}" class="btn btn-primary" role="button"><i class="ri-refresh-line"></i> Refresh the set data</a>
+    {{ accordion.footer() }}
   {{ accordion.footer() }}
 {% endif %}

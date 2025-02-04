@@ -87,15 +87,19 @@ def admin() -> str:
     open_tag = request.args.get('open_tag', None)
     open_theme = request.args.get('open_theme', None)
 
+    open_metadata = (
+        open_owner or
+        open_status or
+        open_storage or
+        open_tag
+    )
+
     open_database = (
         open_image is None and
         open_instructions is None and
         open_logout is None and
-        open_owner is None and
+        not open_metadata and
         open_retired is None and
-        open_status is None and
-        open_storage is None and
-        open_tag is None and
         open_theme is None
     )
 
@@ -120,6 +124,7 @@ def admin() -> str:
         open_image=open_image,
         open_instructions=open_instructions,
         open_logout=open_logout,
+        open_metadata=open_metadata,
         open_owner=open_owner,
         open_retired=open_retired,
         open_status=open_status,
