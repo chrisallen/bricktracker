@@ -9,7 +9,7 @@
     <div class="col-12 flex-grow-1">
       <label class="visually-hidden" for="grid-search">Search</label>
       <div class="input-group">
-        <span class="input-group-text"><i class="ri-search-line"></i><span class="ms-1 d-none d-xl-inline"> Search</span></span>
+        <span class="input-group-text"><i class="ri-search-line"></i><span class="ms-1 d-none d-md-inline"> Search</span></span>
         <input id="grid-search" data-search-exact="name,number,parts,searchStorage,theme,year" data-search-list="searchOwner,searchTag" class="form-control form-control-sm" type="text" placeholder="Set, name, number of parts, theme, year, owner, storage, tag" value="">
       </div>
     </div>
@@ -28,118 +28,8 @@
       </div>
     </div>
   </div>
-  <div id="grid-sort" class="collapse {% if config['SHOW_GRID_SORT'] %}show{% endif %} row row-cols-lg-auto g-1 justify-content-center align-items-center pb-2">
-    <div class="col-12 flex-grow-1">
-      <div class="input-group">
-        <span class="input-group-text"><i class="ri-sort-asc"></i><span class="ms-1 d-none d-xxl-inline"> Sort</span></span>
-        <button id="sort-number" type="button" class="btn btn-outline-primary"
-          data-sort-attribute="number" data-sort-natural="true"><i class="ri-hashtag"></i><span class="d-none d-xxl-inline"> Set</span></button>
-        <button id="sort-name" type="button" class="btn btn-outline-primary"
-          data-sort-attribute="name"><i class="ri-pencil-line"></i><span class="d-none d-xxl-inline"> Name</span></button>
-        <button id="sort-theme" type="button" class="btn btn-outline-primary"
-          data-sort-attribute="theme"><i class="ri-price-tag-3-line"></i><span class="d-none d-xxl-inline"> Theme</span></button>
-        <button id="sort-year" type="button" class="btn btn-outline-primary"
-          data-sort-attribute="year"><i class="ri-calendar-line"></i><span class="d-none d-xxl-inline"> Year</span></button>
-        <button id="sort-minifigure" type="button" class="btn btn-outline-primary"
-          data-sort-attribute="minifigures" data-sort-desc="true"><i class="ri-group-line"></i><span class="d-none d-xxl-inline"> Figures</span></button>
-        <button id="sort-parts" type="button" class="btn btn-outline-primary"
-          data-sort-attribute="parts" data-sort-desc="true"><i class="ri-shapes-line"></i><span class="d-none d-xxl-inline"> Parts</span></button>
-        <button id="sort-missing" type="button" class="btn btn-outline-primary"
-          data-sort-attribute="missing" data-sort-desc="true"><i class="ri-question-line"></i><span class="d-none d-xxl-inline"> Missing</span></button>
-        <button id="sort-damaged" type="button" class="btn btn-outline-primary"
-          data-sort-attribute="damaged" data-sort-desc="true"><i class="ri-error-warning-line"></i><span class="d-none d-xxl-inline"> Damaged</span></button>
-        <button id="sort-clear" type="button" class="btn btn-outline-dark"
-          data-sort-clear="true"><i class="ri-close-circle-line"></i><span class="d-none d-xxl-inline"> Clear</span></button>
-      </div>
-    </div>
-  </div>
-  <div id="grid-filter" class="collapse {% if config['SHOW_GRID_FILTERS'] %}show{% endif %} row row-cols-lg-auto g-1 justify-content-center align-items-center pb-2">
-    <div class="col-12 flex-grow-1">
-      <label class="visually-hidden" for="grid-status">Status</label>
-      <div class="input-group">
-        <span class="input-group-text"><i class="ri-checkbox-line"></i><span class="ms-1 d-none d-xl-inline"> Status</span></span>
-        <select id="grid-status" class="form-select"
-          data-filter="metadata"
-          autocomplete="off">
-          <option value="" selected>All</option>
-          <option value="-has-missing">Set is complete</option>
-          <option value="has-missing">Set has missing pieces</option>
-          <option value="has-damaged">Set has damaged pieces</option>
-          <option value="has-missing-instructions">Set has missing instructions</option>
-          {% if brickset_storages | length %}
-            <option value="has-storage">Is in storage</option>
-            <option value="-has-storage">Is NOT in storage</option>
-          {% endif %}
-          {% for status in brickset_statuses %}
-            <option value="{{ status.as_dataset() }}">{{ status.fields.name }}</option>
-            <option value="-{{ status.as_dataset() }}">NOT: {{ status.fields.name }}</option>
-          {% endfor %}
-        </select>
-      </div>
-    </div>
-    <div class="col-12 flex-grow-1">
-      <label class="visually-hidden" for="grid-theme">Theme</label>
-      <div class="input-group">
-        <span class="input-group-text"><i class="ri-price-tag-3-line"></i><span class="ms-1 d-none d-xl-inline"> Theme</span></span>
-        <select id="grid-theme" class="form-select"
-          data-filter="value" data-filter-attribute="theme"
-          autocomplete="off">
-          <option value="" selected>All</option>
-          {% for theme in collection.themes %}
-          <option value="{{ theme | lower }}">{{ theme }}</option>
-          {% endfor %}
-        </select>
-      </div>
-    </div>
-    {% if brickset_owners | length %}
-      <div class="col-12 flex-grow-1">
-        <label class="visually-hidden" for="grid-owner">Owner</label>
-        <div class="input-group">
-          <span class="input-group-text"><i class="ri-user-line"></i><span class="ms-1 d-none d-xl-inline"> Owner</span></span>
-          <select id="grid-owner" class="form-select"
-            data-filter="metadata"
-            autocomplete="off">
-            <option value="" selected>All</option>
-            {% for owner in brickset_owners %}
-              <option value="{{ owner.as_dataset() }}">{{ owner.fields.name }}</option>
-            {% endfor %}
-          </select>
-        </div>
-      </div>
-    {% endif %}
-    {% if brickset_storages | length %}
-      <div class="col-12 flex-grow-1">
-        <label class="visually-hidden" for="grid-owner">Storage</label>
-        <div class="input-group">
-          <span class="input-group-text"><i class="ri-archive-2-line"></i><span class="ms-1 d-none d-xl-inline"> Storage</span></span>
-          <select id="grid-storage" class="form-select"
-            data-filter="value" data-filter-attribute="storage"
-            autocomplete="off">
-            <option value="" selected>All</option>
-            {% for storage in brickset_storages %}
-              <option value="{{ storage.fields.id }}">{{ storage.fields.name }}</option>
-            {% endfor %}
-          </select>
-        </div>
-      </div>
-    {% endif %}
-    {% if brickset_tags | length %}
-      <div class="col-12 flex-grow-1">
-        <label class="visually-hidden" for="grid-tag">Tag</label>
-        <div class="input-group">
-          <span class="input-group-text"><i class="ri-price-tag-2-line"></i><span class="ms-1 d-none d-xl-inline"> Tag</span></span>
-          <select id="grid-tag" class="form-select"
-            data-filter="metadata"
-            autocomplete="off">
-            <option value="" selected>All</option>
-            {% for tag in brickset_tags %}
-              <option value="{{ tag.as_dataset() }}">{{ tag.fields.name }}</option>
-            {% endfor %}
-          </select>
-        </div>
-      </div>
-    {% endif %}
-  </div>
+  {% include 'set/sort.html' %}
+  {% include 'set/filter.html' %}
   <div class="row" data-grid="true" id="grid">
   {% for item in collection %}
     <div class="col-md-6 col-xl-3 d-flex align-items-stretch">
