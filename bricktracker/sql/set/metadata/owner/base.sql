@@ -4,3 +4,7 @@ SELECT
 FROM "bricktracker_metadata_owners"
 
 {% block where %}{% endblock %}
+
+{% if order %}
+ORDER BY {{ order }}
+{% endif %}

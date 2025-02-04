@@ -11,11 +11,12 @@ logger = logging.getLogger(__name__)
 class BrickSetTagList(BrickMetadataList[BrickSetTag]):
     kind: str = 'set tags'
 
-    # Database table
+    # Database
     table: str = 'bricktracker_set_tags'
+    order: str = '"bricktracker_metadata_tags"."name"'
 
     # Queries
-    select_query = 'set/metadata/tag/list'
+    select_query: str = 'set/metadata/tag/list'
 
     # Instantiate the list with the proper class
     @classmethod

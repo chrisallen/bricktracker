@@ -30,8 +30,9 @@ class BrickMetadataList(BrickRecordList[T]):
     mapping: dict[str, T]
     model: Type[T]
 
-    # Database table
+    # Database
     table: str
+    order: str
 
     # Queries
     select_query: str
@@ -73,7 +74,7 @@ class BrickMetadataList(BrickRecordList[T]):
                 self.__class__.mapping = {}
 
                 # Load the metadata from the database
-                for record in self.select():
+                for record in self.select(order=self.order):
                     metadata = model(record=record)
 
                     self.__class__.records.append(metadata)

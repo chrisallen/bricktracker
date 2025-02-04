@@ -11,8 +11,9 @@ logger = logging.getLogger(__name__)
 class BrickSetOwnerList(BrickMetadataList[BrickSetOwner]):
     kind: str = 'set owners'
 
-    # Database table
+    # Database
     table: str = 'bricktracker_set_owners'
+    order: str = '"bricktracker_metadata_owners"."name"'
 
     # Queries
     select_query = 'set/metadata/owner/list'

@@ -13,9 +13,12 @@ logger = logging.getLogger(__name__)
 class BrickSetStorageList(BrickMetadataList[BrickSetStorage]):
     kind: str = 'set storages'
 
+    # Order
+    order: str = '"bricktracker_metadata_storages"."name"'
+
     # Queries
-    select_query = 'set/metadata/storage/list'
-    all_query = 'set/metadata/storage/all'
+    select_query: str = 'set/metadata/storage/list'
+    all_query: str = 'set/metadata/storage/all'
 
     # Set value endpoint
     set_value_endpoint: str = 'set.update_storage'

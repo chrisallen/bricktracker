@@ -5,3 +5,7 @@ SELECT
 FROM "bricktracker_metadata_statuses"
 
 {% block where %}{% endblock %}
+
+{% if order %}
+ORDER BY {{ order }}
+{% endif %}

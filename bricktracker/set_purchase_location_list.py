@@ -15,9 +15,12 @@ class BrickSetPurchaseLocationList(
 ):
     kind: str = 'set purchase locations'
 
+    # Order
+    order: str = '"bricktracker_metadata_purchase_locations"."name"'
+
     # Queries
-    select_query = 'set/metadata/purchase_location/list'
-    all_query = 'set/metadata/purchase_location/all'
+    select_query: str = 'set/metadata/purchase_location/list'
+    all_query: str = 'set/metadata/purchase_location/all'
 
     # Set value endpoint
     set_value_endpoint: str = 'set.update_purchase_location'

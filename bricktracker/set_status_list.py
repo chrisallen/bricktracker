@@ -11,8 +11,9 @@ logger = logging.getLogger(__name__)
 class BrickSetStatusList(BrickMetadataList[BrickSetStatus]):
     kind: str = 'set statuses'
 
-    # Database table
+    # Database
     table: str = 'bricktracker_set_statuses'
+    order: str = '"bricktracker_metadata_statuses"."name"'
 
     # Queries
     select_query = 'set/metadata/status/list'
