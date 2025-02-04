@@ -14,7 +14,8 @@
 - Added: `BK_SHOW_GRID_SORT`, show the sort options on the grid by default
 - Added: `BK_SHOW_GRID_FILTERS`, show the filter options on the grid by default
 - Added: `BK_HIDE_ALL_STORAGES`, hide the "Storages" menu entry
-- Added: `BK_MINIFIGURES_DEFAULT_ORDER`, ordering of storages
+- Added: `BK_STORAGE_DEFAULT_ORDER`, ordering of storages
+- Added: `BK_PURCHASE_LOCATION_DEFAULT_ORDER`, ordering of purchase locations
 
 ### Code
 
@@ -39,6 +40,7 @@
     - Ownership
     - Tags
     - Storage
+    - Purchase location
 
 - Storage
     - Storage content and list
@@ -85,6 +87,7 @@
         - Tags
         - Refresh
         - Storage
+        - Purchase location
 
 - Sets grid
     - Collapsible controls depending on screen size

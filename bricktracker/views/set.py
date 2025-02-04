@@ -18,6 +18,7 @@ from ..part import BrickPart
 from ..set import BrickSet
 from ..set_list import BrickSetList, set_metadata_lists
 from ..set_owner_list import BrickSetOwnerList
+from ..set_purchase_location_list import BrickSetPurchaseLocationList
 from ..set_status_list import BrickSetStatusList
 from ..set_storage_list import BrickSetStorageList
 from ..set_tag_list import BrickSetTagList
@@ -38,6 +39,25 @@ def list() -> str:
         brickset_statuses=BrickSetStatusList.list(),
         **set_metadata_lists(as_class=True)
     )
+
+
+# Change the value of purchase location
+@set_page.route('/<id>/purchase_location', methods=['POST'])
+@login_required
+@exception_handler(__file__, json=True)
+def update_purchase_location(*, id: str) -> Response:
+    brickset = BrickSet().select_light(id)
+    purchase_location = BrickSetPurchaseLocationList.get(
+        request.json.get('value', ''),  # type: ignore
+        allow_none=True
+    )
+
+    value = purchase_location.update_set_value(
+        brickset,
+        value=purchase_location.fields.id
+    )
+
+    return jsonify({'value': value})
 
 
 # Change the state of a owner

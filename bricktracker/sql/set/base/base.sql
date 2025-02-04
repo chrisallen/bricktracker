@@ -1,6 +1,7 @@
 SELECT
     {% block id %}{% endblock %}
     "bricktracker_sets"."storage",
+    "bricktracker_sets"."purchase_location",
     "rebrickable_sets"."set",
     "rebrickable_sets"."number",
     "rebrickable_sets"."version",

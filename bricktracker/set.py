@@ -10,6 +10,7 @@ from .minifigure_list import BrickMinifigureList
 from .part_list import BrickPartList
 from .rebrickable_set import RebrickableSet
 from .set_owner_list import BrickSetOwnerList
+from .set_purchase_location_list import BrickSetPurchaseLocationList
 from .set_status_list import BrickSetStatusList
 from .set_storage_list import BrickSetStorageList
 from .set_tag_list import BrickSetTagList
@@ -62,6 +63,13 @@ class BrickSet(RebrickableSet):
                     allow_none=True
                 )
                 self.fields.storage = storage.fields.id
+
+                # Save the purchase location
+                purchase_location = BrickSetPurchaseLocationList.get(
+                    data.get('purchase_location', ''),
+                    allow_none=True
+                )
+                self.fields.purchase_location = purchase_location.fields.id
 
                 # Insert into database
                 self.insert(commit=False)

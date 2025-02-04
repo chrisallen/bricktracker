@@ -17,6 +17,11 @@
     {% if not config['HIDE_TABLE_DAMAGED_PARTS'] %}
       data-has-damaged="{{ (item.fields.total_damaged > 0) | int }}" data-damaged="{{ item.fields.total_damaged }}"
     {% endif %}
+    data-has-purchase-location="{{ item.fields.purchase_location is not none | int }}"
+    {% if item.fields.purchase_location is not none %}
+      data-purchase-location="{{ item.fields.purchase_location }}"
+      {% if item.fields.purchase_location in brickset_purchase_locations.mapping %}data-search-purchase-location="{{ brickset_purchase_locations.mapping[item.fields.purchase_location].fields.name | lower }}"{% endif %}
+    {% endif %}
     data-has-storage="{{ item.fields.storage is not none | int }}"
     {% if item.fields.storage is not none %}
       data-storage="{{ item.fields.storage }}"
@@ -63,6 +68,7 @@
       {{ badge.owner(item, owner, solo=solo, last=last) }}
     {% endfor %}
     {{ badge.storage(item, brickset_storages, solo=solo, last=last) }}
+    {{ badge.purchase_location(item, brickset_purchase_locations, solo=solo, last=last) }}
     {% if not last %}
       {% if not solo %}
         {{ badge.instructions(item, solo=solo, last=last) }}

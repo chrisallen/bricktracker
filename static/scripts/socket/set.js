@@ -16,6 +16,7 @@ class BrickSetSocket extends BrickSocket {
         this.html_input = document.getElementById(`${id}-set`);
         this.html_no_confim = document.getElementById(`${id}-no-confirm`);
         this.html_owners = document.getElementById(`${id}-owners`);
+        this.html_purchase_location = document.getElementById(`${id}-purchase-location`);
         this.html_storage = document.getElementById(`${id}-storage`);
         this.html_tags = document.getElementById(`${id}-tags`);
 
@@ -152,6 +153,12 @@ class BrickSetSocket extends BrickSocket {
                 });
             }
 
+            // Grab the purchase location
+            let purchase_location = null;
+            if (this.html_purchase_location) {
+                purchase_location = this.html_purchase_location.value;
+            }
+
             // Grab the storage
             let storage = null;
             if (this.html_storage) {
@@ -177,6 +184,7 @@ class BrickSetSocket extends BrickSocket {
             this.socket.emit(this.messages.IMPORT_SET, {
                 set: (set !== undefined) ? set : this.html_input.value,
                 owners: owners,
+                purchase_location: purchase_location,
                 storage: storage,
                 tags: tags,
                 refresh: this.refresh
@@ -291,6 +299,10 @@ class BrickSetSocket extends BrickSocket {
 
         if (this.html_owners) {
             this.html_owners.querySelectorAll('input').forEach(input => input.disabled = !enabled);
+        }
+
+        if (this.html_purchase_location) {
+            this.html_purchase_location.disabled = !enabled;
         }
 
         if (this.html_storage) {

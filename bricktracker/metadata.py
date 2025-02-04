@@ -48,7 +48,7 @@ class BrickMetadata(BrickRecord):
     def as_column(self, /) -> str:
         return '{kind}_{id}'.format(
             id=self.fields.id,
-            kind=self.kind.lower()
+            kind=self.kind.lower().replace(' ', '-')
         )
 
     # HTML dataset name
@@ -90,8 +90,6 @@ class BrickMetadata(BrickRecord):
 
     # Rename the entry
     def rename(self, /) -> None:
-        self.safe()
-
         self.update_field('name', value=self.fields.name)
 
     # Make the name "safe"
@@ -159,7 +157,7 @@ class BrickMetadata(BrickRecord):
         )
 
         if rows != 1:
-            raise DatabaseException('Could not update the field "{field}" for {kind} {name} ({id})'.format(  # noqa: E501
+            raise DatabaseException('Could not update the field "{field}" for {kind} "{name}" ({id})'.format(  # noqa: E501
                 field=field,
                 kind=self.kind,
                 name=self.fields.name,

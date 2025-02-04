@@ -65,6 +65,18 @@
   {% endif %}
 {% endmacro %}
 
+{% macro purchase_location(item, purchase_locations, solo=false, last=false) %}
+  {% if purchase_locations and item.fields.purchase_location in purchase_locations.mapping %}
+    {% set purchase_location = purchase_locations.mapping[item.fields.purchase_location] %}
+    {% if last %}
+      {% set tooltip=purchase_location.fields.name %}
+    {% else %}
+      {% set text=purchase_location.fields.name %}
+    {% endif %}
+    {{ badge(check=purchase_location, solo=solo, last=last, color='light border', icon='building-line', text=text, tooltip=tooltip) }}
+  {% endif %}
+{% endmacro %}
+
 {% macro set(set, solo=false, last=false, url=None, id=None) %}
   {% if id %}
       {% set url=url_for('set.details', id=id) %}

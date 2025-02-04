@@ -1,6 +1,7 @@
 from .instructions_list import BrickInstructionsList
 from .retired_list import BrickRetiredList
 from .set_owner_list import BrickSetOwnerList
+from .set_purchase_location_list import BrickSetPurchaseLocationList
 from .set_status_list import BrickSetStatusList
 from .set_storage_list import BrickSetStorageList
 from .set_tag_list import BrickSetTagList
@@ -16,6 +17,9 @@ def reload() -> None:
 
         # Reload the set owners
         BrickSetOwnerList.new(force=True)
+
+        # Reload the set purchase locations
+        BrickSetPurchaseLocationList.new(force=True)
 
         # Reload the set statuses
         BrickSetStatusList.new(force=True)

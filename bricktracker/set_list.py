@@ -5,6 +5,8 @@ from flask import current_app
 from .record_list import BrickRecordList
 from .set_owner import BrickSetOwner
 from .set_owner_list import BrickSetOwnerList
+from .set_purchase_location import BrickSetPurchaseLocation
+from .set_purchase_location_list import BrickSetPurchaseLocationList
 from .set_status_list import BrickSetStatusList
 from .set_storage import BrickSetStorage
 from .set_storage_list import BrickSetStorageList
@@ -175,6 +177,8 @@ def set_metadata_lists(
     str,
     Union[
         list[BrickSetOwner],
+        list[BrickSetPurchaseLocation],
+        BrickSetPurchaseLocation,
         list[BrickSetStorage],
         BrickSetStorageList,
         list[BrickSetTag]
@@ -182,6 +186,7 @@ def set_metadata_lists(
 ]:
     return {
         'brickset_owners': BrickSetOwnerList.list(),
+        'brickset_purchase_locations': BrickSetPurchaseLocationList.list(as_class=as_class),  # noqa: E501
         'brickset_storages': BrickSetStorageList.list(as_class=as_class),
         'brickset_tags': BrickSetTagList.list(),
     }

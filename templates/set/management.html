@@ -1,44 +1,53 @@
 {% if g.login.is_authenticated() %}
   {{ accordion.header('Management', 'set-management', 'set-details', icon='settings-4-line', class='p-0') }}
     {{ accordion.header('Owners', 'owner', 'set-management', icon='group-line', class='p-0') }}
-    <ul class="list-group list-group-flush">
-    {% if brickset_owners | length %}
-      {% for owner in brickset_owners %}
-        <li class="d-flex list-group-item list-group-item-action text-nowrap">{{ form.checkbox(item, owner, delete=delete) }}</li>
-      {% endfor %}
-    {% else %}
-      <li class="list-group-item list-group-item-action text-center"><i class="ri-error-warning-line"></i> No owner found.</li>
+      <ul class="list-group list-group-flush">
+      {% if brickset_owners | length %}
+        {% for owner in brickset_owners %}
+          <li class="d-flex list-group-item list-group-item-action text-nowrap">{{ form.checkbox(item, owner, delete=delete) }}</li>
+        {% endfor %}
+      {% else %}
+        <li class="list-group-item list-group-item-action text-center"><i class="ri-error-warning-line"></i> No owner found.</li>
+        {% endif %}
+      </ul>
+      <div class="list-group list-group-flush border-top">
+        <a class="list-group-item list-group-item-action" href="{{ url_for('admin.admin', open_owner=true) }}"><i class="ri-settings-4-line"></i> Manage the set owners</a>
+      </div>
+    {{ accordion.footer() }}
+    {{ accordion.header('Purchase location', 'purchase-location', 'set-management', icon='building-line') }}
+      {% if brickset_purchase_locations | length %}
+        {{ form.select('Purchase location', item, 'purchase_location', brickset_purchase_locations, delete=delete) }}
+      {% else %}
+        <p class="text-center"><i class="ri-error-warning-line"></i> No purchase location found.</p>
       {% endif %}
-    </ul>
-    <div class="list-group list-group-flush border-top">
-      <a class="list-group-item list-group-item-action" href="{{ url_for('admin.admin', open_owner=true) }}"><i class="ri-settings-4-line"></i> Manage the set owners</a>
-    </div>
-  {{ accordion.footer() }}
+      <hr>
+      <a href="{{ url_for('admin.admin', open_purchase_location=true) }}" class="btn btn-primary" role="button"><i class="ri-settings-4-line"></i> Manage the set purchase locations</a>
+    {{ accordion.footer() }}
     {{ accordion.header('Storage', 'storage', 'set-management', icon='archive-2-line') }}
-    {% if brickset_storages | length %}
-      {{ form.select('Storage', item, 'storage', brickset_storages, delete=delete) }}
-    {% else %}
-      <p class="text-center"><i class="ri-error-warning-line"></i> No storage found.</p>
-    {% endif %}
-    <hr>
-      <a href="{{ url_for('admin.admin', open_storage=true) }}" class="btn btn-primary" role="button"><i class="ri-settings-4-line"></i> Manage the set storages</a>
-  {{ accordion.footer() }}
-    {{ accordion.header('Tags', 'tag', 'set-management', icon='price-tag-2-line', class='p-0') }}
-    <ul class="list-group list-group-flush">
-    {% if brickset_tags | length %}
-      {% for tag in brickset_tags %}
-        <li class="d-flex list-group-item list-group-item-action text-nowrap">{{ form.checkbox(item, tag, delete=delete) }}</li>
-      {% endfor %}
-    {% else %}
-      <li class="list-group-item list-group-item-action text-center"><i class="ri-error-warning-line"></i> No tag found.</li>
+      {% if brickset_storages | length %}
+        {{ form.select('Storage', item, 'storage', brickset_storages, delete=delete) }}
+      {% else %}
+        <p class="text-center"><i class="ri-error-warning-line"></i> No storage found.</p>
       {% endif %}
-    </ul>
-    <div class="list-group list-group-flush border-top">
-      <a class="list-group-item list-group-item-action" href="{{ url_for('admin.admin', open_tag=true) }}"><i class="ri-settings-4-line"></i> Manage the set tags</a>
-    </div>
-  {{ accordion.footer() }}
+      <hr>
+      <a href="{{ url_for('admin.admin', open_storage=true) }}" class="btn btn-primary" role="button"><i class="ri-settings-4-line"></i> Manage the set storages</a>
+    {{ accordion.footer() }}
+    {{ accordion.header('Tags', 'tag', 'set-management', icon='price-tag-2-line', class='p-0') }}
+      <ul class="list-group list-group-flush">
+      {% if brickset_tags | length %}
+        {% for tag in brickset_tags %}
+          <li class="d-flex list-group-item list-group-item-action text-nowrap">{{ form.checkbox(item, tag, delete=delete) }}</li>
+        {% endfor %}
+      {% else %}
+        <li class="list-group-item list-group-item-action text-center"><i class="ri-error-warning-line"></i> No tag found.</li>
+        {% endif %}
+      </ul>
+      <div class="list-group list-group-flush border-top">
+        <a class="list-group-item list-group-item-action" href="{{ url_for('admin.admin', open_tag=true) }}"><i class="ri-settings-4-line"></i> Manage the set tags</a>
+      </div>
+    {{ accordion.footer() }}
     {{ accordion.header('Data', 'data', 'set-management', icon='database-2-line') }}
-    <a href="{{ item.url_for_refresh() }}" class="btn btn-primary" role="button"><i class="ri-refresh-line"></i> Refresh the set data</a>
+      <a href="{{ item.url_for_refresh() }}" class="btn btn-primary" role="button"><i class="ri-refresh-line"></i> Refresh the set data</a>
     {{ accordion.footer() }}
   {{ accordion.footer() }}
 {% endif %}

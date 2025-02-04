@@ -51,9 +51,22 @@
               </div>
               {{ accordion.footer() }}
             {% endif %}
+            {% if brickset_purchase_locations | length %}
+              {{ accordion.header('Purchase location', 'purchase-location', 'metadata', icon='building-line') }}
+              <label class="visually-hidden" for="add-purchase-location">{{ name }}</label>
+              <div class="input-group">
+                <select id="add-purchase-location" class="form-select" autocomplete="off">
+                  <option value="" selected><i>None</i></option>
+                  {% for purchase_location in brickset_purchase_locations %}
+                    <option value="{{ purchase_location.fields.id }}">{{ purchase_location.fields.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              {{ accordion.footer() }}
+            {% endif %}
             {% if brickset_storages | length %}
               {{ accordion.header('Storage', 'storage', 'metadata', icon='archive-2-line') }}
-              <label class="visually-hidden" for="storage">{{ name }}</label>
+              <label class="visually-hidden" for="add-storage">{{ name }}</label>
               <div class="input-group">
                 <select id="add-storage" class="form-select" autocomplete="off">
                   <option value="" selected><i>None</i></option>

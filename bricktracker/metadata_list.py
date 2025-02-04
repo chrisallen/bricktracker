@@ -7,13 +7,21 @@ from .exceptions import NotFoundException
 from .fields import BrickRecordFields
 from .record_list import BrickRecordList
 from .set_owner import BrickSetOwner
+from .set_purchase_location import BrickSetPurchaseLocation
 from .set_status import BrickSetStatus
 from .set_storage import BrickSetStorage
 from .set_tag import BrickSetTag
 
 logger = logging.getLogger(__name__)
 
-T = TypeVar('T', BrickSetOwner, BrickSetStatus, BrickSetStorage, BrickSetTag)
+T = TypeVar(
+    'T',
+    BrickSetOwner,
+    BrickSetPurchaseLocation,
+    BrickSetStatus,
+    BrickSetStorage,
+    BrickSetTag
+)
 
 
 # Lego sets metadata list

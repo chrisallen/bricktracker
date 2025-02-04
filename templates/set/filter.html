@@ -60,6 +60,22 @@
       </div>
     </div>
   {% endif %}
+  {% if brickset_purchase_locations | length %}
+    <div class="col-12 flex-grow-1">
+      <label class="visually-hidden" for="grid-owner">Purchase location</label>
+      <div class="input-group">
+        <span class="input-group-text"><i class="ri-building-line"></i><span class="ms-1 d-none d-md-inline"> Purchase location</span></span>
+        <select id="grid-purchase-location" class="form-select"
+          data-filter="value" data-filter-attribute="purchase-location"
+          autocomplete="off">
+          <option value="" selected>All</option>
+          {% for purchase_location in brickset_purchase_locations %}
+            <option value="{{ purchase_location.fields.id }}">{{ purchase_location.fields.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  {% endif %}
   {% if brickset_storages | length %}
     <div class="col-12 flex-grow-1">
       <label class="visually-hidden" for="grid-owner">Storage</label>
