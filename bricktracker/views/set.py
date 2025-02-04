@@ -149,6 +149,7 @@ def delete(*, id: str) -> str:
         delete=True,
         item=BrickSet().select_specific(id),
         error=request.args.get('error'),
+        **set_metadata_lists(as_class=True)
     )
 
 
