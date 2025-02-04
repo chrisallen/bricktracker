@@ -7,10 +7,18 @@
         data-filter="metadata"
         autocomplete="off">
         <option value="" selected>All</option>
-        <option value="-has-missing">Set is complete</option>
-        <option value="has-missing">Set has missing pieces</option>
-        <option value="has-damaged">Set has damaged pieces</option>
-        <option value="has-missing-instructions">Set has missing instructions</option>
+        {% if not config['HIDE_TABLE_MISSING_PARTS'] %}
+          <option value="has-missing">Has missing pieces</option>
+          <option value="-has-missing">Has NO missing pieces</option>
+        {% endif %}
+        {% if not config['HIDE_TABLE_DAMAGED_PARTS'] %}
+          <option value="has-damaged">Has damaged pieces</option>
+          <option value="-has-damaged">Has NO damaged pieces</option>
+        {% endif %}
+        {% if not config['HIDE_SET_INSTRUCTIONS'] %}
+          <option value="-has-missing-instructions">Has instructions</option>
+          <option value="has-missing-instructions">Is MISSING instructions</option>
+        {% endif %}
         {% if brickset_storages | length %}
           <option value="has-storage">Is in storage</option>
           <option value="-has-storage">Is NOT in storage</option>

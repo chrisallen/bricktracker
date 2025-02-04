@@ -103,7 +103,9 @@
 {% endmacro %}
 
 {% macro total_damaged(damaged, solo=false, last=false) %}
-  {{ badge(check=damaged, solo=solo, last=last, color='danger', icon='error-warning-line', collapsible='Damaged:', text=damaged, alt='Damaged') }}
+  {% if not config['HIDE_TABLE_DAMAGED_PARTS'] %}
+    {{ badge(check=damaged, solo=solo, last=last, color='danger', icon='error-warning-line', collapsible='Damaged:', text=damaged, alt='Damaged') }}
+  {% endif %}
 {% endmacro %}
 
 {% macro total_quantity(quantity, solo=false, last=false) %}
@@ -115,7 +117,9 @@
 {% endmacro %}
 
 {% macro total_missing(missing, solo=false, last=false) %}
-  {{ badge(check=missing, solo=solo, last=last, color='light text-danger-emphasis bg-danger-subtle border border-danger-subtle', icon='question-line', collapsible='Missing:', text=missing, alt='Missing') }}
+  {% if not config['HIDE_TABLE_MISSING_PARTS'] %}
+    {{ badge(check=missing, solo=solo, last=last, color='light text-danger-emphasis bg-danger-subtle border border-danger-subtle', icon='question-line', collapsible='Missing:', text=missing, alt='Missing') }}
+  {% endif %}
 {% endmacro %}
 
 {% macro total_sets(sets, solo=false, last=false) %}
