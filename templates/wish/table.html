@@ -12,6 +12,7 @@
         <th scope="col"><i class="ri-calendar-line fw-normal"></i> Year</th>
         <th scope="col"><i class="ri-shapes-line fw-normal"></i> Parts</th>
         <th scope="col"><i class="ri-calendar-close-line fw-normal"></i> Retirement</th>
+        <th data-table-no-sort="true" class="no-sort" scope="col"><i class="ri-user-line fw-normal"></i> Requesters</th>
         {% if g.login.is_authenticated() %}
           <th data-table-no-sort-and-search="true" class="no-sort" scope="col"><i class="ri-settings-4-line fw-normal"></i> Actions</th>
         {% endif %}
@@ -28,11 +29,15 @@
             <td>{{ item.fields.year }}</td>
             <td>{{ item.fields.number_of_parts }}</td>
             <td>{% if retirement_date %}{{ retirement_date }}{% else %}<span class="badge rounded-pill text-bg-light border">Not found</span>{% endif %}</td>
+            <td>
+              {% for owner in owners %}
+                {{ badge.owner(item, owner) }}
+              {% endfor %}
+            </td>
             {% if g.login.is_authenticated() %}
             <td>
-              <form action="{{ item.url_for_delete() }}" method="post">
-                <button type="submit" class="btn btn-sm btn-danger"><i class="ri-delete-bin-2-line"></i> Delete</button>
-              </form>
+              <a href="{{ item.url() }}" class="btn btn-sm btn-primary mb-1" role="button"><i class="ri-gift-line"></i> Details</a>
+              <a href="{{ item.url_for_delete() }}" class="btn btn-sm btn-danger mb-1" role="button"><i class="ri-delete-bin-2-line"></i> Delete</a>
             </td>
             {% endif %}
           </tr>

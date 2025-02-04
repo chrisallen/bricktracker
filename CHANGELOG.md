@@ -55,6 +55,9 @@
     - Allow for advanced migration scenarios through companion python files
     - Add a bunch of the requested fields into the database for future implementation
 
+- Wish
+    - Requester
+
 ### UI
 
 - Add
@@ -100,6 +103,9 @@
 - Storage
     - Storage list
     - Storage content
+
+- Wish
+    - Requester
 
 ## 1.1.1: PDF Instructions Download
 

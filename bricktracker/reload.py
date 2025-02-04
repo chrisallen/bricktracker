@@ -6,6 +6,7 @@ from .set_status_list import BrickSetStatusList
 from .set_storage_list import BrickSetStorageList
 from .set_tag_list import BrickSetTagList
 from .theme_list import BrickThemeList
+from .wish_owner_list import BrickWishOwnerList
 
 
 # Reload everything related to a database after an operation
@@ -35,5 +36,8 @@ def reload() -> None:
 
         # Reload themes
         BrickThemeList(force=True)
+
+        # Reload the wish owners
+        BrickWishOwnerList.new(force=True)
     except Exception:
         pass

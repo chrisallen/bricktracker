@@ -11,6 +11,7 @@ from .set_purchase_location import BrickSetPurchaseLocation
 from .set_status import BrickSetStatus
 from .set_storage import BrickSetStorage
 from .set_tag import BrickSetTag
+from .wish_owner import BrickWishOwner
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +21,8 @@ T = TypeVar(
     BrickSetPurchaseLocation,
     BrickSetStatus,
     BrickSetStorage,
-    BrickSetTag
+    BrickSetTag,
+    BrickWishOwner
 )
 
 

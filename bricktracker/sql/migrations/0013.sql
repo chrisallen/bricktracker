@@ -16,4 +16,11 @@ CREATE TABLE "bricktracker_set_owners" (
     FOREIGN KEY("id") REFERENCES "bricktracker_sets"("id")
 );
 
+-- Create a table for the wish owners
+CREATE TABLE "bricktracker_wish_owners" (
+    "set" TEXT NOT NULL,
+    PRIMARY KEY("set"),
+    FOREIGN KEY("set") REFERENCES "bricktracker_wishes"("set")
+);
+
 COMMIT;

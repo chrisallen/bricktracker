@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     from .set_storage import BrickSetStorage
     from .set_tag import BrickSetTag
     from .wish import BrickWish
+    from .wish_owner import BrickWishOwner
 
 T = TypeVar(
     'T',
@@ -26,6 +27,7 @@ T = TypeVar(
     'BrickSetStorage',
     'BrickSetTag',
     'BrickWish',
+    'BrickWishOwner',
     'RebrickableSet'
 )
 
