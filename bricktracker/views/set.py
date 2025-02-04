@@ -145,7 +145,8 @@ def update_tag(*, id: str, metadata_id: str) -> Response:
 @exception_handler(__file__)
 def delete(*, id: str) -> str:
     return render_template(
-        'delete.html',
+        'set.html',
+        delete=True,
         item=BrickSet().select_specific(id),
         error=request.args.get('error'),
     )
