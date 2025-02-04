@@ -25,7 +25,7 @@
         </div>
         <div class="col-12 flex-grow-1">
           {% if brickset_purchase_locations | length %}
-            {{ form.select('Location', item, 'purchase_location', brickset_purchase_locations, icon='building-line', delete=delete) }}
+            {{ form.select('Location', item.fields.id, brickset_purchase_locations.as_prefix(), brickset_purchase_locations.url_for_set_value(item.fields.id), item.fields.purchase_location, brickset_purchase_locations, icon='building-line', delete=delete) }}
           {% else %}
             <i class="ri-error-warning-line"></i> No purchase location found.
           {% endif %}
@@ -36,7 +36,7 @@
     {{ accordion.footer() }}
     {{ accordion.header('Storage', 'storage', 'set-management', icon='archive-2-line') }}
       {% if brickset_storages | length %}
-        {{ form.select('Storage', item, 'storage', brickset_storages, delete=delete) }}
+      {{ form.select('Storage', item.fields.id, brickset_storages.as_prefix(), brickset_storages.url_for_set_value(item.fields.id), item.fields.storage, brickset_storages, icon='building-line', delete=delete) }}
       {% else %}
         <p class="text-center"><i class="ri-error-warning-line"></i> No storage found.</p>
       {% endif %}
