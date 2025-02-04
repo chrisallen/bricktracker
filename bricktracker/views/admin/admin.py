@@ -34,6 +34,7 @@ def admin() -> str:
     database_exception: Exception | None = None
     database_upgrade_needed: bool = False
     database_version: int = -1
+    instructions: BrickInstructionsList | None = None
     metadata_owners: list[BrickSetOwner] = []
     metadata_statuses: list[BrickSetStatus] = []
     metadata_storages: list[BrickSetStorage] = []
@@ -49,6 +50,8 @@ def admin() -> str:
         database_upgrade_needed = database.upgrade_needed()
         database_version = database.version
         database_counters = BrickSQL().count_records()
+
+        instructions = BrickInstructionsList()
 
         metadata_owners = BrickSetOwnerList.list()
         metadata_statuses = BrickSetStatusList.list(all=True)
@@ -104,7 +107,7 @@ def admin() -> str:
         database_exception=database_exception,
         database_upgrade_needed=database_upgrade_needed,
         database_version=database_version,
-        instructions=BrickInstructionsList(),
+        instructions=instructions,
         metadata_owners=metadata_owners,
         metadata_statuses=metadata_statuses,
         metadata_storages=metadata_storages,
