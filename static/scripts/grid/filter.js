@@ -5,6 +5,7 @@ class BrickGridFilter {
 
         // Grid sort elements (built based on the initial id)
         this.html_search = document.getElementById(`${this.grid.id}-search`);
+        this.html_search_clear = document.getElementById(`${this.grid.id}-search-clear`);
         this.html_filter = document.getElementById(`${this.grid.id}-filter`);
 
         // Search setup
@@ -25,6 +26,13 @@ class BrickGridFilter {
             this.html_search.addEventListener("keyup", ((gridfilter) => () => {
                 gridfilter.filter();
             })(this));
+
+            if (this.html_search_clear) {
+                this.html_search_clear.addEventListener("click", ((gridfilter) => () => {
+                    this.html_search.value = '';
+                    gridfilter.filter();
+                })(this));
+            }
         }
 
         // Filters setup
