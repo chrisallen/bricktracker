@@ -12,7 +12,7 @@ class BrickSetStorage(BrickMetadata):
     insert_query: str = 'set/metadata/storage/insert'
     select_query: str = 'set/metadata/storage/select'
     update_field_query: str = 'set/metadata/storage/update/field'
-    update_set_state_query: str = 'set/metadata/storage/update/state'
+    update_set_value_query: str = 'set/metadata/storage/update/value'
 
     # Self url
     def url(self, /) -> str:

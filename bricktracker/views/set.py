@@ -77,9 +77,9 @@ def update_storage(*, id: str) -> Response:
         allow_none=True
     )
 
-    state = storage.update_set_value(brickset, state=storage.fields.id)
+    value = storage.update_set_value(brickset, value=storage.fields.id)
 
-    return jsonify({'value': state})
+    return jsonify({'value': value})
 
 
 # Change the state of a tag

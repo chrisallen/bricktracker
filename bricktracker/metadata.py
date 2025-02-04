@@ -27,6 +27,7 @@ class BrickMetadata(BrickRecord):
     select_query: str
     update_field_query: str
     update_set_state_query: str
+    update_set_value_query: str
 
     def __init__(
         self,
@@ -224,25 +225,25 @@ class BrickMetadata(BrickRecord):
         /,
         *,
         json: Any | None = None,
-        state: Any | None = None,
+        value: Any | None = None,
     ) -> Any:
-        if state is None and json is not None:
-            state = json.get('value', '')
+        if value is None and json is not None:
+            value = json.get('value', '')
 
-        if state == '':
-            state = None
+        if value == '':
+            value = None
 
         parameters = self.sql_parameters()
         parameters['set_id'] = brickset.fields.id
-        parameters['state'] = state
+        parameters['value'] = value
 
         rows, _ = BrickSQL().execute_and_commit(
-            self.update_set_state_query,
+            self.update_set_value_query,
             parameters=parameters,
         )
 
         # Update the status
-        if state is None and not hasattr(self.fields, 'name'):
+        if value is None and not hasattr(self.fields, 'name'):
             self.fields.name = 'None'
 
         if rows != 1:
@@ -253,12 +254,12 @@ class BrickMetadata(BrickRecord):
             ))
 
         # Info
-        logger.info('{kind} value changed to "{name}" ({state}) for set {set} ({id})'.format(  # noqa: E501
+        logger.info('{kind} value changed to "{name}" ({value}) for set {set} ({id})'.format(  # noqa: E501
             kind=self.kind,
             name=self.fields.name,
-            state=state,
+            value=value,
             set=brickset.fields.set,
             id=brickset.fields.id,
         ))
 
-        return state
+        return value
