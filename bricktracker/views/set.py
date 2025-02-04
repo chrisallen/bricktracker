@@ -16,7 +16,7 @@ from .exceptions import exception_handler
 from ..minifigure import BrickMinifigure
 from ..part import BrickPart
 from ..set import BrickSet
-from ..set_list import BrickSetList
+from ..set_list import BrickSetList, set_metadata_lists
 from ..set_owner_list import BrickSetOwnerList
 from ..set_status_list import BrickSetStatusList
 from ..set_storage_list import BrickSetStorageList
@@ -35,10 +35,8 @@ def list() -> str:
     return render_template(
         'sets.html',
         collection=BrickSetList().all(),
-        brickset_owners=BrickSetOwnerList.list(),
         brickset_statuses=BrickSetStatusList.list(),
-        brickset_storages=BrickSetStorageList.list(as_class=True),
-        brickset_tags=BrickSetTagList.list(),
+        **set_metadata_lists(as_class=True)
     )
 
 
@@ -145,10 +143,8 @@ def details(*, id: str) -> str:
         'set.html',
         item=BrickSet().select_specific(id),
         open_instructions=request.args.get('open_instructions'),
-        brickset_owners=BrickSetOwnerList.list(),
         brickset_statuses=BrickSetStatusList.list(all=True),
-        brickset_storages=BrickSetStorageList.list(as_class=True),
-        brickset_tags=BrickSetTagList.list(),
+        **set_metadata_lists(as_class=True)
     )
 
 

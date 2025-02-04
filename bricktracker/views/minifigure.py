@@ -3,10 +3,7 @@ from flask import Blueprint, render_template
 from .exceptions import exception_handler
 from ..minifigure import BrickMinifigure
 from ..minifigure_list import BrickMinifigureList
-from ..set_owner_list import BrickSetOwnerList
-from ..set_list import BrickSetList
-from ..set_storage_list import BrickSetStorageList
-from ..set_tag_list import BrickSetTagList
+from ..set_list import BrickSetList, set_metadata_lists
 
 minifigure_page = Blueprint('minifigure', __name__, url_prefix='/minifigures')
 
@@ -31,7 +28,5 @@ def details(*, figure: str) -> str:
         using=BrickSetList().using_minifigure(figure),
         missing=BrickSetList().missing_minifigure(figure),
         damaged=BrickSetList().damaged_minifigure(figure),
-        brickset_owners=BrickSetOwnerList.list(),
-        brickset_storages=BrickSetStorageList.list(as_class=True),
-        brickset_tags=BrickSetTagList.list(),
+        **set_metadata_lists(as_class=True)
     )

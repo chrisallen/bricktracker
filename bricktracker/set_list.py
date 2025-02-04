@@ -1,11 +1,14 @@
-from typing import Any, Self
+from typing import Any, Self, Union
 
 from flask import current_app
 
 from .record_list import BrickRecordList
+from .set_owner import BrickSetOwner
 from .set_owner_list import BrickSetOwnerList
 from .set_status_list import BrickSetStatusList
 from .set_storage import BrickSetStorage
+from .set_storage_list import BrickSetStorageList
+from .set_tag import BrickSetTag
 from .set_tag_list import BrickSetTagList
 from .set import BrickSet
 
@@ -163,3 +166,22 @@ class BrickSetList(BrickRecordList[BrickSet]):
         self.list(override_query=self.using_storage_query)
 
         return self
+
+
+# Helper to build the metadata lists
+def set_metadata_lists(
+    as_class: bool = False
+) -> dict[
+    str,
+    Union[
+        list[BrickSetOwner],
+        list[BrickSetStorage],
+        BrickSetStorageList,
+        list[BrickSetTag]
+    ]
+]:
+    return {
+        'brickset_owners': BrickSetOwnerList.list(),
+        'brickset_storages': BrickSetStorageList.list(as_class=as_class),
+        'brickset_tags': BrickSetTagList.list(),
+    }
