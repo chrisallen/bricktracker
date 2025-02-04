@@ -18,6 +18,7 @@
 - Added: `BK_PURCHASE_LOCATION_DEFAULT_ORDER`, ordering of purchase locations
 - Added: `BK_PURCHASE_CURRENCY`, currency to display for purchase prices
 - Added: `BK_PURCHASE_DATE_FORMAT`, date format for purchase dates
+- Documented: `BK_FILE_DATETIME_FORMAT`, date format for files on disk (instructions, theme)
 
 ### Code
 
