@@ -29,7 +29,7 @@ SELECT
     NULL AS "total_damaged", -- dummy for order: total_damaged
     {% endblock %}
     {% block total_quantity %}
-    NULL AS "total_quantity", -- dummy for order: total_quantity
+    NULL AS "total_quantity" -- dummy for order: total_quantity
     {% endblock %}
 FROM "bricktracker_sets"
 
