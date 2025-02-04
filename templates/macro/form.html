@@ -1,19 +1,18 @@
-{% macro checkbox(item, metadata, parent=none, delete=false) %}
+{% macro checkbox(name, id, prefix, url, checked, parent=none, delete=false) %}
   {% if g.login.is_authenticated() %}
-    {% set prefix=metadata.as_dataset() %}
-    <input class="form-check-input" type="checkbox" id="{{ prefix }}-{{ item.fields.id }}" {% if item.fields[metadata.as_column()] %}checked{% endif %}
+    <input class="form-check-input" type="checkbox" id="{{ prefix }}-{{ id }}" {% if checked %}checked{% endif %}
     {% if not delete %}
-      data-changer-id="{{ item.fields.id }}" data-changer-prefix="{{ prefix }}" data-changer-url="{{ metadata.url_for_set_state(item.fields.id) }}" {% if parent %}data-changer-parent="{{ parent }}"{% endif %}
+      data-changer-id="{{ id }}" data-changer-prefix="{{ prefix }}" data-changer-url="{{ url }}" {% if parent %}data-changer-parent="{{ parent }}"{% endif %}
     {% else %}
       disabled
     {% endif %}
       autocomplete="off">
-    <label class="form-check-label flex-grow-1 ms-1" for="{{ prefix }}-{{ item.fields.id }}">
-      {{ metadata.fields.name }} <i id="status-{{ prefix }}-{{ item.fields.id }}"></i>
+    <label class="form-check-label flex-grow-1 ms-1" for="{{ prefix }}-{{ id }}">
+      {{ name }} <i id="status-{{ prefix }}-{{ id }}"></i>
     </label>
   {% else %}
-    <input class="form-check-input text-reset" type="checkbox" {% if item.fields[metadata.as_column()] %}checked{% endif %} disabled>
-    {{ text }}
+    <input class="form-check-input text-reset" type="checkbox" {% if checked %}checked{% endif %} disabled>
+    {{ name }}
   {% endif %}
 {% endmacro %}
 

@@ -4,7 +4,7 @@
       <ul class="list-group list-group-flush">
       {% if brickset_owners | length %}
         {% for owner in brickset_owners %}
-          <li class="d-flex list-group-item list-group-item-action text-nowrap">{{ form.checkbox(item, owner, delete=delete) }}</li>
+          <li class="d-flex list-group-item list-group-item-action text-nowrap">{{ form.checkbox(owner.fields.name, item.fields.id, owner.as_dataset(), owner.url_for_set_state(item.fields.id), item.fields[owner.as_column()], delete=delete) }}</li>
         {% endfor %}
       {% else %}
         <li class="list-group-item list-group-item-action text-center"><i class="ri-error-warning-line"></i> No owner found.</li>
@@ -47,7 +47,7 @@
       <ul class="list-group list-group-flush">
       {% if brickset_tags | length %}
         {% for tag in brickset_tags %}
-          <li class="d-flex list-group-item list-group-item-action text-nowrap">{{ form.checkbox(item, tag, delete=delete) }}</li>
+          <li class="d-flex list-group-item list-group-item-action text-nowrap">{{ form.checkbox(tag.fields.name, item.fields.id, tag.as_dataset(), tag.url_for_set_state(item.fields.id), item.fields[tag.as_column()], delete=delete) }}</li>
         {% endfor %}
       {% else %}
         <li class="list-group-item list-group-item-action text-center"><i class="ri-error-warning-line"></i> No tag found.</li>

@@ -83,7 +83,7 @@
   {% if not tiny and brickset_statuses | length %}
     <ul class="list-group list-group-flush card-check border-bottom-0">
       {% for status in brickset_statuses %}
-        <li class="d-flex list-group-item {% if not solo %}p-1{% endif %} text-nowrap">{{ form.checkbox(item, status, parent='set', delete=delete) }}</li>
+        <li class="d-flex list-group-item {% if not solo %}p-1{% endif %} text-nowrap">{{ form.checkbox(status.fields.name, item.fields.id, status.as_dataset(), status.url_for_set_state(item.fields.id), item.fields[status.as_column()], parent='set', delete=delete) }}</li>
       {% endfor %}
     </ul>
   {% endif %}
