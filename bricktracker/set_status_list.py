@@ -1,10 +1,7 @@
-import logging
 from typing import Self
 
 from .metadata_list import BrickMetadataList
 from .set_status import BrickSetStatus
-
-logger = logging.getLogger(__name__)
 
 
 # Lego sets status list

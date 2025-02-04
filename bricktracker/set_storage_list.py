@@ -1,12 +1,9 @@
-import logging
 from typing import Self
 
 from flask import current_app
 
 from .metadata_list import BrickMetadataList
 from .set_storage import BrickSetStorage
-
-logger = logging.getLogger(__name__)
 
 
 # Lego sets storage list

@@ -1,5 +1,3 @@
-import logging
-
 from flask import Blueprint, redirect, url_for
 from flask_login import login_required
 from werkzeug.wrappers.response import Response
@@ -9,8 +7,6 @@ from ...minifigure import BrickMinifigure
 from ...part import BrickPart
 from ...rebrickable_image import RebrickableImage
 from ...set import BrickSet
-
-logger = logging.getLogger(__name__)
 
 admin_image_page = Blueprint(
     'admin_image',

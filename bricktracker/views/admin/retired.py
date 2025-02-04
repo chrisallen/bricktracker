@@ -1,13 +1,9 @@
-import logging
-
 from flask import Blueprint, redirect, url_for
 from flask_login import login_required
 from werkzeug.wrappers.response import Response
 
 from ..exceptions import exception_handler
 from ...retired_list import BrickRetiredList
-
-logger = logging.getLogger(__name__)
 
 admin_retired_page = Blueprint(
     'admin_retired',

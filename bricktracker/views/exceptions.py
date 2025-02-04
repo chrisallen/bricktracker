@@ -1,12 +1,9 @@
 from functools import wraps
-import logging
 from typing import Callable, ParamSpec, Tuple, Union
 
 from werkzeug.wrappers.response import Response
 
 from .error import error
-
-logger = logging.getLogger(__name__)
 
 # Decorator type hinting is hard.
 # What a view can return (str or Response or (Response, xxx))

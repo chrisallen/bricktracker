@@ -1,4 +1,3 @@
-import logging
 from sqlite3 import Row
 from typing import Any, TYPE_CHECKING
 
@@ -9,8 +8,6 @@ from .rebrickable_image import RebrickableImage
 from .record import BrickRecord
 if TYPE_CHECKING:
     from .set import BrickSet
-
-logger = logging.getLogger(__name__)
 
 
 # A minifigure from Rebrickable

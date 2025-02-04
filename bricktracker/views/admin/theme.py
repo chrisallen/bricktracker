@@ -1,13 +1,9 @@
-import logging
-
 from flask import Blueprint, redirect, url_for
 from flask_login import login_required
 from werkzeug.wrappers.response import Response
 
 from ..exceptions import exception_handler
 from ...theme_list import BrickThemeList
-
-logger = logging.getLogger(__name__)
 
 admin_theme_page = Blueprint(
     'admin_theme',

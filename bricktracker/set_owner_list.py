@@ -1,10 +1,7 @@
-import logging
 from typing import Self
 
 from .metadata_list import BrickMetadataList
 from .set_owner import BrickSetOwner
-
-logger = logging.getLogger(__name__)
 
 
 # Lego sets owner list

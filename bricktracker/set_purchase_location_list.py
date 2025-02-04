@@ -1,12 +1,9 @@
-import logging
 from typing import Self
 
 from flask import current_app
 
 from .metadata_list import BrickMetadataList
 from .set_purchase_location import BrickSetPurchaseLocation
-
-logger = logging.getLogger(__name__)
 
 
 # Lego sets purchase location list

@@ -1,5 +1,4 @@
 import os
-import logging
 from sqlite3 import Row
 from typing import Any, TYPE_CHECKING
 from urllib.parse import urlparse
@@ -13,8 +12,6 @@ if TYPE_CHECKING:
     from .minifigure import BrickMinifigure
     from .set import BrickSet
     from .socket import BrickSocket
-
-logger = logging.getLogger(__name__)
 
 
 # A part from Rebrickable
