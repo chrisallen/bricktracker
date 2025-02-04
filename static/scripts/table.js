@@ -1,11 +1,16 @@
 class BrickTable {
     constructor(table, per_page) {
-        const columns = []
+        const columns = [];
+        const no_sort_and_filter = [];
         const no_sort = [];
         const number = [];
 
         // Read the table header for parameters
         table.querySelectorAll('th').forEach((th, index) => {
+            if (th.dataset.tableNoSortAndFilter) {
+                no_sort_and_filter.push(index);
+            }
+
             if (th.dataset.tableNoSort) {
                 no_sort.push(index);
             }
@@ -15,8 +20,12 @@ class BrickTable {
             }
         });
 
+        if (no_sort_and_filter.length) {
+            columns.push({ select: no_sort_and_filter, sortable: false, searchable: false });
+        }
+
         if (no_sort.length) {
-            columns.push({ select: no_sort, sortable: false, searchable: false });
+            columns.push({ select: no_sort, sortable: false });
         }
 
         if (number.length) {
