@@ -1,5 +1,5 @@
 {% if g.login.is_authenticated() %}
-  {{ accordion.header('Management', 'set-management', 'set-details', icon='settings-4-line', class='p-0', expanded=true) }}
+  {{ accordion.header('Management', 'set-management', 'set-details', icon='settings-4-line', class='p-0') }}
     {{ accordion.header('Owners', 'owner', 'set-management', icon='group-line', class='p-0') }}
       <ul class="list-group list-group-flush">
       {% if brickset_owners | length %}
@@ -14,7 +14,7 @@
         <a class="list-group-item list-group-item-action" href="{{ url_for('admin.admin', open_owner=true) }}"><i class="ri-settings-4-line"></i> Manage the set owners</a>
       </div>
     {{ accordion.footer() }}
-    {{ accordion.header('Purchase', 'purchase', 'set-management', icon='wallet-3-line', expanded=true) }}
+    {{ accordion.header('Purchase', 'purchase', 'set-management', icon='wallet-3-line') }}
       <div class="alert alert-info" role="alert">The expected date format here is <code>yyyy/mm/dd</code> (year/month/day), but you can configured how it is displayed in the set card with the <code>PURCHASE_DATE_FORMAT</code> variable.</div>
       <div class="row row-cols-lg-auto g-1 justify-content-start align-items-center pb-2">
         <div class="col-12">
