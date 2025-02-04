@@ -21,6 +21,7 @@ It also uses the following libraries and frameworks:
 - `tinysort` (https://github.com/Sjeiti/TinySort)
 - `sortable` (https://github.com/tofsjonas/sortable)
 - `simple-datatables` (https://github.com/fiduswriter/simple-datatables)
+- `vanillajs-datepicker` (https://github.com/mymth/vanillajs-datepicker)
 
 The BrickTracker brick logo is part of the Small n' Flat Icons set designed by [Arnaud Chesne](https://iconduck.com/designers/arnaud-chesne).
 

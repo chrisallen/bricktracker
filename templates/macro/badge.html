@@ -65,6 +65,15 @@
   {% endif %}
 {% endmacro %}
 
+{% macro purchase_date(date, solo=false, last=false) %}
+  {% if last %}
+    {% set tooltip=date %}
+  {% else %}
+    {% set text=date %}
+  {% endif %}
+  {{ badge(check=date, solo=solo, last=last, color='light border', icon='calendar-line', text=text, tooltip=tooltip, collapsible='Date:') }}
+{% endmacro %}
+
 {% macro purchase_location(item, purchase_locations, solo=false, last=false) %}
   {% if purchase_locations and item.fields.purchase_location in purchase_locations.mapping %}
     {% set purchase_location = purchase_locations.mapping[item.fields.purchase_location] %}
@@ -73,8 +82,17 @@
     {% else %}
       {% set text=purchase_location.fields.name %}
     {% endif %}
-    {{ badge(check=purchase_location, solo=solo, last=last, color='light border', icon='building-line', text=text, tooltip=tooltip) }}
+    {{ badge(check=purchase_location, solo=solo, last=last, color='light border', icon='building-line', text=text, tooltip=tooltip, collapsible='Location:') }}
   {% endif %}
+{% endmacro %}
+
+{% macro purchase_price(price, solo=false, last=false) %}
+  {% if last %}
+    {% set tooltip=price %}
+  {% else %}
+    {% set text=price %}
+  {% endif %}
+  {{ badge(check=price, solo=solo, last=last, color='light border', icon='wallet-3-line', text=text, tooltip=tooltip, collapsible='Price:') }}
 {% endmacro %}
 
 {% macro set(set, solo=false, last=false, url=None, id=None) %}

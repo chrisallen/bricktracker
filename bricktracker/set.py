@@ -1,3 +1,4 @@
+from datetime import datetime
 import logging
 import traceback
 from typing import Any, Self, TYPE_CHECKING
@@ -5,7 +6,7 @@ from uuid import uuid4
 
 from flask import current_app, url_for
 
-from .exceptions import NotFoundException
+from .exceptions import NotFoundException, DatabaseException, ErrorException
 from .minifigure_list import BrickMinifigureList
 from .part_list import BrickPartList
 from .rebrickable_set import RebrickableSet
@@ -27,6 +28,8 @@ class BrickSet(RebrickableSet):
     select_query: str = 'set/select/full'
     light_query: str = 'set/select/light'
     insert_query: str = 'set/insert'
+    update_purchase_date_query: str = 'set/update/purchase_date'
+    update_purchase_price_query: str = 'set/update/purchase_price'
 
     # Delete a set
     def delete(self, /) -> None:
@@ -152,6 +155,30 @@ class BrickSet(RebrickableSet):
 
         return True
 
+    # Purchase date
+    def purchase_date(self, /, *, standard: bool = False) -> str:
+        if self.fields.purchase_date is not None:
+            time = datetime.fromtimestamp(self.fields.purchase_date)
+
+            if standard:
+                return time.strftime('%Y/%m/%d')
+            else:
+                return time.strftime(
+                    current_app.config['PURCHASE_DATE_FORMAT']
+                )
+        else:
+            return ''
+
+    # Purchase price with currency
+    def purchase_price(self, /) -> str:
+        if self.fields.purchase_price is not None:
+            return '{price}{currency}'.format(
+                price=self.fields.purchase_price,
+                currency=current_app.config['PURCHASE_CURRENCY']
+            )
+        else:
+            return ''
+
     # Minifigures
     def minifigures(self, /) -> BrickMinifigureList:
         return BrickMinifigureList().from_set(self)
@@ -194,6 +221,80 @@ class BrickSet(RebrickableSet):
 
         return self
 
+    # Update the purchase date
+    def update_purchase_date(self, json: Any | None, /) -> Any:
+        value = json.get('value', None)  # type: ignore
+
+        try:
+            if value == '':
+                value = None
+
+            if value is not None:
+                value = datetime.strptime(value, '%Y/%m/%d').timestamp()
+        except Exception:
+            raise ErrorException('{value} is not a date'.format(
+                value=value,
+            ))
+
+        self.fields.purchase_date = value
+
+        rows, _ = BrickSQL().execute_and_commit(
+            self.update_purchase_date_query,
+            parameters=self.sql_parameters()
+        )
+
+        if rows != 1:
+            raise DatabaseException('Could not update the purchase date for set {set} ({id})'.format(  # noqa: E501
+                set=self.fields.set,
+                id=self.fields.id,
+            ))
+
+        # Info
+        logger.info('Purchase date changed to "{value}" for set {set} ({id})'.format(  # noqa: E501
+            value=value,
+            set=self.fields.set,
+            id=self.fields.id,
+        ))
+
+        return value
+
+    # Update the purchase price
+    def update_purchase_price(self, json: Any | None, /) -> Any:
+        value = json.get('value', None)  # type: ignore
+
+        try:
+            if value == '':
+                value = None
+
+            if value is not None:
+                value = float(value)
+        except Exception:
+            raise ErrorException('{value} is not a number or empty'.format(
+                value=value,
+            ))
+
+        self.fields.purchase_price = value
+
+        rows, _ = BrickSQL().execute_and_commit(
+            self.update_purchase_price_query,
+            parameters=self.sql_parameters()
+        )
+
+        if rows != 1:
+            raise DatabaseException('Could not update the purchase price for set {set} ({id})'.format(  # noqa: E501
+                set=self.fields.set,
+                id=self.fields.id,
+            ))
+
+        # Info
+        logger.info('Purchase price changed to "{value}" for set {set} ({id})'.format(  # noqa: E501
+            value=value,
+            set=self.fields.set,
+            id=self.fields.id,
+        ))
+
+        return value
+
     # Self url
     def url(self, /) -> str:
         return url_for('set.details', id=self.fields.id)
@@ -230,3 +331,11 @@ class BrickSet(RebrickableSet):
             return url_for('storage.details', id=self.fields.storage)
         else:
             return ''
+
+    # Update purchase date url
+    def url_for_purchase_date(self, /) -> str:
+        return url_for('set.update_purchase_date', id=self.fields.id)
+
+    # Update purchase price url
+    def url_for_purchase_price(self, /) -> str:
+        return url_for('set.update_purchase_price', id=self.fields.id)

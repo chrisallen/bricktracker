@@ -41,6 +41,18 @@ def list() -> str:
     )
 
 
+# Change the value of purchase date
+@set_page.route('/<id>/purchase_date', methods=['POST'])
+@login_required
+@exception_handler(__file__, json=True)
+def update_purchase_date(*, id: str) -> Response:
+    brickset = BrickSet().select_light(id)
+
+    value = brickset.update_purchase_date(request.json)
+
+    return jsonify({'value': value})
+
+
 # Change the value of purchase location
 @set_page.route('/<id>/purchase_location', methods=['POST'])
 @login_required
@@ -56,6 +68,18 @@ def update_purchase_location(*, id: str) -> Response:
         brickset,
         value=purchase_location.fields.id
     )
+
+    return jsonify({'value': value})
+
+
+# Change the value of purchase price
+@set_page.route('/<id>/purchase_price', methods=['POST'])
+@login_required
+@exception_handler(__file__, json=True)
+def update_purchase_price(*, id: str) -> Response:
+    brickset = BrickSet().select_light(id)
+
+    value = brickset.update_purchase_price(request.json)
 
     return jsonify({'value': value})
 

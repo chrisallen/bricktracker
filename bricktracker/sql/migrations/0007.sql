@@ -27,7 +27,7 @@ CREATE TABLE "bricktracker_sets" (
     "set" TEXT NOT NULL,
     "description" TEXT,
     "storage" TEXT, -- Storage bin location
-    "purchase_date" INTEGER, -- Purchase data
+    "purchase_date" REAL, -- Purchase data
     "purchase_location" TEXT, -- Purchase location
     "purchase_price" REAL, -- Purchase price
     PRIMARY KEY("id"),

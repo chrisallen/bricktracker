@@ -17,19 +17,22 @@
   {% endif %}
 {% endmacro %}
 
-{% macro input(name, id, prefix, url, value, all=none, read_only=none) %}
+{% macro input(name, id, prefix, url, value, all=none, read_only=none, icon=none, suffix=none, date=false) %}
   {% if all or read_only %}
     {{ value }}
   {% else %}
     <label class="visually-hidden" for="{{ prefix }}-{{ id }}">{{ name }}</label>
     <div class="input-group">
+      {% if icon %}<span class="input-group-text"><i class="ri-{{ icon }} me-1"></i><span class="ms-1 d-none d-md-inline"> {{ name }}</span></span>{% endif %}
       <input class="form-control form-control-sm flex-shrink-1" type="text" id="{{ prefix }}-{{ id }}" value="{% if value %}{{ value }}{% endif %}"
       {% if g.login.is_authenticated() %}
         data-changer-id="{{ id }}" data-changer-prefix="{{ prefix }}" data-changer-url="{{ url }}"
+        {% if date %}data-changer-date="true"{% endif %}
       {% else %}
         disabled
       {% endif %}
         autocomplete="off">
+      {% if suffix %}<span class="input-group-text d-none d-md-inline">{{ suffix }}</span>{% endif %}
       {% if g.login.is_authenticated() %}
         <span id="status-{{ prefix }}-{{ id }}" class="input-group-text ri-save-line"></span>
         <button id="clear-{{ prefix }}-{{ id }}" type="button" class="btn btn-sm btn-light btn-outline-danger border"><i class="ri-eraser-line"></i></button>
@@ -45,7 +48,7 @@
     {% set prefix=metadata_list.as_prefix() %}
     <label class="visually-hidden" for="{{ prefix }}-{{ item.fields.id }}">{{ name }}</label>
     <div class="input-group">
-      {% if icon %}<span class="input-group-text"><i class="ri-{{ icon }}"></i></span>{% endif %}
+      {% if icon %}<span class="input-group-text"><i class="ri-{{ icon }} me-1"></i><span class="ms-1 d-none d-md-inline"> {{ name }}</span></span>{% endif %}
       <select id="{{ prefix }}-{{ item.fields.id }}" class="form-select"
         {% if not delete %}
           data-changer-id="{{ item.fields.id }}" data-changer-prefix="{{ prefix }}" data-changer-url="{{ metadata_list.url_for_set_value(item.fields.id) }}"

@@ -16,6 +16,8 @@
 - Added: `BK_HIDE_ALL_STORAGES`, hide the "Storages" menu entry
 - Added: `BK_STORAGE_DEFAULT_ORDER`, ordering of storages
 - Added: `BK_PURCHASE_LOCATION_DEFAULT_ORDER`, ordering of purchase locations
+- Added: `BK_PURCHASE_CURRENCY`, currency to display for purchase prices
+- Added: `BK_PURCHASE_DATE_FORMAT`, date format for purchase dates
 
 ### Code
 
@@ -40,7 +42,7 @@
     - Ownership
     - Tags
     - Storage
-    - Purchase location
+    - Purchase location, date, price
 
 - Storage
     - Storage content and list
@@ -87,7 +89,7 @@
         - Tags
         - Refresh
         - Storage
-        - Purchase location
+        - Purchase location, date, price
 
 - Sets grid
     - Collapsible controls depending on screen size

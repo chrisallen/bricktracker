@@ -41,6 +41,8 @@ CONFIG: Final[list[dict[str, Any]]] = [
     {'n': 'PARTS_DEFAULT_ORDER', 'd': '"rebrickable_parts"."name" ASC, "rebrickable_parts"."color_name" ASC, "bricktracker_parts"."spare" ASC'},  # noqa: E501
     {'n': 'PARTS_FOLDER', 'd': 'parts', 's': True},
     {'n': 'PORT', 'd': 3333, 'c': int},
+    {'n': 'PURCHASE_DATE_FORMAT', 'd': '%d/%m/%Y'},
+    {'n': 'PURCHASE_CURRENCY', 'd': '€'},
     {'n': 'PURCHASE_LOCATION_DEFAULT_ORDER', 'd': '"bricktracker_metadata_purchase_locations"."name" ASC'},  # noqa: E501
     {'n': 'RANDOM', 'e': 'RANDOM', 'c': bool},
     {'n': 'REBRICKABLE_API_KEY', 'e': 'REBRICKABLE_API_KEY', 'd': ''},

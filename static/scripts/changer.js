@@ -1,5 +1,6 @@
 // Generic state changer with visual feedback
-// Tooltips require boostrap.Tooltip
+// Tooltips requires boostrap.Tooltip
+// Date requires vanillajs-datepicker
 class BrickChanger {
     constructor(prefix, id, url, parent = undefined) {
         this.prefix = prefix
@@ -48,6 +49,20 @@ class BrickChanger {
         if (this.html_clear) {
             this.html_clear.addEventListener("click", ((changer) => (e) => {
                 changer.html_element.value = "";
+                changer.change();
+            })(this));
+        }
+
+        // Date picker
+        this.picker = undefined;
+        if (this.html_element.dataset.changerDate == "true") {
+            this.picker = new Datepicker(this.html_element, {
+                buttonClass: 'btn',
+                format: 'yyyy/mm/dd',
+            });
+
+            // Picker fires a custom "changeDate" event
+            this.html_element.addEventListener("changeDate", ((changer) => (e) => {
                 changer.change();
             })(this));
         }
