@@ -174,6 +174,11 @@ class BrickChanger {
             console.log(error.message);
 
             this.status_error(error.message);
+
+            // Reverse the checked state
+            if (this.html_type == "checkbox") {
+                this.html_element.checked = !this.html_element.checked;
+            }
         }
     }
 }

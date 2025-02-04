@@ -22,6 +22,9 @@
 
 ### Code
 
+- Changer
+    - Revert the checked state of a checkbox if an error occured
+
 - Form
     - Migrate missing input fields to BrickChanger
 
