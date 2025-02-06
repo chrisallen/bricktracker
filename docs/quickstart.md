@@ -1,7 +1,7 @@
 # Quickstart
 
 > **Note**
-> The following page is based on version `1.1.1` of BrickTracker.
+> The following page is based on version `1.2.0` of BrickTracker.
 
 ## Prerequisites
 - Docker and Docker Compose installed
@@ -40,7 +40,7 @@ services:
   bricktracker:
     container_name: BrickTracker
     restart: unless-stopped
-    image: gitea.baerentsen.space/frederikbaerentsen/bricktracker:1.1.1
+    image: gitea.baerentsen.space/frederikbaerentsen/bricktracker:1.2.0
     ports:
       - "3333:3333"
     volumes:

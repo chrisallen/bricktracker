@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.2.0:
 
 > **Warning**
 > "Missing" part has been renamed to "Problems" to accomodate for missing and damaged parts.

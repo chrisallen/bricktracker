@@ -26,8 +26,13 @@
 | `BK_HIDE_ALL_PARTS` | Hide parts menu entry | `false` | No |
 | `BK_HIDE_ALL_MINIFIGURES` | Hide minifigures menu entry | `false` | No |
 | `BK_HIDE_ALL_INSTRUCTIONS` | Hide instructions menu entry | `false` | No |
-| `BK_HIDE_MISSING_PARTS` | Hide missing parts menu entry | `false` | No |
+| `BK_HIDE_ALL_PROBLEMS_PARTS` | Hide problems parts menu entry | `false` | No |
+| `BK_HIDE_TABLE_MISSING_PARTS` | Hide Missing column in tables | `false` | No |
+| `BK_HIDE_TABLE_DAMAGED_PARTS` | Hide Damaged column in tables | `false` | No |
 | `BK_HIDE_WISHES` | Hide wishlist menu entry | `false` | No |
+| `BK_HIDE_ALL_STORAGES` | Hide storages menu entry | `false` | No |
+| `BK_SHOW_GRID_SORT` | Show sort options by default | `false` | No |
+| `BK_SHOW_GRID_FILTERS` | Show filter options by default | `false` | No |
 | `BK_INDEPENDENT_ACCORDIONS` | Make accordions independent | `false` | No |
 
 ## Sort Order Configuration
@@ -37,6 +42,15 @@
 | `BK_PARTS_DEFAULT_ORDER` | Default part sorting | `"inventory"."name" ASC` | No |
 | `BK_MINIFIGURES_DEFAULT_ORDER` | Default minifig sorting | `"minifigures"."name" ASC` | No |
 | `BK_WISHES_DEFAULT_ORDER` | Default wishlist sorting | `"bricktracker_wishes"."rowid" DESC` | No |
+| `BK_STORAGE_DEFAULT_ORDER` | Default storage sorting | `"bricktracker_metadata_storages"."name" ASC` | No |
+| `BK_PURCHASE_LOCATION_DEFAULT_ORDER` | Default purchase location sorting | `"bricktracker_metadata_purchase_locations"."name" ASC` | No |
+
+## Purchase Configuration
+| Variable | Purpose | Default | Required |
+|----------|---------|----------|-----------|
+| `BK_PURCHASE_CURRENCY` | Currency for purchase prices | `€` | No |
+| `BK_PURCHASE_DATE_FORMAT` | Purchase date format | `%d/%m/%Y` | No |
+| `BK_FILE_DATETIME_FORMAT` | Date format for files | `%d/%m/%Y, %H:%M:%S` | No |
 
 ## External Links Configuration
 | Variable | Purpose | Default | Required |
