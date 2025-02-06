@@ -1,14 +1,15 @@
-{% macro badge(check=none, url=none, solo=false, last=false, color='primary', blank=none, icon=none, alt=none, collapsible=none, text=none, tooltip=none) %}
+{% macro badge(check=none, url=none, solo=false, last=false, header=false, color='primary', rgb=none, blank=none, icon=none, alt=none, collapsible=none, text=none, tooltip=none) %}
   {% if check or url %}
     {% if url %}
       <a href="{{ url }}" {% if blank %}target="_blank"{% endif %}
     {% else %}
       <span
     {% endif %}
-      class="badge text-bg-{{ color }} fw-normal mb-1 {% if solo %}fs-6{% endif %}" {% if alt %}alt="{{ alt }}"{% endif %}
+      class="badge text-bg-{{ color }} fw-normal {% if not header %}mb-1{% endif %} {% if solo and not header %}fs-6{% endif %}" {% if alt %}alt="{{ alt }}"{% endif %}
       {% if tooltip %} data-bs-toggle="tooltip" title="{{ tooltip }}"{% endif %}
     >
     {% if icon %}<i class="ri-{{ icon }}"></i>{% endif %}
+    {% if rgb %}<span class="color-rgb {% if rgb == 'any' %}color-any{% endif %} align-bottom border border-black" {% if rgb != 'any' %}style="background-color: #{{ rgb }};"{% endif %}></span>{% endif %}
     {% if collapsible and not last %}<span {% if not solo %}class="d-none d-md-inline"{% endif %}> {{ collapsible }} </span>{% endif %}
     {% if text %}{{ text }}{% endif %}
     {% if url %}
@@ -23,6 +24,20 @@
   {{ badge(url=item.url_for_bricklink(), solo=solo, last=last, blank=true, color='light border', icon='external-link-line', collapsible='Bricklink', alt='Bricklink') }}
 {% endmacro %}
 
+{% macro color(item, icon=none, solo=false, last=false, header=false) %}
+  {% if item.fields.color == 9999 %}
+    {% set rgb = 'any' %}
+  {% else %}
+      {% set rgb = item.fields.color_rgb %}
+  {% endif %}
+  {{ badge(check=item.fields.color_name, solo=solo, last=last, header=header, color=' bg-white text-black border', rgb=rgb, icon='palette-line', collapsible=item.fields.color_name) }}
+  {{ badge(check=item.fields.color_transparent, solo=solo, last=last, header=header, color='light border', icon='blur-off-line', collapsible='Transparent') }}
+{% endmacro %}
+
+{% macro identifier(id, icon=none, solo=false, last=false, header=false) %}
+  {{ badge(check=id, solo=solo, last=last, header=header, color='secondary', icon=icon, text=id) }}
+{% endmacro %}
+
 {% macro instructions(item, solo=false, last=false) %}
   {{ badge(url=item.url_for_instructions(), solo=solo, last=last, blank=true, color='light border', icon='file-line', collapsible='Instructions:', text=item.instructions | length, alt='Instructions') }}
 {% endmacro %}
@@ -35,6 +50,51 @@
   {{ badge(check=quantity, solo=solo, last=last, color='success', icon='close-line', collapsible='Quantity:', text=quantity, alt='Quantity') }}
 {% endmacro %}
 
+{% macro owner(item, owner, solo=false, last=false) %}
+  {% if last %}
+    {% set tooltip=owner.fields.name %}
+  {% else %}
+    {% set text=owner.fields.name %}
+  {% endif %}
+  {{ badge(check=item.fields[owner.as_column()], solo=solo, last=last, color='light text-success-emphasis bg-success-subtle border border-success-subtle', icon='user-line', text=text, alt='Owner', tooltip=tooltip) }}
+{% endmacro %}
+
+{% macro print(item, solo=false, last=false, header=false) %}
+  {% if item.fields.print %}
+    {{ badge(url=item.url_for_print(), solo=solo, last=last, color='light border', icon='paint-brush-line', collapsible='Print') }}
+  {% endif %}
+{% endmacro %}
+
+{% macro purchase_date(date, solo=false, last=false) %}
+  {% if last %}
+    {% set tooltip=date %}
+  {% else %}
+    {% set text=date %}
+  {% endif %}
+  {{ badge(check=date, solo=solo, last=last, color='light border', icon='calendar-line', text=text, tooltip=tooltip, collapsible='Date:') }}
+{% endmacro %}
+
+{% macro purchase_location(item, purchase_locations, solo=false, last=false) %}
+  {% if purchase_locations and item.fields.purchase_location in purchase_locations.mapping %}
+    {% set purchase_location = purchase_locations.mapping[item.fields.purchase_location] %}
+    {% if last %}
+      {% set tooltip=purchase_location.fields.name %}
+    {% else %}
+      {% set text=purchase_location.fields.name %}
+    {% endif %}
+    {{ badge(check=purchase_location, solo=solo, last=last, color='light border', icon='building-line', text=text, tooltip=tooltip, collapsible='Location:') }}
+  {% endif %}
+{% endmacro %}
+
+{% macro purchase_price(price, solo=false, last=false) %}
+  {% if last %}
+    {% set tooltip=price %}
+  {% else %}
+    {% set text=price %}
+  {% endif %}
+  {{ badge(check=price, solo=solo, last=last, color='light border', icon='wallet-3-line', text=text, tooltip=tooltip, collapsible='Price:') }}
+{% endmacro %}
+
 {% macro set(set, solo=false, last=false, url=None, id=None) %}
   {% if id %}
       {% set url=url_for('set.details', id=id) %}
@@ -42,13 +102,40 @@
   {{ badge(check=set, url=url, solo=solo, last=last, color='secondary', icon='hashtag', collapsible='Set:', text=set, alt='Set') }}
 {% endmacro %}
 
+{% macro storage(item, storages, solo=false, last=false) %}
+  {% if storages and item.fields.storage in storages.mapping %}
+    {% set storage = storages.mapping[item.fields.storage] %}
+    {% if last %}
+      {% set tooltip=storage.fields.name %}
+    {% else %}
+      {% set text=storage.fields.name %}
+    {% endif %}
+    {{ badge(url=item.url_for_storage(), solo=solo, last=last, color='light text-warning-emphasis bg-warning-subtle border border-warning-subtle', icon='archive-2-line', text=text, alt='Storage', tooltip=tooltip) }}
+  {% endif %}
+{% endmacro %}
+
+{% macro tag(item, tag, solo=false, last=false) %}
+  {% if last %}
+    {% set tooltip=tag.fields.name %}
+  {% else %}
+    {% set text=tag.fields.name %}
+  {% endif %}
+  {{ badge(check=item.fields[tag.as_column()], solo=solo, last=last, color='light text-primary-emphasis bg-primary-subtle border border-primary-subtle', icon='price-tag-2-line', text=text, alt='Tag', tooltip=tooltip) }}
+{% endmacro %}
+
 {% macro theme(theme, solo=false, last=false) %}
-  {% if last  %}
+  {% if last %}
     {% set tooltip=theme %}
   {% else %}
     {% set text=theme %}
   {% endif %}
   {{ badge(check=theme, solo=solo, last=last, color='primary', icon='price-tag-3-line', text=text, alt='Theme', tooltip=tooltip) }}
+{% endmacro %}
+
+{% macro total_damaged(damaged, solo=false, last=false) %}
+  {% if not config['HIDE_TABLE_DAMAGED_PARTS'] %}
+    {{ badge(check=damaged, solo=solo, last=last, color='danger', icon='error-warning-line', collapsible='Damaged:', text=damaged, alt='Damaged') }}
+  {% endif %}
 {% endmacro %}
 
 {% macro total_quantity(quantity, solo=false, last=false) %}
@@ -60,7 +147,9 @@
 {% endmacro %}
 
 {% macro total_missing(missing, solo=false, last=false) %}
-  {{ badge(check=missing, solo=solo, last=last, color='danger', icon='error-warning-line', collapsible='Missing:', text=missing, alt='Missing') }}
+  {% if not config['HIDE_TABLE_MISSING_PARTS'] %}
+    {{ badge(check=missing, solo=solo, last=last, color='light text-danger-emphasis bg-danger-subtle border border-danger-subtle', icon='question-line', collapsible='Missing:', text=missing, alt='Missing') }}
+  {% endif %}
 {% endmacro %}
 
 {% macro total_sets(sets, solo=false, last=false) %}

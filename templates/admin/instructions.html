@@ -6,25 +6,27 @@
   The instructions files folder is: <code>{{ config['INSTRUCTIONS_FOLDER'] }}</code>. <br>
   Allowed file formats for instructions are the following: <code>{{ ', '.join(config['INSTRUCTIONS_ALLOWED_EXTENSIONS']) }}</code>.
 </p>
-<h5 class="border-bottom">Counters</h5>
-<p>
-  <div class="d-flex justify-content-start">
-    <ul class="list-group">
-      <li class="list-group-item d-flex justify-content-between align-items-start">
-        <span><i class="ri-hashtag"></i> Sets</span> <span class="badge text-bg-primary rounded-pill ms-2">{{ instructions.sets | length }}</span>
-      </li>
-      <li class="list-group-item d-flex justify-content-between align-items-start">
-        <span><i class="ri-file-line"></i> Instructions for sets</span> <span class="badge text-bg-primary rounded-pill ms-2">{{ instructions.sets_total }}</span>
-      </li>
-      <li class="list-group-item d-flex justify-content-between align-items-start">
-        <span><i class="ri-question-line"></i> Unknown</span> <span class="badge text-bg-primary rounded-pill ms-2">{{ instructions.unknown_total }}</span>
-      </li>
-      <li class="list-group-item d-flex justify-content-between align-items-start">
-        <span><i class="ri-prohibited-line"></i> Rejected files</span> <span class="badge text-bg-primary rounded-pill ms-2">{{ instructions.rejected_total }}</span>
-      </li>
-    </ul>
-  </div>
-</p>
+{% if instructions %}
+  <h5 class="border-bottom">Counters</h5>
+  <p>
+    <div class="d-flex justify-content-start">
+      <ul class="list-group">
+        <li class="list-group-item d-flex justify-content-between align-items-start">
+          <span><i class="ri-hashtag"></i> Sets</span> <span class="badge text-bg-primary rounded-pill ms-2">{{ instructions.sets | length }}</span>
+        </li>
+        <li class="list-group-item d-flex justify-content-between align-items-start">
+          <span><i class="ri-file-line"></i> Instructions for sets</span> <span class="badge text-bg-primary rounded-pill ms-2">{{ instructions.sets_total }}</span>
+        </li>
+        <li class="list-group-item d-flex justify-content-between align-items-start">
+          <span><i class="ri-question-line"></i> Unknown</span> <span class="badge text-bg-primary rounded-pill ms-2">{{ instructions.unknown_total }}</span>
+        </li>
+        <li class="list-group-item d-flex justify-content-between align-items-start">
+          <span><i class="ri-prohibited-line"></i> Rejected files</span> <span class="badge text-bg-primary rounded-pill ms-2">{{ instructions.rejected_total }}</span>
+        </li>
+      </ul>
+    </div>
+  </p>
+{% endif %}
 <h5 class="border-bottom">Refresh</h5>
 <p>
   <a href="{{ url_for('admin_instructions.refresh') }}" class="btn btn-primary" role="button"><i class="ri-refresh-line"></i> Refresh the instructions cache</a>

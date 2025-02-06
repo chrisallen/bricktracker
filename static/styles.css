@@ -46,7 +46,7 @@
     object-fit:contain;
 }
 
-.table-td-missing {
+.table-td-input {
     max-width: 150px;
 }
 
@@ -58,4 +58,23 @@
 
 .sortable thead th {
     font-weight: bold !important;
+}
+
+.color-rgb {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+}
+
+.color-rgb-table {
+    width: 20px !important;
+    height: 20px !important;
+}
+
+.color-any {
+    background:
+        linear-gradient(217deg, rgb(255 0 0 / 80%), rgb(255 0 0 / 0%) 70.71%),
+        linear-gradient(127deg, rgb(0 255 0 / 80%), rgb(0 255 0 / 0%) 70.71%),
+        linear-gradient(336deg, rgb(0 0 255 / 80%), rgb(0 0 255 / 0%) 70.71%)
+    ;
 }

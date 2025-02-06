@@ -8,16 +8,26 @@ if TYPE_CHECKING:
     from .part import BrickPart
     from .rebrickable_set import RebrickableSet
     from .set import BrickSet
-    from .set_checkbox import BrickSetCheckbox
+    from .set_owner import BrickSetOwner
+    from .set_purchase_location import BrickSetPurchaseLocation
+    from .set_status import BrickSetStatus
+    from .set_storage import BrickSetStorage
+    from .set_tag import BrickSetTag
     from .wish import BrickWish
+    from .wish_owner import BrickWishOwner
 
 T = TypeVar(
     'T',
-    'BrickSet',
-    'BrickSetCheckbox',
-    'BrickPart',
     'BrickMinifigure',
+    'BrickPart',
+    'BrickSet',
+    'BrickSetOwner',
+    'BrickSetPurchaseLocation',
+    'BrickSetStatus',
+    'BrickSetStorage',
+    'BrickSetTag',
     'BrickWish',
+    'BrickWishOwner',
     'RebrickableSet'
 )
 

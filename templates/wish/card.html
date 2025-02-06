@@ -1,0 +1,49 @@
+{% import 'macro/accordion.html' as accordion %}
+{% import 'macro/badge.html' as badge %}
+{% import 'macro/card.html' as card %}
+{% import 'macro/form.html' as form %}
+
+<div class="card mb-3 flex-fill {% if solo %}card-solo{% endif %}">
+  {{ card.header(item, item.fields.name, solo=solo, identifier=item.fields.set) }}
+  {{ card.image(item, solo=solo, last=last, caption=item.fields.name, alt=item.fields.set) }}
+  <div class="card-body border-bottom-0 {% if not solo %}p-1{% endif %}">
+    {{ badge.theme(item.theme.name, solo=solo, last=last) }}
+    {{ badge.parts(item.fields.number_of_parts, solo=solo, last=last) }}
+    {% for owner in owners %}
+      {{ badge.owner(item, owner, solo=solo, last=last) }}
+    {% endfor %}
+  </div>
+  {% if solo and g.login.is_authenticated() %}
+    <div class="accordion accordion-flush border-top" id="wish-details">
+      {% if not delete %}
+        {{ accordion.header('Requester', 'owner', 'wish-details', icon='group-line', class='p-0') }}
+        <ul class="list-group list-group-flush">
+        {% if owners | length %}
+          {% for owner in owners %}
+            <li class="d-flex list-group-item list-group-item-action text-nowrap">{{ form.checkbox(owner.fields.name, item.fields.set, owner.as_dataset(), owner.url_for_wish_state(item.fields.set), item.fields[owner.as_column()], delete=delete) }}</li>
+          {% endfor %}
+        {% else %}
+          <li class="list-group-item list-group-item-action text-center"><i class="ri-error-warning-line"></i> No requester found.</li>
+        {% endif %}
+        </ul>
+        <div class="list-group list-group-flush border-top">
+          <a class="list-group-item list-group-item-action" href="{{ url_for('admin.admin', open_owner=true) }}"><i class="ri-settings-4-line"></i> Manage the set owners</a>
+        </div>
+        {{ accordion.footer() }}
+      {% endif %}
+      {{ accordion.header('Danger zone', 'danger-zone', 'wish-details', expanded=delete, danger=true, class='text-end') }}
+        {% if delete %}
+          <form action="{{ item.url_for_do_delete() }}" method="post">
+            {% if error %}<div class="alert alert-danger text-start" role="alert"><strong>Error:</strong> {{ error }}.</div>{% endif %}
+            <div class="alert alert-danger text-center" role="alert">You are about to delete a wish. This action is irreversible.</div>
+            <a class="btn btn-primary" href="{{ item.url() }}" role="button"><i class="ri-arrow-left-long-line"></i> Back to the wish</a>
+            <button type="submit" class="btn btn-danger"><i class="ri-close-line"></i> Delete the wish</button>
+          </form>
+        {% else %}
+          <a href="{{ item.url_for_delete() }}" class="btn btn-danger" role="button"><i class="ri-close-line"></i> Delete the wish</a>
+        {% endif %}
+      {{ accordion.footer() }}
+    </div>
+    <div class="card-footer"></div>
+  {% endif %}
+</div>

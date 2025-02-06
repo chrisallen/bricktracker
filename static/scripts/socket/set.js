@@ -1,16 +1,24 @@
 // Set Socket class
 class BrickSetSocket extends BrickSocket {
-    constructor(id, path, namespace, messages, bulk=false) {
+    constructor(id, path, namespace, messages, bulk=false, refresh=false) {
         super(id, path, namespace, messages, bulk);
+
+        // Refresh mode
+        this.refresh = refresh
 
         // Listeners
         this.add_listener = undefined;
+        this.input_listener = undefined;
         this.confirm_listener = undefined;
 
         // Form elements (built based on the initial id)
         this.html_button = document.getElementById(id);
         this.html_input = document.getElementById(`${id}-set`);
         this.html_no_confim = document.getElementById(`${id}-no-confirm`);
+        this.html_owners = document.getElementById(`${id}-owners`);
+        this.html_purchase_location = document.getElementById(`${id}-purchase-location`);
+        this.html_storage = document.getElementById(`${id}-storage`);
+        this.html_tags = document.getElementById(`${id}-tags`);
 
         // Card elements
         this.html_card = document.getElementById(`${id}-card`);
@@ -23,24 +31,15 @@ class BrickSetSocket extends BrickSocket {
         this.html_card_dismiss = document.getElementById(`${id}-card-dismiss`);
 
         if (this.html_button) {
-            this.add_listener = ((bricksocket) => (e) => {
-                if (!bricksocket.disabled && bricksocket.socket !== undefined && bricksocket.socket.connected) {
-                    bricksocket.toggle(false);
+            this.add_listener = this.html_button.addEventListener("click", ((bricksocket) => (e) => {
+                bricksocket.execute();
+            })(this));
 
-                    // Split and save the list if bulk
-                    if (bricksocket.bulk) {
-                        bricksocket.read_set_list()
-                    }
-
-                    if (bricksocket.bulk || (bricksocket.html_no_confim && bricksocket.html_no_confim.checked)) {
-                        bricksocket.import_set(true);
-                    } else {
-                        bricksocket.load_set();
-                    }
+            this.input_listener = this.html_input.addEventListener("keyup", ((bricksocket) => (e) => {
+                if (e.key === 'Enter') {
+                    bricksocket.execute();
                 }
-            })(this);
-
-            this.html_button.addEventListener("click", this.add_listener);
+            })(this))
         }
 
         if (this.html_card_dismiss && this.html_card) {
@@ -77,6 +76,24 @@ class BrickSetSocket extends BrickSocket {
         if (this.bulk) {
             // Import the next set
             this.import_set(true, undefined, true);
+        }
+    }
+
+    // Execute the action
+    execute() {
+        if (!this.disabled && this.socket !== undefined && this.socket.connected) {
+            this.toggle(false);
+
+            // Split and save the list if bulk
+            if (this.bulk) {
+                this.read_set_list();
+            }
+
+            if (this.bulk || this.refresh || (this.html_no_confim && this.html_no_confim.checked)) {
+                this.import_set(true);
+            } else {
+                this.load_set();
+            }
         }
     }
 
@@ -126,10 +143,51 @@ class BrickSetSocket extends BrickSocket {
                 this.set_list_last_set = set;
             }
 
+            // Grab the owners
+            const owners = [];
+            if (this.html_owners) {
+                this.html_owners.querySelectorAll('input').forEach(input => {
+                    if (input.checked) {
+                        owners.push(input.value);
+                    }
+                });
+            }
+
+            // Grab the purchase location
+            let purchase_location = null;
+            if (this.html_purchase_location) {
+                purchase_location = this.html_purchase_location.value;
+            }
+
+            // Grab the storage
+            let storage = null;
+            if (this.html_storage) {
+                storage = this.html_storage.value;
+            }
+
+            // Grab the tags
+            const tags = [];
+            if (this.html_tags) {
+                this.html_tags.querySelectorAll('input').forEach(input => {
+                    if (input.checked) {
+                        tags.push(input.value);
+                    }
+                });
+            }
+
             this.spinner(true);
+
+            if (this.html_progress_bar) {
+                this.html_progress_bar.scrollIntoView();
+            }
 
             this.socket.emit(this.messages.IMPORT_SET, {
                 set: (set !== undefined) ? set : this.html_input.value,
+                owners: owners,
+                purchase_location: purchase_location,
+                storage: storage,
+                tags: tags,
+                refresh: this.refresh
             });
         } else {
             this.fail("Could not find the input field for the set number");
@@ -202,6 +260,8 @@ class BrickSetSocket extends BrickSocket {
                         })(this, data["set"]);
 
                         this.html_card_confirm.addEventListener("click", this.confirm_listener);
+
+                        this.html_card_confirm.scrollIntoView();
                     }
                 }
             }
@@ -231,6 +291,26 @@ class BrickSetSocket extends BrickSocket {
 
         if (this.html_input) {
             this.html_input.disabled = !enabled;
+        }
+
+        if (!this.bulk && this.html_no_confim) {
+            this.html_no_confim.disabled = !enabled;
+        }
+
+        if (this.html_owners) {
+            this.html_owners.querySelectorAll('input').forEach(input => input.disabled = !enabled);
+        }
+
+        if (this.html_purchase_location) {
+            this.html_purchase_location.disabled = !enabled;
+        }
+
+        if (this.html_storage) {
+            this.html_storage.disabled = !enabled;
+        }
+
+        if (this.html_tags) {
+            this.html_tags.querySelectorAll('input').forEach(input => input.disabled = !enabled);
         }
 
         if (this.html_card_confirm) {

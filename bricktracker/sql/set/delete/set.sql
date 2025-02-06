@@ -6,16 +6,19 @@ BEGIN TRANSACTION;
 DELETE FROM "bricktracker_sets"
 WHERE "bricktracker_sets"."id" IS NOT DISTINCT FROM '{{ id }}';
 
+DELETE FROM "bricktracker_set_owners"
+WHERE "bricktracker_set_owners"."id" IS NOT DISTINCT FROM '{{ id }}';
+
 DELETE FROM "bricktracker_set_statuses"
-WHERE "bricktracker_set_statuses"."bricktracker_set_id" IS NOT DISTINCT FROM '{{ id }}';
+WHERE "bricktracker_set_statuses"."id" IS NOT DISTINCT FROM '{{ id }}';
 
-DELETE FROM "minifigures"
-WHERE "minifigures"."u_id" IS NOT DISTINCT FROM '{{ id }}';
+DELETE FROM "bricktracker_set_tags"
+WHERE "bricktracker_set_tags"."id" IS NOT DISTINCT FROM '{{ id }}';
 
-DELETE FROM "missing"
-WHERE "missing"."u_id" IS NOT DISTINCT FROM '{{ id }}';
+DELETE FROM "bricktracker_minifigures"
+WHERE "bricktracker_minifigures"."id" IS NOT DISTINCT FROM '{{ id }}';
 
-DELETE FROM "inventory"
-WHERE "inventory"."u_id" IS NOT DISTINCT FROM '{{ id }}';
+DELETE FROM "bricktracker_parts"
+WHERE "bricktracker_parts"."id" IS NOT DISTINCT FROM '{{ id }}';
 
 COMMIT;

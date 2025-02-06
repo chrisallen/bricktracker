@@ -11,15 +11,9 @@ class BrickInstructionsSocket extends BrickSocket {
         this.html_files = document.getElementById(`${id}-files`);
 
         if (this.html_button) {
-            this.download_listener = ((bricksocket) => (e) => {
-                if (!bricksocket.disabled && bricksocket.socket !== undefined && bricksocket.socket.connected) {
-                    bricksocket.toggle(false);
-
-                    bricksocket.download_instructions();
-                }
-            })(this);
-
-            this.html_button.addEventListener("click", this.download_listener);
+            this.download_listener = this.html_button.addEventListener("click", ((bricksocket) => (e) => {
+                bricksocket.execute();
+            })(this));
         }
 
         if (this.html_card_dismiss && this.html_card) {
@@ -41,6 +35,15 @@ class BrickInstructionsSocket extends BrickSocket {
 
         // Download the next file
         this.download_instructions(true);
+    }
+
+    // Execute the action
+    execute() {
+        if (!this.disabled && this.socket !== undefined && this.socket.connected) {
+            this.toggle(false);
+
+            this.download_instructions();
+        }
     }
 
     // Get the list of checkboxes describing files

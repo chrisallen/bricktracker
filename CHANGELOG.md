@@ -1,5 +1,117 @@
 # Changelog
 
+## Unreleased
+
+> **Warning**
+> "Missing" part has been renamed to "Problems" to accomodate for missing and damaged parts.
+> The associated environment variables have changed named (the old names are still valid)
+
+### Environment
+
+- Renamed: `BK_HIDE_MISSING_PARTS` -> `BK_HIDE_ALL_PROBLEMS_PARTS`
+- Added: `BK_HIDE_TABLE_MISSING_PARTS`, hide the Missing column in all tables
+- Added: `BK_HIDE_TABLE_DAMAGED_PARTS`, hide the Damaged column in all tables
+- Added: `BK_SHOW_GRID_SORT`, show the sort options on the grid by default
+- Added: `BK_SHOW_GRID_FILTERS`, show the filter options on the grid by default
+- Added: `BK_HIDE_ALL_STORAGES`, hide the "Storages" menu entry
+- Added: `BK_STORAGE_DEFAULT_ORDER`, ordering of storages
+- Added: `BK_PURCHASE_LOCATION_DEFAULT_ORDER`, ordering of purchase locations
+- Added: `BK_PURCHASE_CURRENCY`, currency to display for purchase prices
+- Added: `BK_PURCHASE_DATE_FORMAT`, date format for purchase dates
+- Documented: `BK_FILE_DATETIME_FORMAT`, date format for files on disk (instructions, theme)
+
+### Code
+
+- Changer
+    - Revert the checked state of a checkbox if an error occured
+
+- Form
+    - Migrate missing input fields to BrickChanger
+
+- General cleanup
+
+- Metadata
+    - Underlying class to implement more metadata-like features
+
+- Minifigure
+    - Deduplicate
+    - Compute number of parts
+
+- Parts
+    - Damaged parts
+
+- Sets
+    - Refresh data from Rebrickable
+    - Fix missing @login_required for set deletion
+    - Ownership
+    - Tags
+    - Storage
+    - Purchase location, date, price
+
+- Storage
+    - Storage content and list
+
+- Socket
+    - Add decorator for rebrickable, authenticated and threaded socket actions
+
+- SQL
+    - Allow for advanced migration scenarios through companion python files
+    - Add a bunch of the requested fields into the database for future implementation
+
+- Wish
+    - Requester
+
+### UI
+
+- Add
+    - Allow adding or bulk adding by pressing Enter in the input field
+
+- Admin
+    - Grey out legacy tables in the database view
+    - Checkboxes renamed to Set statuses
+    - List of sets that may need to be refreshed
+
+- Cards
+    - Use macros for badge in the card header
+
+- Form
+    - Add a clear button for dynamic text inputs
+    - Add error message in a tooltip for dynamic inputs
+
+- Minifigure
+    - Display number of parts
+
+- Parts
+    - Use Rebrickable URL if stored (+ color code)
+    - Display color and transparency
+    - Display if print of another part
+    - Display prints using the same base
+    - Damaged parts
+    - Display same parts using a different color
+
+- Sets
+    - Add a flag to hide instructions in a set
+    - Make checkbox clickable on the whole width of the card
+    - Management
+        - Ownership
+        - Tags
+        - Refresh
+        - Storage
+        - Purchase location, date, price
+
+- Sets grid
+    - Collapsible controls depending on screen size
+    - Manually collapsible filters (with configuration variable for default state)
+    - Manually collapsible sort (with configuration variable for default state)
+    - Clear search bar
+
+- Storage
+    - Storage list
+    - Storage content
+
+- Wish
+    - Requester
+
 ## 1.1.1: PDF Instructions Download
 
 ### Instructions

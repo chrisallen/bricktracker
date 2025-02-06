@@ -1,27 +1,30 @@
-{% import 'macro/accordion.html' as accordion %}
+{% import 'macro/accordion.html' as accordion with context %}
 {% import 'macro/badge.html' as badge %}
 {% import 'macro/card.html' as card %}
 
 <div class="card mb-3 flex-fill {% if solo %}card-solo{% endif %}">
-  {{ card.header(item, item.fields.name, solo=solo, number=item.clean_number(), icon='user-line') }}
-  {{ card.image(item, solo=solo, last=last, caption=item.fields.name, alt=item.fields.fig_num, medium=true) }}
+  {{ card.header(item, item.fields.name, solo=solo, identifier=item.fields.figure, icon='user-line') }}
+  {{ card.image(item, solo=solo, last=last, caption=item.fields.name, alt=item.fields.figure, medium=true) }}
   <div class="card-body border-bottom {% if not solo %}p-1{% endif %}">
+    {{ badge.parts(item.fields.number_of_parts, solo=solo, last=last) }}
     {% if last %}
-      {{ badge.set(item.fields.set_num, solo=solo, last=last, id=item.fields.u_id) }}
+      {{ badge.set(item.fields.set, solo=solo, last=last, id=item.fields.rebrickable_set_id) }}
       {{ badge.quantity(item.fields.quantity, solo=solo, last=last) }}
     {% endif %}
     {{ badge.quantity(item.fields.total_quantity, solo=solo, last=last) }}
     {{ badge.total_sets(using | length, solo=solo, last=last) }}
     {{ badge.total_missing(item.fields.total_missing, solo=solo, last=last) }}
+    {{ badge.total_damaged(item.fields.total_damaged, solo=solo, last=last) }}
     {% if not last %}
       {{ badge.rebrickable(item, solo=solo, last=last) }}
     {% endif %}
   </div>
   {% if solo %}
     <div class="accordion accordion-flush" id="minifigure-details">
-      {{ accordion.table(item.generic_parts(), 'Parts', item.fields.fig_num, 'minifigure-details', 'part/table.html', icon='shapes-line', alt=item.fields.fig_num, read_only_missing=read_only_missing)}}
+      {{ accordion.table(item.generic_parts(), 'Parts', item.fields.figure, 'minifigure-details', 'part/table.html', icon='shapes-line', alt=item.fields.figure, read_only=read_only)}}
       {{ accordion.cards(using, 'Sets using this minifigure', 'using-inventory', 'minifigure-details', 'set/card.html', icon='hashtag') }}
-      {{ accordion.cards(missing, 'Sets missing parts of this minifigure', 'missing-inventory', 'minifigure-details', 'set/card.html', icon='error-warning-line') }}
+      {{ accordion.cards(missing, 'Sets missing parts for this minifigure', 'missing-inventory', 'minifigure-details', 'set/card.html', icon='question-line') }}
+      {{ accordion.cards(damaged, 'Sets with damaged parts for this minifigure', 'damaged-inventory', 'minifigure-details', 'set/card.html', icon='error-warning-line') }}
     </div>
     <div class="card-footer"></div>
   {% endif %}

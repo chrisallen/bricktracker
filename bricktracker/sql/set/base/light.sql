@@ -1,6 +1,6 @@
 SELECT
     "bricktracker_sets"."id",
-    "bricktracker_sets"."rebrickable_set" AS "set"
+    "bricktracker_sets"."set"
 FROM "bricktracker_sets"
 
 {% block join %}{% endblock %}

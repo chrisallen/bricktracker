@@ -13,11 +13,16 @@ from bricktracker.sql import close
 from bricktracker.version import __version__
 from bricktracker.views.add import add_page
 from bricktracker.views.admin.admin import admin_page
-from bricktracker.views.admin.checkbox import admin_checkbox_page
 from bricktracker.views.admin.database import admin_database_page
 from bricktracker.views.admin.image import admin_image_page
 from bricktracker.views.admin.instructions import admin_instructions_page
+from bricktracker.views.admin.owner import admin_owner_page
+from bricktracker.views.admin.purchase_location import admin_purchase_location_page  # noqa: E501
 from bricktracker.views.admin.retired import admin_retired_page
+from bricktracker.views.admin.set import admin_set_page
+from bricktracker.views.admin.status import admin_status_page
+from bricktracker.views.admin.storage import admin_storage_page
+from bricktracker.views.admin.tag import admin_tag_page
 from bricktracker.views.admin.theme import admin_theme_page
 from bricktracker.views.error import error_404
 from bricktracker.views.index import index_page
@@ -26,6 +31,7 @@ from bricktracker.views.login import login_page
 from bricktracker.views.minifigure import minifigure_page
 from bricktracker.views.part import part_page
 from bricktracker.views.set import set_page
+from bricktracker.views.storage import storage_page
 from bricktracker.views.wish import wish_page
 
 
@@ -74,15 +80,21 @@ def setup_app(app: Flask) -> None:
     app.register_blueprint(minifigure_page)
     app.register_blueprint(part_page)
     app.register_blueprint(set_page)
+    app.register_blueprint(storage_page)
     app.register_blueprint(wish_page)
 
     # Register admin routes
     app.register_blueprint(admin_page)
-    app.register_blueprint(admin_checkbox_page)
     app.register_blueprint(admin_database_page)
     app.register_blueprint(admin_image_page)
     app.register_blueprint(admin_instructions_page)
     app.register_blueprint(admin_retired_page)
+    app.register_blueprint(admin_owner_page)
+    app.register_blueprint(admin_purchase_location_page)
+    app.register_blueprint(admin_set_page)
+    app.register_blueprint(admin_status_page)
+    app.register_blueprint(admin_storage_page)
+    app.register_blueprint(admin_tag_page)
     app.register_blueprint(admin_theme_page)
 
     # An helper to make global variables available to the

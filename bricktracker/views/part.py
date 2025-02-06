@@ -4,7 +4,7 @@ from .exceptions import exception_handler
 from ..minifigure_list import BrickMinifigureList
 from ..part import BrickPart
 from ..part_list import BrickPartList
-from ..set_list import BrickSetList
+from ..set_list import BrickSetList, set_metadata_lists
 
 part_page = Blueprint('part', __name__, url_prefix='/parts')
 
@@ -19,42 +19,50 @@ def list() -> str:
     )
 
 
-# Missing
-@part_page.route('/missing', methods=['GET'])
+# Problem
+@part_page.route('/problem', methods=['GET'])
 @exception_handler(__file__)
-def missing() -> str:
+def problem() -> str:
     return render_template(
-        'missing.html',
-        table_collection=BrickPartList().missing()
+        'problem.html',
+        table_collection=BrickPartList().problem()
     )
 
 
 # Part details
-@part_page.route('/<number>/<int:color>/details', defaults={'element': None}, methods=['GET'])  # noqa: E501
-@part_page.route('/<number>/<int:color>/<int:element>/details', methods=['GET'])  # noqa: E501
+@part_page.route('/<part>/<int:color>/details', methods=['GET'])  # noqa: E501
 @exception_handler(__file__)
-def details(*, number: str, color: int, element: int | None) -> str:
+def details(*, part: str, color: int) -> str:
+    brickpart = BrickPart().select_generic(part, color)
+
     return render_template(
         'part.html',
-        item=BrickPart().select_generic(number, color, element_id=element),
+        item=brickpart,
         sets_using=BrickSetList().using_part(
-            number,
-            color,
-            element_id=element
+            part,
+            color
         ),
         sets_missing=BrickSetList().missing_part(
-            number,
-            color,
-            element_id=element
+            part,
+            color
+        ),
+        sets_damaged=BrickSetList().damaged_part(
+            part,
+            color
         ),
         minifigures_using=BrickMinifigureList().using_part(
-            number,
-            color,
-            element_id=element
+            part,
+            color
         ),
         minifigures_missing=BrickMinifigureList().missing_part(
-            number,
-            color,
-            element_id=element
+            part,
+            color
         ),
+        minifigures_damaged=BrickMinifigureList().damaged_part(
+            part,
+            color
+        ),
+        different_color=BrickPartList().with_different_color(brickpart),
+        similar_prints=BrickPartList().from_print(brickpart),
+        **set_metadata_lists(as_class=True)
     )

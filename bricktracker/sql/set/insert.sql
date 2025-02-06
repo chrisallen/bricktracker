@@ -1,7 +1,11 @@
 INSERT OR IGNORE INTO "bricktracker_sets" (
     "id",
-    "rebrickable_set"
+    "set",
+    "storage",
+    "purchase_location"
 ) VALUES (
     :id,
-    :set
+    :set,
+    :storage,
+    :purchase_location
 )

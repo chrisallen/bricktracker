@@ -2,5 +2,5 @@
 
 {% block group %}
 GROUP BY
-    "bricktracker_sets"."rebrickable_set"
+    "bricktracker_sets"."set"
 {% endblock %}

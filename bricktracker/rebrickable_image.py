@@ -8,16 +8,16 @@ from shutil import copyfileobj
 
 from .exceptions import DownloadException
 if TYPE_CHECKING:
-    from .minifigure import BrickMinifigure
-    from .part import BrickPart
+    from .rebrickable_minifigure import RebrickableMinifigure
+    from .rebrickable_part import RebrickablePart
     from .rebrickable_set import RebrickableSet
 
 
 # A set, part or minifigure image from Rebrickable
 class RebrickableImage(object):
     set: 'RebrickableSet'
-    minifigure: 'BrickMinifigure | None'
-    part: 'BrickPart | None'
+    minifigure: 'RebrickableMinifigure | None'
+    part: 'RebrickablePart | None'
 
     extension: str | None
 
@@ -26,8 +26,8 @@ class RebrickableImage(object):
         set: 'RebrickableSet',
         /,
         *,
-        minifigure: 'BrickMinifigure | None' = None,
-        part: 'BrickPart | None' = None,
+        minifigure: 'RebrickableMinifigure | None' = None,
+        part: 'RebrickablePart | None' = None,
     ):
         # Save all objects
         self.set = set
@@ -81,16 +81,16 @@ class RebrickableImage(object):
     # Return the id depending on the objects provided
     def id(self, /) -> str:
         if self.part is not None:
-            if self.part.fields.part_img_url_id is None:
+            if self.part.fields.image_id is None:
                 return RebrickableImage.nil_name()
             else:
-                return self.part.fields.part_img_url_id
+                return self.part.fields.image_id
 
         if self.minifigure is not None:
-            if self.minifigure.fields.set_img_url is None:
+            if self.minifigure.fields.image is None:
                 return RebrickableImage.nil_minifigure_name()
             else:
-                return self.minifigure.fields.fig_num
+                return self.minifigure.fields.figure
 
         return self.set.fields.set
 
@@ -105,16 +105,16 @@ class RebrickableImage(object):
     # Return the url depending on the objects provided
     def url(self, /) -> str:
         if self.part is not None:
-            if self.part.fields.part_img_url is None:
+            if self.part.fields.image is None:
                 return current_app.config['REBRICKABLE_IMAGE_NIL']
             else:
-                return self.part.fields.part_img_url
+                return self.part.fields.image
 
         if self.minifigure is not None:
-            if self.minifigure.fields.set_img_url is None:
+            if self.minifigure.fields.image is None:
                 return current_app.config['REBRICKABLE_IMAGE_NIL_MINIFIGURE']
             else:
-                return self.minifigure.fields.set_img_url
+                return self.minifigure.fields.image
 
         return self.set.fields.image
 

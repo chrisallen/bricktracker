@@ -10,7 +10,7 @@ from typing import Any, Final
 CONFIG: Final[list[dict[str, Any]]] = [
     {'n': 'AUTHENTICATION_PASSWORD', 'd': ''},
     {'n': 'AUTHENTICATION_KEY', 'd': ''},
-    {'n': 'BRICKLINK_LINK_PART_PATTERN', 'd': 'https://www.bricklink.com/v2/catalog/catalogitem.page?P={number}'},  # noqa: E501
+    {'n': 'BRICKLINK_LINK_PART_PATTERN', 'd': 'https://www.bricklink.com/v2/catalog/catalogitem.page?P={part}'},  # noqa: E501
     {'n': 'BRICKLINK_LINKS', 'c': bool},
     {'n': 'DATABASE_PATH', 'd': './app.db'},
     {'n': 'DATABASE_TIMESTAMP_FORMAT', 'd': '%Y-%m-%d-%H-%M-%S'},
@@ -28,21 +28,28 @@ CONFIG: Final[list[dict[str, Any]]] = [
     {'n': 'HIDE_ALL_INSTRUCTIONS', 'c': bool},
     {'n': 'HIDE_ALL_MINIFIGURES', 'c': bool},
     {'n': 'HIDE_ALL_PARTS', 'c': bool},
+    {'n': 'HIDE_ALL_PROBLEMS_PARTS', 'e': 'BK_HIDE_MISSING_PARTS', 'c': bool},
     {'n': 'HIDE_ALL_SETS', 'c': bool},
-    {'n': 'HIDE_MISSING_PARTS', 'c': bool},
+    {'n': 'HIDE_ALL_STORAGES', 'c': bool},
+    {'n': 'HIDE_SET_INSTRUCTIONS', 'c': bool},
+    {'n': 'HIDE_TABLE_DAMAGED_PARTS', 'c': bool},
+    {'n': 'HIDE_TABLE_MISSING_PARTS', 'c': bool},
     {'n': 'HIDE_WISHES', 'c': bool},
-    {'n': 'MINIFIGURES_DEFAULT_ORDER', 'd': '"minifigures"."name" ASC'},
+    {'n': 'MINIFIGURES_DEFAULT_ORDER', 'd': '"rebrickable_minifigures"."name" ASC'},  # noqa: E501
     {'n': 'MINIFIGURES_FOLDER', 'd': 'minifigs', 's': True},
     {'n': 'NO_THREADED_SOCKET', 'c': bool},
-    {'n': 'PARTS_DEFAULT_ORDER', 'd': '"inventory"."name" ASC, "inventory"."color_name" ASC, "inventory"."is_spare" ASC'},  # noqa: E501
+    {'n': 'PARTS_DEFAULT_ORDER', 'd': '"rebrickable_parts"."name" ASC, "rebrickable_parts"."color_name" ASC, "bricktracker_parts"."spare" ASC'},  # noqa: E501
     {'n': 'PARTS_FOLDER', 'd': 'parts', 's': True},
     {'n': 'PORT', 'd': 3333, 'c': int},
+    {'n': 'PURCHASE_DATE_FORMAT', 'd': '%d/%m/%Y'},
+    {'n': 'PURCHASE_CURRENCY', 'd': '€'},
+    {'n': 'PURCHASE_LOCATION_DEFAULT_ORDER', 'd': '"bricktracker_metadata_purchase_locations"."name" ASC'},  # noqa: E501
     {'n': 'RANDOM', 'e': 'RANDOM', 'c': bool},
     {'n': 'REBRICKABLE_API_KEY', 'e': 'REBRICKABLE_API_KEY', 'd': ''},
     {'n': 'REBRICKABLE_IMAGE_NIL', 'd': 'https://rebrickable.com/static/img/nil.png'},  # noqa: E501
     {'n': 'REBRICKABLE_IMAGE_NIL_MINIFIGURE', 'd': 'https://rebrickable.com/static/img/nil_mf.jpg'},  # noqa: E501
-    {'n': 'REBRICKABLE_LINK_MINIFIGURE_PATTERN', 'd': 'https://rebrickable.com/minifigs/{number}'},  # noqa: E501
-    {'n': 'REBRICKABLE_LINK_PART_PATTERN', 'd': 'https://rebrickable.com/parts/{number}/_/{color}'},  # noqa: E501
+    {'n': 'REBRICKABLE_LINK_MINIFIGURE_PATTERN', 'd': 'https://rebrickable.com/minifigs/{figure}'},  # noqa: E501
+    {'n': 'REBRICKABLE_LINK_PART_PATTERN', 'd': 'https://rebrickable.com/parts/{part}/_/{color}'},  # noqa: E501
     {'n': 'REBRICKABLE_LINK_INSTRUCTIONS_PATTERN', 'd': 'https://rebrickable.com/instructions/{path}'},  # noqa: E501
     {'n': 'REBRICKABLE_USER_AGENT', 'd': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'},  # noqa: E501
     {'n': 'REBRICKABLE_LINKS', 'e': 'LINKS', 'c': bool},
@@ -51,9 +58,12 @@ CONFIG: Final[list[dict[str, Any]]] = [
     {'n': 'RETIRED_SETS_PATH', 'd': './retired_sets.csv'},
     {'n': 'SETS_DEFAULT_ORDER', 'd': '"rebrickable_sets"."number" DESC, "rebrickable_sets"."version" ASC'},  # noqa: E501
     {'n': 'SETS_FOLDER', 'd': 'sets', 's': True},
+    {'n': 'SHOW_GRID_FILTERS', 'c': bool},
+    {'n': 'SHOW_GRID_SORT', 'c': bool},
     {'n': 'SKIP_SPARE_PARTS', 'c': bool},
     {'n': 'SOCKET_NAMESPACE', 'd': 'bricksocket'},
     {'n': 'SOCKET_PATH', 'd': '/bricksocket/'},
+    {'n': 'STORAGE_DEFAULT_ORDER', 'd': '"bricktracker_metadata_storages"."name" ASC'},  # noqa: E501
     {'n': 'THEMES_FILE_URL', 'd': 'https://cdn.rebrickable.com/media/downloads/themes.csv.gz'},  # noqa: E501
     {'n': 'THEMES_PATH', 'd': './themes.csv'},
     {'n': 'TIMEZONE', 'd': 'Etc/UTC'},

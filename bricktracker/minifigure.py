@@ -1,48 +1,68 @@
-from sqlite3 import Row
-from typing import Any, Self, TYPE_CHECKING
-
-from flask import current_app, url_for
+import logging
+import traceback
+from typing import Self, TYPE_CHECKING
 
 from .exceptions import ErrorException, NotFoundException
 from .part_list import BrickPartList
-from .rebrickable_image import RebrickableImage
-from .record import BrickRecord
+from .rebrickable_minifigure import RebrickableMinifigure
 if TYPE_CHECKING:
     from .set import BrickSet
+    from .socket import BrickSocket
+
+logger = logging.getLogger(__name__)
 
 
 # Lego minifigure
-class BrickMinifigure(BrickRecord):
-    brickset: 'BrickSet | None'
-
+class BrickMinifigure(RebrickableMinifigure):
     # Queries
     insert_query: str = 'minifigure/insert'
     generic_query: str = 'minifigure/select/generic'
     select_query: str = 'minifigure/select/specific'
 
-    def __init__(
-        self,
-        /,
-        *,
-        brickset: 'BrickSet | None' = None,
-        record: Row | dict[str, Any] | None = None,
-    ):
-        super().__init__()
+    # Import a minifigure into the database
+    def download(self, socket: 'BrickSocket', refresh: bool = False) -> bool:
+        if self.brickset is None:
+            raise ErrorException('Importing a minifigure from Rebrickable outside of a set is not supported')  # noqa: E501
 
-        # Save the brickset
-        self.brickset = brickset
+        try:
+            # Insert into the database
+            socket.auto_progress(
+                message='Set {set}: inserting minifigure {figure} into database'.format(  # noqa: E501
+                    set=self.brickset.fields.set,
+                    figure=self.fields.figure
+                )
+            )
 
-        # Ingest the record if it has one
-        if record is not None:
-            self.ingest(record)
+            if not refresh:
+                # Insert into database
+                self.insert(commit=False)
 
-    # Return the number just in digits format
-    def clean_number(self, /) -> str:
-        number: str = self.fields.fig_num
-        number = number.removeprefix('fig-')
-        number = number.lstrip('0')
+            # Load the inventory
+            if not BrickPartList.download(
+                socket,
+                self.brickset,
+                minifigure=self,
+                refresh=refresh
+            ):
+                return False
 
-        return number
+            # Insert the rebrickable set into database (after counting parts)
+            self.insert_rebrickable()
+
+        except Exception as e:
+            socket.fail(
+                message='Error while importing minifigure {figure} from {set}: {error}'.format(  # noqa: E501
+                    figure=self.fields.figure,
+                    set=self.brickset.fields.set,
+                    error=e,
+                )
+            )
+
+            logger.debug(traceback.format_exc())
+
+            return False
+
+        return True
 
     # Parts
     def generic_parts(self, /) -> BrickPartList:
@@ -51,108 +71,38 @@ class BrickMinifigure(BrickRecord):
     # Parts
     def parts(self, /) -> BrickPartList:
         if self.brickset is None:
-            raise ErrorException('Part list for minifigure {number} requires a brickset'.format(  # noqa: E501
-                number=self.fields.fig_num,
+            raise ErrorException('Part list for minifigure {figure} requires a brickset'.format(  # noqa: E501
+                figure=self.fields.figure,
             ))
 
-        return BrickPartList().load(self.brickset, minifigure=self)
+        return BrickPartList().list_specific(self.brickset, minifigure=self)
 
     # Select a generic minifigure
-    def select_generic(self, fig_num: str, /) -> Self:
+    def select_generic(self, figure: str, /) -> Self:
         # Save the parameters to the fields
-        self.fields.fig_num = fig_num
+        self.fields.figure = figure
 
         if not self.select(override_query=self.generic_query):
             raise NotFoundException(
-                'Minifigure with number {number} was not found in the database'.format(  # noqa: E501
-                    number=self.fields.fig_num,
+                'Minifigure with figure {figure} was not found in the database'.format(  # noqa: E501
+                    figure=self.fields.figure,
                 ),
             )
 
         return self
 
-    # Select a specific minifigure (with a set and an number)
-    def select_specific(self, brickset: 'BrickSet', fig_num: str, /) -> Self:
+    # Select a specific minifigure (with a set and a figure)
+    def select_specific(self, brickset: 'BrickSet', figure: str, /) -> Self:
         # Save the parameters to the fields
         self.brickset = brickset
-        self.fields.fig_num = fig_num
+        self.fields.figure = figure
 
         if not self.select():
             raise NotFoundException(
-                'Minifigure with number {number} from set {set} was not found in the database'.format(  # noqa: E501
-                    number=self.fields.fig_num,
+                'Minifigure with figure {figure} from set {set} was not found in the database'.format(  # noqa: E501
+                    figure=self.fields.figure,
                     set=self.brickset.fields.set,
                 ),
             )
 
         return self
-
-    # Return a dict with common SQL parameters for a minifigure
-    def sql_parameters(self, /) -> dict[str, Any]:
-        parameters = super().sql_parameters()
-
-        # Supplement from the brickset
-        if self.brickset is not None:
-            if 'u_id' not in parameters:
-                parameters['u_id'] = self.brickset.fields.id
-
-            if 'set_num' not in parameters:
-                parameters['set_num'] = self.brickset.fields.set
-
-        return parameters
-
-    # Self url
-    def url(self, /) -> str:
-        return url_for(
-            'minifigure.details',
-            number=self.fields.fig_num,
-        )
-
-    # Compute the url for minifigure part image
-    def url_for_image(self, /) -> str:
-        if not current_app.config['USE_REMOTE_IMAGES']:
-            if self.fields.set_img_url is None:
-                file = RebrickableImage.nil_minifigure_name()
-            else:
-                file = self.fields.fig_num
-
-            return RebrickableImage.static_url(file, 'MINIFIGURES_FOLDER')
-        else:
-            if self.fields.set_img_url is None:
-                return current_app.config['REBRICKABLE_IMAGE_NIL_MINIFIGURE']
-            else:
-                return self.fields.set_img_url
-
-    # Compute the url for the rebrickable page
-    def url_for_rebrickable(self, /) -> str:
-        if current_app.config['REBRICKABLE_LINKS']:
-            try:
-                return current_app.config['REBRICKABLE_LINK_MINIFIGURE_PATTERN'].format(  # noqa: E501
-                    number=self.fields.fig_num.lower(),
-                )
-            except Exception:
-                pass
-
-        return ''
-
-    # Normalize from Rebrickable
-    @staticmethod
-    def from_rebrickable(
-        data: dict[str, Any],
-        /,
-        *,
-        brickset: 'BrickSet | None' = None,
-        **_,
-    ) -> dict[str, Any]:
-        record = {
-            'fig_num': data['set_num'],
-            'name': data['set_name'],
-            'quantity': data['quantity'],
-            'set_img_url': data['set_img_url'],
-        }
-
-        if brickset is not None:
-            record['set_num'] = brickset.fields.set
-            record['u_id'] = brickset.fields.id
-
-        return record

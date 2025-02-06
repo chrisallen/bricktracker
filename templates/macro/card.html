@@ -1,11 +1,16 @@
-{% macro header(item, name, solo=false, number=none, color=none, icon='hashtag') %}
+{% import 'macro/badge.html' as badge %}
+
+{% macro header(item, name, solo=false, identifier=none, icon='hashtag') %}
   <div class="card-header">
     {% if not solo %}
       <a class="text-decoration-none text-reset" href="{{ item.url() }}" data-bs-toggle="tooltip" title="{{ name }}">
     {% endif %}
     <h5 class="mb-0 {% if not solo %}fs-6 text-nowrap overflow-x-hidden text-truncate{% endif %}">
-      {% if number %}<span class="badge text-bg-secondary fw-normal"><i class="ri-{{ icon }}"></i>{{ number }}</span>{% endif %}
-      {% if color %}<span class="badge text-bg-light fw-normal border"><i class="ri-palette-line"></i> {{ color }}</span>{% endif %}
+      {{ badge.identifier(identifier, icon=icon, solo=solo, header=true) }}
+      {% if solo %}
+        {{ badge.color(item, header=true) }}
+        {{ badge.print(item, header=true) }}
+      {% endif %}
       {{ name }}
     </h5>
     {% if not solo %}

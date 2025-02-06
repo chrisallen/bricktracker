@@ -5,7 +5,11 @@
 {% endblock %}
 
 {% block total_missing %}
-IFNULL("missing_join"."total", 0) AS "total_missing",
+IFNULL("problem_join"."total_missing", 0) AS "total_missing",
+{% endblock %}
+
+{% block total_damaged %}
+IFNULL("problem_join"."total_damaged", 0) AS "total_damaged",
 {% endblock %}
 
 {% block total_quantity %}
@@ -13,30 +17,41 @@ IFNULL("minifigures_join"."total", 0) AS "total_minifigures"
 {% endblock %}
 
 {% block join %}
+{% if owners %}
+LEFT JOIN "bricktracker_set_owners"
+ON "bricktracker_sets"."id" IS NOT DISTINCT FROM "bricktracker_set_owners"."id"
+{% endif %}
+
 {% if statuses %}
 LEFT JOIN "bricktracker_set_statuses"
-ON "bricktracker_sets"."id" IS NOT DISTINCT FROM "bricktracker_set_statuses"."bricktracker_set_id"
+ON "bricktracker_sets"."id" IS NOT DISTINCT FROM "bricktracker_set_statuses"."id"
+{% endif %}
+
+{% if tags %}
+LEFT JOIN "bricktracker_set_tags"
+ON "bricktracker_sets"."id" IS NOT DISTINCT FROM "bricktracker_set_tags"."id"
 {% endif %}
 
 -- LEFT JOIN + SELECT to avoid messing the total
 LEFT JOIN (
     SELECT
-        "missing"."u_id",
-        SUM("missing"."quantity") AS "total"
-    FROM "missing"
+        "bricktracker_parts"."id",
+        SUM("bricktracker_parts"."missing") AS "total_missing",
+        SUM("bricktracker_parts"."damaged") AS "total_damaged"
+    FROM "bricktracker_parts"
     {% block where_missing %}{% endblock %}
-    GROUP BY "u_id"
-) "missing_join"
-ON "bricktracker_sets"."id" IS NOT DISTINCT FROM "missing_join"."u_id"
+    GROUP BY "bricktracker_parts"."id"
+) "problem_join"
+ON "bricktracker_sets"."id" IS NOT DISTINCT FROM "problem_join"."id"
 
 -- LEFT JOIN + SELECT to avoid messing the total
 LEFT JOIN (
     SELECT
-       "minifigures"."u_id",
-       SUM("minifigures"."quantity") AS "total"
-    FROM "minifigures"
+       "bricktracker_minifigures"."id",
+       SUM("bricktracker_minifigures"."quantity") AS "total"
+    FROM "bricktracker_minifigures"
     {% block where_minifigures %}{% endblock %}
-    GROUP BY "u_id"
+    GROUP BY "bricktracker_minifigures"."id"
 ) "minifigures_join"
-ON "bricktracker_sets"."id" IS NOT DISTINCT FROM "minifigures_join"."u_id"
+ON "bricktracker_sets"."id" IS NOT DISTINCT FROM "minifigures_join"."id"
 {% endblock %}

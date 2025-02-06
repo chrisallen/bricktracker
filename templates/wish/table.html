@@ -5,37 +5,43 @@
   <table data-table="{% if all %}true{% endif %}" class="table table-striped align-middle" id="wish">
     <thead>
       <tr>
-        <th data-table-no-sort="true" class="no-sort" scope="col"><i class="ri-image-line fw-normal"></i> Image</th>
+        <th data-table-no-sort-and-search="true" class="no-sort" scope="col"><i class="ri-image-line fw-normal"></i> Image</th>
         <th scope="col"><i class="ri-hashtag fw-normal"></i> Set</th>
         <th scope="col"><i class="ri-pencil-line fw-normal"></i> Name</th>
         <th scope="col"><i class="price-tag-3-line fw-normal"></i> Theme</th>
         <th scope="col"><i class="ri-calendar-line fw-normal"></i> Year</th>
         <th scope="col"><i class="ri-shapes-line fw-normal"></i> Parts</th>
         <th scope="col"><i class="ri-calendar-close-line fw-normal"></i> Retirement</th>
+        <th data-table-no-sort="true" class="no-sort" scope="col"><i class="ri-user-line fw-normal"></i> Requesters</th>
         {% if g.login.is_authenticated() %}
-          <th data-table-no-sort="true" class="no-sort" scope="col"><i class="ri-settings-4-line fw-normal"></i> Actions</th>
+          <th data-table-no-sort-and-search="true" class="no-sort" scope="col"><i class="ri-settings-4-line fw-normal"></i> Actions</th>
         {% endif %}
         </tr>
     </thead>
     <tbody>
       {% for item in table_collection %}
-      {% set retirement_date = retired.get(item.fields.set) %}
-      <tr>
-        {{ table.image(item.url_for_image(), caption=item.fields.name, alt=item.fields.set) }}
-        <td>{{ item.fields.set }} {{ table.rebrickable(item) }}</td>
-        <td>{{ item.fields.name }}</td>
-        <td>{{ item.theme.name }}</td>
-        <td>{{ item.fields.year }}</td>
-        <td>{{ item.fields.number_of_parts }}</td>
-        <td>{% if retirement_date %}{{ retirement_date }}{% else %}<span class="badge rounded-pill text-bg-light border">Not found</span>{% endif %}</td>
-        {% if g.login.is_authenticated() %}
-        <td>
-          <form action="{{ item.url_for_delete() }}" method="post">
-            <button type="submit" class="btn btn-sm btn-danger"><i class="ri-delete-bin-2-line"></i> Delete</button>
-          </form>
-        </td>
-        {% endif %}
-      </tr>
+        {% with retirement_date = retired.get(item.fields.set) %}
+          <tr>
+            {{ table.image(item.url_for_image(), caption=item.fields.name, alt=item.fields.set) }}
+            <td>{{ item.fields.set }} {{ table.rebrickable(item) }}</td>
+            <td>{{ item.fields.name }}</td>
+            <td>{{ item.theme.name }}</td>
+            <td>{{ item.fields.year }}</td>
+            <td>{{ item.fields.number_of_parts }}</td>
+            <td>{% if retirement_date %}{{ retirement_date }}{% else %}<span class="badge rounded-pill text-bg-light border">Not found</span>{% endif %}</td>
+            <td>
+              {% for owner in owners %}
+                {{ badge.owner(item, owner) }}
+              {% endfor %}
+            </td>
+            {% if g.login.is_authenticated() %}
+            <td>
+              <a href="{{ item.url() }}" class="btn btn-sm btn-primary mb-1" role="button"><i class="ri-gift-line"></i> Details</a>
+              <a href="{{ item.url_for_delete() }}" class="btn btn-sm btn-danger mb-1" role="button"><i class="ri-delete-bin-2-line"></i> Delete</a>
+            </td>
+            {% endif %}
+          </tr>
+        {% endwith %}
       {% endfor %}
     </tbody>
   </table>

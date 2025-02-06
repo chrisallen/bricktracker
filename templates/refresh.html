@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %} - Refresh set {{ item.fields.set }}{% endblock %}
+
+{% block main %}
+<div class="container">
+  <div class="alert alert-primary" role="alert">
+    <h4 class="alert-heading">Refreshing from Rebrickable</h4>
+    <p class="mb-0">This will refresh all the Rebrickable data (set, minifigures, parts) associated with this set.</p>
+  </div>
+  <div class="row">
+    <div class="col-12">
+      <div class="card mb-3">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="ri-refresh-line"></i> Refresh a set</h5>
+        </div>
+        <div class="card-body">
+          <div id="refresh-fail" class="alert alert-danger d-none" role="alert"></div>
+          <div id="refresh-complete" class="alert alert-success d-none" role="alert"></div>
+          <div class="mb-3">
+            <label for="refresh-set" class="form-label">Set number</label>
+            <input type="text" class="form-control" id="refresh-set" value="{{ item.fields.set }}">
+          </div>
+          <hr>
+          <div class="mb-3">
+            <p>
+              Progress <span id="refresh-count"></span>
+              <span id="refresh-spinner" class="d-none">
+                <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                <span class="visually-hidden" role="status">Loading...</span>
+              </span>
+            </p>
+            <div id="refresh-progress" class="progress" role="progressbar" aria-label="Refresh a set progress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+              <div id="refresh-progress-bar" class="progress-bar" style="width: 0%"></div>
+            </div>
+            <p id="refresh-progress-message" class="text-center d-none"></p>
+          </div>
+          <div id="refresh-card" class="d-flex justify-content-center">
+            <div class="card mb-3 col-6">
+              <div class="card-header">
+                <h5 class="mb-0">
+                  <span class="badge text-bg-secondary fw-normal"><i class="ri-hashtag"></i> <span id="refresh-card-set">{{ item.fields.set }}</span></span>
+                  <span id="refresh-card-name">{{ item.fields.name }}</span>
+                </h5>
+              </div>
+              <div id="refresh-card-image-container" class="card-img" style="background-image: url({{ item.url_for_image() }})">
+                <img id="refresh-card-image" src="{{ item.url_for_image() }}">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer text-end">
+          <span id="refresh-status-icon" class="me-1"></span><span id="refresh-status" class="me-1"></span>
+          {% if id %}
+            <a href="{{ url_for('set.details', id=item.fields.id) }}" class="btn btn-primary" role="button"><i class="ri-hashtag"></i> Back to the set details</a>
+            {% else %}
+            <a href="{{ url_for('admin_set.refresh') }}" class="btn btn-danger" role="button"><i class="ri-hashtag"></i> List of sets to be refreshed</a>
+          {% endif %}
+          <button id="refresh" type="button" class="btn btn-primary"><i class="ri-refresh-line"></i> Refresh</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% with id='refresh', refresh=true %}
+  {% include 'set/socket.html' %}
+{% endwith %}
+{% endblock %}

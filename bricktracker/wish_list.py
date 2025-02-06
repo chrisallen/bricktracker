@@ -9,6 +9,7 @@ from .rebrickable import Rebrickable
 from .rebrickable_image import RebrickableImage
 from .record_list import BrickRecordList
 from .wish import BrickWish
+from .wish_owner_list import BrickWishOwnerList
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +23,8 @@ class BrickWishList(BrickRecordList[BrickWish]):
     def all(self, /) -> Self:
         # Load the wished sets from the database
         for record in self.select(
-            order=current_app.config['WISHES_DEFAULT_ORDER']
+            order=current_app.config['WISHES_DEFAULT_ORDER'],
+            owners=BrickWishOwnerList.as_columns(),
         ):
             brickwish = BrickWish(record=record)
 

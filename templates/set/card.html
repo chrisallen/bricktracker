@@ -4,61 +4,116 @@
 {% import 'macro/form.html' as form %}
 
 <div {% if not solo %}id="set-{{ item.fields.id }}"{% endif %} class="card mb-3 flex-fill {% if solo %}card-solo{% endif %}"
-  {% if not solo %}
+  {% if not solo and not tiny %}
     data-index="{{ index }}" data-number="{{ item.fields.set }}" data-name="{{ item.fields.name | lower }}" data-parts="{{ item.fields.number_of_parts }}"
-    data-year="{{ item.fields.year }}" data-theme="{{ item.theme.name | lower }}" data-minifigures="{{ item.fields.total_minifigures }}" data-has-minifigures="{{ (item.fields.total_minifigures > 0) | int }}"
-    data-has-missing="{{ (item.fields.total_missing > 0) | int }}" data-has-missing-instructions="{{ (not (item.instructions | length)) | int }}" data-missing="{{ item.fields.total_missing }}"
-    {% for checkbox in brickset_checkboxes %}data-{{ checkbox.as_dataset() }}="{{ item.fields[checkbox.as_column()] }}" {% endfor %}
+    data-year="{{ item.fields.year }}" data-theme="{{ item.theme.name | lower }}"
+    {% if not config['HIDE_SET_INSTRUCTIONS'] %}
+      data-has-missing-instructions="{{ (item.instructions | length == 0) | int }}"
+    {% endif %}
+    data-has-minifigures="{{ (item.fields.total_minifigures > 0) | int }}" data-minifigures="{{ item.fields.total_minifigures }}"
+    {% if not config['HIDE_TABLE_MISSING_PARTS'] %}
+      data-has-missing="{{ (item.fields.total_missing > 0) | int }}" data-missing="{{ item.fields.total_missing }}"
+    {% endif %}
+    {% if not config['HIDE_TABLE_DAMAGED_PARTS'] %}
+      data-has-damaged="{{ (item.fields.total_damaged > 0) | int }}" data-damaged="{{ item.fields.total_damaged }}"
+    {% endif %}
+    {% if item.fields.purchase_date is not none %}data-purchase-date="{{ item.fields.purchase_date }}"{% endif %}
+    {% if item.fields.purchase_price is not none %}data-purchase-price="{{ item.fields.purchase_price }}"{% endif %}
+    data-has-purchase-location="{{ item.fields.purchase_location is not none | int }}"
+    {% if item.fields.purchase_location is not none %}
+      data-purchase-location="{{ item.fields.purchase_location }}"
+      {% if item.fields.purchase_location in brickset_purchase_locations.mapping %}data-search-purchase-location="{{ brickset_purchase_locations.mapping[item.fields.purchase_location].fields.name | lower }}"{% endif %}
+    {% endif %}
+    data-has-storage="{{ item.fields.storage is not none | int }}"
+    {% if item.fields.storage is not none %}
+      data-storage="{{ item.fields.storage }}"
+      {% if item.fields.storage in brickset_storages.mapping %}data-search-storage="{{ brickset_storages.mapping[item.fields.storage].fields.name | lower }}"{% endif %}
+    {% endif %}
+    {% for status in brickset_statuses %}
+      {% with checked=item.fields[status.as_column()] %}
+        {% if checked %}
+          data-{{ status.as_dataset() }}="{{ checked }}"
+        {% endif %}
+      {% endwith %}
+    {% endfor %}
+    {% for owner in brickset_owners %}
+      {% with checked=item.fields[owner.as_column()] %}
+        {% if checked %}
+          data-{{ owner.as_dataset() }}="{{ checked }}" data-search-owner-{{ loop.index }}="{{ owner.fields.name | lower }}"
+        {% endif %}
+      {% endwith %}
+    {% endfor %}
+    {% for tag in brickset_tags %}
+      {% with checked=item.fields[tag.as_column()] %}
+        {% if checked %}
+          data-{{ tag.as_dataset() }}="{{ checked }}" data-search-tag-{{ loop.index }}="{{ tag.fields.name | lower }}"
+        {% endif %}
+      {% endwith %}
+    {% endfor %}
   {% endif %}
 >
-  {{ card.header(item, item.fields.name, solo=solo, number=item.fields.number) }}
-  {{ card.image(item, solo=solo, last=last, caption=item.fields.name, alt=item.fields.number) }}
+  {{ card.header(item, item.fields.name, solo=solo, identifier=item.fields.set) }}
+  {{ card.image(item, solo=solo, last=last, caption=item.fields.name, alt=item.fields.set) }}
   <div class="card-body border-bottom-0 {% if not solo %}p-1{% endif %}">
     {{ badge.theme(item.theme.name, solo=solo, last=last) }}
-    {{ badge.year(item.fields.year, solo=solo, last=last) }}
+    {% for tag in brickset_tags %}
+      {{ badge.tag(item, tag, solo=solo, last=last) }}
+    {% endfor %}
+    {% if not last %}
+      {{ badge.year(item.fields.year, solo=solo, last=last) }}
+    {% endif %}
     {{ badge.parts(item.fields.number_of_parts, solo=solo, last=last) }}
     {{ badge.total_minifigures(item.fields.total_minifigures, solo=solo, last=last) }}
     {{ badge.total_missing(item.fields.total_missing, solo=solo, last=last) }}
+    {{ badge.total_damaged(item.fields.total_damaged, solo=solo, last=last) }}
+    {% for owner in brickset_owners %}
+      {{ badge.owner(item, owner, solo=solo, last=last) }}
+    {% endfor %}
+    {{ badge.storage(item, brickset_storages, solo=solo, last=last) }}
     {% if not last %}
+      {{ badge.purchase_date(item.purchase_date(), solo=solo, last=last) }}
+      {{ badge.purchase_location(item, brickset_purchase_locations, solo=solo, last=last) }}
+      {{ badge.purchase_price(item.purchase_price(), solo=solo, last=last) }}
       {% if not solo %}
         {{ badge.instructions(item, solo=solo, last=last) }}
       {% endif %}
       {{ badge.rebrickable(item, solo=solo, last=last) }}
     {% endif %}
   </div>
-  {% if not tiny and brickset_checkboxes | length %}
+  {% if not tiny and brickset_statuses | length %}
     <ul class="list-group list-group-flush card-check border-bottom-0">
-      {% for checkbox in brickset_checkboxes %}
-        <li class="list-group-item {% if not solo %}p-1{% endif %}">
-          {{ form.checkbox(checkbox.as_dataset(), item.fields.id, checkbox.fields.name, checkbox.status_url(item.fields.id), item.fields[checkbox.as_column()], delete=delete) }}
-        </li>
+      {% for status in brickset_statuses %}
+        <li class="d-flex list-group-item {% if not solo %}p-1{% endif %} text-nowrap">{{ form.checkbox(status.fields.name, item.fields.id, status.as_dataset(), status.url_for_set_state(item.fields.id), item.fields[status.as_column()], parent='set', delete=delete) }}</li>
       {% endfor %}
     </ul>
   {% endif %}
   {% if solo %}
     <div class="accordion accordion-flush border-top" id="set-details">
       {% if not delete %}
-        {{ accordion.header('Instructions', 'instructions', 'set-details', expanded=open_instructions, quantity=item.instructions | length, icon='file-line', class='p-0') }}
-        <div class="list-group list-group-flush">
-          {% if item.instructions | length %}
-            {% for instruction in item.instructions %}
-            <a class="list-group-item list-group-item-action" href="{{ instruction.url() }}" target="_blank"><i class="ri-arrow-right-long-line"></i> <i class="ri-{{ instruction.icon() }}"></i> {{ instruction.filename }}</a>
-            {% endfor %}
-          {% else %}
-            <span class="list-group-item list-group-item-action text-center"><i class="ri-error-warning-line"></i> No instructions file found.</span>
-            {% if g.login.is_authenticated() %}
-              <a class="list-group-item list-group-item-action" href="{{ url_for('instructions.upload') }}"><i class="ri-upload-line"></i> Upload an instructions file</a>
+        {% if not config['HIDE_SET_INSTRUCTIONS'] %}
+          {{ accordion.header('Instructions', 'instructions', 'set-details', expanded=open_instructions, quantity=item.instructions | length, icon='file-line', class='p-0') }}
+          <div class="list-group list-group-flush">
+            {% if item.instructions | length %}
+              {% for instruction in item.instructions %}
+              <a class="list-group-item list-group-item-action" href="{{ instruction.url() }}" target="_blank"><i class="ri-arrow-right-long-line"></i> <i class="ri-{{ instruction.icon() }}"></i> {{ instruction.filename }}</a>
+              {% endfor %}
+            {% else %}
+              <span class="list-group-item list-group-item-action text-center"><i class="ri-error-warning-line"></i> No instructions file found.</span>
+              {% if g.login.is_authenticated() %}
+                <a class="list-group-item list-group-item-action" href="{{ url_for('instructions.upload') }}"><i class="ri-upload-line"></i> Upload an instructions file</a>
+              {% endif %}
             {% endif %}
-          {% endif %}
-          {% if g.login.is_authenticated() %}
-            <a class="list-group-item list-group-item-action" href="{{ url_for('instructions.download', set=item.fields.set) }}"><i class="ri-download-line"></i> Download instructions from Rebrickable</a>
-          {% endif %}
-        </div>
-        {{ accordion.footer() }}
+            {% if g.login.is_authenticated() %}
+              <a class="list-group-item list-group-item-action" href="{{ url_for('instructions.download', set=item.fields.set) }}"><i class="ri-download-line"></i> Download instructions from Rebrickable</a>
+            {% endif %}
+          </div>
+          {{ accordion.footer() }}
+        {% endif %}
         {{ accordion.table(item.parts(), 'Parts', 'parts-inventory', 'set-details', 'part/table.html', icon='shapes-line')}}
         {% for minifigure in item.minifigures() %}
-          {{ accordion.table(minifigure.parts(), minifigure.fields.name, minifigure.fields.fig_num, 'set-details', 'part/table.html', quantity=minifigure.fields.quantity, icon='group-line', image=minifigure.url_for_image(), alt=minifigure.fields.fig_num, details=minifigure.url())}}
+          {{ accordion.table(minifigure.parts(), minifigure.fields.name, minifigure.fields.figure, 'set-details', 'part/table.html', quantity=minifigure.fields.quantity, icon='group-line', image=minifigure.url_for_image(), alt=minifigure.fields.figure, details=minifigure.url())}}
         {% endfor %}
+        {% include 'set/management.html' %}
       {% endif %}
       {% if g.login.is_authenticated() %}
         {{ accordion.header('Danger zone', 'danger-zone', 'set-details', expanded=delete, danger=true, class='text-end') }}

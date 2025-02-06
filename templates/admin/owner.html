@@ -1,0 +1,42 @@
+{% import 'macro/accordion.html' as accordion %}
+
+{{ accordion.header('Set owners', 'owner', 'metadata', expanded=open_owner, icon='user-line', class='p-0') }}
+{% if owner_error %}<div class="alert alert-danger m-2" role="alert"><strong>Error:</strong> {{ owner_error }}.</div>{% endif %}
+<ul class="list-group list-group-flush">
+  {% if metadata_owners | length %}
+    {% for owner in metadata_owners %}
+      <li class="list-group-item">
+        <form action="{{ url_for('admin_owner.rename', id=owner.fields.id) }}" method="post" class="row row-cols-lg-auto g-3 align-items-center">
+          <div class="col-12 flex-grow-1">
+            <label class="visually-hidden" for="name-{{ owner.fields.id }}">Name</label>
+            <div class="input-group">
+              <div class="input-group-text">Name</div>
+              <input type="text" class="form-control" id="name-{{ owner.fields.id }}" name="name" value="{{ owner.fields.name }}">
+              <button type="submit" class="btn btn-primary"><i class="ri-edit-line"></i> Rename</button>
+            </div>
+          </div>
+          <div class="col-12">
+            <a href="{{ url_for('admin_owner.delete', id=owner.fields.id) }}" class="btn btn-danger" role="button"><i class="ri-delete-bin-2-line"></i> Delete</a>
+          </div>
+        </form>
+      </li>
+    {% endfor %}
+  {% else %}
+    <li class="list-group-item text-center"><i class="ri-error-warning-line"></i> No owner found.</li>
+  {% endif %}
+  <li class="list-group-item">
+    <form action="{{ url_for('admin_owner.add') }}" method="post" class="row row-cols-lg-auto g-3 align-items-center">
+      <div class="col-12 flex-grow-1">
+        <label class="visually-hidden" for="name">Name</label>
+        <div class="input-group">
+          <div class="input-group-text">Name</div>
+          <input type="text" class="form-control" id="name" name="name" value="">
+        </div>
+      </div>
+      <div class="col-12">
+        <button type="submit" class="btn btn-primary"><i class="ri-add-circle-line"></i> Add</button>
+      </div>
+    </form>
+  </li>
+</ul>
+{{ accordion.footer() }}

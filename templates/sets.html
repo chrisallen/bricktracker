@@ -9,55 +9,28 @@
     <div class="col-12 flex-grow-1">
       <label class="visually-hidden" for="grid-search">Search</label>
       <div class="input-group">
-        <span class="input-group-text">Search</span>
-        <input id="grid-search" class="form-control form-control-sm" type="text" placeholder="Set name, set number, set theme or number of parts..." value="">
-      </div>
-    </div>
-    <div class="col-12 flex-grow-1">
-      <label class="visually-hidden" for="grid-filter">Filter</label>
-      <div class="input-group">
-        <span class="input-group-text">Filter</span>
-        <select id="grid-filter" class="form-select form-select-sm" autocomplete="off">
-          <option value="" selected>All sets</option>
-          <option value="-has-missing">Set is complete</option>
-          <option value="has-missing">Set has missing pieces</option>
-          <option value="has-missing-instructions">Set has missing instructions</option>
-          {% for checkbox in brickset_checkboxes %}
-            <option value="{{ checkbox.as_dataset() }}">{{ checkbox.fields.name }}</option>
-            <option value="-{{ checkbox.as_dataset() }}">NOT: {{ checkbox.fields.name }}</option>
-          {% endfor %}
-        </select>
-        <select id="grid-theme" class="form-select form-select-sm" autocomplete="off">
-          <option value="" selected>All themes</option>
-          {% for theme in collection.themes %}
-          <option value="{{ theme | lower }}">{{ theme }}</option>
-          {% endfor %}
-        </select>
+        <span class="input-group-text"><i class="ri-search-line"></i><span class="ms-1 d-none d-md-inline"> Search</span></span>
+        <input id="grid-search" data-search-exact="name,number,parts,searchPurchaseLocation,searchStorage,theme,year" data-search-list="searchOwner,searchTag" class="form-control form-control-sm" type="text" placeholder="Set, name, number of parts, theme, year, owner, purchase location, storage, tag" value="">
+        <button id="grid-search-clear" type="button" class="btn btn-light btn-outline-danger border"><i class="ri-eraser-line"></i></button>
       </div>
     </div>
     <div class="col-12">
-      <div id="grid-sort" class="input-group">
-        <span class="input-group-text">Sort</span>
-        <button id="sort-number" type="button" class="btn btn-sm btn-outline-primary"
-          data-sort-target="div#grid>div" data-sort-attribute="number" data-sort-natural="true">Num.</button>
-        <button id="sort-name" type="button" class="btn btn-sm btn-outline-primary"
-          data-sort-target="div#grid>div" data-sort-attribute="name">Name</button>
-        <button id="sort-theme" type="button" class="btn btn-sm btn-outline-primary"
-          data-sort-target="div#grid>div" data-sort-attribute="theme">Theme</button>
-        <button id="sort-year" type="button" class="btn btn-sm btn-outline-primary"
-          data-sort-target="div#grid>div" data-sort-attribute="year">Year</button>
-        <button id="sort-minifigure" type="button" class="btn btn-sm btn-outline-primary"
-          data-sort-target="div#grid>div" data-sort-attribute="minifigures" data-sort-desc="true">Fig.</button>
-        <button id="sort-parts" type="button" class="btn btn-sm btn-outline-primary"
-          data-sort-target="div#grid>div" data-sort-attribute="parts" data-sort-desc="true">Parts</button>
-        <button id="sort-missing" type="button" class="btn btn-sm btn-outline-primary"
-          data-sort-target="div#grid>div" data-sort-attribute="missing" data-sort-desc="true">Miss.</button>
-        <button id="sort-clear" type="button" class="btn btn-sm btn-outline-dark"
-          data-sort-target="div#grid>div" data-sort-clear="true"><i class="ri-filter-off-line"></i></button>
+      <div class="input-group">
+        <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#grid-sort" aria-expanded="{% if config['SHOW_GRID_SORT'] %}true{% else %}false{% endif %}" aria-controls="grid-sort">
+          <i class="ri-sort-asc"></i> Sort
+        </button>
+      </div>
+    </div>
+    <div class="col-12">
+      <div class="input-group">
+        <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#grid-filter" aria-expanded="{% if config['SHOW_GRID_FILTERS'] %}true{% else %}false{% endif %}" aria-controls="grid-filter">
+          <i class="ri-filter-line"></i> Filters
+        </button>
       </div>
     </div>
   </div>
-
+  {% include 'set/sort.html' %}
+  {% include 'set/filter.html' %}
   <div class="row" data-grid="true" id="grid">
   {% for item in collection %}
     <div class="col-md-6 col-xl-3 d-flex align-items-stretch">

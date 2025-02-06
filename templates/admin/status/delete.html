@@ -1,0 +1,25 @@
+{% import 'macro/accordion.html' as accordion %}
+
+{{ accordion.header('Set statuses danger zone', 'status-danger', 'admin', expanded=true, danger=true, class='text-end') }}
+<form action="{{ url_for('admin_status.do_delete', id=status.fields.id) }}" method="post">
+  {% if status_error %}<div class="alert alert-danger text-start" role="alert"><strong>Error:</strong> {{ status_error }}.</div>{% endif %}
+  <div class="alert alert-danger text-center" role="alert">You are about to <strong>delete a set status</strong>. This action is irreversible.</div>
+  <div class="row row-cols-lg-auto g-3 align-items-center">
+    <div class="col-12 flex-grow-1">
+      <div class="input-group">
+        <div class="input-group-text">Name</div>
+        <input type="text" class="form-control" value="{{ status.fields.name }}" disabled>
+      </div>
+    </div>
+    <div class="col-12">
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" {% if status.fields.displayed_on_grid %}checked{% endif %} disabled>
+        <span class="form-check-label">Displayed on the Set Grid</span>
+      </div>
+    </div>
+  </div>
+  <hr class="border-bottom">
+  <a class="btn btn-danger" href="{{ url_for('admin.admin', open_status=true) }}" role="button"><i class="ri-arrow-left-long-line"></i> Back to the admin</a>
+  <button type="submit" class="btn btn-danger"><i class="ri-delete-bin-2-line"></i> Delete <strong>the set status</strong></button>
+</form>
+{{ accordion.footer() }}

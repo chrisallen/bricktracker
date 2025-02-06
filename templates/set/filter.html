@@ -1,0 +1,111 @@
+<div id="grid-filter" class="collapse {% if config['SHOW_GRID_FILTERS'] %}show{% endif %} row row-cols-lg-auto g-1 justify-content-center align-items-center pb-2">
+  <div class="col-12 flex-grow-1">
+    <label class="visually-hidden" for="grid-status">Status</label>
+    <div class="input-group">
+      <span class="input-group-text"><i class="ri-checkbox-line"></i><span class="ms-1 d-none d-md-inline"> Status</span></span>
+      <select id="grid-status" class="form-select"
+        data-filter="metadata"
+        autocomplete="off">
+        <option value="" selected>All</option>
+        {% if not config['HIDE_TABLE_MISSING_PARTS'] %}
+          <option value="has-missing">Has missing pieces</option>
+          <option value="-has-missing">Has NO missing pieces</option>
+        {% endif %}
+        {% if not config['HIDE_TABLE_DAMAGED_PARTS'] %}
+          <option value="has-damaged">Has damaged pieces</option>
+          <option value="-has-damaged">Has NO damaged pieces</option>
+        {% endif %}
+        {% if not config['HIDE_SET_INSTRUCTIONS'] %}
+          <option value="-has-missing-instructions">Has instructions</option>
+          <option value="has-missing-instructions">Is MISSING instructions</option>
+        {% endif %}
+        {% if brickset_storages | length %}
+          <option value="has-storage">Is in storage</option>
+          <option value="-has-storage">Is NOT in storage</option>
+        {% endif %}
+        {% for status in brickset_statuses %}
+          <option value="{{ status.as_dataset() }}">{{ status.fields.name }}</option>
+          <option value="-{{ status.as_dataset() }}">NOT: {{ status.fields.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  <div class="col-12 flex-grow-1">
+    <label class="visually-hidden" for="grid-theme">Theme</label>
+    <div class="input-group">
+      <span class="input-group-text"><i class="ri-price-tag-3-line"></i><span class="ms-1 d-none d-md-inline"> Theme</span></span>
+      <select id="grid-theme" class="form-select"
+        data-filter="value" data-filter-attribute="theme"
+        autocomplete="off">
+        <option value="" selected>All</option>
+        {% for theme in collection.themes %}
+        <option value="{{ theme | lower }}">{{ theme }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  {% if brickset_owners | length %}
+    <div class="col-12 flex-grow-1">
+      <label class="visually-hidden" for="grid-owner">Owner</label>
+      <div class="input-group">
+        <span class="input-group-text"><i class="ri-user-line"></i><span class="ms-1 d-none d-md-inline"> Owner</span></span>
+        <select id="grid-owner" class="form-select"
+          data-filter="metadata"
+          autocomplete="off">
+          <option value="" selected>All</option>
+          {% for owner in brickset_owners %}
+            <option value="{{ owner.as_dataset() }}">{{ owner.fields.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  {% endif %}
+  {% if brickset_purchase_locations | length %}
+    <div class="col-12 flex-grow-1">
+      <label class="visually-hidden" for="grid-owner">Purchase location</label>
+      <div class="input-group">
+        <span class="input-group-text"><i class="ri-building-line"></i><span class="ms-1 d-none d-md-inline"> Purchase location</span></span>
+        <select id="grid-purchase-location" class="form-select"
+          data-filter="value" data-filter-attribute="purchase-location"
+          autocomplete="off">
+          <option value="" selected>All</option>
+          {% for purchase_location in brickset_purchase_locations %}
+            <option value="{{ purchase_location.fields.id }}">{{ purchase_location.fields.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  {% endif %}
+  {% if brickset_storages | length %}
+    <div class="col-12 flex-grow-1">
+      <label class="visually-hidden" for="grid-owner">Storage</label>
+      <div class="input-group">
+        <span class="input-group-text"><i class="ri-archive-2-line"></i><span class="ms-1 d-none d-md-inline"> Storage</span></span>
+        <select id="grid-storage" class="form-select"
+          data-filter="value" data-filter-attribute="storage"
+          autocomplete="off">
+          <option value="" selected>All</option>
+          {% for storage in brickset_storages %}
+            <option value="{{ storage.fields.id }}">{{ storage.fields.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  {% endif %}
+  {% if brickset_tags | length %}
+    <div class="col-12 flex-grow-1">
+      <label class="visually-hidden" for="grid-tag">Tag</label>
+      <div class="input-group">
+        <span class="input-group-text"><i class="ri-price-tag-2-line"></i><span class="ms-1 d-none d-md-inline"> Tag</span></span>
+        <select id="grid-tag" class="form-select"
+          data-filter="metadata"
+          autocomplete="off">
+          <option value="" selected>All</option>
+          {% for tag in brickset_tags %}
+            <option value="{{ tag.as_dataset() }}">{{ tag.fields.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  {% endif %}
+</div>

@@ -1,17 +1,66 @@
-{% macro checkbox(prefix, id, text, url, checked, delete=false) %}
+{% macro checkbox(name, id, prefix, url, checked, parent=none, delete=false) %}
   {% if g.login.is_authenticated() %}
     <input class="form-check-input" type="checkbox" id="{{ prefix }}-{{ id }}" {% if checked %}checked{% endif %}
-        {% if not delete %}
-          data-changer-id="{{ id }}" data-changer-prefix="{{ prefix }}" data-changer-url="{{ url }}" data-changer-parent="set"
-        {% else %}
-          disabled
-        {% endif %}
-    autocomplete="off">
-    <label class="form-check-label" for="{{ prefix }}-{{ id }}">
-      {{ text }} <i id="status-{{ prefix }}-{{ id }}" class="mb-1"></i>
+    {% if not delete %}
+      data-changer-id="{{ id }}" data-changer-prefix="{{ prefix }}" data-changer-url="{{ url }}" {% if parent %}data-changer-parent="{{ parent }}"{% endif %}
+    {% else %}
+      disabled
+    {% endif %}
+      autocomplete="off">
+    <label class="form-check-label flex-grow-1 ms-1" for="{{ prefix }}-{{ id }}">
+      {{ name }} <i id="status-{{ prefix }}-{{ id }}"></i>
     </label>
   {% else %}
     <input class="form-check-input text-reset" type="checkbox" {% if checked %}checked{% endif %} disabled>
-    {{ text }}
+    {{ name }}
+  {% endif %}
+{% endmacro %}
+
+{% macro input(name, id, prefix, url, value, all=none, read_only=none, icon=none, suffix=none, date=false) %}
+  {% if all or read_only %}
+    {{ value }}
+  {% else %}
+    <label class="visually-hidden" for="{{ prefix }}-{{ id }}">{{ name }}</label>
+    <div class="input-group">
+      {% if icon %}<span class="input-group-text"><i class="ri-{{ icon }} me-1"></i><span class="ms-1 d-none d-md-inline"> {{ name }}</span></span>{% endif %}
+      <input class="form-control form-control-sm flex-shrink-1" type="text" id="{{ prefix }}-{{ id }}" value="{% if value %}{{ value }}{% endif %}"
+      {% if g.login.is_authenticated() %}
+        data-changer-id="{{ id }}" data-changer-prefix="{{ prefix }}" data-changer-url="{{ url }}"
+        {% if date %}data-changer-date="true"{% endif %}
+      {% else %}
+        disabled
+      {% endif %}
+        autocomplete="off">
+      {% if suffix %}<span class="input-group-text d-none d-md-inline">{{ suffix }}</span>{% endif %}
+      {% if g.login.is_authenticated() %}
+        <span id="status-{{ prefix }}-{{ id }}" class="input-group-text ri-save-line"></span>
+        <button id="clear-{{ prefix }}-{{ id }}" type="button" class="btn btn-sm btn-light btn-outline-danger border"><i class="ri-eraser-line"></i></button>
+      {% else %}
+        <span class="input-group-text ri-prohibited-line"></span>
+      {% endif %}
+    </div>
+  {% endif %}
+{% endmacro %}
+
+{% macro select(name, id, prefix, url, value, metadata_list, nullable=true, icon=none, delete=false) %}
+  {% if g.login.is_authenticated() %}
+    <label class="visually-hidden" for="{{ prefix }}-{{ id }}">{{ name }}</label>
+    <div class="input-group">
+      {% if icon %}<span class="input-group-text"><i class="ri-{{ icon }} me-1"></i><span class="ms-1 d-none d-md-inline"> {{ name }}</span></span>{% endif %}
+      <select id="{{ prefix }}-{{ id }}" class="form-select"
+        {% if not delete %}
+          data-changer-id="{{ id }}" data-changer-prefix="{{ prefix }}" data-changer-url="{{ url }}"
+        {% else %}
+          disabled
+        {% endif %}
+        autocomplete="off">
+        {% if nullable %}<option value="" {% if value is none %}selected{% endif %}><i>None</i></option>{% endif %}
+        {% for metadata in metadata_list %}
+          <option value="{{ metadata.fields.id }}" {% if metadata.fields.id == value %}selected{% endif %}>{{ metadata.fields.name }}</option>
+        {% endfor %}
+      </select>
+      <span id="status-{{ prefix }}-{{ id }}" class="input-group-text ri-save-line"></span>
+      <button id="clear-{{ prefix }}-{{ id }}" type="button" class="btn btn-sm btn-light btn-outline-danger border"><i class="ri-eraser-line"></i></button>
+    </div>
   {% endif %}
 {% endmacro %}

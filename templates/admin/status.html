@@ -1,0 +1,61 @@
+{% import 'macro/accordion.html' as accordion %}
+
+{{ accordion.header('Set statuses', 'status', 'metadata', expanded=open_status, icon='checkbox-line', class='p-0') }}
+{% if status_error %}<div class="alert alert-danger m-2" role="alert"><strong>Error:</strong> {{ status_error }}.</div>{% endif %}
+<ul class="list-group list-group-flush">
+  {% if metadata_statuses | length %}
+    {% for status in metadata_statuses %}
+      <li class="list-group-item">
+        <form action="{{ url_for('admin_status.rename', id=status.fields.id) }}" method="post" class="row row-cols-lg-auto g-3 align-items-center">
+          <div class="col-12 flex-grow-1">
+            <label class="visually-hidden" for="name-{{ status.fields.id }}">Name</label>
+            <div class="input-group">
+              <div class="input-group-text">Name</div>
+              <input type="text" class="form-control" id="name-{{ status.fields.id }}" name="name" value="{{ status.fields.name }}">
+              <button type="submit" class="btn btn-primary"><i class="ri-edit-line"></i> Rename</button>
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="grid-{{ status.fields.id }}"
+                data-changer-id="{{ status.fields.id }}" data-changer-prefix="grid" data-changer-url="{{ url_for('admin_status.update_field', id=status.fields.id, name='displayed_on_grid')}}"
+                {% if status.fields.displayed_on_grid %}checked{% endif %} autocomplete="off">
+              <label class="form-check-label" for="grid-{{ status.fields.id }}">
+                <i class="ri-grid-line"></i> Displayed on the Set Grid
+                <i id="status-grid-{{ status.fields.id }}" class="mb-1"></i>
+              </label>
+            </div>
+          </div>
+          <div class="col-12">
+            <a href="{{ url_for('admin_status.delete', id=status.fields.id) }}" class="btn btn-danger" role="button"><i class="ri-delete-bin-2-line"></i> Delete</a>
+          </div>
+        </form>
+      </li>
+    {% endfor %}
+  {% else %}
+    <li class="list-group-item text-center"><i class="ri-error-warning-line"></i> No status found.</li>
+  {% endif %}
+  <li class="list-group-item">
+    <form action="{{ url_for('admin_status.add') }}" method="post" class="row row-cols-lg-auto g-3 align-items-center">
+      <div class="col-12 flex-grow-1">
+        <label class="visually-hidden" for="name">Name</label>
+        <div class="input-group">
+          <div class="input-group-text">Name</div>
+          <input type="text" class="form-control" id="name" name="name" value="">
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="grid" name="grid" checked>
+          <label class="form-check-label" for="grid-">
+            <i class="ri-grid-line"></i> Displayed on the Set Grid
+          </label>
+        </div>
+      </div>
+      <div class="col-12">
+        <button type="submit" class="btn btn-primary"><i class="ri-add-circle-line"></i> Add</button>
+      </div>
+    </form>
+  </li>
+</ul>
+{{ accordion.footer() }}

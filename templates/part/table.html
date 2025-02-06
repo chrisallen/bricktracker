@@ -1,21 +1,25 @@
+{% import 'macro/form.html' as form %}
 {% import 'macro/table.html' as table %}
 
 <div class="table-responsive-sm">
   <table data-table="{% if all %}true{% endif %}" class="table table-striped align-middle {% if not all %}sortable mb-0{% endif %}" {% if all %}id="parts"{% endif %}>
-    {{ table.header(color=true, quantity=not no_quantity, missing=not no_missing, sets=all, minifigures=all) }}
+    {{ table.header(color=true, quantity=not no_quantity, sets=all, minifigures=all) }}
     <tbody>
       {% for item in table_collection %}
       <tr>
-        {{ table.image(item.url_for_image(), caption=item.fields.name, alt=item.fields.part_num, accordion=solo) }}
-        <td>
+        {{ table.image(item.url_for_image(), caption=item.fields.name, alt=item.fields.part, accordion=solo) }}
+        <td data-sort="{{ item.fields.name }}">
           <a class="text-reset" href="{{ item.url() }}">{{ item.fields.name }}</a>
-          {% if item.fields.is_spare %}<span class="badge rounded-pill text-bg-warning fw-normal"><i class="ri-loop-left-line"></i> Spare</span>{% endif %}
+          {% if item.fields.spare %}<span class="badge rounded-pill text-bg-warning fw-normal"><i class="ri-loop-left-line"></i> Spare</span>{% endif %}
           {% if all %}
             {{ table.rebrickable(item) }}
             {{ table.bricklink(item) }}
           {% endif %}
         </td>
-        <td>{{ item.fields.color_name }}</td>
+        <td data-sort="{{ item.fields.color_name }}">
+          {% if item.fields.color_rgb %}<span class="color-rgb color-rgb-table {% if item.fields.color == 9999 %}color-any{% endif %} align-middle border border-black" {% if item.fields.color != 9999 %}style="background-color: #{{ item.fields.color_rgb }};"{% endif %}></span>{% endif %}
+          <span class="align-middle">{{ item.fields.color_name }}</span>
+        </td>
         {% if not no_quantity %}
           {% if all %}
             <td>{{ item.fields.total_quantity }}</td>
@@ -23,23 +27,14 @@
             <td>{% if quantity %}{{ item.fields.quantity * quantity }}{% else %}{{ item.fields.quantity }}{% endif %}</td>
           {% endif %}
         {% endif %}
-        {% if not no_missing %}
-          <td {% if not all %}id="sort-part-{{ item.fields.u_id }}-{{ item.fields.id }}" data-sort="{{ item.fields.total_missing }}"{% endif %} class="table-td-missing">
-            {% if all or read_only_missing %}
-              {{ item.fields.total_missing }}
-            {% else %}
-            <div class="input-group">
-              {% if g.login.is_authenticated() %}
-                <input class="form-control form-control-sm flex-shrink-1" type="text" {% if item.fields.total_missing %}value="{{ item.fields.total_missing }}"{% endif %}
-                  onchange="change_part_missing_amount(this, '{{ item.fields.u_id }}', '{{ item.fields.id }}', '{{ item.url_for_missing() }}')" autocomplete="off">
-                <span id="status-part-{{ item.fields.u_id }}-{{ item.fields.id }}" class="input-group-text ri-save-line"></span>
-                {% else %}
-                <input class="form-control form-control-sm" type="text" {% if item.fields.total_missing %}value="{{ item.fields.total_missing }}"{% endif %}
-                  disabled autocomplete="off">
-                <span class="input-group-text ri-prohibited-line"></span>
-              {% endif %}
-            </div>
-            {% endif %}
+        {% if not config['HIDE_TABLE_MISSING_PARTS'] %}
+          <td data-sort="{{ item.fields.total_missing }}" class="table-td-input">
+            {{ form.input('Missing', item.fields.id, item.html_id('missing'), item.url_for_problem('missing'), item.fields.total_missing, all=all, read_only=read_only) }}
+          </td>
+        {% endif %}
+        {% if not config['HIDE_TABLE_DAMAGED_PARTS'] %}
+          <td data-sort="{{ item.fields.total_damaged }}" class="table-td-input">
+            {{ form.input('Damaged', item.fields.id, item.html_id('damaged'), item.url_for_problem('damaged'), item.fields.total_damaged, all=all, read_only=read_only) }}
           </td>
         {% endif %}
         {% if all %}

@@ -1,0 +1,16 @@
+{% import 'macro/form.html' as form %}
+{% import 'macro/table.html' as table %}
+
+<div class="table-responsive-sm">
+  <table data-table="true" class="table table-striped align-middle" id="storage">
+    {{ table.header(image=false, missing=false, damaged=false, sets=true) }}
+    <tbody>
+      {% for item in table_collection %}
+      <tr>
+        <td data-sort="{{ item.fields.name }}"><a class="text-reset" href="{{ item.url() }}">{{ item.fields.name }}</a></td>
+        <td>{{ item.fields.total_sets }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

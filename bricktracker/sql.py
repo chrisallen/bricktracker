@@ -1,3 +1,4 @@
+from importlib import import_module
 import logging
 import os
 import sqlite3
@@ -301,7 +302,37 @@ class BrickSQL(object):
                     version=pending.version)
                 )
 
-                self.executescript(pending.get_query())
+                # Load context from the migrations if it exists
+                # It looks for a file in migrations/ named after the SQL file
+                # and containing one function named migration_xxxx, also named
+                # after the SQL file, returning a context dict.
+                #
+                # For instance:
+                # - sql/migrations/0007.sql
+                # - migrations/0007.py
+                #    - def migration_0007(BrickSQL) -> dict[str, Any]
+                try:
+                    module = import_module(
+                        '.migrations.{name}'.format(
+                            name=pending.name
+                        ),
+                        package='bricktracker'
+                    )
+                except Exception:
+                    module = None
+
+                # If a module has been loaded, we need to fail if an error
+                # occured while executing the migration function
+                if module is not None:
+                    function = getattr(module, 'migration_{name}'.format(
+                        name=pending.name
+                    ))
+
+                    context: dict[str, Any] = function(self)
+                else:
+                    context: dict[str, Any] = {}
+
+                self.executescript(pending.get_query(), **context)
                 self.execute('schema/set_version', version=pending.version)
 
     # Tells whether the database needs upgrade

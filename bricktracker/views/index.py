@@ -2,8 +2,8 @@ from flask import Blueprint, render_template
 
 from .exceptions import exception_handler
 from ..minifigure_list import BrickMinifigureList
-from ..set_checkbox_list import BrickSetCheckboxList
-from ..set_list import BrickSetList
+from ..set_status_list import BrickSetStatusList
+from ..set_list import BrickSetList, set_metadata_lists
 
 index_page = Blueprint('index', __name__)
 
@@ -15,6 +15,7 @@ def index() -> str:
     return render_template(
         'index.html',
         brickset_collection=BrickSetList().last(),
+        brickset_statuses=BrickSetStatusList.list(),
         minifigure_collection=BrickMinifigureList().last(),
-        brickset_checkboxes=BrickSetCheckboxList().list(),
+        **set_metadata_lists(as_class=True)
     )

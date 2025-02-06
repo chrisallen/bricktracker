@@ -1,12 +1,9 @@
 from functools import wraps
-import logging
 from typing import Callable, ParamSpec, Tuple, Union
 
 from werkzeug.wrappers.response import Response
 
 from .error import error
-
-logger = logging.getLogger(__name__)
 
 # Decorator type hinting is hard.
 # What a view can return (str or Response or (Response, xxx))
@@ -28,6 +25,7 @@ def exception_handler(
     *,
     json: bool = False,
     post_redirect: str | None = None,
+    error_name: str = 'error',
     **superkwargs,
 ) -> Callable[[ViewCallable], ViewCallable]:
     def outer(function: ViewCallable, /) -> ViewCallable:
@@ -42,6 +40,7 @@ def exception_handler(
                     file,
                     json=json,
                     post_redirect=post_redirect,
+                    error_name=error_name,
                     **kwargs,
                     **superkwargs,
                 )

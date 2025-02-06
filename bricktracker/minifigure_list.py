@@ -1,11 +1,17 @@
+import logging
+import traceback
 from typing import Any, Self, TYPE_CHECKING
 
 from flask import current_app
 
 from .minifigure import BrickMinifigure
+from .rebrickable import Rebrickable
 from .record_list import BrickRecordList
 if TYPE_CHECKING:
     from .set import BrickSet
+    from .socket import BrickSocket
+
+logger = logging.getLogger(__name__)
 
 
 # Lego minifigures
@@ -15,10 +21,11 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
 
     # Queries
     all_query: str = 'minifigure/list/all'
+    damaged_part_query: str = 'minifigure/list/damaged_part'
     last_query: str = 'minifigure/list/last'
+    missing_part_query: str = 'minifigure/list/missing_part'
     select_query: str = 'minifigure/list/from_set'
     using_part_query: str = 'minifigure/list/using_part'
-    missing_part_query: str = 'minifigure/list/missing_part'
 
     def __init__(self, /):
         super().__init__()
@@ -31,13 +38,18 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
 
     # Load all minifigures
     def all(self, /) -> Self:
-        for record in self.select(
-            override_query=self.all_query,
-            order=self.order
-        ):
-            minifigure = BrickMinifigure(record=record)
+        self.list(override_query=self.all_query)
 
-            self.records.append(minifigure)
+        return self
+
+    # Minifigures with a part damaged part
+    def damaged_part(self, part: str, color: int, /) -> Self:
+        # Save the parameters to the fields
+        self.fields.part = part
+        self.fields.color = color
+
+        # Load the minifigures from the database
+        self.list(override_query=self.damaged_part_query)
 
         return self
 
@@ -47,29 +59,69 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
         if current_app.config['RANDOM']:
             order = 'RANDOM()'
         else:
-            order = 'minifigures.rowid DESC'
+            order = '"bricktracker_minifigures"."rowid" DESC'
 
-        for record in self.select(
-            override_query=self.last_query,
-            order=order,
-            limit=limit
-        ):
-            minifigure = BrickMinifigure(record=record)
-
-            self.records.append(minifigure)
+        self.list(override_query=self.last_query, order=order, limit=limit)
 
         return self
 
+    # Base minifigure list
+    def list(
+        self,
+        /,
+        *,
+        override_query: str | None = None,
+        order: str | None = None,
+        limit: int | None = None,
+        **context: Any,
+    ) -> None:
+        if order is None:
+            order = self.order
+
+        if hasattr(self, 'brickset'):
+            brickset = self.brickset
+        else:
+            brickset = None
+
+        # Load the sets from the database
+        for record in super().select(
+            override_query=override_query,
+            order=order,
+            limit=limit,
+        ):
+            minifigure = BrickMinifigure(brickset=brickset, record=record)
+
+            self.records.append(minifigure)
+
     # Load minifigures from a brickset
-    def load(self, brickset: 'BrickSet', /) -> Self:
+    def from_set(self, brickset: 'BrickSet', /) -> Self:
         # Save the brickset
         self.brickset = brickset
 
         # Load the minifigures from the database
-        for record in self.select(order=self.order):
-            minifigure = BrickMinifigure(brickset=self.brickset, record=record)
+        self.list()
 
-            self.records.append(minifigure)
+        return self
+
+    # Minifigures missing a part
+    def missing_part(self, part: str, color: int, /) -> Self:
+        # Save the parameters to the fields
+        self.fields.part = part
+        self.fields.color = color
+
+        # Load the minifigures from the database
+        self.list(override_query=self.missing_part_query)
+
+        return self
+
+    # Minifigure using a part
+    def using_part(self, part: str, color: int, /) -> Self:
+        # Save the parameters to the fields
+        self.fields.part = part
+        self.fields.color = color
+
+        # Load the minifigures from the database
+        self.list(override_query=self.using_part_query)
 
         return self
 
@@ -78,57 +130,54 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
         parameters: dict[str, Any] = super().sql_parameters()
 
         if self.brickset is not None:
-            parameters['u_id'] = self.brickset.fields.id
-            parameters['set_num'] = self.brickset.fields.set
+            parameters['id'] = self.brickset.fields.id
 
         return parameters
 
-    # Minifigures missing a part
-    def missing_part(
-        self,
-        part_num: str,
-        color_id: int,
+    # Import the minifigures from Rebrickable
+    @staticmethod
+    def download(
+        socket: 'BrickSocket',
+        brickset: 'BrickSet',
         /,
         *,
-        element_id: int | None = None,
-    ) -> Self:
-        # Save the parameters to the fields
-        self.fields.part_num = part_num
-        self.fields.color_id = color_id
-        self.fields.element_id = element_id
+        refresh: bool = False
+    ) -> bool:
+        try:
+            socket.auto_progress(
+                message='Set {set}: loading minifigures from Rebrickable'.format(  # noqa: E501
+                    set=brickset.fields.set,
+                ),
+                increment_total=True,
+            )
 
-        # Load the minifigures from the database
-        for record in self.select(
-            override_query=self.missing_part_query,
-            order=self.order
-        ):
-            minifigure = BrickMinifigure(record=record)
+            logger.debug('rebrick.lego.get_set_minifigs("{set}")'.format(
+                set=brickset.fields.set,
+            ))
 
-            self.records.append(minifigure)
+            minifigures = Rebrickable[BrickMinifigure](
+                'get_set_minifigs',
+                brickset.fields.set,
+                BrickMinifigure,
+                socket=socket,
+                brickset=brickset,
+            ).list()
 
-        return self
+            # Process each minifigure
+            for minifigure in minifigures:
+                if not minifigure.download(socket, refresh=refresh):
+                    return False
 
-    # Minifigure using a part
-    def using_part(
-        self,
-        part_num: str,
-        color_id: int,
-        /,
-        *,
-        element_id: int | None = None,
-    ) -> Self:
-        # Save the parameters to the fields
-        self.fields.part_num = part_num
-        self.fields.color_id = color_id
-        self.fields.element_id = element_id
+            return True
 
-        # Load the minifigures from the database
-        for record in self.select(
-            override_query=self.using_part_query,
-            order=self.order
-        ):
-            minifigure = BrickMinifigure(record=record)
+        except Exception as e:
+            socket.fail(
+                message='Error while importing set {set} minifigure list: {error}'.format(  # noqa: E501
+                    set=brickset.fields.set,
+                    error=e,
+                )
+            )
 
-            self.records.append(minifigure)
+            logger.debug(traceback.format_exc())
 
-        return self
+            return False

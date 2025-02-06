@@ -1,0 +1,33 @@
+<div id="grid-sort" class="collapse {% if config['SHOW_GRID_SORT'] %}show{% endif %} row row-cols-lg-auto g-1 justify-content-center align-items-center">
+  <div class="col-12 flex-grow-1">
+    <div class="input-group">
+      <span class="input-group-text mb-2"><i class="ri-sort-asc"></i><span class="ms-1 d-none d-md-inline"> Sort</span></span>
+      <button id="sort-number" type="button" class="btn btn-outline-primary mb-2"
+        data-sort-attribute="number" data-sort-natural="true"><i class="ri-hashtag"></i><span class="d-none d-md-inline"> Set</span></button>
+      <button id="sort-name" type="button" class="btn btn-outline-primary mb-2"
+        data-sort-attribute="name"><i class="ri-pencil-line"></i><span class="d-none d-md-inline"> Name</span></button>
+      <button id="sort-theme" type="button" class="btn btn-outline-primary mb-2"
+        data-sort-attribute="theme"><i class="ri-price-tag-3-line"></i><span class="d-none d-md-inline"> Theme</span></button>
+      <button id="sort-year" type="button" class="btn btn-outline-primary mb-2"
+        data-sort-attribute="year"><i class="ri-calendar-line"></i><span class="d-none d-md-inline"> Year</span></button>
+      <button id="sort-minifigure" type="button" class="btn btn-outline-primary mb-2"
+        data-sort-attribute="minifigures" data-sort-desc="true"><i class="ri-group-line"></i><span class="d-none d-xl-inline"> Figures</span></button>
+      <button id="sort-parts" type="button" class="btn btn-outline-primary mb-2"
+        data-sort-attribute="parts" data-sort-desc="true"><i class="ri-shapes-line"></i><span class="d-none d-xl-inline"> Parts</span></button>
+      {% if not config['HIDE_TABLE_MISSING_PARTS'] %}
+      <button id="sort-missing" type="button" class="btn btn-outline-primary mb-2"
+        data-sort-attribute="missing" data-sort-desc="true"><i class="ri-question-line"></i><span class="d-none d-xl-inline"> Missing</span></button>
+      {% endif %}
+      {% if not config['HIDE_TABLE_DAMAGED_PARTS'] %}
+      <button id="sort-damaged" type="button" class="btn btn-outline-primary mb-2"
+        data-sort-attribute="damaged" data-sort-desc="true"><i class="ri-error-warning-line"></i><span class="d-none d-xl-inline"> Damaged</span></button>
+      {% endif %}
+      <button id="sort-purchase-date" type="button" class="btn btn-outline-primary mb-2"
+        data-sort-attribute="purchase-date" data-sort-desc="true"><i class="ri-calendar-line"></i><span class="d-none d-xl-inline"> Date</span></button>
+      <button id="sort-purchase-price" type="button" class="btn btn-outline-primary mb-2"
+        data-sort-attribute="purchase-price" data-sort-desc="true"><i class="ri-wallet-3-line"></i><span class="d-none d-xl-inline"> Price</span></button>
+      <button id="sort-clear" type="button" class="btn btn-outline-dark mb-2"
+        data-sort-clear="true"><i class="ri-close-circle-line"></i><span class="d-none d-xl-inline"> Clear</span></button>
+    </div>
+  </div>
+</div>

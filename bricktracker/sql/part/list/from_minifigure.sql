@@ -1,28 +1,21 @@
 
-{% extends 'part/base/select.sql' %}
+{% extends 'part/base/base.sql' %}
 
 {% block total_missing %}
-SUM(IFNULL("missing"."quantity", 0)) AS "total_missing",
+SUM("bricktracker_parts"."missing") AS "total_missing",
 {% endblock %}
 
-{% block join %}
-LEFT JOIN "missing"
-ON "missing"."set_num" IS NOT DISTINCT FROM "inventory"."set_num"
-AND "missing"."id" IS NOT DISTINCT FROM "inventory"."id"
-AND "missing"."part_num" IS NOT DISTINCT FROM "inventory"."part_num"
-AND "missing"."color_id" IS NOT DISTINCT FROM "inventory"."color_id"
-AND "missing"."element_id" IS NOT DISTINCT FROM "inventory"."element_id"
+{% block total_damaged %}
+SUM("bricktracker_parts"."damaged") AS "total_damaged",
 {% endblock %}
 
 {% block where %}
-WHERE "inventory"."set_num" IS NOT DISTINCT FROM :set_num
+WHERE "bricktracker_parts"."figure" IS NOT DISTINCT FROM :figure
 {% endblock %}
 
 {% block group %}
 GROUP BY
-    "inventory"."part_num",
-    "inventory"."name",
-    "inventory"."color_id",
-    "inventory"."is_spare",
-    "inventory"."element_id"
+    "bricktracker_parts"."part",
+    "bricktracker_parts"."color",
+    "bricktracker_parts"."spare"
 {% endblock %}

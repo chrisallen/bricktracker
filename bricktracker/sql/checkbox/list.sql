@@ -1,1 +1,0 @@
-{% extends 'checkbox/base.sql' %}

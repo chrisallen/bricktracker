@@ -16,7 +16,7 @@
         {% endif %}
       </button>
     </h2>
-    <div id="{{ id }}" class="accordion-collapse collapse {% if expanded %}show{% endif %}" {% if not config['INDEPENDENT_ACCORDIONS'] %}data-bs-parent="#{{ parent }}"{% endif %}>
+    <div id="{{ id }}" class="accordion-collapse collapse border-start border-5 rounded-0 {% if expanded %}show{% endif %}" {% if not config['INDEPENDENT_ACCORDIONS'] %}data-bs-parent="#{{ parent }}"{% endif %}>
       <div class="accordion-body {% if class %}{{ class }}{% endif %}">
 {% endmacro %}
 
@@ -26,10 +26,10 @@
   </div>
 {% endmacro %}
 
-{% macro cards(card_collection, title, id, parent, target, icon=none) %}
+{% macro cards(card_collection, title, id, parent, target, expanded=false, icon=none) %}
   {% set size=card_collection | length %}
   {% if size %}
-    {{ header(title, id, parent, icon=icon) }}
+    {{ header(title, id, parent, expanded=expanded, icon=icon) }}
       <div class="row">
         {% for item in card_collection %}
           <div class="col-md-6 col-xl-3 d-flex align-items-stretch">
@@ -43,7 +43,7 @@
   {% endif %}
 {% endmacro %}
 
-{% macro table(table_collection, title, id, parent, target, quantity=none, icon=none, image=none, alt=none, details=none, no_missing=none, read_only_missing=none) %}
+{% macro table(table_collection, title, id, parent, target, quantity=none, icon=none, image=none, alt=none, details=none, read_only=none) %}
   {% set size=table_collection | length %}
   {% if size %}
     {{ header(title, id, parent, quantity=quantity, icon=icon, class='p-0', image=image, alt=alt) }}

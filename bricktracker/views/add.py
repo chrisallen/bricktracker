@@ -3,6 +3,7 @@ from flask_login import login_required
 
 from ..configuration_list import BrickConfigurationList
 from .exceptions import exception_handler
+from ..set_list import set_metadata_lists
 from ..socket import MESSAGES
 
 add_page = Blueprint('add', __name__, url_prefix='/add')
@@ -19,7 +20,8 @@ def add() -> str:
         'add.html',
         path=current_app.config['SOCKET_PATH'],
         namespace=current_app.config['SOCKET_NAMESPACE'],
-        messages=MESSAGES
+        messages=MESSAGES,
+        **set_metadata_lists()
     )
 
 
@@ -31,8 +33,10 @@ def bulk() -> str:
     BrickConfigurationList.error_unless_is_set('REBRICKABLE_API_KEY')
 
     return render_template(
-        'bulk.html',
+        'add.html',
         path=current_app.config['SOCKET_PATH'],
         namespace=current_app.config['SOCKET_NAMESPACE'],
-        messages=MESSAGES
+        messages=MESSAGES,
+        bulk=True,
+        **set_metadata_lists()
     )

@@ -1,0 +1,19 @@
+{% import 'macro/accordion.html' as accordion %}
+
+{{ accordion.header('Set tags danger zone', 'tag-danger', 'admin', expanded=true, danger=true, class='text-end') }}
+<form action="{{ url_for('admin_tag.do_delete', id=tag.fields.id) }}" method="post">
+  {% if tag_error %}<div class="alert alert-danger text-start" role="alert"><strong>Error:</strong> {{ tag_error }}.</div>{% endif %}
+  <div class="alert alert-danger text-center" role="alert">You are about to <strong>delete a set tag</strong>. This action is irreversible.</div>
+  <div class="row row-cols-lg-auto g-3 align-items-center">
+    <div class="col-12 flex-grow-1">
+      <div class="input-group">
+        <div class="input-group-text">Name</div>
+        <input type="text" class="form-control" value="{{ tag.fields.name }}" disabled>
+      </div>
+    </div>
+  </div>
+  <hr class="border-bottom">
+  <a class="btn btn-danger" href="{{ url_for('admin.admin', open_tag=true) }}" role="button"><i class="ri-arrow-left-long-line"></i> Back to the admin</a>
+  <button type="submit" class="btn btn-danger"><i class="ri-delete-bin-2-line"></i> Delete <strong>the set tag</strong></button>
+</form>
+{{ accordion.footer() }}

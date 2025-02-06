@@ -1,0 +1,64 @@
+{% if g.login.is_authenticated() %}
+  {{ accordion.header('Management', 'set-management', 'set-details', icon='settings-4-line', class='p-0') }}
+    {{ accordion.header('Owners', 'owner', 'set-management', icon='group-line', class='p-0') }}
+      <ul class="list-group list-group-flush">
+      {% if brickset_owners | length %}
+        {% for owner in brickset_owners %}
+          <li class="d-flex list-group-item list-group-item-action text-nowrap">{{ form.checkbox(owner.fields.name, item.fields.id, owner.as_dataset(), owner.url_for_set_state(item.fields.id), item.fields[owner.as_column()], delete=delete) }}</li>
+        {% endfor %}
+      {% else %}
+        <li class="list-group-item list-group-item-action text-center"><i class="ri-error-warning-line"></i> No owner found.</li>
+        {% endif %}
+      </ul>
+      <div class="list-group list-group-flush border-top">
+        <a class="list-group-item list-group-item-action" href="{{ url_for('admin.admin', open_owner=true) }}"><i class="ri-settings-4-line"></i> Manage the set owners</a>
+      </div>
+    {{ accordion.footer() }}
+    {{ accordion.header('Purchase', 'purchase', 'set-management', icon='wallet-3-line') }}
+      <div class="alert alert-info" role="alert">The expected date format here is <code>yyyy/mm/dd</code> (year/month/day), but you can configured how it is displayed in the set card with the <code>PURCHASE_DATE_FORMAT</code> variable.</div>
+      <div class="row row-cols-lg-auto g-1 justify-content-start align-items-center pb-2">
+        <div class="col-12">
+          {{ form.input('Date', item.fields.id, 'date', item.url_for_purchase_date(), item.purchase_date(standard=true), icon='calendar-line', date=true) }}
+        </div>
+        <div class="col-12 flex-grow-1">
+          {{ form.input('Price', item.fields.id, 'price', item.url_for_purchase_price(), item.fields.purchase_price, suffix=config['PURCHASE_CURRENCY'], icon='wallet-3-line') }}
+        </div>
+        <div class="col-12 flex-grow-1">
+          {% if brickset_purchase_locations | length %}
+            {{ form.select('Location', item.fields.id, brickset_purchase_locations.as_prefix(), brickset_purchase_locations.url_for_set_value(item.fields.id), item.fields.purchase_location, brickset_purchase_locations, icon='building-line', delete=delete) }}
+          {% else %}
+            <i class="ri-error-warning-line"></i> No purchase location found.
+          {% endif %}
+        </div>
+      </div>
+      <hr>
+      <a href="{{ url_for('admin.admin', open_purchase_location=true) }}" class="btn btn-primary" role="button"><i class="ri-settings-4-line"></i> Manage the set purchase locations</a>
+    {{ accordion.footer() }}
+    {{ accordion.header('Storage', 'storage', 'set-management', icon='archive-2-line') }}
+      {% if brickset_storages | length %}
+      {{ form.select('Storage', item.fields.id, brickset_storages.as_prefix(), brickset_storages.url_for_set_value(item.fields.id), item.fields.storage, brickset_storages, icon='building-line', delete=delete) }}
+      {% else %}
+        <p class="text-center"><i class="ri-error-warning-line"></i> No storage found.</p>
+      {% endif %}
+      <hr>
+      <a href="{{ url_for('admin.admin', open_storage=true) }}" class="btn btn-primary" role="button"><i class="ri-settings-4-line"></i> Manage the set storages</a>
+    {{ accordion.footer() }}
+    {{ accordion.header('Tags', 'tag', 'set-management', icon='price-tag-2-line', class='p-0') }}
+      <ul class="list-group list-group-flush">
+      {% if brickset_tags | length %}
+        {% for tag in brickset_tags %}
+          <li class="d-flex list-group-item list-group-item-action text-nowrap">{{ form.checkbox(tag.fields.name, item.fields.id, tag.as_dataset(), tag.url_for_set_state(item.fields.id), item.fields[tag.as_column()], delete=delete) }}</li>
+        {% endfor %}
+      {% else %}
+        <li class="list-group-item list-group-item-action text-center"><i class="ri-error-warning-line"></i> No tag found.</li>
+        {% endif %}
+      </ul>
+      <div class="list-group list-group-flush border-top">
+        <a class="list-group-item list-group-item-action" href="{{ url_for('admin.admin', open_tag=true) }}"><i class="ri-settings-4-line"></i> Manage the set tags</a>
+      </div>
+    {{ accordion.footer() }}
+    {{ accordion.header('Data', 'data', 'set-management', icon='database-2-line') }}
+      <a href="{{ item.url_for_refresh() }}" class="btn btn-primary" role="button"><i class="ri-refresh-line"></i> Refresh the set data</a>
+    {{ accordion.footer() }}
+  {{ accordion.footer() }}
+{% endif %}

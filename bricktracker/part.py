@@ -1,23 +1,25 @@
-import os
+import logging
 from sqlite3 import Row
 from typing import Any, Self, TYPE_CHECKING
-from urllib.parse import urlparse
+import traceback
 
-from flask import current_app, url_for
+from flask import url_for
 
-from .exceptions import DatabaseException, ErrorException, NotFoundException
-from .rebrickable_image import RebrickableImage
-from .record import BrickRecord
+from .exceptions import ErrorException, NotFoundException
+from .rebrickable_part import RebrickablePart
 from .sql import BrickSQL
 if TYPE_CHECKING:
     from .minifigure import BrickMinifigure
     from .set import BrickSet
+    from .socket import BrickSocket
+
+logger = logging.getLogger(__name__)
 
 
 # Lego set or minifig part
-class BrickPart(BrickRecord):
-    brickset: 'BrickSet | None'
-    minifigure: 'BrickMinifigure | None'
+class BrickPart(RebrickablePart):
+    identifier: str
+    kind: str
 
     # Queries
     insert_query: str = 'part/insert'
@@ -30,74 +32,91 @@ class BrickPart(BrickRecord):
         *,
         brickset: 'BrickSet | None' = None,
         minifigure: 'BrickMinifigure | None' = None,
-        record: Row | dict[str, Any] | None = None,
+        record: Row | dict[str, Any] | None = None
     ):
-        super().__init__()
-
-        # Save the brickset and minifigure
-        self.brickset = brickset
-        self.minifigure = minifigure
-
-        # Ingest the record if it has one
-        if record is not None:
-            self.ingest(record)
-
-    # Delete missing part
-    def delete_missing(self, /) -> None:
-        BrickSQL().execute_and_commit(
-            'missing/delete/from_set',
-            parameters=self.sql_parameters()
+        super().__init__(
+            brickset=brickset,
+            minifigure=minifigure,
+            record=record
         )
 
-    # Set missing part
-    def set_missing(self, quantity: int, /) -> None:
-        parameters = self.sql_parameters()
-        parameters['quantity'] = quantity
+        if self.minifigure is not None:
+            self.identifier = self.minifigure.fields.figure
+            self.kind = 'Minifigure'
+        elif self.brickset is not None:
+            self.identifier = self.brickset.fields.set
+            self.kind = 'Set'
 
-        # Can't use UPSERT because the database has no keys
-        # Try to update
-        database = BrickSQL()
-        rows, _ = database.execute(
-            'missing/update/from_set',
-            parameters=parameters,
-        )
+    # Import a part into the database
+    def download(self, socket: 'BrickSocket', refresh: bool = False) -> bool:
+        if self.brickset is None:
+            raise ErrorException('Importing a part from Rebrickable outside of a set is not supported')  # noqa: E501
 
-        # Insert if no row has been affected
-        if not rows:
-            rows, _ = database.execute(
-                'missing/insert',
-                parameters=parameters,
+        try:
+            # Insert into the database
+            socket.auto_progress(
+                message='{kind} {identifier}: inserting part {part} into database'.format(  # noqa: E501
+                    kind=self.kind,
+                    identifier=self.identifier,
+                    part=self.fields.part
+                )
             )
 
-            if rows != 1:
-                raise DatabaseException(
-                    'Could not update the missing quantity for part {id}'.format(  # noqa: E501
-                        id=self.fields.id
-                    )
-                )
+            if not refresh:
+                # Insert into database
+                self.insert(commit=False)
 
-        database.commit()
+            # Insert the rebrickable set into database
+            self.insert_rebrickable()
+
+        except Exception as e:
+            socket.fail(
+                message='Error while importing part {part} from {kind} {identifier}: {error}'.format(  # noqa: E501
+                    part=self.fields.part,
+                    kind=self.kind,
+                    identifier=self.identifier,
+                    error=e,
+                )
+            )
+
+            logger.debug(traceback.format_exc())
+
+            return False
+
+        return True
+
+    # A identifier for HTML component
+    def html_id(self, prefix: str | None = None, /) -> str:
+        components: list[str] = ['part']
+
+        if prefix is not None:
+            components.append(prefix)
+
+        if self.fields.figure is not None:
+            components.append(self.fields.figure)
+
+        components.append(self.fields.part)
+        components.append(str(self.fields.color))
+        components.append(str(self.fields.spare))
+
+        return '-'.join(components)
 
     # Select a generic part
     def select_generic(
         self,
-        part_num: str,
-        color_id: int,
+        part: str,
+        color: int,
         /,
-        *,
-        element_id: int | None = None
     ) -> Self:
         # Save the parameters to the fields
-        self.fields.part_num = part_num
-        self.fields.color_id = color_id
-        self.fields.element_id = element_id
+        self.fields.part = part
+        self.fields.color = color
 
         if not self.select(override_query=self.generic_query):
             raise NotFoundException(
-                'Part with number {number}, color ID {color} and element ID {element} was not found in the database'.format(  # noqa: E501
-                    number=self.fields.part_num,
-                    color=self.fields.color_id,
-                    element=self.fields.element_id,
+                'Part with number {number}, color ID {color} was not found in the database'.format(  # noqa: E501
+                    number=self.fields.part,
+                    color=self.fields.color,
                 ),
             )
 
@@ -107,7 +126,9 @@ class BrickPart(BrickRecord):
     def select_specific(
         self,
         brickset: 'BrickSet',
-        id: str,
+        part: str,
+        color: int,
+        spare: int,
         /,
         *,
         minifigure: 'BrickMinifigure | None' = None,
@@ -115,168 +136,73 @@ class BrickPart(BrickRecord):
         # Save the parameters to the fields
         self.brickset = brickset
         self.minifigure = minifigure
-        self.fields.id = id
+        self.fields.part = part
+        self.fields.color = color
+        self.fields.spare = spare
 
         if not self.select():
+            if self.minifigure is not None:
+                figure = self.minifigure.fields.figure
+            else:
+                figure = None
+
             raise NotFoundException(
-                'Part with ID {id} from set {set} was not found in the database'.format(  # noqa: E501
+                'Part {part} with color {color} (spare: {spare}) from set {set} ({id}) (minifigure: {figure}) was not found in the database'.format(  # noqa: E501
+                    part=self.fields.part,
+                    color=self.fields.color,
+                    spare=self.fields.spare,
                     id=self.fields.id,
                     set=self.brickset.fields.set,
+                    figure=figure,
                 ),
             )
 
         return self
 
-    # Return a dict with common SQL parameters for a part
-    def sql_parameters(self, /) -> dict[str, Any]:
-        parameters = super().sql_parameters()
+    # Update a problematic part
+    def update_problem(self, problem: str, json: Any | None, /) -> int:
+        amount: str | int = json.get('value', '')  # type: ignore
 
-        # Supplement from the brickset
-        if 'u_id' not in parameters and self.brickset is not None:
-            parameters['u_id'] = self.brickset.fields.id
+        # We need a positive integer
+        try:
+            if amount == '':
+                amount = 0
 
-        if 'set_num' not in parameters:
-            if self.minifigure is not None:
-                parameters['set_num'] = self.minifigure.fields.fig_num
+            amount = int(amount)
 
-            elif self.brickset is not None:
-                parameters['set_num'] = self.brickset.fields.set
+            if amount < 0:
+                amount = 0
+        except Exception:
+            raise ErrorException('"{amount}" is not a valid integer'.format(
+                amount=amount
+            ))
 
-        return parameters
+        if amount < 0:
+            raise ErrorException('Cannot set a negative amount')
 
-    # Update the missing part
-    def update_missing(self, missing: Any, /) -> None:
-        # If empty, delete it
-        if missing == '':
-            self.delete_missing()
+        setattr(self.fields, problem, amount)
 
-        else:
-            # Try to understand it as a number
-            try:
-                missing = int(missing)
-            except Exception:
-                raise ErrorException('"{missing}" is not a valid integer'.format(  # noqa: E501
-                    missing=missing
-                ))
-
-            # If 0, delete it
-            if missing == 0:
-                self.delete_missing()
-
-            else:
-                # If negative, it's an error
-                if missing < 0:
-                    raise ErrorException('Cannot set a negative missing value')
-
-                # Otherwise upsert it
-                # Not checking if it is too much, you do you
-                self.set_missing(missing)
-
-    # Self url
-    def url(self, /) -> str:
-        return url_for(
-            'part.details',
-            number=self.fields.part_num,
-            color=self.fields.color_id,
-            element=self.fields.element_id,
+        BrickSQL().execute_and_commit(
+            'part/update/{problem}'.format(problem=problem),
+            parameters=self.sql_parameters()
         )
 
-    # Compute the url for the bricklink page
-    def url_for_bricklink(self, /) -> str:
-        if current_app.config['BRICKLINK_LINKS']:
-            try:
-                return current_app.config['BRICKLINK_LINK_PART_PATTERN'].format(  # noqa: E501
-                    number=self.fields.part_num,
-                )
-            except Exception:
-                pass
+        return amount
 
-        return ''
-
-    # Compute the url for the part image
-    def url_for_image(self, /) -> str:
-        if not current_app.config['USE_REMOTE_IMAGES']:
-            if self.fields.part_img_url is None:
-                file = RebrickableImage.nil_name()
-            else:
-                file = self.fields.part_img_url_id
-
-            return RebrickableImage.static_url(file, 'PARTS_FOLDER')
-        else:
-            if self.fields.part_img_url is None:
-                return current_app.config['REBRICKABLE_IMAGE_NIL']
-            else:
-                return self.fields.part_img_url
-
-    # Compute the url for missing part
-    def url_for_missing(self, /) -> str:
+    # Compute the url for problematic part
+    def url_for_problem(self, problem: str, /) -> str:
         # Different URL for a minifigure part
         if self.minifigure is not None:
-            return url_for(
-                'set.missing_minifigure_part',
-                id=self.fields.u_id,
-                minifigure_id=self.minifigure.fields.fig_num,
-                part_id=self.fields.id,
-            )
+            figure = self.minifigure.fields.figure
+        else:
+            figure = None
 
         return url_for(
-            'set.missing_part',
-            id=self.fields.u_id,
-            part_id=self.fields.id
+            'set.problem_part',
+            id=self.fields.id,
+            figure=figure,
+            part=self.fields.part,
+            color=self.fields.color,
+            spare=self.fields.spare,
+            problem=problem,
         )
-
-    # Compute the url for the rebrickable page
-    def url_for_rebrickable(self, /) -> str:
-        if current_app.config['REBRICKABLE_LINKS']:
-            try:
-                return current_app.config['REBRICKABLE_LINK_PART_PATTERN'].format(  # noqa: E501
-                    number=self.fields.part_num,
-                    color=self.fields.color_id,
-                )
-            except Exception:
-                pass
-
-        return ''
-
-    # Normalize from Rebrickable
-    @staticmethod
-    def from_rebrickable(
-        data: dict[str, Any],
-        /,
-        *,
-        brickset: 'BrickSet | None' = None,
-        minifigure: 'BrickMinifigure | None' = None,
-        **_,
-    ) -> dict[str, Any]:
-        record = {
-            'set_num': data['set_num'],
-            'id': data['id'],
-            'part_num': data['part']['part_num'],
-            'name': data['part']['name'],
-            'part_img_url': data['part']['part_img_url'],
-            'part_img_url_id': None,
-            'color_id': data['color']['id'],
-            'color_name': data['color']['name'],
-            'quantity': data['quantity'],
-            'is_spare': data['is_spare'],
-            'element_id': data['element_id'],
-        }
-
-        if brickset is not None:
-            record['u_id'] = brickset.fields.id
-
-        if minifigure is not None:
-            record['set_num'] = data['fig_num']
-
-        # Extract the file name
-        if data['part']['part_img_url'] is not None:
-            part_img_url_file = os.path.basename(
-                urlparse(data['part']['part_img_url']).path
-            )
-
-            part_img_url_id, _ = os.path.splitext(part_img_url_file)
-
-            if part_img_url_id is not None or part_img_url_id != '':
-                record['part_img_url_id'] = part_img_url_id
-
-        return record

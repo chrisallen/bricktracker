@@ -1,10 +1,12 @@
+{% import 'macro/accordion.html' as accordion %}
+
 {% extends 'base.html' %}
 
-{% block title %} - Add a set{% endblock %}
+{% block title %} - {% if not bulk %}Add a set{% else %}Bulk add sets{% endif %}{% endblock %}
 
 {% block main %}
 <div class="container">
-  {% if not config['HIDE_ADD_BULK_SET'] %}
+  {% if not bulk and not config['HIDE_ADD_BULK_SET'] %}
   <div class="alert alert-primary" role="alert">
     <h4 class="alert-heading">Too many to add?</h4>
     <p class="mb-0">You can import multiple sets at once with <a href="{{ url_for('add.bulk') }}" class="btn btn-primary"><i class="ri-function-add-line"></i> Bulk add</a>.</p>
@@ -14,20 +16,81 @@
     <div class="col-12">
       <div class="card mb-3">
         <div class="card-header">
-          <h5 class="mb-0"><i class="ri-add-circle-line"></i> Add a set</h5>
+          <h5 class="mb-0"><i class="ri-add-circle-line"></i> {% if not bulk %}Add a set{% else %}Bulk add sets{% endif %}</h5>
         </div>
         <div class="card-body">
           <div id="add-fail" class="alert alert-danger d-none" role="alert"></div>
-          <div id="add-complete" class="alert alert-success d-none" role="alert"></div>
+          {% if not bulk %}
+            <div id="add-complete" class="alert alert-success d-none" role="alert"></div>
+          {% else %}
+            <div id="add-complete"></div>
+          {% endif %}
           <div class="mb-3">
-            <label for="add-set" class="form-label">Set number (only one)</label>
-            <input type="text" class="form-control" id="add-set" placeholder="107-1 or 1642-1 or ...">
+            <label for="add-set" class="form-label">{% if not bulk %}Set number (only one){% else %}List of sets (separated by a comma){% endif %}</label>
+            <input type="text" class="form-control" id="add-set" placeholder="{% if not bulk %}107-1 or 1642-1 or ...{% else %}107-1, 1642-1, ...{% endif %}">
           </div>
           <div class="form-check">
-            <input type="checkbox" class="form-check-input" id="add-no-confirm">
+            <input type="checkbox" class="form-check-input" id="add-no-confirm" {% if bulk %}checked disabled{% endif %}>
             <label class="form-check-label" for="add-no-confirm">
               Add without confirmation
             </label>
+          </div>
+          <h6 class="border-bottom mt-2">Metadata</h6>
+          <div class="accordion accordion" id="metadata">
+            {% if brickset_owners | length %}
+              {{ accordion.header('Owners', 'owners', 'metadata', icon='user-line') }}
+              <div id="add-owners">
+              {% for owner in brickset_owners %}
+                {% with id=owner.as_dataset() %}
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="{{ owner.fields.id }}" id="{{ id }}" autocomplete="off">
+                    <label class="form-check-label" for="{{ id }}">{{ owner.fields.name }}</label>
+                  </div>
+                {% endwith %}
+              {% endfor %}
+              </div>
+              {{ accordion.footer() }}
+            {% endif %}
+            {% if brickset_purchase_locations | length %}
+              {{ accordion.header('Purchase location', 'purchase-location', 'metadata', icon='building-line') }}
+              <label class="visually-hidden" for="add-purchase-location">{{ name }}</label>
+              <div class="input-group">
+                <select id="add-purchase-location" class="form-select" autocomplete="off">
+                  <option value="" selected><i>None</i></option>
+                  {% for purchase_location in brickset_purchase_locations %}
+                    <option value="{{ purchase_location.fields.id }}">{{ purchase_location.fields.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              {{ accordion.footer() }}
+            {% endif %}
+            {% if brickset_storages | length %}
+              {{ accordion.header('Storage', 'storage', 'metadata', icon='archive-2-line') }}
+              <label class="visually-hidden" for="add-storage">{{ name }}</label>
+              <div class="input-group">
+                <select id="add-storage" class="form-select" autocomplete="off">
+                  <option value="" selected><i>None</i></option>
+                  {% for storage in brickset_storages %}
+                    <option value="{{ storage.fields.id }}">{{ storage.fields.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              {{ accordion.footer() }}
+            {% endif %}
+            {% if brickset_tags | length %}
+              {{ accordion.header('Tags', 'tags', 'metadata', icon='price-tag-2-line') }}
+              <div id="add-tags">
+              {% for tag in brickset_tags %}
+                {% with id=tag.as_dataset() %}
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="{{ tag.fields.id }}" id="{{ id }}" autocomplete="off">
+                    <label class="form-check-label" for="{{ id }}">{{ tag.fields.name }}</label>
+                  </div>
+                {% endwith %}
+              {% endfor %}
+              </div>
+              {{ accordion.footer() }}
+            {% endif %}
           </div>
           <hr>
           <div class="mb-3">
@@ -54,19 +117,24 @@
               <div id="add-card-image-container" class="card-img">
                 <img id="add-card-image" loading="lazy">
               </div>
-              <div id="add-card-footer" class="card-footer text-end d-none">
-                <button id="add-card-dismiss" type="button" class="btn btn-danger"><i class="ri-close-line"></i> Dismiss</button>
-                <button id="add-card-confirm" type="button" class="btn btn-primary"><i class="ri-check-double-line"></i> Confirm add</button>
-              </div>
+              {% if not bulk %}
+                <div id="add-card-footer" class="card-footer text-end d-none">
+                  <button id="add-card-dismiss" type="button" class="btn btn-danger"><i class="ri-close-line"></i> Dismiss</button>
+                  <button id="add-card-confirm" type="button" class="btn btn-primary"><i class="ri-check-double-line"></i> Confirm add</button>
+                </div>
+              {% endif %}
             </div>
           </div>
         </div>
         <div class="card-footer text-end">
-          <span id="add-status-icon" class="me-1"></span><span id="add-status" class="me-1"></span><button id="add" type="button" class="btn btn-primary"><i class="ri-add-circle-line"></i> Add</button>
+          <span id="add-status-icon" class="me-1"></span><span id="add-status" class="me-1"></span>
+          <button id="add" type="button" class="btn btn-primary">{% if not bulk %}<i class="ri-add-circle-line"></i> Add{% else %}<i class="ri-function-add-line"></i> Bulk add{% endif %}</button>
         </div>
       </div>
     </div>
   </div>
 </div>
-{% include 'set/socket.html' %}
+{% with id='add', bulk=bulk %}
+  {% include 'set/socket.html' %}
+{% endwith %}
 {% endblock %}

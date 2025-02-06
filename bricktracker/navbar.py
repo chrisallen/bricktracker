@@ -11,9 +11,10 @@ NAVBAR: Final[list[dict[str, Any]]] = [
     {'e': 'set.list', 't': 'Sets', 'i': 'grid-line', 'f': 'HIDE_ALL_SETS'},  # noqa: E501
     {'e': 'add.add', 't': 'Add', 'i': 'add-circle-line', 'f': 'HIDE_ADD_SET'},  # noqa: E501
     {'e': 'part.list', 't': 'Parts', 'i': 'shapes-line', 'f': 'HIDE_ALL_PARTS'},  # noqa: E501
-    {'e': 'part.missing', 't': 'Missing', 'i': 'error-warning-line', 'f': 'HIDE_MISSING_PARTS'},  # noqa: E501
+    {'e': 'part.problem', 't': 'Problems', 'i': 'error-warning-line', 'f': 'HIDE_ALL_PROBLEMS_PARTS'},  # noqa: E501
     {'e': 'minifigure.list', 't': 'Minifigures', 'i': 'group-line', 'f': 'HIDE_ALL_MINIFIGURES'},  # noqa: E501
     {'e': 'instructions.list', 't': 'Instructions', 'i': 'file-line', 'f': 'HIDE_ALL_INSTRUCTIONS'},  # noqa: E501
+    {'e': 'storage.list', 't': 'Storages', 'i': 'archive-2-line', 'f': 'HIDE_ALL_STORAGES'},  # noqa: E501
     {'e': 'wish.list', 't': 'Wishlist', 'i': 'gift-line', 'f': 'HIDE_WISHES'},
     {'e': 'admin.admin', 't': 'Admin', 'i': 'settings-4-line', 'f': 'HIDE_ADMIN'},  # noqa: E501
 ]
