@@ -3,7 +3,7 @@ from typing import List, overload, Self, Type, TypeVar
 
 from flask import url_for
 
-from .exceptions import NotFoundException
+from .exceptions import ErrorException, NotFoundException
 from .fields import BrickRecordFields
 from .record_list import BrickRecordList
 from .set_owner import BrickSetOwner
@@ -113,11 +113,16 @@ class BrickMetadataList(BrickRecordList[T]):
 
     # Grab a specific status
     @classmethod
-    def get(cls, id: str, /, *, allow_none: bool = False) -> T:
+    def get(cls, id: str | None, /, *, allow_none: bool = False) -> T:
         new = cls.new()
 
-        if allow_none and id == '':
+        if allow_none and (id == '' or id is None):
             return new.model()
+
+        if id is None:
+            raise ErrorException('Cannot get {kind} with no ID'.format(
+                kind=new.kind.capitalize()
+            ))
 
         if id not in new.mapping:
             raise NotFoundException(
