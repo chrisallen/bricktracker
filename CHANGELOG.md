@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.1:
+
+This release fixes a bug where you could not add a set if no metadata was configured.
+
 ## 1.2.0:
 
 > **Warning**

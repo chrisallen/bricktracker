@@ -2,7 +2,7 @@ services:
   bricktracker:
     container_name: BrickTracker
     restart: unless-stopped
-    image: gitea.baerentsen.space/frederikbaerentsen/bricktracker:1.2.0
+    image: gitea.baerentsen.space/frederikbaerentsen/bricktracker:1.2.1
     ports:
       - "3333:3333"
     volumes:
