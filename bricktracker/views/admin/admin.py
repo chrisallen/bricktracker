@@ -84,6 +84,7 @@ def admin() -> str:
     open_image = request.args.get('open_image', None)
     open_instructions = request.args.get('open_instructions', None)
     open_logout = request.args.get('open_logout', None)
+    open_metadata = request.args.get('open_metadata', None)
     open_owner = request.args.get('open_owner', None)
     open_purchase_location = request.args.get('open_purchase_location', None)
     open_retired = request.args.get('open_retired', None)
@@ -93,6 +94,7 @@ def admin() -> str:
     open_theme = request.args.get('open_theme', None)
 
     open_metadata = (
+        open_metadata or
         open_owner or
         open_purchase_location or
         open_status or

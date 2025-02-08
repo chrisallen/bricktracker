@@ -37,59 +37,66 @@
           </div>
           <h6 class="border-bottom mt-2">Metadata</h6>
           <div class="accordion accordion" id="metadata">
-            {% if brickset_owners | length %}
-              {{ accordion.header('Owners', 'owners', 'metadata', icon='user-line') }}
-              <div id="add-owners">
-              {% for owner in brickset_owners %}
-                {% with id=owner.as_dataset() %}
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="{{ owner.fields.id }}" id="{{ id }}" autocomplete="off">
-                    <label class="form-check-label" for="{{ id }}">{{ owner.fields.name }}</label>
-                  </div>
-                {% endwith %}
-              {% endfor %}
+            {% if not (brickset_owners | length) and not (brickset_purchase_locations | length) and not (brickset_storages | length) and not (brickset_tags | length) %}
+              <div class="alert alert-warning" role="alert">
+                You have no metadata configured.
+                You can add entries in the <a href="{{ url_for('admin.admin', open_metadata=true) }}" class="btn btn-warning" role="button"><i class="ri-profile-line"></i> Set metadata management</a> section of the Admin panel.
               </div>
-              {{ accordion.footer() }}
-            {% endif %}
-            {% if brickset_purchase_locations | length %}
-              {{ accordion.header('Purchase location', 'purchase-location', 'metadata', icon='building-line') }}
-              <label class="visually-hidden" for="add-purchase-location">{{ name }}</label>
-              <div class="input-group">
-                <select id="add-purchase-location" class="form-select" autocomplete="off">
-                  <option value="" selected><i>None</i></option>
-                  {% for purchase_location in brickset_purchase_locations %}
-                    <option value="{{ purchase_location.fields.id }}">{{ purchase_location.fields.name }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-              {{ accordion.footer() }}
-            {% endif %}
-            {% if brickset_storages | length %}
-              {{ accordion.header('Storage', 'storage', 'metadata', icon='archive-2-line') }}
-              <label class="visually-hidden" for="add-storage">{{ name }}</label>
-              <div class="input-group">
-                <select id="add-storage" class="form-select" autocomplete="off">
-                  <option value="" selected><i>None</i></option>
-                  {% for storage in brickset_storages %}
-                    <option value="{{ storage.fields.id }}">{{ storage.fields.name }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-              {{ accordion.footer() }}
-            {% endif %}
-            {% if brickset_tags | length %}
-              {{ accordion.header('Tags', 'tags', 'metadata', icon='price-tag-2-line') }}
-              <div id="add-tags">
-              {% for tag in brickset_tags %}
-                {% with id=tag.as_dataset() %}
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="{{ tag.fields.id }}" id="{{ id }}" autocomplete="off">
-                    <label class="form-check-label" for="{{ id }}">{{ tag.fields.name }}</label>
-                  </div>
-                {% endwith %}
-              {% endfor %}
-              </div>
-              {{ accordion.footer() }}
+              {% else %}
+              {% if brickset_owners | length %}
+                {{ accordion.header('Owners', 'owners', 'metadata', icon='user-line') }}
+                <div id="add-owners">
+                {% for owner in brickset_owners %}
+                  {% with id=owner.as_dataset() %}
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" value="{{ owner.fields.id }}" id="{{ id }}" autocomplete="off">
+                      <label class="form-check-label" for="{{ id }}">{{ owner.fields.name }}</label>
+                    </div>
+                  {% endwith %}
+                {% endfor %}
+                </div>
+                {{ accordion.footer() }}
+              {% endif %}
+              {% if brickset_purchase_locations | length %}
+                {{ accordion.header('Purchase location', 'purchase-location', 'metadata', icon='building-line') }}
+                <label class="visually-hidden" for="add-purchase-location">{{ name }}</label>
+                <div class="input-group">
+                  <select id="add-purchase-location" class="form-select" autocomplete="off">
+                    <option value="" selected><i>None</i></option>
+                    {% for purchase_location in brickset_purchase_locations %}
+                      <option value="{{ purchase_location.fields.id }}">{{ purchase_location.fields.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                {{ accordion.footer() }}
+              {% endif %}
+              {% if brickset_storages | length %}
+                {{ accordion.header('Storage', 'storage', 'metadata', icon='archive-2-line') }}
+                <label class="visually-hidden" for="add-storage">{{ name }}</label>
+                <div class="input-group">
+                  <select id="add-storage" class="form-select" autocomplete="off">
+                    <option value="" selected><i>None</i></option>
+                    {% for storage in brickset_storages %}
+                      <option value="{{ storage.fields.id }}">{{ storage.fields.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                {{ accordion.footer() }}
+              {% endif %}
+              {% if brickset_tags | length %}
+                {{ accordion.header('Tags', 'tags', 'metadata', icon='price-tag-2-line') }}
+                <div id="add-tags">
+                {% for tag in brickset_tags %}
+                  {% with id=tag.as_dataset() %}
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" value="{{ tag.fields.id }}" id="{{ id }}" autocomplete="off">
+                      <label class="form-check-label" for="{{ id }}">{{ tag.fields.name }}</label>
+                    </div>
+                  {% endwith %}
+                {% endfor %}
+                </div>
+                {{ accordion.footer() }}
+              {% endif %}
             {% endif %}
           </div>
           <hr>
