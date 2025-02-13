@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.2:
+
+This release fixes a bug where orphaned parts in the `inventory` table are blocking the database upgrade.
+
 ## 1.2.1:
 
 This release fixes a bug where you could not add a set if no metadata was configured.

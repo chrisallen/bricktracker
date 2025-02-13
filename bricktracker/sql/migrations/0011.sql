@@ -4,6 +4,19 @@ PRAGMA foreign_keys = ON;
 
 BEGIN TRANSACTION;
 
+-- Fix: somehow a deletion bug was introduced in an older release?
+DELETE FROM "inventory"
+WHERE "inventory"."u_id" NOT IN (
+    SELECT "bricktracker_sets"."id"
+    FROM "bricktracker_sets"
+);
+
+DELETE FROM "missing"
+WHERE "missing"."u_id" NOT IN (
+    SELECT "bricktracker_sets"."id"
+    FROM "bricktracker_sets"
+);
+
 -- Create a Bricktracker parts table: an amount of parts linked to a Bricktracker set
 CREATE TABLE "bricktracker_parts" (
     "id" TEXT NOT NULL,
