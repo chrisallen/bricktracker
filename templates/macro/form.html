@@ -1,6 +1,6 @@
 {% macro checkbox(name, id, prefix, url, checked, parent=none, delete=false) %}
   {% if g.login.is_authenticated() %}
-    <input class="form-check-input" type="checkbox" id="{{ prefix }}-{{ id }}" {% if checked %}checked{% endif %}
+    <input class="form-check-input px-1" type="checkbox" id="{{ prefix }}-{{ id }}" {% if checked %}checked{% endif %}
     {% if not delete %}
       data-changer-id="{{ id }}" data-changer-prefix="{{ prefix }}" data-changer-url="{{ url }}" {% if parent %}data-changer-parent="{{ parent }}"{% endif %}
     {% else %}
@@ -22,8 +22,8 @@
   {% else %}
     <label class="visually-hidden" for="{{ prefix }}-{{ id }}">{{ name }}</label>
     <div class="input-group">
-      {% if icon %}<span class="input-group-text"><i class="ri-{{ icon }} me-1"></i><span class="ms-1 d-none d-md-inline"> {{ name }}</span></span>{% endif %}
-      <input class="form-control form-control-sm flex-shrink-1" type="text" id="{{ prefix }}-{{ id }}" value="{% if value %}{{ value }}{% endif %}"
+      {% if icon %}<span class="input-group-text px-1"><i class="ri-{{ icon }} me-1"></i><span class="ms-1 d-none d-md-inline"> {{ name }}</span></span>{% endif %}
+      <input class="form-control form-control-sm flex-shrink-1 px-1" type="text" id="{{ prefix }}-{{ id }}" value="{% if value %}{{ value }}{% endif %}"
       {% if g.login.is_authenticated() %}
         data-changer-id="{{ id }}" data-changer-prefix="{{ prefix }}" data-changer-url="{{ url }}"
         {% if date %}data-changer-date="true"{% endif %}
@@ -31,12 +31,12 @@
         disabled
       {% endif %}
         autocomplete="off">
-      {% if suffix %}<span class="input-group-text d-none d-md-inline">{{ suffix }}</span>{% endif %}
+      {% if suffix %}<span class="input-group-text d-none d-md-inline px-1">{{ suffix }}</span>{% endif %}
       {% if g.login.is_authenticated() %}
-        <span id="status-{{ prefix }}-{{ id }}" class="input-group-text ri-save-line"></span>
-        <button id="clear-{{ prefix }}-{{ id }}" type="button" class="btn btn-sm btn-light btn-outline-danger border"><i class="ri-eraser-line"></i></button>
+        <span id="status-{{ prefix }}-{{ id }}" class="input-group-text ri-save-line px-1"></span>
+        <button id="clear-{{ prefix }}-{{ id }}" type="button" class="btn btn-sm btn-light btn-outline-danger border px-1"><i class="ri-eraser-line"></i></button>
       {% else %}
-        <span class="input-group-text ri-prohibited-line"></span>
+        <span class="input-group-text ri-prohibited-line px-1"></span>
       {% endif %}
     </div>
   {% endif %}
@@ -46,8 +46,8 @@
   {% if g.login.is_authenticated() %}
     <label class="visually-hidden" for="{{ prefix }}-{{ id }}">{{ name }}</label>
     <div class="input-group">
-      {% if icon %}<span class="input-group-text"><i class="ri-{{ icon }} me-1"></i><span class="ms-1 d-none d-md-inline"> {{ name }}</span></span>{% endif %}
-      <select id="{{ prefix }}-{{ id }}" class="form-select"
+      {% if icon %}<span class="input-group-text px-1"><i class="ri-{{ icon }} me-1"></i><span class="ms-1 d-none d-md-inline"> {{ name }}</span></span>{% endif %}
+      <select id="{{ prefix }}-{{ id }}" class="form-select px-1"
         {% if not delete %}
           data-changer-id="{{ id }}" data-changer-prefix="{{ prefix }}" data-changer-url="{{ url }}"
         {% else %}
@@ -59,8 +59,8 @@
           <option value="{{ metadata.fields.id }}" {% if metadata.fields.id == value %}selected{% endif %}>{{ metadata.fields.name }}</option>
         {% endfor %}
       </select>
-      <span id="status-{{ prefix }}-{{ id }}" class="input-group-text ri-save-line"></span>
-      <button id="clear-{{ prefix }}-{{ id }}" type="button" class="btn btn-sm btn-light btn-outline-danger border"><i class="ri-eraser-line"></i></button>
+      <span id="status-{{ prefix }}-{{ id }}" class="input-group-text ri-save-line px-1"></span>
+      <button id="clear-{{ prefix }}-{{ id }}" type="button" class="btn btn-sm btn-light btn-outline-danger border px-1"><i class="ri-eraser-line"></i></button>
     </div>
   {% endif %}
 {% endmacro %}

@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Fix legibility of "Damaged" and "Missing" fields for tiny screen by reducing horizontal padding
+
 ## 1.2.2:
 
 This release fixes a bug where orphaned parts in the `inventory` table are blocking the database upgrade.
