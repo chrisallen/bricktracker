@@ -61,9 +61,9 @@ docker compose up -d
 
 2. Access BrickTracker at `http://localhost:3333`
 
-Please refer to [Environment Variables Reference](docs/env.md) for a list of available variables.
+Please refer to [Environment Variables Reference](env.md) for a list of available variables.
 
-3. Read more in [First steps](docs/first-steps.md)
+3. Read more in [First steps](first-steps.md)
 
 ## Troubleshooting
 
@@ -85,6 +85,6 @@ Please refer to [Environment Variables Reference](docs/env.md) for a list of ava
    - Check for any syntax errors in `.env` file
    - Verify no conflicting environment variables are set in the shell
 
-For more troubleshooting, take a look at [Common Errors](docs/common-errors.md)
+For more troubleshooting, take a look at [Common Errors](common-errors.md)
 
-Please refer to [Setup](docs/setup.md) for more information.
+Please refer to [Setup](setup.md) for more information.

@@ -53,7 +53,7 @@ services:
 The [.env.sample](../.env.sample) file provides ample documentation on all the configurable options. Have a look at it.
 You can make a copy of `.env.sample` as `.env` with your options or create an `.env` file from scratch.
 
-[Environment Variables Reference](docs/env.md) contains a table of the available variables.
+[Environment Variables Reference](env.md) contains a table of the available variables.
 
 ## Database file
 
