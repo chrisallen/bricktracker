@@ -9,3 +9,4 @@ rebrick
 requests
 tzdata
 bs4
+cloudscraper
