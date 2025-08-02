@@ -92,50 +92,72 @@ class BrickInstructions(object):
 
     # Download an instruction file
     def download(self, path: str, /) -> None:
+        """
+        Streams the PDF in chunks and uses self.socket.update_total
+        + self.socket.progress_count to drive a determinate bar.
+        """
         try:
-            # start progress
-            self.socket.progress(message=f'Downloading {self.filename}')
             target = self.path(filename=secure_filename(self.filename))
 
-            # skip if already exists
+            # Skip if we already have it
             if os.path.isfile(target):
                 return self.socket.complete(
-                    message=f'File {self.filename} already exists, skipped'
+                    message=f"File {self.filename} already exists, skipped"
                 )
 
-            # path is already a full URL from find_instructions()
-            url = path
-            self.socket.progress(message=f'Requesting {url}')
-            # use cloudscraper to pass the CF challenge here too
+            # Fetch PDF via cloudscraper (to bypass Cloudflare)
             scraper = cloudscraper.create_scraper()
-            scraper.headers.update({'User-Agent': current_app.config['REBRICKABLE_USER_AGENT']})
-            response = scraper.get(url, stream=True)
-            if not response.ok:
-                raise DownloadException(f'Failed to download: HTTP {response.status_code}')
+            scraper.headers.update({
+                "User-Agent": current_app.config['REBRICKABLE_USER_AGENT']
+            })
+            resp = scraper.get(path, stream=True)
+            if not resp.ok:
+                raise DownloadException(f"Failed to download: HTTP {resp.status_code}")
 
-            # record size if available
-            try:
-                self.size = int(response.headers.get('Content-Length', 0))
-            except ValueError:
-                self.size = 0
+            # Tell the socket how many bytes in total
+            total = int(resp.headers.get("Content-Length", 0))
+            self.socket.update_total(total)
 
-            # download to disk
-            self.socket.progress(message=f'Downloading {self.filename} ({self.human_size()})')
-            with open(target, 'wb') as f:
-                copyfileobj(response.raw, f)
+            # Reset the counter and kick off at 0%
+            self.socket.progress_count = 0
+            self.socket.progress(message=f"Starting download {self.filename}")
 
-            logger.info(f'The instruction file {self.filename} has been downloaded')
-            self.socket.complete(message=f'File {self.filename} downloaded ({self.human_size()})')
+            # Write out in 8 KiB chunks and update the counter
+            with open(target, "wb") as f:
+                for chunk in resp.iter_content(chunk_size=8192):
+                    if not chunk:
+                        continue
+                    f.write(chunk)
+
+                    # Bump the internal counter and emit
+                    self.socket.progress_count += len(chunk)
+                    self.socket.progress(
+                        message=(
+                            f"Downloading {self.filename} "
+                            f"({humanize.naturalsize(self.socket.progress_count)}/"
+                            f"{humanize.naturalsize(self.socket.progress_total)})"
+                        )
+                    )
+
+            # Done!
+            logger.info(f"Downloaded {self.filename}")
+            self.socket.complete(
+                message=f"File {self.filename} downloaded ({self.human_size()})"
+            )
 
         except Exception as e:
-            self.socket.fail(
-                message=f'Error downloading {self.filename}: {e}'
-            )
             logger.debug(traceback.format_exc())
+            self.socket.fail(
+                message=f"Error downloading {self.filename}: {e}"
+            )
 
     # Display the size in a human format
     def human_size(self) -> str:
-        return humanize.naturalsize(self.size)
+        try:
+            size = self.size
+        except AttributeError:
+            size = os.path.getsize(self.path())
+        return humanize.naturalsize(size)
 
     # Display the time in a human format
     def human_time(self) -> str:
