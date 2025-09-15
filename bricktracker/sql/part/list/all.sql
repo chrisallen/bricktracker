@@ -26,6 +26,12 @@ ON "bricktracker_parts"."id" IS NOT DISTINCT FROM "bricktracker_minifigures"."id
 AND "bricktracker_parts"."figure" IS NOT DISTINCT FROM "bricktracker_minifigures"."figure"
 {% endblock %}
 
+{% block where %}
+{% if color_id and color_id != 'all' %}
+WHERE "bricktracker_parts"."color" = {{ color_id }}
+{% endif %}
+{% endblock %}
+
 {% block group %}
 GROUP BY
     "bricktracker_parts"."part",

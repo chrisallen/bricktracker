@@ -1,0 +1,15 @@
+<div id="table-filter" class="collapse {% if config['SHOW_GRID_FILTERS'] %}show{% endif %} row row-cols-lg-auto g-1 justify-content-center align-items-center">
+  {% if owners | length %}
+  <div class="col-12 flex-grow-1">
+    <div class="input-group">
+      <span class="input-group-text"><i class="ri-user-line"></i><span class="ms-1 d-none d-md-inline"> Owner</span></span>
+      <select id="filter-owner" class="form-select" onchange="filterByOwnerAndKeepOpen()" autocomplete="off">
+        <option value="all" {% if selected_owner == 'all' %}selected{% endif %}>All owners</option>
+        {% for owner in owners %}
+          <option value="{{ owner.fields.id }}" {% if selected_owner == owner.fields.id %}selected{% endif %}>{{ owner.fields.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  {% endif %}
+</div>

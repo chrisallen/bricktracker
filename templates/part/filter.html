@@ -1,0 +1,30 @@
+<div id="table-filter" class="collapse {% if config['SHOW_GRID_FILTERS'] %}show{% endif %} row row-cols-lg-auto g-1 justify-content-center align-items-center">
+  {% if owners | length %}
+  <div class="col-12 col-md-6 flex-grow-1">
+    <div class="input-group">
+      <span class="input-group-text"><i class="ri-user-line"></i><span class="ms-1 d-none d-md-inline"> Owner</span></span>
+      <select id="filter-owner" class="form-select" onchange="applyFiltersAndKeepOpen()" autocomplete="off">
+        <option value="all" {% if selected_owner == 'all' %}selected{% endif %}>All owners</option>
+        {% for owner in owners %}
+          <option value="{{ owner.fields.id }}" {% if selected_owner == owner.fields.id %}selected{% endif %}>{{ owner.fields.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  {% endif %}
+  {% if colors | length %}
+  <div class="col-12 col-md-6 flex-grow-1">
+    <div class="input-group">
+      <span class="input-group-text"><i class="ri-palette-line"></i><span class="ms-1 d-none d-md-inline"> Color</span></span>
+      <select id="filter-color" class="form-select" onchange="applyFiltersAndKeepOpen()" autocomplete="off">
+        <option value="all" {% if selected_color == 'all' %}selected{% endif %}>All colors</option>
+        {% for color in colors %}
+          <option value="{{ color.color_id }}" {% if selected_color == color.color_id|string %}selected{% endif %} data-color-rgb="{{ color.color_rgb }}" data-color-id="{{ color.color_id }}">
+            {{ color.color_name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  {% endif %}
+</div>

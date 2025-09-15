@@ -1,4 +1,5 @@
-class BrickTable {
+// Make BrickTable globally accessible
+window.BrickTable = class BrickTable {
     constructor(table, per_page) {
         const columns = [];
         const no_sort_and_filter = [];
@@ -32,12 +33,17 @@ class BrickTable {
             columns.push({ select: number, type: "number", searchable: false });
         }
 
+        // Special configuration for tables with custom search/sort
+        const isMinifiguresTable = table.id === 'minifigures';
+        const isPartsTable = table.id === 'parts';
+        const hasCustomInterface = isMinifiguresTable || isPartsTable;
+
         this.table = new simpleDatatables.DataTable(`#${table.id}`, {
             columns: columns,
             pagerDelta: 1,
             perPage: per_page,
             perPageSelect: [10, 25, 50, 100, 500, 1000],
-            searchable: true,
+            searchable: !hasCustomInterface, // Disable built-in search for tables with custom interface
             searchMethod: (table => (terms, cell, row, column, source) => table.search(terms, cell, row, column, source))(this),
             searchQuerySeparator: "",
             tableRender: () => {
@@ -92,5 +98,13 @@ class BrickTable {
 
 // Helper to setup the tables
 const setup_tables = (per_page) => document.querySelectorAll('table[data-table="true"]').forEach(
-    el => new BrickTable(el, per_page)
+    el => {
+        const brickTable = new window.BrickTable(el, per_page);
+        // Store the instance globally for external access
+        if (el.id === 'minifigures') {
+            window.brickTableInstance = brickTable;
+        } else if (el.id === 'parts') {
+            window.partsTableInstance = brickTable;
+        }
+    }
 );
