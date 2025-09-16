@@ -10,6 +10,7 @@ from bricktracker.configuration_list import BrickConfigurationList
 from bricktracker.login import LoginManager
 from bricktracker.navbar import Navbar
 from bricktracker.sql import close
+from bricktracker.template_filters import replace_query_filter
 from bricktracker.version import __version__
 from bricktracker.views.add import add_page
 from bricktracker.views.admin.admin import admin_page
@@ -120,6 +121,9 @@ def setup_app(app: Flask) -> None:
 
         # Version
         g.version = __version__
+
+    # Register custom Jinja2 filters
+    app.jinja_env.filters['replace_query'] = replace_query_filter
 
     # Make sure all connections are closed at the end
     @app.teardown_request

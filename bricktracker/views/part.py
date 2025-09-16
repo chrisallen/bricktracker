@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request
+from flask import Blueprint, current_app, render_template, request
 
 from .exceptions import exception_handler
 from ..minifigure_list import BrickMinifigureList
@@ -15,13 +15,58 @@ part_page = Blueprint('part', __name__, url_prefix='/parts')
 @part_page.route('/', methods=['GET'])
 @exception_handler(__file__)
 def list() -> str:
-    
+
     # Get filter parameters from request
     owner_id = request.args.get('owner', 'all')
     color_id = request.args.get('color', 'all')
+    search_query = request.args.get('search', '').strip()
+    sort_field = request.args.get('sort', '')
+    sort_order = request.args.get('order', 'asc')
 
-    # Get parts with filters applied
-    parts = BrickPartList().all_filtered(owner_id, color_id)
+    # Check if server-side pagination is enabled
+    use_pagination = current_app.config.get('SERVER_SIDE_PAGINATION', False)
+
+    if use_pagination:
+        # PAGINATION MODE - Server-side pagination with search
+        # Get pagination parameters
+        page = int(request.args.get('page', 1))
+
+        # Determine page size based on device type
+        user_agent = request.headers.get('User-Agent', '').lower()
+        is_mobile = any(device in user_agent for device in ['mobile', 'android', 'iphone', 'ipad'])
+        per_page = 25 if is_mobile else 50
+
+        # Get parts with pagination
+        parts, total_count = BrickPartList().all_filtered_paginated(
+            owner_id=owner_id,
+            color_id=color_id,
+            search_query=search_query,
+            page=page,
+            per_page=per_page,
+            sort_field=sort_field,
+            sort_order=sort_order
+        )
+
+        # Calculate pagination info
+        total_pages = (total_count + per_page - 1) // per_page if total_count > 0 else 1
+        has_prev = page > 1
+        has_next = page < total_pages
+
+        pagination_context = {
+            'page': page,
+            'per_page': per_page,
+            'total_count': total_count,
+            'total_pages': total_pages,
+            'has_prev': has_prev,
+            'has_next': has_next,
+            'is_mobile': is_mobile
+        }
+    else:
+        # ORIGINAL MODE - Single page with all data for client-side search
+        # Get all parts without pagination but with filters applied
+        parts = BrickPartList().all_filtered(owner_id, color_id)
+
+        pagination_context = None
 
     # Get list of owners for filter dropdown
     owners = BrickSetOwnerList.list()
@@ -34,14 +79,23 @@ def list() -> str:
 
     colors = BrickSQL().fetchall('part/colors/list', **color_context)
 
-    return render_template(
-        'parts.html',
-        table_collection=parts,
-        owners=owners,
-        selected_owner=owner_id,
-        colors=colors,
-        selected_color=color_id,
-    )
+    template_context = {
+        'table_collection': parts,
+        'owners': owners,
+        'selected_owner': owner_id,
+        'colors': colors,
+        'selected_color': color_id,
+        'search_query': search_query,
+        'use_pagination': use_pagination,
+        'current_sort': sort_field,
+        'current_order': sort_order
+    }
+
+    if pagination_context:
+        template_context['pagination'] = pagination_context
+
+    return render_template('parts.html', **template_context)
+
 
 
 # Problem

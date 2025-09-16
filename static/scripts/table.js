@@ -36,10 +36,12 @@ window.BrickTable = class BrickTable {
         // Special configuration for tables with custom search/sort
         const isMinifiguresTable = table.id === 'minifigures';
         const isPartsTable = table.id === 'parts';
-        const hasCustomInterface = isMinifiguresTable || isPartsTable;
+        const isPartsTablePaginationMode = isPartsTable && table.getAttribute('data-table') === 'false';
+        const hasCustomInterface = isMinifiguresTable || isPartsTablePaginationMode;
 
         this.table = new simpleDatatables.DataTable(`#${table.id}`, {
             columns: columns,
+            paging: !isPartsTablePaginationMode, // Disable built-in pagination only for parts table in pagination mode
             pagerDelta: 1,
             perPage: per_page,
             perPageSelect: [10, 25, 50, 100, 500, 1000],

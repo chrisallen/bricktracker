@@ -24,6 +24,8 @@ class BrickPartList(BrickRecordList[BrickPart]):
     # Queries
     all_query: str = 'part/list/all'
     all_by_owner_query: str = 'part/list/all_by_owner'
+    all_count_query: str = 'part/count/all'
+    all_by_owner_count_query: str = 'part/count/all_by_owner'
     different_color_query = 'part/list/with_different_color'
     last_query: str = 'part/list/last'
     minifigure_query: str = 'part/list/from_minifigure'
@@ -76,6 +78,76 @@ class BrickPartList(BrickRecordList[BrickPart]):
 
         return self
 
+    # Load parts with pagination support
+    def all_filtered_paginated(
+        self,
+        owner_id: str | None = None,
+        color_id: str | None = None,
+        search_query: str | None = None,
+        page: int = 1,
+        per_page: int = 50,
+        sort_field: str | None = None,
+        sort_order: str = 'asc'
+    ) -> tuple[Self, int]:
+        from .sql import BrickSQL
+
+        # Save the filter parameters
+        if owner_id is not None:
+            self.fields.owner_id = owner_id
+        if color_id is not None:
+            self.fields.color_id = color_id
+        if search_query:
+            self.fields.search_query = search_query
+        if sort_field:
+            self.fields.sort_field = sort_field
+            self.fields.sort_order = sort_order
+
+        # Calculate offset
+        offset = (page - 1) * per_page
+
+        # Get total count first
+        count_context = {}
+        if owner_id and owner_id != 'all':
+            count_context['owner_id'] = owner_id
+            count_query = self.all_by_owner_count_query
+            query = self.all_by_owner_query
+        else:
+            count_query = self.all_count_query
+            query = self.all_query
+
+        if color_id and color_id != 'all':
+            count_context['color_id'] = color_id
+        if search_query:
+            count_context['search_query'] = search_query
+
+        # Execute count query
+        count_result = BrickSQL().fetchone(count_query, **count_context)
+        total_count = count_result['total_count'] if count_result else 0
+
+        # Prepare sort order
+        order_clause = None
+        if sort_field:
+            # Map frontend sort field names to SQL column names
+            field_mapping = {
+                'name': '"rebrickable_parts"."name"',
+                'color': '"rebrickable_parts"."color_name"',
+                'quantity': '"total_quantity"',
+                'missing': '"total_missing"',
+                'damaged': '"total_damaged"',
+                'sets': '"total_sets"',
+                'minifigures': '"total_minifigures"'
+            }
+
+            if sort_field in field_mapping:
+                sql_field = field_mapping[sort_field]
+                direction = 'DESC' if sort_order.lower() == 'desc' else 'ASC'
+                order_clause = f'{sql_field} {direction}'
+
+        # Load paginated parts
+        self.list(override_query=query, limit=per_page, offset=offset, order=order_clause)
+
+        return self, total_count
+
     # Base part list
     def list(
         self,
@@ -84,6 +156,7 @@ class BrickPartList(BrickRecordList[BrickPart]):
         override_query: str | None = None,
         order: str | None = None,
         limit: int | None = None,
+        offset: int | None = None,
         **context: Any,
     ) -> None:
         if order is None:
@@ -105,12 +178,15 @@ class BrickPartList(BrickRecordList[BrickPart]):
             context_vars['owner_id'] = self.fields.owner_id
         if hasattr(self.fields, 'color_id') and self.fields.color_id is not None:
             context_vars['color_id'] = self.fields.color_id
+        if hasattr(self.fields, 'search_query') and self.fields.search_query:
+            context_vars['search_query'] = self.fields.search_query
 
         # Load the sets from the database
         for record in super().select(
             override_query=override_query,
             order=order,
             limit=limit,
+            offset=offset,
             **context_vars
         ):
             part = BrickPart(

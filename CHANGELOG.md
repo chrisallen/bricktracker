@@ -1,6 +1,19 @@
 # Changelog
 
-## Unreleased 
+## Unreleased
+
+### 1.2.5
+
+- Add configurable pagination system with `SERVER_SIDE_PAGINATION` environment variable
+  - `BK_SERVER_SIDE_PAGINATION=true`: Server-side pagination with mobile-responsive page sizes (25/50 items)
+  - `BK_SERVER_SIDE_PAGINATION=false`: Original single-page mode with live instant search
+  - Supports search, filtering, and sorting in both modes
+  - Optimized for large datasets (100k+ parts)
+- Enhance parts page functionality
+  - Server-side search triggered by Enter key
+  - Server-side sorting
+  - Color filtering
+  - Mobile-friendly pagination navigation
 
 ### 1.2.4
 

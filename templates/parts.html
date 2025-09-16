@@ -1,4 +1,6 @@
 {% extends 'base.html' %}
+{% import 'macro/form.html' as form %}
+{% import 'macro/table.html' as table %}
 
 {% block title %} - All parts{% endblock %}
 
@@ -10,7 +12,7 @@
       <label class="visually-hidden" for="table-search">Search</label>
       <div class="input-group">
         <span class="input-group-text"><i class="ri-search-line"></i><span class="ms-1 d-none d-md-inline"> Search</span></span>
-        <input id="table-search" class="form-control form-control-sm px-1" type="text" placeholder="Part name, color, quantity, sets" value="">
+        <input id="table-search" class="form-control form-control-sm px-1" type="text" placeholder="Part name, color, quantity, sets" value="{{ search_query or '' }}">
         <button id="table-search-clear" type="button" class="btn btn-light btn-outline-danger border"><i class="ri-eraser-line"></i></button>
       </div>
     </div>
@@ -32,9 +34,162 @@
   {% include 'part/sort.html' %}
   {% include 'part/filter.html' %}
 
-  {% with all=true %}
-    {% include 'part/table.html' %}
-  {% endwith %}
+  {% if use_pagination %}
+  <!-- PAGINATION MODE -->
+  <div class="table-responsive-sm">
+    <table data-table="false" class="table table-striped align-middle sortable mb-0" id="parts">
+      {{ table.header(color=true, quantity=not no_quantity, sets=true, minifigures=true) }}
+      {% with all=true %}
+        {% include 'part/table_body.html' %}
+      {% endwith %}
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div>
+    {% if pagination and pagination.total_pages > 1 %}
+    <div class="row mt-4">
+      <div class="col-12">
+      <!-- Desktop Pagination -->
+      <div class="d-none d-md-block">
+        <nav aria-label="Parts pagination">
+          <ul class="pagination justify-content-center">
+            {% if pagination.has_prev %}
+              <li class="page-item">
+                <a class="page-link" href="{{ request.url | replace_query('page', pagination.page - 1) }}">
+                  <i class="ri-arrow-left-line"></i> Previous
+                </a>
+              </li>
+            {% endif %}
+
+            <!-- Show page numbers (with smart truncation) -->
+            {% set start_page = [1, pagination.page - 2] | max %}
+            {% set end_page = [pagination.total_pages, pagination.page + 2] | min %}
+
+            {% if start_page > 1 %}
+              <li class="page-item">
+                <a class="page-link" href="{{ request.url | replace_query('page', 1) }}">1</a>
+              </li>
+              {% if start_page > 2 %}
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+              {% endif %}
+            {% endif %}
+
+            {% for page_num in range(start_page, end_page + 1) %}
+              {% if page_num == pagination.page %}
+                <li class="page-item active">
+                  <span class="page-link">{{ page_num }}</span>
+                </li>
+              {% else %}
+                <li class="page-item">
+                  <a class="page-link" href="{{ request.url | replace_query('page', page_num) }}">{{ page_num }}</a>
+                </li>
+              {% endif %}
+            {% endfor %}
+
+            {% if end_page < pagination.total_pages %}
+              {% if end_page < pagination.total_pages - 1 %}
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+              {% endif %}
+              <li class="page-item">
+                <a class="page-link" href="{{ request.url | replace_query('page', pagination.total_pages) }}">{{ pagination.total_pages }}</a>
+              </li>
+            {% endif %}
+
+            {% if pagination.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="{{ request.url | replace_query('page', pagination.page + 1) }}">
+                  Next <i class="ri-arrow-right-line"></i>
+                </a>
+              </li>
+            {% endif %}
+          </ul>
+        </nav>
+      </div>
+
+      <!-- Mobile Pagination -->
+      <div class="d-md-none">
+        <div class="btn-group w-100" role="group" aria-label="Mobile pagination">
+          {% if pagination.has_prev %}
+            <a href="{{ request.url | replace_query('page', pagination.page - 1) }}"
+               class="btn btn-outline-primary">
+              <i class="ri-arrow-left-line"></i> Previous
+            </a>
+          {% else %}
+            <button class="btn btn-outline-secondary" disabled>
+              <i class="ri-arrow-left-line"></i> Previous
+            </button>
+          {% endif %}
+
+          <span class="btn btn-light">
+            Page {{ pagination.page }} of {{ pagination.total_pages }}
+          </span>
+
+          {% if pagination.has_next %}
+            <a href="{{ request.url | replace_query('page', pagination.page + 1) }}"
+               class="btn btn-outline-primary">
+              Next <i class="ri-arrow-right-line"></i>
+            </a>
+          {% else %}
+            <button class="btn btn-outline-secondary" disabled>
+              Next <i class="ri-arrow-right-line"></i>
+            </button>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Results Info -->
+      <div class="text-center mt-3">
+        <small class="text-muted">
+          Showing {{ ((pagination.page - 1) * pagination.per_page + 1) }} to
+          {{ [pagination.page * pagination.per_page, pagination.total_count] | min }}
+          of {{ pagination.total_count }} parts
+        </small>
+      </div>
+    </div>
+    </div>
+    {% endif %}
+  </div>
+
+  {% else %}
+  <!-- ORIGINAL MODE - Single page with client-side search -->
+  <div class="table-responsive-sm">
+    <table data-table="true" class="table table-striped align-middle {% if not all %}sortable mb-0{% endif %}" id="parts">
+      {{ table.header(color=true, quantity=not no_quantity, sets=true, minifigures=true) }}
+      <tbody>
+        {% for item in table_collection %}
+        <tr>
+          {{ table.image(item.url_for_image(), caption=item.fields.name, alt=item.fields.part, accordion=solo) }}
+          <td data-sort="{{ item.fields.name }}">
+            <a class="text-reset" href="{{ item.url() }}">{{ item.fields.name }}</a>
+            {% if item.fields.spare %}<span class="badge rounded-pill text-bg-warning fw-normal"><i class="ri-loop-left-line"></i> Spare</span>{% endif %}
+            {{ table.rebrickable(item) }}
+            {{ table.bricklink(item) }}
+          </td>
+          <td data-sort="{{ item.fields.color_name }}">
+            {% if item.fields.color_rgb %}<span class="color-rgb color-rgb-table {% if item.fields.color == 9999 %}color-any{% endif %} align-middle border border-black" {% if item.fields.color != 9999 %}style="background-color: #{{ item.fields.color_rgb }};"{% endif %}></span>{% endif %}
+            <span class="align-middle">{{ item.fields.color_name }}</span>
+          </td>
+          <td>{{ item.fields.total_quantity }}</td>
+          {% if not config['HIDE_TABLE_MISSING_PARTS'] %}
+            <td data-sort="{{ item.fields.total_missing }}" class="table-td-input">
+              {{ form.input('Missing', item.fields.id, item.html_id('missing'), item.url_for_problem('missing'), item.fields.total_missing, all=true, read_only=read_only) }}
+            </td>
+          {% endif %}
+          {% if not config['HIDE_TABLE_DAMAGED_PARTS'] %}
+            <td data-sort="{{ item.fields.total_damaged }}" class="table-td-input">
+              {{ form.input('Damaged', item.fields.id, item.html_id('damaged'), item.url_for_problem('damaged'), item.fields.total_damaged, all=true, read_only=read_only) }}
+            </td>
+          {% endif %}
+          <td>{{ item.fields.total_sets }}</td>
+          <td>{{ item.fields.total_minifigures }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
 </div>
 {% else %}
   <div class="container-fluid">
