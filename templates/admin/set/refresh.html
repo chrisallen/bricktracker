@@ -1,5 +1,6 @@
 {% import 'macro/table.html' as table %}
 {% import 'macro/badge.html' as badge %}
+{% import 'macro/form.html' as form %}
 
 <div class="alert alert-info m-2" role="alert">This page lists the sets that may need a refresh because they have some of their newer fields containing empty values.</div>
 <div class="table-responsive-sm">
@@ -13,6 +14,7 @@
         <th data-table-number="true" scope="col"><i class="ri-error-warning-line fw-normal"></i> Empty RGB</th>
         <th data-table-number="true" scope="col"><i class="ri-error-warning-line fw-normal"></i> Empty transparent</th>
         <th data-table-number="true" scope="col"><i class="ri-error-warning-line fw-normal"></i> Empty URL</th>
+        <th data-table-number="true" scope="col"><i class="ri-palette-line fw-normal"></i>BrickLink Issues</th>
         <th data-table-no-sort-and-search="true" class="no-sort" scope="col"><i class="ri-settings-4-line fw-normal"></i> Actions</th>
       </tr>
     </thead>
@@ -26,6 +28,7 @@
           <td>{{ item.fields.null_rgb }}</td>
           <td>{{ item.fields.null_transparent }}</td>
           <td>{{ item.fields.null_url }}</td>
+          <td>{{ item.fields.null_bricklink_color_id + item.fields.null_bricklink_color_name + item.fields.null_bricklink_part_num }}</td>
           <td><a href="{{ item.url_for_refresh() }}" class="btn btn-primary" role="button"><i class="ri-refresh-line"></i> Refresh</a></td>
         </tr>
       {% endfor %}
