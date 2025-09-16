@@ -7,7 +7,7 @@ from ...rebrickable_set_list import RebrickableSetList
 admin_set_page = Blueprint('admin_set',  __name__, url_prefix='/admin/set')
 
 
-# Sets that need o be refreshed
+# Sets that need to be refreshed
 @admin_set_page.route('/refresh', methods=['GET'])
 @login_required
 @exception_handler(__file__)

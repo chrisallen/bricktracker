@@ -91,8 +91,17 @@ class RebrickablePart(BrickRecord):
     def url_for_bricklink(self, /) -> str:
         if current_app.config['BRICKLINK_LINKS']:
             try:
+                # Use BrickLink part number if available and not None/empty, otherwise fall back to Rebrickable part
+                bricklink_part = getattr(self.fields, 'bricklink_part_num', None)
+                part_param = bricklink_part if bricklink_part else self.fields.part
+
+                # Use BrickLink color ID if available and not None, otherwise fall back to Rebrickable color
+                bricklink_color = getattr(self.fields, 'bricklink_color_id', None)
+                color_param = bricklink_color if bricklink_color is not None else self.fields.color
+                print(f'BrickLink URL parameters: part={part_param}, color={color_param}')  # Debugging line, can be removed later
                 return current_app.config['BRICKLINK_LINK_PART_PATTERN'].format(  # noqa: E501
-                    part=self.fields.part,
+                    part=part_param,
+                    color=color_param,
                 )
             except Exception:
                 pass
@@ -168,6 +177,9 @@ class RebrickablePart(BrickRecord):
             'color_name': data['color']['name'],
             'color_rgb': data['color']['rgb'],
             'color_transparent': data['color']['is_trans'],
+            'bricklink_color_id': None,
+            'bricklink_color_name': None,
+            'bricklink_part_num': None,
             'name': data['part']['name'],
             'category': data['part']['part_cat_id'],
             'image': data['part']['part_img_url'],
@@ -175,6 +187,30 @@ class RebrickablePart(BrickRecord):
             'url': data['part']['part_url'],
             'print': data['part']['print_of']
         }
+
+        # Extract BrickLink color info if available in external_ids
+        if 'color' in data and 'external_ids' in data['color']:
+            external_ids = data['color']['external_ids']
+            if 'BrickLink' in external_ids and external_ids['BrickLink']:
+                bricklink_data = external_ids['BrickLink']
+
+                # Extract BrickLink color ID and name from the nested structure
+                if isinstance(bricklink_data, dict):
+                    if 'ext_ids' in bricklink_data and bricklink_data['ext_ids']:
+                        record['bricklink_color_id'] = bricklink_data['ext_ids'][0]
+
+                    if 'ext_descrs' in bricklink_data and bricklink_data['ext_descrs']:
+                        # ext_descrs is a list of lists, get the first description from the first list
+                        if len(bricklink_data['ext_descrs']) > 0 and len(bricklink_data['ext_descrs'][0]) > 0:
+                            record['bricklink_color_name'] = bricklink_data['ext_descrs'][0][0]
+
+        # Extract BrickLink part number if available
+        if 'part' in data and 'external_ids' in data['part']:
+            part_external_ids = data['part']['external_ids']
+            if 'BrickLink' in part_external_ids and part_external_ids['BrickLink']:
+                bricklink_parts = part_external_ids['BrickLink']
+                if isinstance(bricklink_parts, list) and len(bricklink_parts) > 0:
+                    record['bricklink_part_num'] = bricklink_parts[0]
 
         if brickset is not None:
             record['id'] = brickset.fields.id

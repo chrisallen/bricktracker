@@ -2,7 +2,26 @@
 
 ## Unreleased
 
-- Fix legibility of "Damaged" and "Missing" fields for tiny screen by reducing horizontal padding
+### Current PR
+
+- Added search/filter/sort options to `parts` and `minifigures`.
+
+### Next PR
+
+> **Warning**
+> To use the new BrickLink color parameter in URLs, update your `.env` file:
+> `BK_BRICKLINK_LINK_PART_PATTERN=https://www.bricklink.com/v2/catalog/catalogitem.page?P={part}&C={color}`
+
+- Add BrickLink color and part number support for accurate BrickLink URLs
+  - Database migrations to store BrickLink color ID, color name, and part number
+  - Updated Rebrickable API integration to extract BrickLink data from external_ids
+  - Enhanced BrickLink URL generation with proper part number fallback
+  - Extended admin set refresh to detect and track missing BrickLink data
+
+## 1.2.2
+
+Fix legibility of "Damaged" and "Missing" fields for tiny screen by reducing horizontal padding
+Fixed instructions download from Rebrickable
 
 ## 1.2.2:
 
