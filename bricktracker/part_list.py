@@ -23,6 +23,7 @@ class BrickPartList(BrickRecordList[BrickPart]):
 
     # Queries
     all_query: str = 'part/list/all'
+    all_by_owner_query: str = 'part/list/all_by_owner'
     different_color_query = 'part/list/with_different_color'
     last_query: str = 'part/list/last'
     minifigure_query: str = 'part/list/from_minifigure'
@@ -43,6 +44,35 @@ class BrickPartList(BrickRecordList[BrickPart]):
     # Load all parts
     def all(self, /) -> Self:
         self.list(override_query=self.all_query)
+
+        return self
+
+    # Load all parts by owner
+    def all_by_owner(self, owner_id: str | None = None, /) -> Self:
+        # Save the owner_id parameter
+        self.fields.owner_id = owner_id
+
+        # Load the parts from the database
+        self.list(override_query=self.all_by_owner_query)
+
+        return self
+
+    # Load all parts with filters (owner and/or color)
+    def all_filtered(self, owner_id: str | None = None, color_id: str | None = None, /) -> Self:
+        # Save the filter parameters
+        if owner_id is not None:
+            self.fields.owner_id = owner_id
+        if color_id is not None:
+            self.fields.color_id = color_id
+
+        # Choose query based on whether owner filtering is needed
+        if owner_id and owner_id != 'all':
+            query = self.all_by_owner_query
+        else:
+            query = self.all_query
+
+        # Load the parts from the database
+        self.list(override_query=query)
 
         return self
 
@@ -69,11 +99,19 @@ class BrickPartList(BrickRecordList[BrickPart]):
         else:
             minifigure = None
 
+        # Prepare template context for filtering
+        context_vars = {}
+        if hasattr(self.fields, 'owner_id') and self.fields.owner_id is not None:
+            context_vars['owner_id'] = self.fields.owner_id
+        if hasattr(self.fields, 'color_id') and self.fields.color_id is not None:
+            context_vars['color_id'] = self.fields.color_id
+
         # Load the sets from the database
         for record in super().select(
             override_query=override_query,
             order=order,
             limit=limit,
+            **context_vars
         ):
             part = BrickPart(
                 brickset=brickset,

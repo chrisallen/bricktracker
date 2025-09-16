@@ -7,17 +7,17 @@
       {% for item in table_collection %}
       <tr>
         {{ table.image(item.url_for_image(), caption=item.fields.name, alt=item.fields.figure) }}
-        <td >
+        <td data-sort="name">
           <a class="text-reset" href="{{ item.url() }}" style="max-width:auto">{{ item.fields.name }}</a>
           {% if all %}
             {{ table.rebrickable(item) }}
           {% endif %}
         </td>
-        <td>{{ item.fields.number_of_parts }}</td>
-        <td>{{ item.fields.total_quantity }}</td>
-        <td>{{ item.fields.total_missing }}</td>
-        <td>{{ item.fields.total_damaged }}</td>
-        <td>{{ item.fields.total_sets }}</td>
+        <td data-sort="parts">{{ item.fields.number_of_parts }}</td>
+        <td data-sort="quantity">{{ item.fields.total_quantity }}</td>
+        <td data-sort="missing">{{ item.fields.total_missing }}</td>
+        <td data-sort="damaged">{{ item.fields.total_damaged }}</td>
+        <td data-sort="sets">{{ item.fields.total_sets }}</td>
       </tr>
       {% endfor %}
     </tbody>

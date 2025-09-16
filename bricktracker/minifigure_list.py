@@ -21,6 +21,7 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
 
     # Queries
     all_query: str = 'minifigure/list/all'
+    all_by_owner_query: str = 'minifigure/list/all_by_owner'
     damaged_part_query: str = 'minifigure/list/damaged_part'
     last_query: str = 'minifigure/list/last'
     missing_part_query: str = 'minifigure/list/missing_part'
@@ -39,6 +40,16 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
     # Load all minifigures
     def all(self, /) -> Self:
         self.list(override_query=self.all_query)
+
+        return self
+
+    # Load all minifigures by owner
+    def all_by_owner(self, owner_id: str | None = None, /) -> Self:
+        # Save the owner_id parameter
+        self.fields.owner_id = owner_id
+
+        # Load the minifigures from the database
+        self.list(override_query=self.all_by_owner_query)
 
         return self
 
@@ -83,11 +94,17 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
         else:
             brickset = None
 
+        # Prepare template context for owner filtering
+        context = {}
+        if hasattr(self.fields, 'owner_id') and self.fields.owner_id is not None:
+            context['owner_id'] = self.fields.owner_id
+
         # Load the sets from the database
         for record in super().select(
             override_query=override_query,
             order=order,
             limit=limit,
+            **context
         ):
             minifigure = BrickMinifigure(brickset=brickset, record=record)
 
@@ -131,6 +148,10 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
 
         if self.brickset is not None:
             parameters['id'] = self.brickset.fields.id
+
+        # Add owner_id parameter for owner filtering
+        if hasattr(self.fields, 'owner_id') and self.fields.owner_id is not None:
+            parameters['owner_id'] = self.fields.owner_id
 
         return parameters
 

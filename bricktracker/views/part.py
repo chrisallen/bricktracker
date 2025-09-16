@@ -1,10 +1,12 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, request
 
 from .exceptions import exception_handler
 from ..minifigure_list import BrickMinifigureList
 from ..part import BrickPart
 from ..part_list import BrickPartList
 from ..set_list import BrickSetList, set_metadata_lists
+from ..set_owner_list import BrickSetOwnerList
+from ..sql import BrickSQL
 
 part_page = Blueprint('part', __name__, url_prefix='/parts')
 
@@ -13,9 +15,32 @@ part_page = Blueprint('part', __name__, url_prefix='/parts')
 @part_page.route('/', methods=['GET'])
 @exception_handler(__file__)
 def list() -> str:
+    
+    # Get filter parameters from request
+    owner_id = request.args.get('owner', 'all')
+    color_id = request.args.get('color', 'all')
+
+    # Get parts with filters applied
+    parts = BrickPartList().all_filtered(owner_id, color_id)
+
+    # Get list of owners for filter dropdown
+    owners = BrickSetOwnerList.list()
+
+    # Get list of colors for filter dropdown
+    # Prepare context for color query (filter by owner if selected)
+    color_context = {}
+    if owner_id != 'all' and owner_id:
+        color_context['owner_id'] = owner_id
+
+    colors = BrickSQL().fetchall('part/colors/list', **color_context)
+
     return render_template(
         'parts.html',
-        table_collection=BrickPartList().all()
+        table_collection=parts,
+        owners=owners,
+        selected_owner=owner_id,
+        colors=colors,
+        selected_color=color_id,
     )
 
 
