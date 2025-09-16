@@ -1,12 +1,8 @@
 # Changelog
 
-## Unreleased
+## Unreleased 
 
-### Current PR
-
-- Added search/filter/sort options to `parts` and `minifigures`.
-
-### Next PR
+### 1.2.4
 
 > **Warning**
 > To use the new BrickLink color parameter in URLs, update your `.env` file:
@@ -17,6 +13,10 @@
   - Updated Rebrickable API integration to extract BrickLink data from external_ids
   - Enhanced BrickLink URL generation with proper part number fallback
   - Extended admin set refresh to detect and track missing BrickLink data
+
+## 1.2.3
+
+Added search/filter/sort options to `parts` and `minifigures`.
 
 ## 1.2.2
 
