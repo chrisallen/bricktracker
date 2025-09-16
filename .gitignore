@@ -21,6 +21,8 @@ static/sets/
 # Temporary
 *.csv
 /local/
+run_local.sh
+settings.local.json
 
 # Apple idiocy
 .DS_Store
