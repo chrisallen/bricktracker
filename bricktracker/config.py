@@ -41,6 +41,8 @@ CONFIG: Final[list[dict[str, Any]]] = [
     {'n': 'SERVER_SIDE_PAGINATION', 'c': bool},
     {'n': 'PARTS_DEFAULT_ORDER', 'd': '"rebrickable_parts"."name" ASC, "rebrickable_parts"."color_name" ASC, "bricktracker_parts"."spare" ASC'},  # noqa: E501
     {'n': 'PARTS_FOLDER', 'd': 'parts', 's': True},
+    {'n': 'PARTS_PAGINATION_SIZE_DESKTOP', 'd': 50, 'c': int},
+    {'n': 'PARTS_PAGINATION_SIZE_MOBILE', 'd': 25, 'c': int},
     {'n': 'PORT', 'd': 3333, 'c': int},
     {'n': 'PURCHASE_DATE_FORMAT', 'd': '%d/%m/%Y'},
     {'n': 'PURCHASE_CURRENCY', 'd': '€'},

@@ -31,10 +31,10 @@ def list() -> str:
         # Get pagination parameters
         page = int(request.args.get('page', 1))
 
-        # Determine page size based on device type
+        # Determine page size based on device type and configuration
         user_agent = request.headers.get('User-Agent', '').lower()
         is_mobile = any(device in user_agent for device in ['mobile', 'android', 'iphone', 'ipad'])
-        per_page = 25 if is_mobile else 50
+        per_page = current_app.config['PARTS_PAGINATION_SIZE_MOBILE'] if is_mobile else current_app.config['PARTS_PAGINATION_SIZE_DESKTOP']
 
         # Get parts with pagination
         parts, total_count = BrickPartList().all_filtered_paginated(

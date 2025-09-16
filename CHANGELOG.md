@@ -5,8 +5,10 @@
 ### 1.2.5
 
 - Add configurable pagination system with `SERVER_SIDE_PAGINATION` environment variable
-  - `BK_SERVER_SIDE_PAGINATION=true`: Server-side pagination with mobile-responsive page sizes (25/50 items)
+  - `BK_SERVER_SIDE_PAGINATION=true`: Server-side pagination with configurable page sizes
   - `BK_SERVER_SIDE_PAGINATION=false`: Original single-page mode with live instant search
+  - `BK_PARTS_PAGINATION_SIZE_DESKTOP`: Items per page on desktop (default: 50)
+  - `BK_PARTS_PAGINATION_SIZE_MOBILE`: Items per page on mobile (default: 25)
   - Supports search, filtering, and sorting in both modes
   - Optimized for large datasets (100k+ parts)
 - Enhance parts page functionality
