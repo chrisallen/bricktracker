@@ -60,8 +60,15 @@ AND "rebrickable_minifigures"."figure" IS NOT DISTINCT FROM "problem_join"."figu
 {% endblock %}
 
 {% block where %}
+{% set conditions = [] %}
 {% if owner_id and owner_id != 'all' %}
-WHERE "bricktracker_set_owners"."owner_{{ owner_id }}" = 1
+  {% set _ = conditions.append('"bricktracker_set_owners"."owner_' ~ owner_id ~ '" = 1') %}
+{% endif %}
+{% if search_query %}
+  {% set _ = conditions.append('(LOWER("rebrickable_minifigures"."name") LIKE LOWER(\'%' ~ search_query ~ '%\'))') %}
+{% endif %}
+{% if conditions %}
+WHERE {{ conditions | join(' AND ') }}
 {% endif %}
 {% endblock %}
 

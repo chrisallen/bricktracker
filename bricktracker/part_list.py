@@ -24,8 +24,6 @@ class BrickPartList(BrickRecordList[BrickPart]):
     # Queries
     all_query: str = 'part/list/all'
     all_by_owner_query: str = 'part/list/all_by_owner'
-    all_count_query: str = 'part/count/all'
-    all_by_owner_count_query: str = 'part/count/all_by_owner'
     different_color_query = 'part/list/with_different_color'
     last_query: str = 'part/list/last'
     minifigure_query: str = 'part/list/from_minifigure'
@@ -73,8 +71,13 @@ class BrickPartList(BrickRecordList[BrickPart]):
         else:
             query = self.all_query
 
+        # Prepare context for query
+        context = {}
+        if current_app.config.get('SKIP_SPARE_PARTS', False):
+            context['skip_spare_parts'] = True
+
         # Load the parts from the database
-        self.list(override_query=query)
+        self.list(override_query=query, **context)
 
         return self
 
@@ -89,64 +92,42 @@ class BrickPartList(BrickRecordList[BrickPart]):
         sort_field: str | None = None,
         sort_order: str = 'asc'
     ) -> tuple[Self, int]:
-        from .sql import BrickSQL
-
-        # Save the filter parameters
-        if owner_id is not None:
-            self.fields.owner_id = owner_id
-        if color_id is not None:
-            self.fields.color_id = color_id
-        if search_query:
-            self.fields.search_query = search_query
-        if sort_field:
-            self.fields.sort_field = sort_field
-            self.fields.sort_order = sort_order
-
-        # Calculate offset
-        offset = (page - 1) * per_page
-
-        # Get total count first
-        count_context = {}
+        # Prepare filter context
+        filter_context = {}
         if owner_id and owner_id != 'all':
-            count_context['owner_id'] = owner_id
-            count_query = self.all_by_owner_count_query
-            query = self.all_by_owner_query
+            filter_context['owner_id'] = owner_id
+            list_query = self.all_by_owner_query
         else:
-            count_query = self.all_count_query
-            query = self.all_query
+            list_query = self.all_query
 
         if color_id and color_id != 'all':
-            count_context['color_id'] = color_id
+            filter_context['color_id'] = color_id
         if search_query:
-            count_context['search_query'] = search_query
+            filter_context['search_query'] = search_query
+        if current_app.config.get('SKIP_SPARE_PARTS', False):
+            filter_context['skip_spare_parts'] = True
 
-        # Execute count query
-        count_result = BrickSQL().fetchone(count_query, **count_context)
-        total_count = count_result['total_count'] if count_result else 0
+        # Field mapping for sorting
+        field_mapping = {
+            'name': '"rebrickable_parts"."name"',
+            'color': '"rebrickable_parts"."color_name"',
+            'quantity': '"total_quantity"',
+            'missing': '"total_missing"',
+            'damaged': '"total_damaged"',
+            'sets': '"total_sets"',
+            'minifigures': '"total_minifigures"'
+        }
 
-        # Prepare sort order
-        order_clause = None
-        if sort_field:
-            # Map frontend sort field names to SQL column names
-            field_mapping = {
-                'name': '"rebrickable_parts"."name"',
-                'color': '"rebrickable_parts"."color_name"',
-                'quantity': '"total_quantity"',
-                'missing': '"total_missing"',
-                'damaged': '"total_damaged"',
-                'sets': '"total_sets"',
-                'minifigures': '"total_minifigures"'
-            }
-
-            if sort_field in field_mapping:
-                sql_field = field_mapping[sort_field]
-                direction = 'DESC' if sort_order.lower() == 'desc' else 'ASC'
-                order_clause = f'{sql_field} {direction}'
-
-        # Load paginated parts
-        self.list(override_query=query, limit=per_page, offset=offset, order=order_clause)
-
-        return self, total_count
+        # Use the base pagination method
+        return self.paginate(
+            page=page,
+            per_page=per_page,
+            sort_field=sort_field,
+            sort_order=sort_order,
+            list_query=list_query,
+            field_mapping=field_mapping,
+            **filter_context
+        )
 
     # Base part list
     def list(
@@ -181,6 +162,9 @@ class BrickPartList(BrickRecordList[BrickPart]):
         if hasattr(self.fields, 'search_query') and self.fields.search_query:
             context_vars['search_query'] = self.fields.search_query
 
+        # Merge with any additional context passed in
+        context_vars.update(context)
+
         # Load the sets from the database
         for record in super().select(
             override_query=override_query,
@@ -194,9 +178,6 @@ class BrickPartList(BrickRecordList[BrickPart]):
                 minifigure=minifigure,
                 record=record,
             )
-
-            if current_app.config['SKIP_SPARE_PARTS'] and part.fields.spare:
-                continue
 
             self.records.append(part)
 

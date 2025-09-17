@@ -21,6 +21,7 @@ class BrickSetList(BrickRecordList[BrickSet]):
     order: str
 
     # Queries
+    all_query: str = 'set/list/all'
     damaged_minifigure_query: str = 'set/list/damaged_minifigure'
     damaged_part_query: str = 'set/list/damaged_part'
     generic_query: str = 'set/list/generic'
@@ -47,6 +48,44 @@ class BrickSetList(BrickRecordList[BrickSet]):
         self.list(do_theme=True)
 
         return self
+
+    # All sets with pagination and filtering
+    def all_filtered_paginated(
+        self,
+        search_query: str | None = None,
+        page: int = 1,
+        per_page: int = 50,
+        sort_field: str | None = None,
+        sort_order: str = 'asc'
+    ) -> tuple[Self, int]:
+        # Prepare filter context
+        filter_context = {
+            'search_query': search_query,
+            'owners': BrickSetOwnerList.as_columns(),
+            'statuses': BrickSetStatusList.as_columns(),
+            'tags': BrickSetTagList.as_columns(),
+        }
+
+        # Field mapping for sorting
+        field_mapping = {
+            'set': '"rebrickable_sets"."set"',
+            'name': '"rebrickable_sets"."name"',
+            'year': '"rebrickable_sets"."year"',
+            'parts': '"rebrickable_sets"."number_of_parts"'
+        }
+
+        # Use the base pagination method with custom list method
+        result, total_count = self.paginate(
+            page=page,
+            per_page=per_page,
+            sort_field=sort_field,
+            sort_order=sort_order,
+            list_query=self.all_query,
+            field_mapping=field_mapping,
+            **filter_context
+        )
+
+        return result, total_count
 
     # Sets with a minifigure part damaged
     def damaged_minifigure(self, figure: str, /) -> Self:
@@ -102,9 +141,7 @@ class BrickSetList(BrickRecordList[BrickSet]):
             override_query=override_query,
             order=order,
             limit=limit,
-            owners=BrickSetOwnerList.as_columns(),
-            statuses=BrickSetStatusList.as_columns(),
-            tags=BrickSetTagList.as_columns(),
+            **context
         ):
             brickset = BrickSet(record=record)
 

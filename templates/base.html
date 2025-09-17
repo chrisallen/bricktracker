@@ -97,6 +97,9 @@
     {% if request.endpoint == 'part.list' %}
     <script src="{{ url_for('static', filename='scripts/parts.js') }}"></script>
     {% endif %}
+    {% if request.endpoint == 'set.list' %}
+    <script src="{{ url_for('static', filename='scripts/sets.js') }}"></script>
+    {% endif %}
     <script type="text/javascript">
       document.addEventListener("DOMContentLoaded", () => {
         setup_grids();

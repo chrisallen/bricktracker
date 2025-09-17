@@ -67,6 +67,9 @@ AND "bricktracker_parts"."figure" IS NOT DISTINCT FROM "bricktracker_minifigures
   {% set search_condition = '(LOWER("rebrickable_parts"."name") LIKE LOWER(\'%' ~ search_query ~ '%\') OR LOWER("rebrickable_parts"."color_name") LIKE LOWER(\'%' ~ search_query ~ '%\') OR LOWER("bricktracker_parts"."part") LIKE LOWER(\'%' ~ search_query ~ '%\'))' %}
   {% set _ = conditions.append(search_condition) %}
 {% endif %}
+{% if skip_spare_parts %}
+  {% set _ = conditions.append('"bricktracker_parts"."spare" = 0') %}
+{% endif %}
 {% if conditions %}
 WHERE {{ conditions | join(' AND ') }}
 {% endif %}

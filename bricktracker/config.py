@@ -43,6 +43,8 @@ CONFIG: Final[list[dict[str, Any]]] = [
     {'n': 'PARTS_FOLDER', 'd': 'parts', 's': True},
     {'n': 'PARTS_PAGINATION_SIZE_DESKTOP', 'd': 50, 'c': int},
     {'n': 'PARTS_PAGINATION_SIZE_MOBILE', 'd': 25, 'c': int},
+    {'n': 'SETS_PAGINATION_SIZE_DESKTOP', 'd': 12, 'c': int},
+    {'n': 'SETS_PAGINATION_SIZE_MOBILE', 'd': 8, 'c': int},
     {'n': 'PORT', 'd': 3333, 'c': int},
     {'n': 'PURCHASE_DATE_FORMAT', 'd': '%d/%m/%Y'},
     {'n': 'PURCHASE_CURRENCY', 'd': '€'},
