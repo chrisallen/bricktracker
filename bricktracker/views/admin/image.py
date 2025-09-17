@@ -25,6 +25,7 @@ def update() -> Response:
         BrickSet(),
         minifigure=BrickMinifigure(record={
             'set_img_url': None,
+            'image': None,
         })
     ).download()
 
@@ -33,7 +34,9 @@ def update() -> Response:
         BrickSet(),
         part=BrickPart(record={
             'part_img_url': None,
-            'part_img_url_id': None
+            'part_img_url_id': None,
+            'image_id': None,
+            'image': None,
         })
     ).download()
 
