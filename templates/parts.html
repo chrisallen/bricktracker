@@ -109,7 +109,7 @@
 
       <!-- Mobile Pagination -->
       <div class="d-md-none">
-        <div class="btn-group w-100" role="group" aria-label="Mobile pagination">
+        <div class="mobile-pagination" role="group" aria-label="Mobile pagination">
           {% if pagination.has_prev %}
             <a href="{{ request.url | replace_query('page', pagination.page - 1) }}"
                class="btn btn-outline-primary">
