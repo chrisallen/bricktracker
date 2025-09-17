@@ -1,4 +1,3 @@
-from abc import ABC, abstractmethod
 from sqlite3 import Row
 from typing import Any, Generator, Generic, ItemsView, Self, TypeVar, TYPE_CHECKING
 
@@ -34,7 +33,7 @@ T = TypeVar(
 
 
 # SQLite records
-class BrickRecordList(Generic[T], ABC):
+class BrickRecordList(Generic[T]):
     select_query: str
     records: list[T]
 
@@ -147,8 +146,7 @@ class BrickRecordList(Generic[T], ABC):
 
         return self, total_count
 
-    # Abstract method that subclasses must implement
-    @abstractmethod
+    # Base method that subclasses can override
     def list(
         self,
         /,
@@ -156,8 +154,8 @@ class BrickRecordList(Generic[T], ABC):
         override_query: str | None = None,
         **context: Any,
     ) -> None:
-        """Load records from database - must be implemented by subclasses"""
-        pass
+        """Load records from database - should be implemented by subclasses that use pagination"""
+        raise NotImplementedError("Subclass must implement list() method")
 
     # Generic SQL parameters from fields
     def sql_parameters(self, /) -> dict[str, Any]:
