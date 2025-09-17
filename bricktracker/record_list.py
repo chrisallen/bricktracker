@@ -1,3 +1,4 @@
+import re
 from sqlite3 import Row
 from typing import Any, Generator, Generic, ItemsView, Self, TypeVar, TYPE_CHECKING
 
@@ -109,7 +110,6 @@ class BrickRecordList(Generic[T]):
             main_sql = BrickSQL().load_query(list_query, **count_context)
 
             # Remove ORDER BY, LIMIT, OFFSET clauses for counting
-            import re
             # Remove ORDER BY clause and everything after it that's not part of subqueries
             count_sql = re.sub(r'\s+ORDER\s+BY\s+[^)]*?(\s+LIMIT|\s+OFFSET|$)', r'\1', main_sql, flags=re.IGNORECASE)
             # Remove LIMIT and OFFSET

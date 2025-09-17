@@ -253,16 +253,16 @@ class BrickInstructions(object):
 
         raw: list[tuple[str, str]] = []
         for a in soup.find_all('a', href=link_re):
-            img = a.find('img', alt=True)
-            if not img or set not in img['alt']:
+            img = a.find('img', alt=True) # type: ignore
+            if not img or set not in img['alt']: # type: ignore
                 continue
 
             # Turn the alt text into a slug
-            alt_text = img['alt'].removeprefix('LEGO Building Instructions for ')
+            alt_text = img['alt'].removeprefix('LEGO Building Instructions for ') # type: ignore
             slug = re.sub(r'[^A-Za-z0-9]+', '-', alt_text).strip('-')
 
             # Build the absolute download URL
-            download_url = urljoin('https://rebrickable.com', a['href'])
+            download_url = urljoin('https://rebrickable.com', a['href']) # type: ignore
             raw.append((slug, download_url))
 
         if not raw:
