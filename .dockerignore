@@ -13,7 +13,6 @@ docs/
 LICENSE
 *.md
 *.sample
-docusaurus/
 
 # Temporary
 *.csv

@@ -26,3 +26,6 @@ settings.local.json
 
 # Apple idiocy
 .DS_Store
+
+# Docusaurus
+docusaurus/
