@@ -6,19 +6,14 @@
         data-sort-attribute="set" data-sort-natural="true"><i class="ri-hashtag"></i><span class="d-none d-md-inline"> Set</span></button>
       <button id="sort-name" type="button" class="btn btn-outline-primary mb-2"
         data-sort-attribute="name"><i class="ri-pencil-line"></i><span class="d-none d-md-inline"> Name</span></button>
-      {% if not use_pagination %}
       <button id="sort-theme" type="button" class="btn btn-outline-primary mb-2"
         data-sort-attribute="theme"><i class="ri-price-tag-3-line"></i><span class="d-none d-md-inline"> Theme</span></button>
-      {% endif %}
       <button id="sort-year" type="button" class="btn btn-outline-primary mb-2"
         data-sort-attribute="year"><i class="ri-calendar-line"></i><span class="d-none d-md-inline"> Year</span></button>
-      {% if not use_pagination %}
       <button id="sort-minifigure" type="button" class="btn btn-outline-primary mb-2"
         data-sort-attribute="minifigures" data-sort-desc="true"><i class="ri-group-line"></i><span class="d-none d-xl-inline"> Figures</span></button>
-      {% endif %}
       <button id="sort-parts" type="button" class="btn btn-outline-primary mb-2"
         data-sort-attribute="parts" data-sort-desc="true"><i class="ri-shapes-line"></i><span class="d-none d-xl-inline"> Parts</span></button>
-      {% if not use_pagination %}
       {% if not config['HIDE_TABLE_MISSING_PARTS'] %}
       <button id="sort-missing" type="button" class="btn btn-outline-primary mb-2"
         data-sort-attribute="missing" data-sort-desc="true"><i class="ri-question-line"></i><span class="d-none d-xl-inline"> Missing</span></button>
@@ -31,7 +26,6 @@
         data-sort-attribute="purchase-date" data-sort-desc="true"><i class="ri-calendar-line"></i><span class="d-none d-xl-inline"> Date</span></button>
       <button id="sort-purchase-price" type="button" class="btn btn-outline-primary mb-2"
         data-sort-attribute="purchase-price" data-sort-desc="true"><i class="ri-wallet-3-line"></i><span class="d-none d-xl-inline"> Price</span></button>
-      {% endif %}
       <button id="sort-clear" type="button" class="btn btn-outline-dark mb-2"
         data-sort-clear="true"><i class="ri-close-circle-line"></i><span class="d-none d-xl-inline"> Clear</span></button>
     </div>

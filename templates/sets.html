@@ -3,7 +3,7 @@
 {% block title %} - All sets{% endblock %}
 
 {% block main %}
-{% if collection | length %}
+{% if collection | length or use_pagination %}
 <div class="container-fluid">
   <div class="row row-cols-lg-auto g-1 justify-content-center align-items-center pb-2">
     <div class="col-12 flex-grow-1">
@@ -21,7 +21,6 @@
         </button>
       </div>
     </div>
-    {% if not use_pagination %}
     <div class="col-12">
       <div class="input-group">
         <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#grid-filter" aria-expanded="{% if config['SHOW_GRID_FILTERS'] %}true{% else %}false{% endif %}" aria-controls="grid-filter">
@@ -29,12 +28,9 @@
         </button>
       </div>
     </div>
-    {% endif %}
   </div>
   {% include 'set/sort.html' %}
-  {% if not use_pagination %}
   {% include 'set/filter.html' %}
-  {% endif %}
 
   {% if use_pagination %}
   <!-- PAGINATION MODE -->
@@ -144,9 +140,13 @@
       <!-- Results Info -->
       <div class="text-center mt-3">
         <small class="text-muted">
-          Showing {{ ((pagination.page - 1) * pagination.per_page + 1) }} to
-          {{ [pagination.page * pagination.per_page, pagination.total_count] | min }}
-          of {{ pagination.total_count }} sets
+          {% if pagination.total_count > 0 %}
+            Showing {{ ((pagination.page - 1) * pagination.per_page + 1) }} to
+            {{ [pagination.page * pagination.per_page, pagination.total_count] | min }}
+            of {{ pagination.total_count }} sets
+          {% else %}
+            No sets found
+          {% endif %}
         </small>
       </div>
     </div>

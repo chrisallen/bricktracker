@@ -39,18 +39,32 @@ def list() -> str:
     # Get filter parameters from request
     search_query, sort_field, sort_order, page = get_request_params()
 
+    # Get filter parameters
+    status_filter = request.args.get('status')
+    theme_filter = request.args.get('theme')
+    owner_filter = request.args.get('owner')
+    purchase_location_filter = request.args.get('purchase_location')
+    storage_filter = request.args.get('storage')
+    tag_filter = request.args.get('tag')
+
     # Get pagination configuration
     per_page, is_mobile = get_pagination_config('sets')
     use_pagination = per_page > 0
 
     if use_pagination:
-        # PAGINATION MODE - Server-side pagination with search
+        # PAGINATION MODE - Server-side pagination with search and filters
         sets, total_count = BrickSetList().all_filtered_paginated(
             search_query=search_query,
             page=page,
             per_page=per_page,
             sort_field=sort_field,
-            sort_order=sort_order
+            sort_order=sort_order,
+            status_filter=status_filter,
+            theme_filter=theme_filter,
+            owner_filter=owner_filter,
+            purchase_location_filter=purchase_location_filter,
+            storage_filter=storage_filter,
+            tag_filter=tag_filter
         )
 
         pagination_context = build_pagination_context(page, per_page, total_count, is_mobile)
@@ -65,6 +79,12 @@ def list() -> str:
         'use_pagination': use_pagination,
         'current_sort': sort_field,
         'current_order': sort_order,
+        'current_status_filter': status_filter,
+        'current_theme_filter': theme_filter,
+        'current_owner_filter': owner_filter,
+        'current_purchase_location_filter': purchase_location_filter,
+        'current_storage_filter': storage_filter,
+        'current_tag_filter': tag_filter,
         'brickset_statuses': BrickSetStatusList.list(),
         **set_metadata_lists(as_class=True)
     }

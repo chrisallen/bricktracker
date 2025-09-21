@@ -57,6 +57,9 @@ document.addEventListener("DOMContentLoaded", () => {
       // Setup sort buttons for pagination mode
       setupPaginationSortButtons();
 
+      // Setup filter dropdowns for pagination mode
+      setupPaginationFilterDropdowns();
+
     } else {
       // ORIGINAL MODE - Grid search functionality is handled by existing grid scripts
       // No additional setup needed here
@@ -104,5 +107,69 @@ function setupPaginationSortButtons() {
       currentUrl.searchParams.set('page', '1');
       window.location.href = currentUrl.toString();
     });
+  }
+}
+
+function setupPaginationFilterDropdowns() {
+  // Filter dropdown functionality for pagination mode
+  const filterDropdowns = document.querySelectorAll('#grid-filter select');
+
+  filterDropdowns.forEach(dropdown => {
+    dropdown.addEventListener('change', () => {
+      performServerFilter();
+    });
+  });
+
+  function performServerFilter() {
+    const currentUrl = new URL(window.location);
+
+    // Get all filter values
+    const statusFilter = document.getElementById('grid-status')?.value || '';
+    const themeFilter = document.getElementById('grid-theme')?.value || '';
+    const ownerFilter = document.getElementById('grid-owner')?.value || '';
+    const purchaseLocationFilter = document.getElementById('grid-purchase-location')?.value || '';
+    const storageFilter = document.getElementById('grid-storage')?.value || '';
+    const tagFilter = document.getElementById('grid-tag')?.value || '';
+
+    // Update URL parameters
+    if (statusFilter) {
+      currentUrl.searchParams.set('status', statusFilter);
+    } else {
+      currentUrl.searchParams.delete('status');
+    }
+
+    if (themeFilter) {
+      currentUrl.searchParams.set('theme', themeFilter);
+    } else {
+      currentUrl.searchParams.delete('theme');
+    }
+
+    if (ownerFilter) {
+      currentUrl.searchParams.set('owner', ownerFilter);
+    } else {
+      currentUrl.searchParams.delete('owner');
+    }
+
+    if (purchaseLocationFilter) {
+      currentUrl.searchParams.set('purchase_location', purchaseLocationFilter);
+    } else {
+      currentUrl.searchParams.delete('purchase_location');
+    }
+
+    if (storageFilter) {
+      currentUrl.searchParams.set('storage', storageFilter);
+    } else {
+      currentUrl.searchParams.delete('storage');
+    }
+
+    if (tagFilter) {
+      currentUrl.searchParams.set('tag', tagFilter);
+    } else {
+      currentUrl.searchParams.delete('tag');
+    }
+
+    // Reset to page 1 when filtering
+    currentUrl.searchParams.set('page', '1');
+    window.location.href = currentUrl.toString();
   }
 }

@@ -13,6 +13,8 @@ from .set_storage_list import BrickSetStorageList
 from .set_tag import BrickSetTag
 from .set_tag_list import BrickSetTagList
 from .set import BrickSet
+from .theme_list import BrickThemeList
+from .instructions_list import BrickInstructionsList
 
 
 # All the sets from the database
@@ -56,11 +58,31 @@ class BrickSetList(BrickRecordList[BrickSet]):
         page: int = 1,
         per_page: int = 50,
         sort_field: str | None = None,
-        sort_order: str = 'asc'
+        sort_order: str = 'asc',
+        status_filter: str | None = None,
+        theme_filter: str | None = None,
+        owner_filter: str | None = None,
+        purchase_location_filter: str | None = None,
+        storage_filter: str | None = None,
+        tag_filter: str | None = None
     ) -> tuple[Self, int]:
+        # Convert theme name to theme ID for filtering
+        theme_id_filter = None
+        if theme_filter:
+            theme_id_filter = self._theme_name_to_id(theme_filter)
+
+        # Check if any filters are applied
+        has_filters = any([status_filter, theme_id_filter, owner_filter, purchase_location_filter, storage_filter, tag_filter])
+
         # Prepare filter context
         filter_context = {
             'search_query': search_query,
+            'status_filter': status_filter,
+            'theme_filter': theme_id_filter,  # Use converted theme ID
+            'owner_filter': owner_filter,
+            'purchase_location_filter': purchase_location_filter,
+            'storage_filter': storage_filter,
+            'tag_filter': tag_filter,
             'owners': BrickSetOwnerList.as_columns(),
             'statuses': BrickSetStatusList.as_columns(),
             'tags': BrickSetTagList.as_columns(),
@@ -71,8 +93,27 @@ class BrickSetList(BrickRecordList[BrickSet]):
             'set': '"rebrickable_sets"."set"',
             'name': '"rebrickable_sets"."name"',
             'year': '"rebrickable_sets"."year"',
-            'parts': '"rebrickable_sets"."number_of_parts"'
+            'parts': '"rebrickable_sets"."number_of_parts"',
+            'theme': '"rebrickable_sets"."theme_id"',
+            'minifigures': '"total_minifigures"',  # Use the alias from the SQL query
+            'missing': '"total_missing"',  # Use the alias from the SQL query
+            'damaged': '"total_damaged"',  # Use the alias from the SQL query
+            'purchase-date': '"bricktracker_sets"."purchase_date"',
+            'purchase-price': '"bricktracker_sets"."purchase_price"'
         }
+
+        # Choose query based on whether filters are applied
+        query_to_use = 'set/list/all_filtered' if has_filters else self.all_query
+
+        # Handle instructions filtering separately (post-SQL filtering)
+        instructions_filter = None
+        if status_filter in ['has-missing-instructions', '-has-missing-instructions']:
+            instructions_filter = status_filter
+            # Remove from SQL context to avoid SQL errors
+            filter_context['status_filter'] = None
+            # Recalculate has_filters without instructions
+            has_filters = any([theme_id_filter, owner_filter, purchase_location_filter, storage_filter, tag_filter])
+            query_to_use = 'set/list/all_filtered' if has_filters else self.all_query
 
         # Use the base pagination method with custom list method
         result, total_count = self.paginate(
@@ -80,12 +121,78 @@ class BrickSetList(BrickRecordList[BrickSet]):
             per_page=per_page,
             sort_field=sort_field,
             sort_order=sort_order,
-            list_query=self.all_query,
+            list_query=query_to_use,
             field_mapping=field_mapping,
             **filter_context
         )
 
+        # Apply instructions filtering after SQL query
+        if instructions_filter:
+            result, total_count = self._filter_by_instructions(result, total_count, instructions_filter, page, per_page)
+
+        # Populate themes for filter dropdown (always needed)
+        result._populate_themes()
+
         return result, total_count
+
+    def _populate_themes(self) -> None:
+        """Populate themes list from the current records"""
+        themes = set()
+        for record in self.records:
+            if hasattr(record, 'theme') and hasattr(record.theme, 'name'):
+                themes.add(record.theme.name)
+
+        self.themes = list(themes)
+        self.themes.sort()
+
+    def _theme_name_to_id(self, theme_name: str) -> str | None:
+        """Convert a theme name to theme ID for filtering"""
+        try:
+            theme_list = BrickThemeList()
+            for theme_id, theme in theme_list.themes.items():
+                if theme.name.lower() == theme_name.lower():
+                    return str(theme_id)
+            return None
+        except Exception:
+            # If themes can't be loaded, return None to disable theme filtering
+            return None
+
+    def _filter_by_instructions(self, result_list: Self, total_count: int, instructions_filter: str, page: int, per_page: int) -> tuple[Self, int]:
+        """Filter sets by instruction file existence (post-SQL filtering)"""
+        try:
+            # Load instructions list
+            instructions_list = BrickInstructionsList()
+            instruction_sets = set(instructions_list.sets.keys())
+
+            # Filter the records
+            filtered_records = []
+            for record in result_list.records:
+                set_id = record.fields.set
+                has_instructions = set_id in instruction_sets
+
+                if instructions_filter == 'has-missing-instructions':
+                    # Show sets that are MISSING instructions
+                    if not has_instructions:
+                        filtered_records.append(record)
+                elif instructions_filter == '-has-missing-instructions':
+                    # Show sets that HAVE instructions
+                    if has_instructions:
+                        filtered_records.append(record)
+
+            # Create new result with filtered records
+            new_result = BrickSetList()
+            new_result.records = filtered_records
+
+            # Note: This breaks proper pagination since we're filtering after SQL
+            # The total_count and pagination will be approximate
+            # For proper pagination, we'd need a database table for instructions
+            # This will be implemented in future versions
+
+            return new_result, len(filtered_records)
+
+        except Exception:
+            # If instructions can't be loaded, return original results
+            return result_list, total_count
 
     # Sets with a minifigure part damaged
     def damaged_minifigure(self, figure: str, /) -> Self:
