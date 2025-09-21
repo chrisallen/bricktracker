@@ -6,8 +6,52 @@ function isPaginationMode() {
   return gridElement && gridElement.getAttribute('data-grid') === 'false';
 }
 
+// Filter state management
+function initializeFilterState() {
+  const filterElement = document.getElementById('grid-filter');
+  const filterToggleButton = document.querySelector('[data-bs-target="#grid-filter"]');
+
+  if (!filterElement || !filterToggleButton) return;
+
+  // Key for localStorage specific to sets page
+  const FILTER_STATE_KEY = 'sets-filter-state';
+
+  // Restore filter state on page load
+  const savedState = localStorage.getItem(FILTER_STATE_KEY);
+  if (savedState === 'open') {
+    // Override the template state and show the filter
+    filterElement.classList.add('show');
+    filterToggleButton.setAttribute('aria-expanded', 'true');
+  } else if (savedState === 'closed') {
+    // Explicitly hide if it was closed by user
+    filterElement.classList.remove('show');
+    filterToggleButton.setAttribute('aria-expanded', 'false');
+  }
+
+  // Listen for filter toggle events
+  filterElement.addEventListener('show.bs.collapse', () => {
+    localStorage.setItem(FILTER_STATE_KEY, 'open');
+  });
+
+  filterElement.addEventListener('hide.bs.collapse', () => {
+    localStorage.setItem(FILTER_STATE_KEY, 'closed');
+  });
+
+  // Clear state when leaving the page
+  window.addEventListener('beforeunload', () => {
+    // Only clear if user is navigating away from sets page
+    const currentPath = window.location.pathname;
+    if (!currentPath.includes('/sets')) {
+      localStorage.removeItem(FILTER_STATE_KEY);
+    }
+  });
+}
+
 // Setup page functionality
 document.addEventListener("DOMContentLoaded", () => {
+  // Initialize filter state management
+  initializeFilterState();
+
   const searchInput = document.getElementById('grid-search');
   const searchClear = document.getElementById('grid-search-clear');
 

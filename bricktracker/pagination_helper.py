@@ -4,8 +4,9 @@ from typing import Any, Dict, Tuple
 
 def get_pagination_config(entity_type: str) -> Tuple[int, bool]:
     """Get pagination configuration for an entity type (sets, parts, minifigures)"""
-    # Check if pagination is enabled
-    use_pagination = current_app.config.get('SERVER_SIDE_PAGINATION', False)
+    # Check if pagination is enabled for this specific entity type
+    pagination_key = f'{entity_type.upper()}_SERVER_SIDE_PAGINATION'
+    use_pagination = current_app.config.get(pagination_key, False)
 
     if not use_pagination:
         return 0, False
@@ -15,12 +16,9 @@ def get_pagination_config(entity_type: str) -> Tuple[int, bool]:
     is_mobile = any(device in user_agent for device in ['mobile', 'android', 'iphone', 'ipad'])
 
     # Get appropriate config keys based on entity type
-    if entity_type.upper() == 'SETS':
-        desktop_key = 'SETS_PAGINATION_SIZE_DESKTOP'
-        mobile_key = 'SETS_PAGINATION_SIZE_MOBILE'
-    else:  # parts and minifigures use the same config
-        desktop_key = 'PARTS_PAGINATION_SIZE_DESKTOP'
-        mobile_key = 'PARTS_PAGINATION_SIZE_MOBILE'
+    entity_upper = entity_type.upper()
+    desktop_key = f'{entity_upper}_PAGINATION_SIZE_DESKTOP'
+    mobile_key = f'{entity_upper}_PAGINATION_SIZE_MOBILE'
 
     per_page = current_app.config[mobile_key] if is_mobile else current_app.config[desktop_key]
 
