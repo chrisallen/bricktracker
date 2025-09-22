@@ -238,6 +238,49 @@ class BrickPartList(BrickRecordList[BrickPart]):
 
         return self
 
+    def problem_paginated(
+        self,
+        owner_id: str | None = None,
+        color_id: str | None = None,
+        search_query: str | None = None,
+        page: int = 1,
+        per_page: int = 50,
+        sort_field: str | None = None,
+        sort_order: str = 'asc'
+    ) -> tuple[Self, int]:
+        # Prepare filter context
+        filter_context = {}
+        if owner_id and owner_id != 'all':
+            filter_context['owner_id'] = owner_id
+        if color_id and color_id != 'all':
+            filter_context['color_id'] = color_id
+        if search_query:
+            filter_context['search_query'] = search_query
+        if current_app.config.get('SKIP_SPARE_PARTS', False):
+            filter_context['skip_spare_parts'] = True
+
+        # Field mapping for sorting
+        field_mapping = {
+            'name': '"rebrickable_parts"."name"',
+            'color': '"rebrickable_parts"."color_name"',
+            'quantity': '"total_quantity"',
+            'missing': '"total_missing"',
+            'damaged': '"total_damaged"',
+            'sets': '"total_sets"',
+            'minifigures': '"total_minifigures"'
+        }
+
+        # Use the base pagination method with problem query
+        return self.paginate(
+            page=page,
+            per_page=per_page,
+            sort_field=sort_field,
+            sort_order=sort_order,
+            list_query=self.problem_query,
+            field_mapping=field_mapping,
+            **filter_context
+        )
+
     # Return a dict with common SQL parameters for a parts list
     def sql_parameters(self, /) -> dict[str, Any]:
         parameters: dict[str, Any] = super().sql_parameters()
