@@ -36,16 +36,19 @@ window.BrickTable = class BrickTable {
         // Special configuration for tables with custom search/sort
         const isMinifiguresTable = table.id === 'minifigures';
         const isPartsTable = table.id === 'parts';
+        const isProblemsTable = table.id === 'problems';
         const isPartsTablePaginationMode = isPartsTable && table.getAttribute('data-table') === 'false';
-        const hasCustomInterface = isMinifiguresTable || isPartsTablePaginationMode;
+        const isProblemsTablePaginationMode = isProblemsTable && table.getAttribute('data-table') === 'false';
+        const hasCustomInterface = isMinifiguresTable || isPartsTablePaginationMode || isProblemsTablePaginationMode;
+        const hasCustomSearch = isPartsTable || isProblemsTable; // Parts and problems always have custom search
 
         this.table = new simpleDatatables.DataTable(`#${table.id}`, {
             columns: columns,
-            paging: !isPartsTablePaginationMode, // Disable built-in pagination only for parts table in pagination mode
+            paging: !(isPartsTablePaginationMode || isProblemsTablePaginationMode), // Disable built-in pagination for tables in pagination mode
             pagerDelta: 1,
             perPage: per_page,
             perPageSelect: [10, 25, 50, 100, 500, 1000],
-            searchable: !hasCustomInterface, // Disable built-in search for tables with custom interface
+            searchable: !hasCustomSearch, // Disable built-in search for tables with custom search
             searchMethod: (table => (terms, cell, row, column, source) => table.search(terms, cell, row, column, source))(this),
             searchQuerySeparator: "",
             tableRender: () => {
@@ -107,6 +110,8 @@ const setup_tables = (per_page) => document.querySelectorAll('table[data-table="
             window.brickTableInstance = brickTable;
         } else if (el.id === 'parts') {
             window.partsTableInstance = brickTable;
+        } else if (el.id === 'problems') {
+            window.problemsTableInstance = brickTable;
         }
     }
 );

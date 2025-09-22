@@ -101,7 +101,7 @@ def problem() -> str:
         pagination_context = build_pagination_context(page, per_page, total_count, is_mobile)
     else:
         # ORIGINAL MODE - Single page with all data for client-side search
-        parts = BrickPartList().problem()
+        parts = BrickPartList().problem_filtered(owner_id, color_id)
         pagination_context = None
 
     # Get list of owners for filter dropdown

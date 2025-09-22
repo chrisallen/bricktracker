@@ -238,6 +238,27 @@ class BrickPartList(BrickRecordList[BrickPart]):
 
         return self
 
+    def problem_filtered(self, owner_id: str | None = None, color_id: str | None = None, /) -> Self:
+        # Save the filter parameters for client-side filtering
+        if owner_id is not None:
+            self.fields.owner_id = owner_id
+        if color_id is not None:
+            self.fields.color_id = color_id
+
+        # Prepare context for query
+        context = {}
+        if owner_id and owner_id != 'all':
+            context['owner_id'] = owner_id
+        if color_id and color_id != 'all':
+            context['color_id'] = color_id
+        if current_app.config.get('SKIP_SPARE_PARTS', False):
+            context['skip_spare_parts'] = True
+
+        # Load the problematic parts from the database
+        self.list(override_query=self.problem_query, **context)
+
+        return self
+
     def problem_paginated(
         self,
         owner_id: str | None = None,

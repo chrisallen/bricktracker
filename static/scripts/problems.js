@@ -11,24 +11,52 @@ function setupProblemsPage() {
     searchInput.addEventListener('input', function() {
       clearTimeout(searchTimeout);
       searchTimeout = setTimeout(() => {
-        const url = new URL(window.location);
-        if (this.value.trim()) {
-          url.searchParams.set('search', this.value.trim());
+        if (isPaginationMode()) {
+          // PAGINATION MODE - Server-side search via URL parameters
+          const url = new URL(window.location);
+          if (this.value.trim()) {
+            url.searchParams.set('search', this.value.trim());
+          } else {
+            url.searchParams.delete('search');
+          }
+          url.searchParams.delete('page'); // Reset to first page
+          window.location.href = url.toString();
         } else {
-          url.searchParams.delete('search');
+          // ORIGINAL MODE - Client-side instant search via Simple DataTables
+          const searchValue = this.value.trim();
+          const tableElement = document.querySelector('table[data-table="true"]');
+          if (tableElement && window.problemsTableInstance) {
+            // Enable searchable functionality
+            window.problemsTableInstance.table.searchable = true;
+
+            // Perform the search
+            if (searchValue) {
+              window.problemsTableInstance.table.search(searchValue);
+            } else {
+              // Clear search
+              window.problemsTableInstance.table.search('');
+            }
+          }
         }
-        url.searchParams.delete('page'); // Reset to first page
-        window.location.href = url.toString();
       }, 500);
     });
 
     // Clear search
     clearButton.addEventListener('click', function() {
-      searchInput.value = '';
-      const url = new URL(window.location);
-      url.searchParams.delete('search');
-      url.searchParams.delete('page');
-      window.location.href = url.toString();
+      if (isPaginationMode()) {
+        // PAGINATION MODE - Clear via URL parameters
+        searchInput.value = '';
+        const url = new URL(window.location);
+        url.searchParams.delete('search');
+        url.searchParams.delete('page');
+        window.location.href = url.toString();
+      } else {
+        // ORIGINAL MODE - Clear via DataTables API
+        searchInput.value = '';
+        if (window.problemsTableInstance) {
+          window.problemsTableInstance.table.search('');
+        }
+      }
     });
   }
 
