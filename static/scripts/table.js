@@ -40,7 +40,7 @@ window.BrickTable = class BrickTable {
         const isPartsTablePaginationMode = isPartsTable && table.getAttribute('data-table') === 'false';
         const isProblemsTablePaginationMode = isProblemsTable && table.getAttribute('data-table') === 'false';
         const hasCustomInterface = isMinifiguresTable || isPartsTablePaginationMode || isProblemsTablePaginationMode;
-        const hasCustomSearch = isPartsTable || isProblemsTable; // Parts and problems always have custom search
+        const hasCustomSearch = isPartsTable || isProblemsTable || isMinifiguresTable; // Parts, problems, and minifigures always have custom search
 
         this.table = new simpleDatatables.DataTable(`#${table.id}`, {
             columns: columns,
