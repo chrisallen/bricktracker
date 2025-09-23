@@ -26,8 +26,6 @@ settings.local.json
 
 # Apple idiocy
 .DS_Store
-<<<<<<< HEAD
-=======
 
 # Documentation
 docusaurus/
@@ -35,4 +33,3 @@ vitepress/
 
 # Local data
 offline/
->>>>>>> b275742 (Updated gitignore)
