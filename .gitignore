@@ -30,3 +30,6 @@ settings.local.json
 # Documentation
 docusaurus/
 vitepress/
+
+# Local data
+offline/
