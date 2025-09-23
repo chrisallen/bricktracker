@@ -70,7 +70,7 @@ class BrickSocket(object):
             *args,
             **kwargs,
             path=app.config['SOCKET_PATH'],
-            async_mode='eventlet',
+            async_mode='gevent',
         )
 
         # Store the socket in the app config

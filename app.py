@@ -1,6 +1,6 @@
 # This need to be first
-import eventlet
-eventlet.monkey_patch()
+import gevent.monkey
+gevent.monkey.patch_all()
 
 import logging  # noqa: E402
 
