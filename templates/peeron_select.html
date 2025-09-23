@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %} - Download instructions from Peeron{% endblock %}
+
+{% block main %}
+  <div class="container">
+    {% if error %}<div class="alert alert-danger" role="alert"><strong>Error:</strong> {{ error }}.</div>{% endif %}
+    <div class="row">
+      <div class="col-12">
+        <form method="POST" action="{{ url_for('instructions.do_download') }}">
+          <div class="card mb-3">
+            <div class="card-header">
+              <h5 class="mb-0"><i class="ri-download-line"></i> Download instructions from Rebrickable</h5>
+            </div>
+            <div class="card-body">
+              <div class="mb-3">
+                <label for="download-set" class="form-label">Set number (only one)</label>
+                <input type="text" class="form-control" id="download-set" name="download-set" placeholder="107-1 or 1642-1 or ..." value="{{ set }}">
+              </div>
+            </div>
+            <div class="card-footer text-end">
+              <button type="submit" class="btn btn-primary"><i class="ri-search-line"></i> Search</button>
+            </div>
+          </div>
+        </form>
+        {% if pages %}
+          <div class="alert alert-info" role="alert">
+            <i class="ri-information-line"></i> <strong>Instructions found on Peeron:</strong> {{ set }} was not available on Rebrickable, but {{ pages|length }} instruction pages were found on Peeron.
+          </div>
+          <div class="card mb-3">
+            <div class="card-header">
+              <h5 class="mb-0"><i class="ri-checkbox-line"></i> Select instructions to download</h5>
+            </div>
+            <div class="card-body">
+              <div class="mb-3">
+                <div id="peeron-download-fail" class="alert alert-danger d-none" role="alert"></div>
+                <div id="peeron-download-complete"></div>
+                <h5 class="border-bottom">Available Instructions</h5>
+                <div id="peeron-download-files" class="row g-2">
+                  {% for page in pages %}
+                    <div class="col-12 col-md-6 col-lg-4">
+                      <div class="card border-0 shadow-sm">
+                        <div class="card-body p-2">
+                          <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="peeron-page-{{ loop.index }}"
+                                   data-page-number="{{ page.page_number }}"
+                                   data-thumbnail-url="{{ page.thumbnail_url }}"
+                                   data-image-url="{{ page.image_url }}"
+                                   data-alt-text="{{ page.alt_text }}"
+                                   autocomplete="off">
+                            <label class="form-check-label w-100" for="peeron-page-{{ loop.index }}">
+                              <div class="text-center">
+                                <img src="{{ page.thumbnail_url }}" alt="{{ page.alt_text }}" class="img-fluid mb-2 border rounded" style="max-height: 150px;">
+                                <div class="small fw-bold">Page {{ page.page_number }}</div>
+                              </div>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+              <hr>
+              <div class="mb-3">
+                <p>
+                  Progress <span id="peeron-download-count"></span>
+                  <span id="peeron-download-spinner" class="d-none">
+                    <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                    <span class="visually-hidden" role="status">Loading...</span>
+                  </span>
+                </p>
+                <div id="peeron-download-progress" class="progress" role="progressbar" aria-label="Download Peeron instructions progress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                  <div id="peeron-download-progress-bar" class="progress-bar" style="width: 0%"></div>
+                </div>
+                <p id="peeron-download-progress-message" class="text-center d-none"></p>
+              </div>
+            </div>
+            <div class="card-footer text-end">
+              <span id="peeron-download-status-icon" class="me-1"></span><span id="peeron-download-status" class="me-1"></span><button id="peeron-download" type="button" class="btn btn-primary"><i class="ri-download-line"></i> Download selected files</button>
+            </div>
+          </div>
+          {% include 'instructions/peeron_socket.html' %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock %}

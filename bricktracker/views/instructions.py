@@ -14,6 +14,7 @@ from .exceptions import exception_handler
 from ..instructions import BrickInstructions
 from ..instructions_list import BrickInstructionsList
 from ..parser import parse_set
+from ..peeron_instructions import PeeronInstructions
 from ..socket import MESSAGES
 from .upload import upload_helper
 
@@ -160,12 +161,41 @@ def do_download() -> str:
     except Exception:
         set = ''
 
-    return render_template(
-        'instructions.html',
-        download=True,
-        instructions=BrickInstructions.find_instructions(set),
-        set=set,
-        path=current_app.config['SOCKET_PATH'],
-        namespace=current_app.config['SOCKET_NAMESPACE'],
-        messages=MESSAGES
-    )
+    # Try Rebrickable first, fallback to Peeron if it fails
+    rebrickable_instructions, peeron_pages = PeeronInstructions.find_instructions_with_peeron_fallback(set)
+
+    # Determine which template to render based on what we found
+    if rebrickable_instructions:
+        # Standard Rebrickable instructions found
+        return render_template(
+            'instructions.html',
+            download=True,
+            instructions=rebrickable_instructions,
+            set=set,
+            path=current_app.config['SOCKET_PATH'],
+            namespace=current_app.config['SOCKET_NAMESPACE'],
+            messages=MESSAGES
+        )
+    elif peeron_pages:
+        # Peeron pages found - show page selection interface
+        return render_template(
+            'peeron_select.html',
+            download=True,
+            pages=peeron_pages,
+            set=set,
+            path=current_app.config['SOCKET_PATH'],
+            namespace=current_app.config['SOCKET_NAMESPACE'],
+            messages=MESSAGES
+        )
+    else:
+        # This shouldn't happen as the fallback method re-raises the original error
+        return render_template(
+            'instructions.html',
+            download=True,
+            instructions=[],
+            set=set,
+            error='No instructions found on Rebrickable or Peeron',
+            path=current_app.config['SOCKET_PATH'],
+            namespace=current_app.config['SOCKET_NAMESPACE'],
+            messages=MESSAGES
+        )
