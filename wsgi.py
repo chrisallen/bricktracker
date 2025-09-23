@@ -1,38 +1,18 @@
 #!/usr/bin/env python3
 """
 WSGI entry point for BrickTracker - Production Docker deployment
-This ensures proper gevent monkey patching for gunicorn
+This ensures proper gevent monkey patching before any imports
 """
 
-# CRITICAL: This must be the very first import
+# CRITICAL: Monkey patch must be first, before ANY other imports
 import gevent.monkey
 gevent.monkey.patch_all()
 
-import logging
-import sys
-import os
+# Now import the regular app factory
+from app import create_app
 
-# Add the current directory to Python path
-sys.path.insert(0, os.path.dirname(__file__))
+# Create the application - this will be a BrickSocket instance
+app_instance = create_app()
 
-# Import Flask and BrickTracker modules directly
-from flask import Flask
-from bricktracker.app import setup_app
-from bricktracker.socket import BrickSocket
-
-logger = logging.getLogger(__name__)
-
-# Create the Flask app directly (bypassing app.py to avoid double monkey patching)
-app = Flask(__name__)
-
-# Setup the app
-setup_app(app)
-
-# Create the socket
-socket_instance = BrickSocket(
-    app,
-    threaded=not app.config['NO_THREADED_SOCKET'],
-)
-
-# Export the Flask app for gunicorn
-application = app
+# For gunicorn, we need the Flask app, not the BrickSocket wrapper
+application = app_instance.app if hasattr(app_instance, 'app') else app_instance
