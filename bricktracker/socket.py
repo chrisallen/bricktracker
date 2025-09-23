@@ -6,6 +6,8 @@ from flask_socketio import SocketIO
 
 from .instructions import BrickInstructions
 from .instructions_list import BrickInstructionsList
+from .peeron_instructions import PeeronPage
+from .peeron_pdf import PeeronPDF
 from .set import BrickSet
 from .socket_decorator import authenticated_socket, rebrickable_socket
 from .sql import close as sql_close
@@ -18,6 +20,7 @@ MESSAGES: Final[dict[str, str]] = {
     'CONNECT': 'connect',
     'DISCONNECT': 'disconnect',
     'DOWNLOAD_INSTRUCTIONS': 'download_instructions',
+    'DOWNLOAD_PEERON_PAGES': 'download_peeron_pages',
     'FAIL': 'fail',
     'IMPORT_SET': 'import_set',
     'LOAD_SET': 'load_set',
@@ -105,6 +108,56 @@ class BrickSocket(object):
             instructions.download(path)
 
             BrickInstructionsList(force=True)
+            
+        @self.socket.on(MESSAGES['DOWNLOAD_PEERON_PAGES'], namespace=self.namespace)  # noqa: E501
+        @authenticated_socket(self)
+        def download_peeron_pages(data: dict[str, Any], /) -> None:
+            logger.debug('Socket: DOWNLOAD_PEERON_PAGES={data} (from: {fr})'.format(
+                data=data,
+                fr=request.sid,  # type: ignore
+            ))
+
+            try:
+                # Extract data from the request
+                set_number = data.get('set', '')
+                pages_data = data.get('pages', [])
+
+                if not set_number:
+                    raise ValueError("Set number is required")
+
+                if not pages_data:
+                    raise ValueError("No pages selected")
+
+                # Parse set number
+                if '-' in set_number:
+                    parts = set_number.split('-', 1)
+                    set_num = parts[0]
+                    version_num = parts[1] if len(parts) > 1 else '1'
+                else:
+                    set_num = set_number
+                    version_num = '1'
+
+                # Convert page data to PeeronPage objects
+                pages = []
+                for page_data in pages_data:
+                    page = PeeronPage(
+                        page_number=page_data.get('page_number', ''),
+                        thumbnail_url=page_data.get('thumbnail_url', ''),
+                        image_url=page_data.get('image_url', ''),
+                        alt_text=page_data.get('alt_text', '')
+                    )
+                    pages.append(page)
+
+                # Create PDF generator and start download
+                pdf_generator = PeeronPDF(set_num, version_num, pages, socket=self)
+                pdf_generator.create_pdf()
+
+                # Refresh instructions list to include new PDF
+                BrickInstructionsList(force=True)
+
+            except Exception as e:
+                logger.error(f"Error in download_peeron_pages: {e}")
+                self.fail(message=f"Error downloading Peeron pages: {e}")
 
         @self.socket.on(MESSAGES['IMPORT_SET'], namespace=self.namespace)
         @rebrickable_socket(self)
