@@ -1,3 +1,71 @@
+// Check if we're in pagination mode (server-side) or original mode (client-side)
+function isPaginationMode() {
+  const tableElement = document.querySelector('#problems');
+  return tableElement && tableElement.getAttribute('data-table') === 'false';
+}
+
+// Initialize filter and sort states for problems page
+function initializeCollapsibleStates() {
+  initializePageCollapsibleStates('problems');
+}
+
+// Apply filters with current state
+function applyFilters() {
+  const ownerSelect = document.getElementById('filter-owner');
+  const colorSelect = document.getElementById('filter-color');
+  const currentUrl = new URL(window.location);
+
+  // Reset to first page when filters change (only for pagination mode)
+  if (isPaginationMode()) {
+    currentUrl.searchParams.set('page', '1');
+  }
+
+  // Handle owner filter
+  if (ownerSelect) {
+    const selectedOwner = ownerSelect.value;
+    if (selectedOwner === 'all') {
+      currentUrl.searchParams.delete('owner');
+    } else {
+      currentUrl.searchParams.set('owner', selectedOwner);
+    }
+  }
+
+  // Handle color filter
+  if (colorSelect) {
+    const selectedColor = colorSelect.value;
+    if (selectedColor === 'all') {
+      currentUrl.searchParams.delete('color');
+    } else {
+      currentUrl.searchParams.set('color', selectedColor);
+    }
+  }
+
+  window.location.href = currentUrl.toString();
+}
+
+// Keep filters expanded after selection
+function applyFiltersAndKeepOpen() {
+  preserveCollapsibleStateOnChange('table-filter', 'problems-filter-state');
+  applyFilters();
+}
+
+// setupColorDropdown is now in shared collapsible-state.js
+
+// Setup sort button functionality
+function setupSortButtons() {
+  const columnMap = {
+    'name': 1,
+    'color': 2,
+    'quantity': 3,
+    'missing': 4,
+    'damaged': 5,
+    'sets': 6,
+    'minifigures': 7
+  };
+  // Use shared sort buttons setup from collapsible-state.js
+  window.setupSharedSortButtons('problems', 'problemsTableInstance', columnMap);
+}
+
 // Problems page functionality
 function setupProblemsPage() {
   // Handle search input
@@ -60,19 +128,12 @@ function setupProblemsPage() {
     });
   }
 
+  // Initialize collapsible states (filter and sort)
+  initializeCollapsibleStates();
+
   // Setup sort and filter functionality (from parts.js)
   setupSortButtons();
   setupColorDropdown();
-
-  // Restore filter state if needed
-  const keepFiltersOpen = sessionStorage.getItem('keepFiltersOpen');
-  if (keepFiltersOpen === 'true') {
-    const filterSection = document.getElementById('table-filter');
-    if (filterSection && !filterSection.classList.contains('show')) {
-      filterSection.classList.add('show');
-    }
-    sessionStorage.removeItem('keepFiltersOpen');
-  }
 
   // Update active sort button based on current URL parameters
   const urlParams = new URLSearchParams(window.location.search);

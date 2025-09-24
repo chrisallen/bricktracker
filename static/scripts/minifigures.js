@@ -25,18 +25,15 @@ function filterByOwner() {
   window.location.href = currentUrl.toString();
 }
 
+// Initialize filter and sort states for minifigures page
+function initializeCollapsibleStates() {
+  initializePageCollapsibleStates('minifigures');
+}
+
 // Keep filters expanded after selection
 function filterByOwnerAndKeepOpen() {
-  // Remember if filters were open
-  const filterSection = document.getElementById('table-filter');
-  const wasOpen = filterSection && filterSection.classList.contains('show');
-
+  preserveCollapsibleStateOnChange('table-filter', 'minifigures-filter-state');
   filterByOwner();
-
-  // Store the state to restore after page reload
-  if (wasOpen) {
-    sessionStorage.setItem('keepFiltersOpen', 'true');
-  }
 }
 
 // Setup table search and sort functionality
@@ -44,18 +41,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchInput = document.getElementById('table-search');
   const searchClear = document.getElementById('table-search-clear');
 
-  // Restore filter state after page load
-  if (sessionStorage.getItem('keepFiltersOpen') === 'true') {
-    const filterSection = document.getElementById('table-filter');
-    const filterButton = document.querySelector('[data-bs-target="#table-filter"]');
-
-    if (filterSection && filterButton) {
-      filterSection.classList.add('show');
-      filterButton.setAttribute('aria-expanded', 'true');
-    }
-
-    sessionStorage.removeItem('keepFiltersOpen');
-  }
+  // Initialize collapsible states (filter and sort)
+  initializeCollapsibleStates();
 
   if (searchInput && searchClear) {
     if (isPaginationMode()) {

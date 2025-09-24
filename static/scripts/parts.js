@@ -33,154 +33,31 @@ function applyFilters() {
   window.location.href = currentUrl.toString();
 }
 
-function setupColorDropdown() {
-  const colorSelect = document.getElementById('filter-color');
-  if (!colorSelect) return;
+// setupColorDropdown is now in shared collapsible-state.js
 
-  // Add color squares to option text
-  const options = colorSelect.querySelectorAll('option[data-color-rgb]');
-  options.forEach(option => {
-    const colorRgb = option.dataset.colorRgb;
-    const colorId = option.dataset.colorId;
-    const colorName = option.textContent.trim();
-
-    if (colorRgb && colorId !== '9999') {
-      // Create a visual indicator (using Unicode square)
-      option.textContent = `${colorName}`; //■
-      //option.style.color = `#${colorRgb}`;
-    }
-  });
+// Initialize filter and sort states for parts page
+function initializeCollapsibleStates() {
+  initializePageCollapsibleStates('parts');
 }
 
 // Keep filters expanded after selection
 function applyFiltersAndKeepOpen() {
-  // Remember if filters were open
-  const filterSection = document.getElementById('table-filter');
-  const wasOpen = filterSection && filterSection.classList.contains('show');
-
+  preserveCollapsibleStateOnChange('table-filter', 'parts-filter-state');
   applyFilters();
-
-  // Store the state to restore after page reload
-  if (wasOpen) {
-    sessionStorage.setItem('keepFiltersOpen', 'true');
-  }
 }
 
 function setupSortButtons() {
-  // Sort button functionality
-  const sortButtons = document.querySelectorAll('[data-sort-attribute]');
-  const clearButton = document.querySelector('[data-sort-clear]');
-
-  sortButtons.forEach(button => {
-    button.addEventListener('click', () => {
-      const attribute = button.dataset.sortAttribute;
-      const isDesc = button.dataset.sortDesc === 'true';
-
-      if (isPaginationMode()) {
-        // PAGINATION MODE - Server-side sorting via URL parameters
-        const currentUrl = new URL(window.location);
-
-        // Determine sort direction
-        const currentSort = currentUrl.searchParams.get('sort');
-        const currentOrder = currentUrl.searchParams.get('order');
-        const isCurrentlyActive = currentSort === attribute;
-
-        let newDirection;
-        if (isCurrentlyActive) {
-          // Toggle direction if same attribute
-          newDirection = currentOrder === 'asc' ? 'desc' : 'asc';
-        } else {
-          // Use default direction for new attribute
-          newDirection = isDesc ? 'desc' : 'asc';
-        }
-
-        // Set sort parameters and reset to first page
-        currentUrl.searchParams.set('sort', attribute);
-        currentUrl.searchParams.set('order', newDirection);
-        currentUrl.searchParams.set('page', '1');
-
-        // Navigate to sorted results
-        window.location.href = currentUrl.toString();
-
-      } else {
-        // ORIGINAL MODE - Client-side sorting via Simple DataTables
-        // Get column index based on attribute
-        const columnMap = {
-          'name': 1,
-          'color': 2,
-          'quantity': 3,
-          'missing': 4,
-          'damaged': 5,
-          'sets': 6,
-          'minifigures': 7
-        };
-
-        const columnIndex = columnMap[attribute];
-        if (columnIndex !== undefined && window.partsTableInstance) {
-          // Determine sort direction
-          const isCurrentlyActive = button.classList.contains('btn-primary');
-          const currentDirection = button.dataset.currentDirection || (isDesc ? 'desc' : 'asc');
-          const newDirection = isCurrentlyActive ?
-            (currentDirection === 'asc' ? 'desc' : 'asc') :
-            (isDesc ? 'desc' : 'asc');
-
-          // Clear other active buttons
-          sortButtons.forEach(btn => {
-            btn.classList.remove('btn-primary');
-            btn.classList.add('btn-outline-primary');
-            btn.removeAttribute('data-current-direction');
-          });
-
-          // Mark this button as active
-          button.classList.remove('btn-outline-primary');
-          button.classList.add('btn-primary');
-          button.dataset.currentDirection = newDirection;
-
-          // Apply sort using Simple DataTables API
-          window.partsTableInstance.table.columns.sort(columnIndex, newDirection);
-        }
-      }
-    });
-  });
-
-  if (clearButton) {
-    clearButton.addEventListener('click', () => {
-      if (isPaginationMode()) {
-        // PAGINATION MODE - Clear server-side sorting via URL parameters
-        const currentUrl = new URL(window.location);
-        currentUrl.searchParams.delete('sort');
-        currentUrl.searchParams.delete('order');
-        currentUrl.searchParams.set('page', '1');
-        window.location.href = currentUrl.toString();
-
-      } else {
-        // ORIGINAL MODE - Clear client-side sorting
-        // Clear all sort buttons
-        sortButtons.forEach(btn => {
-          btn.classList.remove('btn-primary');
-          btn.classList.add('btn-outline-primary');
-          btn.removeAttribute('data-current-direction');
-        });
-
-        // Reset table sort - remove all sorting
-        if (window.partsTableInstance) {
-          // Destroy and recreate to clear sorting
-          const tableElement = document.querySelector('#parts');
-          const currentPerPage = window.partsTableInstance.table.options.perPage;
-          window.partsTableInstance.table.destroy();
-
-          setTimeout(() => {
-            // Create new instance using the globally available BrickTable class
-            const newInstance = new window.BrickTable(tableElement, currentPerPage);
-            window.partsTableInstance = newInstance;
-
-            // Re-enable search functionality
-            newInstance.table.searchable = true;
-          }, 50);
-        }
-      }
-    });
-  }
+  const columnMap = {
+    'name': 1,
+    'color': 2,
+    'quantity': 3,
+    'missing': 4,
+    'damaged': 5,
+    'sets': 6,
+    'minifigures': 7
+  };
+  // Use shared sort buttons setup from collapsible-state.js
+  window.setupSharedSortButtons('parts', 'partsTableInstance', columnMap);
 }
 
 // Check if pagination mode is enabled
@@ -220,21 +97,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchInput = document.getElementById('table-search');
   const searchClear = document.getElementById('table-search-clear');
 
+  // Initialize collapsible states (filter and sort)
+  initializeCollapsibleStates();
+
   // Setup color dropdown with color squares
   setupColorDropdown();
-
-  // Restore filter state after page load
-  if (sessionStorage.getItem('keepFiltersOpen') === 'true') {
-    const filterSection = document.getElementById('table-filter');
-    const filterButton = document.querySelector('[data-bs-target="#table-filter"]');
-
-    if (filterSection && filterButton) {
-      filterSection.classList.add('show');
-      filterButton.setAttribute('aria-expanded', 'true');
-    }
-
-    sessionStorage.removeItem('keepFiltersOpen');
-  }
 
   if (searchInput && searchClear) {
     if (isPaginationMode()) {
