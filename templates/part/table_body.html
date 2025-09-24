@@ -1,0 +1,35 @@
+{% import 'macro/form.html' as form %}
+{% import 'macro/table.html' as table %}
+
+<tbody>
+  {% for item in table_collection %}
+  <tr>
+    {{ table.image(item.url_for_image(), caption=item.fields.name, alt=item.fields.part, accordion=solo) }}
+    <td data-sort="{{ item.fields.name }}">
+      <a class="text-reset" href="{{ item.url() }}">{{ item.fields.name }}</a>
+      {% if item.fields.spare %}<span class="badge rounded-pill text-bg-warning fw-normal"><i class="ri-loop-left-line"></i> Spare</span>{% endif %}
+      {% if all %}
+        {{ table.rebrickable(item) }}
+        {{ table.bricklink(item) }}
+      {% endif %}
+    </td>
+    <td data-sort="{{ item.fields.color_name }}">
+      {% if item.fields.color_rgb %}<span class="color-rgb color-rgb-table {% if item.fields.color == 9999 %}color-any{% endif %} align-middle border border-black" {% if item.fields.color != 9999 %}style="background-color: #{{ item.fields.color_rgb }};"{% endif %}></span>{% endif %}
+      <span class="align-middle">{{ item.fields.color_name }}</span>
+    </td>
+    <td>{{ item.fields.total_quantity }}</td>
+    {% if not config['HIDE_TABLE_MISSING_PARTS'] %}
+      <td data-sort="{{ item.fields.total_missing }}" class="table-td-input">
+        {{ form.input('Missing', item.fields.id, item.html_id('missing'), item.url_for_problem('missing'), item.fields.total_missing, all=all, read_only=read_only) }}
+      </td>
+    {% endif %}
+    {% if not config['HIDE_TABLE_DAMAGED_PARTS'] %}
+      <td data-sort="{{ item.fields.total_damaged }}" class="table-td-input">
+        {{ form.input('Damaged', item.fields.id, item.html_id('damaged'), item.url_for_problem('damaged'), item.fields.total_damaged, all=all, read_only=read_only) }}
+      </td>
+    {% endif %}
+    <td>{{ item.fields.total_sets }}</td>
+    <td>{{ item.fields.total_minifigures }}</td>
+  </tr>
+  {% endfor %}
+</tbody>

@@ -37,9 +37,21 @@ CONFIG: Final[list[dict[str, Any]]] = [
     {'n': 'HIDE_WISHES', 'c': bool},
     {'n': 'MINIFIGURES_DEFAULT_ORDER', 'd': '"rebrickable_minifigures"."name" ASC'},  # noqa: E501
     {'n': 'MINIFIGURES_FOLDER', 'd': 'minifigs', 's': True},
+    {'n': 'MINIFIGURES_PAGINATION_SIZE_DESKTOP', 'd': 10, 'c': int},
+    {'n': 'MINIFIGURES_PAGINATION_SIZE_MOBILE', 'd': 5, 'c': int},
+    {'n': 'MINIFIGURES_SERVER_SIDE_PAGINATION', 'c': bool},
     {'n': 'NO_THREADED_SOCKET', 'c': bool},
+    {'n': 'PARTS_SERVER_SIDE_PAGINATION', 'c': bool},
+    {'n': 'SETS_SERVER_SIDE_PAGINATION', 'c': bool},
     {'n': 'PARTS_DEFAULT_ORDER', 'd': '"rebrickable_parts"."name" ASC, "rebrickable_parts"."color_name" ASC, "bricktracker_parts"."spare" ASC'},  # noqa: E501
     {'n': 'PARTS_FOLDER', 'd': 'parts', 's': True},
+    {'n': 'PARTS_PAGINATION_SIZE_DESKTOP', 'd': 10, 'c': int},
+    {'n': 'PARTS_PAGINATION_SIZE_MOBILE', 'd': 5, 'c': int},
+    {'n': 'PROBLEMS_PAGINATION_SIZE_DESKTOP', 'd': 10, 'c': int},
+    {'n': 'PROBLEMS_PAGINATION_SIZE_MOBILE', 'd': 10, 'c': int},
+    {'n': 'PROBLEMS_SERVER_SIDE_PAGINATION', 'c': bool},
+    {'n': 'SETS_PAGINATION_SIZE_DESKTOP', 'd': 12, 'c': int},
+    {'n': 'SETS_PAGINATION_SIZE_MOBILE', 'd': 4, 'c': int},
     {'n': 'PORT', 'd': 3333, 'c': int},
     {'n': 'PURCHASE_DATE_FORMAT', 'd': '%d/%m/%Y'},
     {'n': 'PURCHASE_CURRENCY', 'd': '€'},
@@ -52,6 +64,12 @@ CONFIG: Final[list[dict[str, Any]]] = [
     {'n': 'REBRICKABLE_LINK_PART_PATTERN', 'd': 'https://rebrickable.com/parts/{part}/_/{color}'},  # noqa: E501
     {'n': 'REBRICKABLE_LINK_INSTRUCTIONS_PATTERN', 'd': 'https://rebrickable.com/instructions/{path}'},  # noqa: E501
     {'n': 'REBRICKABLE_USER_AGENT', 'd': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'},  # noqa: E501
+    {'n': 'USER_AGENT', 'd': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'},  # noqa: E501
+    {'n': 'PEERON_DOWNLOAD_DELAY', 'd': 1000, 'c': int},
+    {'n': 'PEERON_INSTRUCTION_PATTERN', 'd': 'http://peeron.com/scans/{set_number}-{version_number}'},
+    {'n': 'PEERON_MIN_IMAGE_SIZE', 'd': 100, 'c': int},
+    {'n': 'PEERON_SCAN_PATTERN', 'd': 'http://belay.peeron.com/scans/{set_number}-{version_number}/'},
+    {'n': 'PEERON_THUMBNAIL_PATTERN', 'd': 'http://belay.peeron.com/thumbs/{set_number}-{version_number}/'},
     {'n': 'REBRICKABLE_LINKS', 'e': 'LINKS', 'c': bool},
     {'n': 'REBRICKABLE_PAGE_SIZE', 'd': 100, 'c': int},
     {'n': 'RETIRED_SETS_FILE_URL', 'd': 'https://docs.google.com/spreadsheets/d/1rlYfEXtNKxUOZt2Mfv0H17DvK7bj6Pe0CuYwq6ay8WA/gviz/tq?tqx=out:csv&sheet=Sorted%20by%20Retirement%20Date'},  # noqa: E501

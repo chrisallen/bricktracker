@@ -34,6 +34,12 @@ ON "bricktracker_minifigures"."id" IS NOT DISTINCT FROM "problem_join"."id"
 AND "rebrickable_minifigures"."figure" IS NOT DISTINCT FROM "problem_join"."figure"
 {% endblock %}
 
+{% block where %}
+{% if search_query %}
+WHERE (LOWER("rebrickable_minifigures"."name") LIKE LOWER('%{{ search_query }}%'))
+{% endif %}
+{% endblock %}
+
 {% block group %}
 GROUP BY
     "rebrickable_minifigures"."figure"

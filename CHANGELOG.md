@@ -1,6 +1,28 @@
 # Changelog
 
-## Unreleased 
+## Unreleased
+
+### 1.3
+
+- Add individual pagination control system per entity type
+  - `BK_SETS_SERVER_SIDE_PAGINATION`: Enable/disable pagination for sets
+  - `BK_PARTS_SERVER_SIDE_PAGINATION`: Enable/disable pagination for parts
+  - `BK_MINIFIGURES_SERVER_SIDE_PAGINATION`: Enable/disable pagination for minifigures
+  - Device-specific pagination sizes (desktop/mobile) for each entity type
+  - Supports search, filtering, and sorting in both server-side and client-side modes
+  - Consolidated duplicate code across parts.js, problems.js, and minifigures.js
+  - Created shared functions in collapsible-state.js for common operations
+- Fixed dynamic sort icons across all pages
+  - Sort icons now properly toggle between ascending/descending states
+- Improved DataTable integration
+  - Disabled column header sorting when server-side pagination is enabled
+  - Prevents conflicting sort mechanisms between DataTable and server-side sorting
+- Enhanced color dropdown functionality
+  - Automatic merging of duplicate color entries with same color_id
+  - Keeps entries with valid RGB data, removes entries with None/empty RGB
+  - Preserves selection state during dropdown consolidation
+  - Consistent search behavior (instant for client-side, Enter key for server-side)
+  - Mobile-friendly pagination navigation
 
 ### 1.2.4
 

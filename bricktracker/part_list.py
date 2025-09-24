@@ -71,10 +71,63 @@ class BrickPartList(BrickRecordList[BrickPart]):
         else:
             query = self.all_query
 
+        # Prepare context for query
+        context = {}
+        if current_app.config.get('SKIP_SPARE_PARTS', False):
+            context['skip_spare_parts'] = True
+
         # Load the parts from the database
-        self.list(override_query=query)
+        self.list(override_query=query, **context)
 
         return self
+
+    # Load parts with pagination support
+    def all_filtered_paginated(
+        self,
+        owner_id: str | None = None,
+        color_id: str | None = None,
+        search_query: str | None = None,
+        page: int = 1,
+        per_page: int = 50,
+        sort_field: str | None = None,
+        sort_order: str = 'asc'
+    ) -> tuple[Self, int]:
+        # Prepare filter context
+        filter_context = {}
+        if owner_id and owner_id != 'all':
+            filter_context['owner_id'] = owner_id
+            list_query = self.all_by_owner_query
+        else:
+            list_query = self.all_query
+
+        if color_id and color_id != 'all':
+            filter_context['color_id'] = color_id
+        if search_query:
+            filter_context['search_query'] = search_query
+        if current_app.config.get('SKIP_SPARE_PARTS', False):
+            filter_context['skip_spare_parts'] = True
+
+        # Field mapping for sorting
+        field_mapping = {
+            'name': '"rebrickable_parts"."name"',
+            'color': '"rebrickable_parts"."color_name"',
+            'quantity': '"total_quantity"',
+            'missing': '"total_missing"',
+            'damaged': '"total_damaged"',
+            'sets': '"total_sets"',
+            'minifigures': '"total_minifigures"'
+        }
+
+        # Use the base pagination method
+        return self.paginate(
+            page=page,
+            per_page=per_page,
+            sort_field=sort_field,
+            sort_order=sort_order,
+            list_query=list_query,
+            field_mapping=field_mapping,
+            **filter_context
+        )
 
     # Base part list
     def list(
@@ -84,6 +137,7 @@ class BrickPartList(BrickRecordList[BrickPart]):
         override_query: str | None = None,
         order: str | None = None,
         limit: int | None = None,
+        offset: int | None = None,
         **context: Any,
     ) -> None:
         if order is None:
@@ -105,12 +159,18 @@ class BrickPartList(BrickRecordList[BrickPart]):
             context_vars['owner_id'] = self.fields.owner_id
         if hasattr(self.fields, 'color_id') and self.fields.color_id is not None:
             context_vars['color_id'] = self.fields.color_id
+        if hasattr(self.fields, 'search_query') and self.fields.search_query:
+            context_vars['search_query'] = self.fields.search_query
+
+        # Merge with any additional context passed in
+        context_vars.update(context)
 
         # Load the sets from the database
         for record in super().select(
             override_query=override_query,
             order=order,
             limit=limit,
+            offset=offset,
             **context_vars
         ):
             part = BrickPart(
@@ -118,9 +178,6 @@ class BrickPartList(BrickRecordList[BrickPart]):
                 minifigure=minifigure,
                 record=record,
             )
-
-            if current_app.config['SKIP_SPARE_PARTS'] and part.fields.spare:
-                continue
 
             self.records.append(part)
 
@@ -180,6 +237,70 @@ class BrickPartList(BrickRecordList[BrickPart]):
         self.list(override_query=self.problem_query)
 
         return self
+
+    def problem_filtered(self, owner_id: str | None = None, color_id: str | None = None, /) -> Self:
+        # Save the filter parameters for client-side filtering
+        if owner_id is not None:
+            self.fields.owner_id = owner_id
+        if color_id is not None:
+            self.fields.color_id = color_id
+
+        # Prepare context for query
+        context = {}
+        if owner_id and owner_id != 'all':
+            context['owner_id'] = owner_id
+        if color_id and color_id != 'all':
+            context['color_id'] = color_id
+        if current_app.config.get('SKIP_SPARE_PARTS', False):
+            context['skip_spare_parts'] = True
+
+        # Load the problematic parts from the database
+        self.list(override_query=self.problem_query, **context)
+
+        return self
+
+    def problem_paginated(
+        self,
+        owner_id: str | None = None,
+        color_id: str | None = None,
+        search_query: str | None = None,
+        page: int = 1,
+        per_page: int = 50,
+        sort_field: str | None = None,
+        sort_order: str = 'asc'
+    ) -> tuple[Self, int]:
+        # Prepare filter context
+        filter_context = {}
+        if owner_id and owner_id != 'all':
+            filter_context['owner_id'] = owner_id
+        if color_id and color_id != 'all':
+            filter_context['color_id'] = color_id
+        if search_query:
+            filter_context['search_query'] = search_query
+        if current_app.config.get('SKIP_SPARE_PARTS', False):
+            filter_context['skip_spare_parts'] = True
+
+        # Field mapping for sorting
+        field_mapping = {
+            'name': '"rebrickable_parts"."name"',
+            'color': '"rebrickable_parts"."color_name"',
+            'quantity': '"total_quantity"',
+            'missing': '"total_missing"',
+            'damaged': '"total_damaged"',
+            'sets': '"total_sets"',
+            'minifigures': '"total_minifigures"'
+        }
+
+        # Use the base pagination method with problem query
+        return self.paginate(
+            page=page,
+            per_page=per_page,
+            sort_field=sort_field,
+            sort_order=sort_order,
+            list_query=self.problem_query,
+            field_mapping=field_mapping,
+            **filter_context
+        )
 
     # Return a dict with common SQL parameters for a parts list
     def sql_parameters(self, /) -> dict[str, Any]:

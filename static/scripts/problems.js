@@ -1,17 +1,17 @@
-// Parts page functionality - now uses shared functions
+// Problems page functionality - now uses shared functions
 
 // Keep filters expanded after selection
 function applyFiltersAndKeepOpen() {
-  window.applyFiltersAndKeepState('parts', 'parts-filter-state');
+  window.applyFiltersAndKeepState('problems', 'problems-filter-state');
 }
 
-// Initialize parts page
+// Initialize problems page
 document.addEventListener("DOMContentLoaded", () => {
   // Use shared table page initialization
   window.initializeTablePage({
-    pagePrefix: 'parts',
-    tableId: 'parts',
-    tableInstanceGlobal: 'partsTableInstance',
+    pagePrefix: 'problems',
+    tableId: 'problems',
+    tableInstanceGlobal: 'problemsTableInstance',
     sortColumnMap: {
       'name': 1,
       'color': 2,
@@ -24,4 +24,3 @@ document.addEventListener("DOMContentLoaded", () => {
     hasColorDropdown: true
   });
 });
-

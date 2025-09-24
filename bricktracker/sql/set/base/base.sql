@@ -49,3 +49,7 @@ ORDER BY {{ order }}
 {% if limit %}
 LIMIT {{ limit }}
 {% endif %}
+
+{% if offset %}
+OFFSET {{ offset }}
+{% endif %}

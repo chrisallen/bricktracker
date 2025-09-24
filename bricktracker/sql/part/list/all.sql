@@ -27,8 +27,19 @@ AND "bricktracker_parts"."figure" IS NOT DISTINCT FROM "bricktracker_minifigures
 {% endblock %}
 
 {% block where %}
+{% set conditions = [] %}
 {% if color_id and color_id != 'all' %}
-WHERE "bricktracker_parts"."color" = {{ color_id }}
+  {% set _ = conditions.append('"bricktracker_parts"."color" = ' ~ color_id) %}
+{% endif %}
+{% if search_query %}
+  {% set search_condition = '(LOWER("rebrickable_parts"."name") LIKE LOWER(\'%' ~ search_query ~ '%\') OR LOWER("rebrickable_parts"."color_name") LIKE LOWER(\'%' ~ search_query ~ '%\') OR LOWER("bricktracker_parts"."part") LIKE LOWER(\'%' ~ search_query ~ '%\'))' %}
+  {% set _ = conditions.append(search_condition) %}
+{% endif %}
+{% if skip_spare_parts %}
+  {% set _ = conditions.append('"bricktracker_parts"."spare" = 0') %}
+{% endif %}
+{% if conditions %}
+WHERE {{ conditions | join(' AND ') }}
 {% endif %}
 {% endblock %}
 

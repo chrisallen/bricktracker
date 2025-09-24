@@ -78,3 +78,25 @@
         linear-gradient(336deg, rgb(0 0 255 / 80%), rgb(0 0 255 / 0%) 70.71%)
     ;
 }
+
+/* Mobile Pagination Fixes */
+.mobile-pagination {
+    display: flex !important;
+    width: 100% !important;
+    gap: 2px;
+}
+
+.mobile-pagination .btn:first-child,
+.mobile-pagination .btn:last-child {
+    flex: 0 0 auto;
+    min-width: 90px;
+    max-width: 120px;
+}
+
+.mobile-pagination .btn:nth-child(2) {
+    flex: 1 1 auto;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}

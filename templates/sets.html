@@ -3,14 +3,14 @@
 {% block title %} - All sets{% endblock %}
 
 {% block main %}
-{% if collection | length %}
+{% if collection | length or use_pagination %}
 <div class="container-fluid">
   <div class="row row-cols-lg-auto g-1 justify-content-center align-items-center pb-2">
     <div class="col-12 flex-grow-1">
       <label class="visually-hidden" for="grid-search">Search</label>
       <div class="input-group">
         <span class="input-group-text"><i class="ri-search-line"></i><span class="ms-1 d-none d-md-inline"> Search</span></span>
-        <input id="grid-search" data-search-exact="name,number,parts,searchPurchaseLocation,searchStorage,theme,year" data-search-list="searchOwner,searchTag" class="form-control form-control-sm px-1" type="text" placeholder="Set, name, number of parts, theme, year, owner, purchase location, storage, tag" value="">
+        <input id="grid-search" {% if not use_pagination %}data-search-exact="name,number,parts,searchPurchaseLocation,searchStorage,theme,year" data-search-list="searchOwner,searchTag"{% endif %} class="form-control form-control-sm px-1" type="text" placeholder="Set, name, number of parts, theme, year{% if not use_pagination %}, owner, purchase location, storage, tag{% endif %}" value="{{ search_query or '' }}">
         <button id="grid-search-clear" type="button" class="btn btn-light btn-outline-danger border"><i class="ri-eraser-line"></i></button>
       </div>
     </div>
@@ -19,10 +19,6 @@
         <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#grid-sort" aria-expanded="{% if config['SHOW_GRID_SORT'] %}true{% else %}false{% endif %}" aria-controls="grid-sort">
           <i class="ri-sort-asc"></i> Sort
         </button>
-      </div>
-    </div>
-    <div class="col-12">
-      <div class="input-group">
         <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#grid-filter" aria-expanded="{% if config['SHOW_GRID_FILTERS'] %}true{% else %}false{% endif %}" aria-controls="grid-filter">
           <i class="ri-filter-line"></i> Filters
         </button>
@@ -31,6 +27,131 @@
   </div>
   {% include 'set/sort.html' %}
   {% include 'set/filter.html' %}
+
+  {% if use_pagination %}
+  <!-- PAGINATION MODE -->
+  <div class="row" data-grid="false" id="grid">
+  {% for item in collection %}
+    <div class="col-md-6 col-xl-3 d-flex align-items-stretch">
+      {% with index=loop.index0 %}
+        {% include 'set/card.html' %}
+      {% endwith %}
+    </div>
+  {% endfor %}
+  </div>
+
+  <!-- Pagination -->
+  <div>
+    {% if pagination and pagination.total_pages > 1 %}
+    <div class="row mt-4">
+      <div class="col-12">
+      <!-- Desktop Pagination -->
+      <div class="d-none d-md-block">
+        <nav aria-label="Sets pagination">
+          <ul class="pagination justify-content-center">
+            {% if pagination.has_prev %}
+              <li class="page-item">
+                <a class="page-link" href="{{ request.url | replace_query('page', pagination.page - 1) }}">
+                  <i class="ri-arrow-left-line"></i> Previous
+                </a>
+              </li>
+            {% endif %}
+
+            <!-- Show page numbers (with smart truncation) -->
+            {% set start_page = [1, pagination.page - 2] | max %}
+            {% set end_page = [pagination.total_pages, pagination.page + 2] | min %}
+
+            {% if start_page > 1 %}
+              <li class="page-item">
+                <a class="page-link" href="{{ request.url | replace_query('page', 1) }}">1</a>
+              </li>
+              {% if start_page > 2 %}
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+              {% endif %}
+            {% endif %}
+
+            {% for page_num in range(start_page, end_page + 1) %}
+              {% if page_num == pagination.page %}
+                <li class="page-item active">
+                  <span class="page-link">{{ page_num }}</span>
+                </li>
+              {% else %}
+                <li class="page-item">
+                  <a class="page-link" href="{{ request.url | replace_query('page', page_num) }}">{{ page_num }}</a>
+                </li>
+              {% endif %}
+            {% endfor %}
+
+            {% if end_page < pagination.total_pages %}
+              {% if end_page < pagination.total_pages - 1 %}
+                <li class="page-item disabled"><span class="page-link">...</span></li>
+              {% endif %}
+              <li class="page-item">
+                <a class="page-link" href="{{ request.url | replace_query('page', pagination.total_pages) }}">{{ pagination.total_pages }}</a>
+              </li>
+            {% endif %}
+
+            {% if pagination.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="{{ request.url | replace_query('page', pagination.page + 1) }}">
+                  Next <i class="ri-arrow-right-line"></i>
+                </a>
+              </li>
+            {% endif %}
+          </ul>
+        </nav>
+      </div>
+
+      <!-- Mobile Pagination -->
+      <div class="d-md-none">
+        <div class="mobile-pagination" role="group" aria-label="Mobile pagination">
+          {% if pagination.has_prev %}
+            <a href="{{ request.url | replace_query('page', pagination.page - 1) }}"
+               class="btn btn-outline-primary">
+              <i class="ri-arrow-left-line"></i> Previous
+            </a>
+          {% else %}
+            <button class="btn btn-outline-secondary" disabled>
+              <i class="ri-arrow-left-line"></i> Previous
+            </button>
+          {% endif %}
+
+          <span class="btn btn-light">
+            Page {{ pagination.page }} of {{ pagination.total_pages }}
+          </span>
+
+          {% if pagination.has_next %}
+            <a href="{{ request.url | replace_query('page', pagination.page + 1) }}"
+               class="btn btn-outline-primary">
+              Next <i class="ri-arrow-right-line"></i>
+            </a>
+          {% else %}
+            <button class="btn btn-outline-secondary" disabled>
+              Next <i class="ri-arrow-right-line"></i>
+            </button>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Results Info -->
+      <div class="text-center mt-3">
+        <small class="text-muted">
+          {% if pagination.total_count > 0 %}
+            Showing {{ ((pagination.page - 1) * pagination.per_page + 1) }} to
+            {{ [pagination.page * pagination.per_page, pagination.total_count] | min }}
+            of {{ pagination.total_count }} sets
+          {% else %}
+            No sets found
+          {% endif %}
+        </small>
+      </div>
+    </div>
+    </div>
+    {% endif %}
+  </div>
+
+  {% else %}
+  <!-- ORIGINAL MODE - Single page with client-side search and filters -->
   <div class="row" data-grid="true" id="grid">
   {% for item in collection %}
     <div class="col-md-6 col-xl-3 d-flex align-items-stretch">
@@ -40,6 +161,8 @@
     </div>
   {% endfor %}
   </div>
+  {% endif %}
+
 </div>
 {% else %}
   {% include 'set/empty.html' %}

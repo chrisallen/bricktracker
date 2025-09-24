@@ -19,17 +19,24 @@ class BrickWishList(BrickRecordList[BrickWish]):
     # Queries
     select_query: str = 'wish/list/all'
 
-    # All the wished sets
-    def all(self, /) -> Self:
+    # Implementation of abstract list method
+    def list(self, /, *, override_query: str | None = None, **context) -> None:
+        # Use provided order or default
+        order = context.pop('order', current_app.config['WISHES_DEFAULT_ORDER'])
+
         # Load the wished sets from the database
         for record in self.select(
-            order=current_app.config['WISHES_DEFAULT_ORDER'],
+            override_query=override_query,
+            order=order,
             owners=BrickWishOwnerList.as_columns(),
+            **context
         ):
             brickwish = BrickWish(record=record)
-
             self.records.append(brickwish)
 
+    # All the wished sets
+    def all(self, /) -> Self:
+        self.list()
         return self
 
     # Add a set to the wishlist
