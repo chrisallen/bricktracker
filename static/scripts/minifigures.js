@@ -112,113 +112,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Setup sort buttons for both modes
   setupSortButtons();
+
+  // Initialize sort button states and icons for pagination mode
+  if (isPaginationMode()) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentSort = urlParams.get('sort');
+    const currentOrder = urlParams.get('order');
+    window.initializeSortButtonStates(currentSort, currentOrder);
+  }
 });
 
 function setupSortButtons() {
-  // Sort button functionality
-  const sortButtons = document.querySelectorAll('[data-sort-attribute]');
-  const clearButton = document.querySelector('[data-sort-clear]');
-
-  sortButtons.forEach(button => {
-    button.addEventListener('click', () => {
-      const attribute = button.dataset.sortAttribute;
-      const isDesc = button.dataset.sortDesc === 'true';
-
-      if (isPaginationMode()) {
-        // PAGINATION MODE - Server-side sorting
-        const currentUrl = new URL(window.location);
-        const currentSort = currentUrl.searchParams.get('sort');
-        const currentOrder = currentUrl.searchParams.get('order');
-
-        // Determine new sort direction
-        let newOrder = isDesc ? 'desc' : 'asc';
-        if (currentSort === attribute) {
-          // Toggle direction if clicking the same column
-          newOrder = currentOrder === 'asc' ? 'desc' : 'asc';
-        }
-
-        currentUrl.searchParams.set('sort', attribute);
-        currentUrl.searchParams.set('order', newOrder);
-
-        // Reset to page 1 when sorting
-        currentUrl.searchParams.set('page', '1');
-        window.location.href = currentUrl.toString();
-
-      } else {
-        // ORIGINAL MODE - Client-side sorting with Simple DataTables
-        const columnMap = {
-          'name': 1,
-          'parts': 2,
-          'quantity': 3,
-          'missing': 4,  // Only if visible
-          'damaged': 5,  // Only if visible, adjust based on missing column
-          'sets': 6      // Adjust based on visible columns
-        };
-
-        const columnIndex = columnMap[attribute];
-        if (columnIndex !== undefined && window.brickTableInstance) {
-          // Determine sort direction
-          const isCurrentlyActive = button.classList.contains('btn-primary');
-          const currentDirection = button.dataset.currentDirection || (isDesc ? 'desc' : 'asc');
-          const newDirection = isCurrentlyActive ?
-            (currentDirection === 'asc' ? 'desc' : 'asc') :
-            (isDesc ? 'desc' : 'asc');
-
-          // Clear other active buttons
-          sortButtons.forEach(btn => {
-            btn.classList.remove('btn-primary');
-            btn.classList.add('btn-outline-primary');
-            btn.removeAttribute('data-current-direction');
-          });
-
-          // Mark this button as active
-          button.classList.remove('btn-outline-primary');
-          button.classList.add('btn-primary');
-          button.dataset.currentDirection = newDirection;
-
-          // Apply sort using Simple DataTables API
-          window.brickTableInstance.table.columns.sort(columnIndex, newDirection);
-        }
-      }
-    });
-  });
-
-  if (clearButton) {
-    clearButton.addEventListener('click', () => {
-      if (isPaginationMode()) {
-        // PAGINATION MODE - Clear server-side sorting
-        const currentUrl = new URL(window.location);
-        currentUrl.searchParams.delete('sort');
-        currentUrl.searchParams.delete('order');
-        currentUrl.searchParams.set('page', '1');
-        window.location.href = currentUrl.toString();
-
-      } else {
-        // ORIGINAL MODE - Clear client-side sorting
-        // Clear all sort buttons
-        sortButtons.forEach(btn => {
-          btn.classList.remove('btn-primary');
-          btn.classList.add('btn-outline-primary');
-          btn.removeAttribute('data-current-direction');
-        });
-
-        // Reset table sort - remove all sorting
-        if (window.brickTableInstance) {
-          // Destroy and recreate to clear sorting
-          const tableElement = document.querySelector('#minifigures');
-          const currentPerPage = window.brickTableInstance.table.options.perPage;
-          window.brickTableInstance.table.destroy();
-
-          setTimeout(() => {
-            // Create new instance using the globally available BrickTable class
-            const newInstance = new window.BrickTable(tableElement, currentPerPage);
-            window.brickTableInstance = newInstance;
-
-            // Re-enable search functionality
-            newInstance.table.searchable = true;
-          }, 50);
-        }
-      }
-    });
-  }
+  const columnMap = {
+    'name': 1,
+    'parts': 2,
+    'quantity': 3,
+    'missing': 4,
+    'damaged': 5,
+    'sets': 6
+  };
+  // Use shared sort buttons setup from collapsible-state.js
+  window.setupSharedSortButtons('minifigures', 'brickTableInstance', columnMap);
 }

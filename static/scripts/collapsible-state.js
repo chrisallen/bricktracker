@@ -37,6 +37,14 @@ function initializeCollapsibleState(elementId, storageKey) {
 function initializePageCollapsibleStates(pagePrefix, filterElementId = 'table-filter', sortElementId = 'table-sort') {
   initializeCollapsibleState(filterElementId, `${pagePrefix}-filter-state`);
   initializeCollapsibleState(sortElementId, `${pagePrefix}-sort-state`);
+
+  // Initialize sort icons based on current URL parameters (for all pages)
+  const urlParams = new URLSearchParams(window.location.search);
+  const currentSort = urlParams.get('sort');
+  const currentOrder = urlParams.get('order');
+  if (currentSort || currentOrder) {
+    updateSortIcon(currentOrder);
+  }
 }
 
 // Shared function to preserve filter state during filter changes
@@ -75,6 +83,48 @@ function isPaginationModeForTable(tableId) {
   const tableElement = document.querySelector(`#${tableId}`);
   return tableElement && tableElement.getAttribute('data-table') === 'false';
 }
+
+// Update sort icon based on current sort direction
+function updateSortIcon(sortDirection = null) {
+  // Find the main sort icon (could be in grid-sort or table-sort)
+  const sortIcon = document.querySelector('#grid-sort .ri-sort-asc, #grid-sort .ri-sort-desc, #table-sort .ri-sort-asc, #table-sort .ri-sort-desc');
+
+  if (!sortIcon) return;
+
+  // Remove existing sort classes
+  sortIcon.classList.remove('ri-sort-asc', 'ri-sort-desc');
+
+  // Add appropriate class based on sort direction
+  if (sortDirection === 'desc') {
+    sortIcon.classList.add('ri-sort-desc');
+  } else {
+    sortIcon.classList.add('ri-sort-asc');
+  }
+}
+
+// Initialize sort button states and icons for pagination mode
+window.initializeSortButtonStates = function(currentSort, currentOrder) {
+  const sortButtons = document.querySelectorAll('[data-sort-attribute]');
+
+  // Update main sort icon
+  updateSortIcon(currentOrder);
+
+  if (currentSort) {
+    sortButtons.forEach(btn => {
+      // Clear all buttons first
+      btn.classList.remove('btn-primary');
+      btn.classList.add('btn-outline-primary');
+      btn.removeAttribute('data-current-direction');
+
+      // Set active state for current sort
+      if (btn.dataset.sortAttribute === currentSort) {
+        btn.classList.remove('btn-outline-primary');
+        btn.classList.add('btn-primary');
+        btn.dataset.currentDirection = currentOrder || 'asc';
+      }
+    });
+  }
+};
 
 // Shared sort button setup function
 window.setupSharedSortButtons = function(tableId, tableInstanceGlobal, columnMap) {
@@ -138,6 +188,9 @@ window.setupSharedSortButtons = function(tableId, tableInstanceGlobal, columnMap
 
           // Apply sort using Simple DataTables API
           tableInstance.table.columns.sort(columnIndex, newDirection);
+
+          // Update sort icon to reflect new direction
+          updateSortIcon(newDirection);
         }
       }
     });
@@ -162,6 +215,9 @@ window.setupSharedSortButtons = function(tableId, tableInstanceGlobal, columnMap
           btn.removeAttribute('data-current-direction');
         });
 
+        // Reset sort icon to default ascending
+        updateSortIcon('asc');
+
         // Reset table sort - remove all sorting
         const tableInstance = window[tableInstanceGlobal];
         if (tableInstance) {
@@ -180,5 +236,164 @@ window.setupSharedSortButtons = function(tableId, tableInstanceGlobal, columnMap
         }
       }
     });
+  }
+};
+
+// =================================================================
+// SHARED FUNCTIONS FOR PAGE-SPECIFIC OPERATIONS
+// =================================================================
+
+// Shared pagination mode detection (works for any table/grid ID)
+window.isPaginationModeForPage = function(elementId, attributeName = 'data-table') {
+  const element = document.querySelector(`#${elementId}`);
+  return element && element.getAttribute(attributeName) === 'false';
+};
+
+// Shared URL parameter update helper
+window.updateUrlParams = function(params, resetPage = true) {
+  const currentUrl = new URL(window.location);
+
+  // Apply parameter updates
+  Object.entries(params).forEach(([key, value]) => {
+    if (value === null || value === undefined || value === '' || value === 'all') {
+      currentUrl.searchParams.delete(key);
+    } else {
+      currentUrl.searchParams.set(key, value);
+    }
+  });
+
+  // Reset to page 1 if requested
+  if (resetPage) {
+    currentUrl.searchParams.set('page', '1');
+  }
+
+  // Navigate to updated URL
+  window.location.href = currentUrl.toString();
+};
+
+// Shared filter application (supports owner and color filters)
+window.applyPageFilters = function(tableId) {
+  const ownerSelect = document.getElementById('filter-owner');
+  const colorSelect = document.getElementById('filter-color');
+  const params = {};
+
+  // Handle owner filter
+  if (ownerSelect) {
+    params.owner = ownerSelect.value;
+  }
+
+  // Handle color filter
+  if (colorSelect) {
+    params.color = colorSelect.value;
+  }
+
+  // Update URL with new parameters
+  window.updateUrlParams(params, true);
+};
+
+// Shared search setup for both pagination and client-side modes
+window.setupPageSearch = function(tableId, searchInputId, clearButtonId, tableInstanceGlobal) {
+  const searchInput = document.getElementById(searchInputId);
+  const searchClear = document.getElementById(clearButtonId);
+
+  if (!searchInput || !searchClear) return;
+
+  const isPaginationMode = window.isPaginationModeForPage(tableId);
+
+  if (isPaginationMode) {
+    // PAGINATION MODE - Server-side search with Enter key
+    searchInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const searchValue = e.target.value.trim();
+        window.updateUrlParams({ search: searchValue }, true);
+      }
+    });
+
+    // Clear search
+    searchClear.addEventListener('click', () => {
+      searchInput.value = '';
+      window.updateUrlParams({ search: null }, true);
+    });
+
+  } else {
+    // ORIGINAL MODE - Client-side instant search via Simple DataTables
+    const setupClientSearch = () => {
+      const tableElement = document.querySelector(`table[data-table="true"]#${tableId}`);
+      const tableInstance = window[tableInstanceGlobal];
+
+      if (tableElement && tableInstance) {
+        // Enable search functionality
+        tableInstance.table.searchable = true;
+
+        // Instant search as user types
+        searchInput.addEventListener('input', (e) => {
+          const searchValue = e.target.value.trim();
+          tableInstance.table.search(searchValue);
+        });
+
+        // Clear search
+        searchClear.addEventListener('click', () => {
+          searchInput.value = '';
+          tableInstance.table.search('');
+        });
+      } else {
+        // If table instance not ready, try again
+        setTimeout(setupClientSearch, 100);
+      }
+    };
+
+    setTimeout(setupClientSearch, 100);
+  }
+};
+
+// Shared function to preserve filter state and apply filters
+window.applyFiltersAndKeepState = function(tableId, storageKey) {
+  const filterElement = document.getElementById('table-filter');
+  const wasOpen = filterElement && filterElement.classList.contains('show');
+
+  // Apply the filters
+  window.applyPageFilters(tableId);
+
+  // Store the state to restore after page reload
+  if (wasOpen) {
+    sessionStorage.setItem(storageKey, 'open');
+  }
+};
+
+// Shared initialization for table pages (parts, problems, minifigures)
+window.initializeTablePage = function(config) {
+  const {
+    pagePrefix,         // e.g., 'parts', 'problems', 'minifigures'
+    tableId,           // e.g., 'parts', 'problems', 'minifigures'
+    searchInputId = 'table-search',
+    clearButtonId = 'table-search-clear',
+    tableInstanceGlobal, // e.g., 'partsTableInstance', 'problemsTableInstance'
+    sortColumnMap,      // Column mapping for sort buttons
+    hasColorDropdown = true
+  } = config;
+
+  // Initialize collapsible states (filter and sort)
+  initializePageCollapsibleStates(pagePrefix);
+
+  // Setup search functionality
+  window.setupPageSearch(tableId, searchInputId, clearButtonId, tableInstanceGlobal);
+
+  // Setup color dropdown if needed
+  if (hasColorDropdown) {
+    setupColorDropdown();
+  }
+
+  // Setup sort buttons with shared functionality
+  if (sortColumnMap) {
+    window.setupSharedSortButtons(tableId, tableInstanceGlobal, sortColumnMap);
+  }
+
+  // Initialize sort button states and icons for pagination mode
+  if (window.isPaginationModeForPage(tableId)) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentSort = urlParams.get('sort');
+    const currentOrder = urlParams.get('order');
+    window.initializeSortButtonStates(currentSort, currentOrder);
   }
 };
