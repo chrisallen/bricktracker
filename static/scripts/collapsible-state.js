@@ -63,14 +63,57 @@ function setupColorDropdown() {
   const colorSelect = document.getElementById('filter-color');
   if (!colorSelect) return;
 
-  // Add color squares to option text
-  const options = colorSelect.querySelectorAll('option[data-color-rgb]');
-  options.forEach(option => {
+  // Merge duplicate color options where one has color_rgb and the other is None
+  const colorMap = new Map();
+  const allOptions = colorSelect.querySelectorAll('option[data-color-id]');
+
+  // First pass: collect all options by color_id
+  allOptions.forEach(option => {
+    const colorId = option.dataset.colorId;
+    const colorRgb = option.dataset.colorRgb;
+    const colorName = option.textContent.trim();
+
+    if (!colorMap.has(colorId)) {
+      colorMap.set(colorId, []);
+    }
+    colorMap.get(colorId).push({
+      element: option,
+      colorRgb: colorRgb,
+      colorName: colorName,
+      selected: option.selected
+    });
+  });
+
+  // Second pass: merge duplicates, keeping the one with color_rgb
+  colorMap.forEach((options, colorId) => {
+    if (options.length > 1) {
+      // Find option with color_rgb (not empty/null/undefined)
+      const withRgb = options.find(opt => opt.colorRgb && opt.colorRgb !== 'None' && opt.colorRgb !== '');
+      const withoutRgb = options.find(opt => !opt.colorRgb || opt.colorRgb === 'None' || opt.colorRgb === '');
+
+      if (withRgb && withoutRgb) {
+        // Keep the selected state from either option
+        const wasSelected = withRgb.selected || withoutRgb.selected;
+
+        // Update the option with RGB to be selected if either was selected
+        if (wasSelected) {
+          withRgb.element.selected = true;
+        }
+
+        // Remove the option without RGB
+        withoutRgb.element.remove();
+      }
+    }
+  });
+
+  // Add color squares to remaining option text
+  const remainingOptions = colorSelect.querySelectorAll('option[data-color-rgb]');
+  remainingOptions.forEach(option => {
     const colorRgb = option.dataset.colorRgb;
     const colorId = option.dataset.colorId;
     const colorName = option.textContent.trim();
 
-    if (colorRgb && colorId !== '9999') {
+    if (colorRgb && colorRgb !== 'None' && colorRgb !== '' && colorId !== '9999') {
       // Create a visual indicator (using Unicode square)
       option.textContent = `${colorName}`; //■
       //option.style.color = `#${colorRgb}`;
