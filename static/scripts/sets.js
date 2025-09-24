@@ -68,6 +68,12 @@ document.addEventListener("DOMContentLoaded", () => {
       // Setup filter dropdowns for pagination mode
       setupPaginationFilterDropdowns();
 
+      // Initialize sort button states and icons for pagination mode
+      const urlParams = new URLSearchParams(window.location.search);
+      const currentSort = urlParams.get('sort');
+      const currentOrder = urlParams.get('order');
+      window.initializeSortButtonStates(currentSort, currentOrder);
+
     } else {
       // ORIGINAL MODE - Grid search functionality is handled by existing grid scripts
       // No additional setup needed here
@@ -100,6 +106,9 @@ function setupPaginationSortButtons() {
       currentUrl.searchParams.set('sort', attribute);
       currentUrl.searchParams.set('order', newOrder);
 
+      // Update sort icon immediately before navigation
+      updateSortIcon(newOrder);
+
       // Reset to page 1 when sorting
       currentUrl.searchParams.set('page', '1');
       window.location.href = currentUrl.toString();
@@ -112,6 +121,10 @@ function setupPaginationSortButtons() {
       const currentUrl = new URL(window.location);
       currentUrl.searchParams.delete('sort');
       currentUrl.searchParams.delete('order');
+
+      // Reset sort icon to default ascending
+      updateSortIcon('asc');
+
       currentUrl.searchParams.set('page', '1');
       window.location.href = currentUrl.toString();
     });
