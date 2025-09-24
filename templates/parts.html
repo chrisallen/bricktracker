@@ -37,7 +37,7 @@
   {% if use_pagination %}
   <!-- PAGINATION MODE -->
   <div class="table-responsive-sm">
-    <table data-table="false" class="table table-striped align-middle sortable mb-0" id="parts">
+    <table data-table="false" class="table table-striped align-middle mb-0" id="parts">
       {{ table.header(color=true, quantity=not no_quantity, sets=true, minifigures=true) }}
       {% with all=true %}
         {% include 'part/table_body.html' %}
