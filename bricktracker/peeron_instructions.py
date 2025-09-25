@@ -1,10 +1,14 @@
+import hashlib
 import logging
+import os
+from pathlib import Path
+import time
 from typing import Any, NamedTuple, TYPE_CHECKING
 from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
 import cloudscraper
-from flask import current_app
+from flask import current_app, url_for
 import requests
 
 from .exceptions import ErrorException
@@ -57,10 +61,105 @@ def create_peeron_scraper():
     return scraper
 
 
+def get_thumbnail_cache_dir():
+    """Get the directory for thumbnail caching"""
+    static_dir = Path(current_app.static_folder)
+    cache_dir = static_dir / 'images' / 'peeron_cache'
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    return cache_dir
+
+
+def get_cached_thumbnail_filename(thumbnail_url: str) -> str:
+    """Generate a filename for caching thumbnails based on URL"""
+    # Create hash of the URL to avoid filename issues
+    url_hash = hashlib.md5(thumbnail_url.encode()).hexdigest()
+    # Extract file extension from URL, default to .jpg
+    ext = '.jpg'
+    if '.' in thumbnail_url:
+        url_ext = '.' + thumbnail_url.split('.')[-1].lower()
+        if url_ext in ['.jpg', '.jpeg', '.png', '.gif']:
+            ext = url_ext
+    return f"{url_hash}{ext}"
+
+
+def cache_thumbnail(thumbnail_url: str) -> str | None:
+    """
+    Download and cache a thumbnail image, return the local URL path.
+    Returns None if caching fails.
+    """
+    try:
+        cache_dir = get_thumbnail_cache_dir()
+        filename = get_cached_thumbnail_filename(thumbnail_url)
+        cache_path = cache_dir / filename
+
+        # Return existing cached file if it exists
+        if cache_path.exists():
+            return url_for('static', filename=f'images/peeron_cache/{filename}')
+
+        # Download the thumbnail
+        scraper = create_peeron_scraper()
+        response = scraper.get(thumbnail_url, timeout=10)
+
+        if response.status_code == 200 and len(response.content) > 0:
+            # Validate it's actually an image by checking minimum size
+            min_size = get_min_image_size()
+            if len(response.content) < min_size:
+                logger.warning(f"Thumbnail too small, skipping cache: {thumbnail_url}")
+                return None
+
+            # Write to cache
+            with open(cache_path, 'wb') as f:
+                f.write(response.content)
+
+            logger.debug(f"Cached thumbnail: {thumbnail_url} -> {cache_path}")
+            return url_for('static', filename=f'images/peeron_cache/{filename}')
+        else:
+            logger.warning(f"Failed to download thumbnail: {thumbnail_url}")
+            return None
+
+    except Exception as e:
+        logger.error(f"Error caching thumbnail {thumbnail_url}: {e}")
+        return None
+
+
+def clear_thumbnail_cache(max_age_days: int = 30) -> int:
+    """
+    Clear old thumbnail cache files.
+    Returns the number of files deleted.
+    """
+    try:
+        cache_dir = get_thumbnail_cache_dir()
+        if not cache_dir.exists():
+            return 0
+
+        deleted_count = 0
+        max_age_seconds = max_age_days * 24 * 60 * 60
+        current_time = time.time()
+
+        for cache_file in cache_dir.glob('*'):
+            if cache_file.is_file():
+                file_age = current_time - os.path.getmtime(cache_file)
+                if file_age > max_age_seconds:
+                    try:
+                        cache_file.unlink()
+                        deleted_count += 1
+                        logger.debug(f"Deleted old cache file: {cache_file}")
+                    except OSError as e:
+                        logger.warning(f"Failed to delete cache file {cache_file}: {e}")
+
+        logger.info(f"Thumbnail cache cleanup completed: {deleted_count} files deleted")
+        return deleted_count
+
+    except Exception as e:
+        logger.error(f"Error during cache cleanup: {e}")
+        return 0
+
+
 class PeeronPage(NamedTuple):
     """Represents a single instruction page from Peeron"""
     page_number: str
     thumbnail_url: str
+    cached_thumbnail_url: str | None  # Local cached thumbnail URL
     image_url: str
     alt_text: str
     rotation: int = 0  # Rotation in degrees (0, 90, 180, 270)
@@ -156,9 +255,13 @@ class PeeronInstructions(object):
             # Create alt text for the page
             alt_text = f"LEGO Instructions {self.set_number}-{self.version_number} Page {page_number}"
 
+            # Cache the thumbnail
+            cached_thumb_url = cache_thumbnail(thumb_url)
+
             page = PeeronPage(
                 page_number=page_number,
                 thumbnail_url=thumb_url,
+                cached_thumbnail_url=cached_thumb_url,
                 image_url=image_url,
                 alt_text=alt_text
             )

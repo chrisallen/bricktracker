@@ -57,7 +57,7 @@
                             <label class="form-check-label w-100" for="peeron-page-{{ loop.index }}">
                               <div class="text-center position-relative">
                                 <div class="position-relative d-inline-block">
-                                  <img id="peeron-img-{{ loop.index }}" src="{{ page.thumbnail_url }}" alt="{{ page.alt_text }}"
+                                  <img id="peeron-img-{{ loop.index }}" src="{{ page.cached_thumbnail_url or page.thumbnail_url }}" alt="{{ page.alt_text }}"
                                        class="img-fluid mb-2 border rounded" style="max-height: 150px; transform: rotate(0deg); transition: transform 0.3s ease;">
                                   <button type="button" class="btn btn-sm btn-light position-absolute top-0 end-0 p-1 me-1 mt-1 peeron-rotate-btn"
                                           data-target="peeron-img-{{ loop.index }}" data-checkbox="peeron-page-{{ loop.index }}" data-rotation="0"
