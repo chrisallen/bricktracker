@@ -60,7 +60,8 @@ def setup_app(app: Flask) -> None:
     # Setup the login manager
     LoginManager(app)
 
-    # I don't know :-)
+    # Configure proxy header handling for reverse proxy deployments (nginx, Apache, etc.)
+    # This ensures proper client IP detection and HTTPS scheme recognition
     app.wsgi_app = ProxyFix(
         app.wsgi_app,
         x_for=1,

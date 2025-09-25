@@ -56,8 +56,11 @@ class PeeronPDF(object):
 
             # Skip if we already have it
             if os.path.isfile(target_path):
+                # Create BrickInstructions instance to get PDF URL
+                instructions = BrickInstructions(self.filename)
+                pdf_url = instructions.url()
                 return self.socket.complete(
-                    message=f"File {self.filename} already exists, skipped"
+                    message=f'File {self.filename} already exists, skipped - <a href="{pdf_url}" target="_blank" class="btn btn-sm btn-primary ms-2"><i class="ri-external-link-line"></i> Open PDF</a>'
                 )
 
             # Set up progress tracking
@@ -78,8 +81,8 @@ class PeeronPDF(object):
             except Exception as e:
                 logger.warning(f"Failed to visit main page: {e}")
 
-            # Download images to temporary files
-            temp_files = []
+            # Download images to temporary files with rotation info
+            temp_files_with_rotation = []
             failed_pages = []
 
             try:
@@ -91,11 +94,11 @@ class PeeronPDF(object):
 
                     temp_file = self._download_page_image(page, i + 1, scraper)
                     if temp_file:
-                        temp_files.append(temp_file)
+                        temp_files_with_rotation.append((temp_file, page.rotation))
                     else:
                         failed_pages.append(page.page_number)
 
-                if not temp_files:
+                if not temp_files_with_rotation:
                     # Collect detailed error information
                     error_msg = f"Failed to download any instruction pages for set {self.set_number}-{self.version_number}."
 
@@ -116,25 +119,30 @@ class PeeronPDF(object):
 
                     raise DownloadException(error_msg)
 
-                elif len(temp_files) < total_pages:
+                elif len(temp_files_with_rotation) < total_pages:
                     # Partial success
-                    error_msg = f"Only downloaded {len(temp_files)}/{total_pages} pages successfully."
+                    error_msg = f"Only downloaded {len(temp_files_with_rotation)}/{total_pages} pages successfully."
                     if failed_pages:
                         error_msg += f" Failed pages: {', '.join(failed_pages)}."
                     logger.warning(error_msg)
 
-                # Create PDF from downloaded images
-                self._create_pdf_from_images(temp_files, target_path)
+                # Create PDF from downloaded images with rotation
+                self._create_pdf_from_images(temp_files_with_rotation, target_path)
 
                 # Success
-                logger.info(f"Created PDF {self.filename} with {len(temp_files)} pages")
+                logger.info(f"Created PDF {self.filename} with {len(temp_files_with_rotation)} pages")
+
+                # Create BrickInstructions instance to get PDF URL
+                instructions = BrickInstructions(self.filename)
+                pdf_url = instructions.url()
+
                 self.socket.complete(
-                    message=f"PDF {self.filename} created with {len(temp_files)} pages"
+                    message=f'PDF {self.filename} created with {len(temp_files_with_rotation)} pages - <a href="{pdf_url}" target="_blank" class="btn btn-sm btn-primary ms-2"><i class="ri-external-link-line"></i> Open PDF</a>'
                 )
 
             finally:
                 # Cleanup temporary files
-                for temp_file in temp_files:
+                for temp_file, _ in temp_files_with_rotation:
                     try:
                         os.remove(temp_file)
                     except Exception as e:
@@ -219,8 +227,8 @@ class PeeronPDF(object):
             return None
 
     # Create PDF from downloaded images
-    def _create_pdf_from_images(self, image_paths: list[str], output_path: str, /) -> None:
-        """Create a PDF from a list of image files"""
+    def _create_pdf_from_images(self, image_paths_and_rotations: list[tuple[str, int]], output_path: str, /) -> None:
+        """Create a PDF from a list of image files with their rotations"""
         try:
             # Import FPDF (should be available from requirements)
             from fpdf import FPDF
@@ -229,22 +237,44 @@ class PeeronPDF(object):
 
         pdf = FPDF()
 
-        for i, img_path in enumerate(image_paths):
+        for i, (img_path, rotation) in enumerate(image_paths_and_rotations):
             try:
-                # Open image to get dimensions
+                # Open image and apply rotation if needed
                 with Image.open(img_path) as image:
+                    # Apply rotation if specified
+                    if rotation != 0:
+                        # PIL rotation is counter-clockwise, so we negate for clockwise rotation
+                        image = image.rotate(-rotation, expand=True)
+
                     width, height = image.size
 
-                # Add page with image dimensions (convert pixels to mm)
-                # 1 pixel = 0.264583 mm (assuming 96 DPI)
-                page_width = width * 0.264583
-                page_height = height * 0.264583
+                    # Add page with image dimensions (convert pixels to mm)
+                    # 1 pixel = 0.264583 mm (assuming 96 DPI)
+                    page_width = width * 0.264583
+                    page_height = height * 0.264583
 
-                pdf.add_page(format=(page_width, page_height))
-                pdf.image(img_path, x=0, y=0, w=page_width, h=page_height)
+                    pdf.add_page(format=(page_width, page_height))
+
+                    # Save rotated image to temporary file for FPDF
+                    temp_rotated_path = None
+                    if rotation != 0:
+                        import tempfile
+                        temp_fd, temp_rotated_path = tempfile.mkstemp(suffix='.jpg', prefix=f'peeron_rotated_{i}_')
+                        try:
+                            os.close(temp_fd)  # Close file descriptor, we'll use the path
+                            image.save(temp_rotated_path, 'JPEG', quality=95)
+                            pdf.image(temp_rotated_path, x=0, y=0, w=page_width, h=page_height)
+                        finally:
+                            # Clean up rotated temp file
+                            if temp_rotated_path and os.path.exists(temp_rotated_path):
+                                os.remove(temp_rotated_path)
+                    else:
+                        pdf.image(img_path, x=0, y=0, w=page_width, h=page_height)
 
                 # Update progress
-                progress_msg = f"Processing page {i + 1}/{len(image_paths)} into PDF"
+                progress_msg = f"Processing page {i + 1}/{len(image_paths_and_rotations)} into PDF"
+                if rotation != 0:
+                    progress_msg += f" (rotated {rotation}°)"
                 self.socket.progress(message=progress_msg)
 
             except Exception as e:

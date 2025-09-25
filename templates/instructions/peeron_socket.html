@@ -22,30 +22,65 @@ window.addEventListener('load', () => {
         });
       }
 
-      // Add select all button
-      this.add_select_all_button();
+      // Setup select all button (now in template)
+      this.setup_select_all_button();
+
+      // Setup rotation buttons
+      this.setup_rotation_buttons();
 
       // Setup the socket
       this.setup();
     }
 
-    add_select_all_button() {
-      if (this.html_button) {
-        const selectAllButton = document.createElement('button');
-        selectAllButton.type = 'button';
-        selectAllButton.className = 'btn btn-sm btn-outline-secondary me-2';
-        selectAllButton.innerHTML = '<i class="ri-checkbox-multiple-line"></i> Select All';
+    setup_select_all_button() {
+      const selectAllButton = document.getElementById('peeron-select-all');
+      if (selectAllButton) {
         selectAllButton.addEventListener('click', () => {
           const checkboxes = this.get_files();
           const allChecked = checkboxes.every(cb => cb.checked);
           checkboxes.forEach(cb => cb.checked = !allChecked);
-          selectAllButton.innerHTML = allChecked ?
-            '<i class="ri-checkbox-multiple-line"></i> Select All' :
-            '<i class="ri-checkbox-blank-line"></i> Deselect All';
-        });
 
-        this.html_button.parentNode.insertBefore(selectAllButton, this.html_button);
+          // Update button text and icon
+          if (allChecked) {
+            selectAllButton.innerHTML = '<i class="ri-checkbox-multiple-line"></i> Select All';
+          } else {
+            selectAllButton.innerHTML = '<i class="ri-checkbox-blank-line"></i> Deselect All';
+          }
+        });
       }
+    }
+
+    setup_rotation_buttons() {
+      document.querySelectorAll('.peeron-rotate-btn').forEach(button => {
+        button.addEventListener('click', (e) => {
+          e.preventDefault(); // Prevent label click
+          e.stopPropagation(); // Stop event bubbling
+
+          const targetId = button.getAttribute('data-target');
+          const checkboxId = button.getAttribute('data-checkbox');
+          const targetImg = document.getElementById(targetId);
+          const checkbox = document.getElementById(checkboxId);
+
+          if (targetImg && checkbox) {
+            let currentRotation = parseInt(button.getAttribute('data-rotation') || '0');
+            currentRotation = (currentRotation + 90) % 360;
+
+            // Update image rotation
+            targetImg.style.transform = `rotate(${currentRotation}deg)`;
+            button.setAttribute('data-rotation', currentRotation.toString());
+
+            // Store rotation in checkbox data for later use
+            checkbox.setAttribute('data-rotation', currentRotation.toString());
+
+            // Update the rotation icon to indicate current state
+            const icon = button.querySelector('i');
+            if (icon) {
+              // Rotate the icon to match the image rotation
+              icon.style.transform = `rotate(${currentRotation}deg)`;
+            }
+          }
+        });
+      });
     }
 
     complete(data) {
@@ -100,7 +135,8 @@ window.addEventListener('load', () => {
           page_number: checkbox.getAttribute('data-page-number'),
           thumbnail_url: checkbox.getAttribute('data-thumbnail-url'),
           image_url: checkbox.getAttribute('data-image-url'),
-          alt_text: checkbox.getAttribute('data-alt-text')
+          alt_text: checkbox.getAttribute('data-alt-text'),
+          rotation: parseInt(checkbox.getAttribute('data-rotation') || '0')
         }));
 
         this.clear();

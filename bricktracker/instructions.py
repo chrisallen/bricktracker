@@ -101,8 +101,9 @@ class BrickInstructions(object):
 
             # Skip if we already have it
             if os.path.isfile(target):
+                pdf_url = self.url()
                 return self.socket.complete(
-                    message=f"File {self.filename} already exists, skipped"
+                    message=f'File {self.filename} already exists, skipped - <a href="{pdf_url}" target="_blank" class="btn btn-sm btn-primary ms-2"><i class="ri-external-link-line"></i> Open PDF</a>'
                 )
 
             # Fetch PDF via cloudscraper (to bypass Cloudflare)
@@ -141,8 +142,9 @@ class BrickInstructions(object):
 
             # Done!
             logger.info(f"Downloaded {self.filename}")
+            pdf_url = self.url()
             self.socket.complete(
-                message=f"File {self.filename} downloaded ({self.human_size()})"
+                message=f'File {self.filename} downloaded ({self.human_size()}) - <a href="{pdf_url}" target="_blank" class="btn btn-sm btn-primary ms-2"><i class="ri-external-link-line"></i> Open PDF</a>'
             )
 
         except Exception as e:

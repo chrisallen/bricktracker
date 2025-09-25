@@ -144,7 +144,8 @@ class BrickSocket(object):
                         page_number=page_data.get('page_number', ''),
                         thumbnail_url=page_data.get('thumbnail_url', ''),
                         image_url=page_data.get('image_url', ''),
-                        alt_text=page_data.get('alt_text', '')
+                        alt_text=page_data.get('alt_text', ''),
+                        rotation=page_data.get('rotation', 0)
                     )
                     pages.append(page)
 

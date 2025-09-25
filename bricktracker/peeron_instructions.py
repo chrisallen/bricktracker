@@ -63,6 +63,7 @@ class PeeronPage(NamedTuple):
     thumbnail_url: str
     image_url: str
     alt_text: str
+    rotation: int = 0  # Rotation in degrees (0, 90, 180, 270)
 
 
 # Peeron instruction scraper
