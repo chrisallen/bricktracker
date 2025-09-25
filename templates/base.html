@@ -104,6 +104,12 @@
     {% endif %}
     {% if request.endpoint == 'set.list' %}
     <script src="{{ url_for('static', filename='scripts/sets.js') }}"></script>
+{% endif %}
+    {% if request.endpoint == 'set.details' %}
+    <script src="{{ url_for('static', filename='scripts/parts-bulk-operations.js') }}"></script>
+    {% endif %}
+    {% if request.endpoint == 'instructions.download' or request.endpoint == 'instructions.do_download' %}
+    <script src="{{ url_for('static', filename='scripts/socket/peeron.js') }}"></script>
     {% endif %}
     <script type="text/javascript">
       document.addEventListener("DOMContentLoaded", () => {

@@ -58,8 +58,7 @@
                               <div class="text-center position-relative">
                                 <div class="position-relative d-inline-block">
                                   <img id="peeron-img-{{ loop.index }}" src="{{ page.thumbnail_url }}" alt="{{ page.alt_text }}"
-                                       class="img-fluid mb-2 border rounded" style="max-height: 150px; transform: rotate(0deg); transition: transform 0.3s ease;"
-                                       data-dims-target="peeron-dims-{{ loop.index }}">
+                                       class="img-fluid mb-2 border rounded" style="max-height: 150px; transform: rotate(0deg); transition: transform 0.3s ease;">
                                   <button type="button" class="btn btn-sm btn-light position-absolute top-0 end-0 p-1 me-1 mt-1 peeron-rotate-btn"
                                           data-target="peeron-img-{{ loop.index }}" data-checkbox="peeron-page-{{ loop.index }}" data-rotation="0"
                                           title="Rotate page" style="font-size: 0.7rem; line-height: 1;">
@@ -67,7 +66,6 @@
                                   </button>
                                 </div>
                                 <div class="small fw-bold">Page {{ page.page_number }}</div>
-                                <div id="peeron-dims-{{ loop.index }}" class="small text-muted">Loading dimensions...</div>
                               </div>
                             </label>
                           </div>
@@ -102,46 +100,4 @@
     </div>
   </div>
 
-<script>
-// Function to show image dimensions
-function showImageDimensions(img, dimElementId) {
-  const dimElement = document.getElementById(dimElementId);
-  if (dimElement && img.naturalWidth && img.naturalHeight) {
-    dimElement.textContent = `${img.naturalWidth} × ${img.naturalHeight} px`;
-    dimElement.classList.remove('text-muted');
-    dimElement.classList.add('text-info');
-  } else if (dimElement) {
-    dimElement.textContent = 'Dimensions unavailable';
-  }
-}
-
-// Initialize dimensions for all images when page loads
-document.addEventListener('DOMContentLoaded', function() {
-  // Wait for all images to load and then show dimensions
-  const images = document.querySelectorAll('img[data-dims-target]');
-  images.forEach(img => {
-    const targetId = img.getAttribute('data-dims-target');
-
-    // Check if already loaded
-    if (img.complete && img.naturalWidth && img.naturalHeight) {
-      showImageDimensions(img, targetId);
-    } else {
-      // Wait for load
-      img.addEventListener('load', function() {
-        showImageDimensions(this, targetId);
-      });
-
-      // Handle error case
-      img.addEventListener('error', function() {
-        const dimElement = document.getElementById(targetId);
-        if (dimElement) {
-          dimElement.textContent = 'Failed to load';
-          dimElement.classList.remove('text-muted');
-          dimElement.classList.add('text-danger');
-        }
-      });
-    }
-  });
-});
-</script>
 {% endblock %}
