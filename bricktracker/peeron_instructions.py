@@ -61,108 +61,205 @@ def create_peeron_scraper():
     return scraper
 
 
-def get_thumbnail_cache_dir():
-    """Get the directory for thumbnail caching"""
+def get_peeron_cache_dir():
+    """Get the base directory for Peeron caching"""
     static_dir = Path(current_app.static_folder)
     cache_dir = static_dir / 'images' / 'peeron_cache'
     cache_dir.mkdir(parents=True, exist_ok=True)
     return cache_dir
 
 
-def get_cached_thumbnail_filename(thumbnail_url: str) -> str:
-    """Generate a filename for caching thumbnails based on URL"""
-    # Create hash of the URL to avoid filename issues
-    url_hash = hashlib.md5(thumbnail_url.encode()).hexdigest()
-    # Extract file extension from URL, default to .jpg
-    ext = '.jpg'
-    if '.' in thumbnail_url:
-        url_ext = '.' + thumbnail_url.split('.')[-1].lower()
-        if url_ext in ['.jpg', '.jpeg', '.png', '.gif']:
-            ext = url_ext
-    return f"{url_hash}{ext}"
+def get_set_cache_dir(set_number: str, version_number: str) -> tuple[Path, Path]:
+    """Get cache directories for a specific set"""
+    base_cache_dir = get_peeron_cache_dir()
+    set_cache_key = f"{set_number}-{version_number}"
+
+    full_cache_dir = base_cache_dir / 'full' / set_cache_key
+    thumb_cache_dir = base_cache_dir / 'thumbs' / set_cache_key
+
+    full_cache_dir.mkdir(parents=True, exist_ok=True)
+    thumb_cache_dir.mkdir(parents=True, exist_ok=True)
+
+    return full_cache_dir, thumb_cache_dir
 
 
-def cache_thumbnail(thumbnail_url: str) -> str | None:
+def cache_full_image_and_generate_thumbnail(image_url: str, page_number: str, set_number: str, version_number: str, session=None) -> tuple[str | None, str | None]:
     """
-    Download and cache a thumbnail image, return the local URL path.
-    Returns None if caching fails.
+    Download and cache full-size image, then generate a thumbnail preview.
+    Uses the full-size scan URLs from Peeron.
+    Returns (cached_image_path, thumbnail_url) or (None, None) if caching fails.
     """
     try:
-        cache_dir = get_thumbnail_cache_dir()
-        filename = get_cached_thumbnail_filename(thumbnail_url)
-        cache_path = cache_dir / filename
+        full_cache_dir, thumb_cache_dir = get_set_cache_dir(set_number, version_number)
 
-        # Return existing cached file if it exists
-        if cache_path.exists():
-            return url_for('static', filename=f'images/peeron_cache/{filename}')
+        full_filename = f"{page_number}.jpg"
+        thumb_filename = f"{page_number}.jpg"
+        full_cache_path = full_cache_dir / full_filename
+        thumb_cache_path = thumb_cache_dir / thumb_filename
 
-        # Download the thumbnail
-        scraper = create_peeron_scraper()
-        response = scraper.get(thumbnail_url, timeout=10)
+        # Return existing cached files if they exist
+        if full_cache_path.exists() and thumb_cache_path.exists():
+            set_cache_key = f"{set_number}-{version_number}"
+            thumbnail_url = url_for('static', filename=f'images/peeron_cache/thumbs/{set_cache_key}/{thumb_filename}')
+            return str(full_cache_path), thumbnail_url
+
+        # Download the full-size image using provided session or create new one
+        if session is None:
+            session = create_peeron_scraper()
+        response = session.get(image_url, timeout=30)
 
         if response.status_code == 200 and len(response.content) > 0:
             # Validate it's actually an image by checking minimum size
             min_size = get_min_image_size()
             if len(response.content) < min_size:
-                logger.warning(f"Thumbnail too small, skipping cache: {thumbnail_url}")
-                return None
+                logger.warning(f"Image too small, skipping cache: {image_url}")
+                return None, None
 
-            # Write to cache
-            with open(cache_path, 'wb') as f:
+            # Write full-size image to cache
+            with open(full_cache_path, 'wb') as f:
                 f.write(response.content)
 
-            logger.debug(f"Cached thumbnail: {thumbnail_url} -> {cache_path}")
-            return url_for('static', filename=f'images/peeron_cache/{filename}')
+            logger.debug(f"Cached full image: {image_url} -> {full_cache_path}")
+
+            # Generate thumbnail from the cached full image
+            try:
+                from PIL import Image
+                with Image.open(full_cache_path) as img:
+                    # Create thumbnail (max 150px on longest side to match template)
+                    img.thumbnail((150, 150), Image.Resampling.LANCZOS)
+                    img.save(thumb_cache_path, 'JPEG', quality=85)
+
+                logger.debug(f"Generated thumbnail: {full_cache_path} -> {thumb_cache_path}")
+
+                set_cache_key = f"{set_number}-{version_number}"
+                thumbnail_url = url_for('static', filename=f'images/peeron_cache/thumbs/{set_cache_key}/{thumb_filename}')
+                return str(full_cache_path), thumbnail_url
+
+            except Exception as thumb_error:
+                logger.error(f"Failed to generate thumbnail for {page_number}: {thumb_error}")
+                # Clean up the full image if thumbnail generation failed
+                if full_cache_path.exists():
+                    full_cache_path.unlink()
+                return None, None
         else:
-            logger.warning(f"Failed to download thumbnail: {thumbnail_url}")
-            return None
+            logger.warning(f"Failed to download full image: {image_url}")
+            return None, None
 
     except Exception as e:
-        logger.error(f"Error caching thumbnail {thumbnail_url}: {e}")
-        return None
+        logger.error(f"Error caching full image {image_url}: {e}")
+        return None, None
 
 
-def clear_thumbnail_cache(max_age_days: int = 30) -> int:
+def clear_set_cache(set_number: str, version_number: str) -> int:
     """
-    Clear old thumbnail cache files.
+    Clear all cached files for a specific set after PDF generation.
     Returns the number of files deleted.
     """
     try:
-        cache_dir = get_thumbnail_cache_dir()
-        if not cache_dir.exists():
+        full_cache_dir, thumb_cache_dir = get_set_cache_dir(set_number, version_number)
+        deleted_count = 0
+
+        # Delete full images
+        if full_cache_dir.exists():
+            for cache_file in full_cache_dir.glob('*.jpg'):
+                try:
+                    cache_file.unlink()
+                    deleted_count += 1
+                    logger.debug(f"Deleted cached full image: {cache_file}")
+                except OSError as e:
+                    logger.warning(f"Failed to delete cache file {cache_file}: {e}")
+
+            # Remove directory if empty
+            try:
+                full_cache_dir.rmdir()
+            except OSError:
+                pass  # Directory not empty or other error
+
+        # Delete thumbnails
+        if thumb_cache_dir.exists():
+            for cache_file in thumb_cache_dir.glob('*.jpg'):
+                try:
+                    cache_file.unlink()
+                    deleted_count += 1
+                    logger.debug(f"Deleted cached thumbnail: {cache_file}")
+                except OSError as e:
+                    logger.warning(f"Failed to delete cache file {cache_file}: {e}")
+
+            # Remove directory if empty
+            try:
+                thumb_cache_dir.rmdir()
+            except OSError:
+                pass  # Directory not empty or other error
+
+        # Try to remove set directory if empty
+        try:
+            set_cache_key = f"{set_number}-{version_number}"
+            full_cache_dir.parent.rmdir() if full_cache_dir.parent.name == set_cache_key else None
+            thumb_cache_dir.parent.rmdir() if thumb_cache_dir.parent.name == set_cache_key else None
+        except OSError:
+            pass  # Directory not empty or other error
+
+        logger.info(f"Set cache cleanup completed for {set_number}-{version_number}: {deleted_count} files deleted")
+        return deleted_count
+
+    except Exception as e:
+        logger.error(f"Error during set cache cleanup for {set_number}-{version_number}: {e}")
+        return 0
+
+
+def clear_old_cache(max_age_days: int = 7) -> int:
+    """
+    Clear old cache files across all sets.
+    Returns the number of files deleted.
+    """
+    try:
+        base_cache_dir = get_peeron_cache_dir()
+        if not base_cache_dir.exists():
             return 0
 
         deleted_count = 0
         max_age_seconds = max_age_days * 24 * 60 * 60
         current_time = time.time()
 
-        for cache_file in cache_dir.glob('*'):
-            if cache_file.is_file():
-                file_age = current_time - os.path.getmtime(cache_file)
-                if file_age > max_age_seconds:
-                    try:
-                        cache_file.unlink()
-                        deleted_count += 1
-                        logger.debug(f"Deleted old cache file: {cache_file}")
-                    except OSError as e:
-                        logger.warning(f"Failed to delete cache file {cache_file}: {e}")
+        # Clean both full and thumbs directories
+        for cache_type in ['full', 'thumbs']:
+            cache_type_dir = base_cache_dir / cache_type
+            if cache_type_dir.exists():
+                for set_dir in cache_type_dir.iterdir():
+                    if set_dir.is_dir():
+                        for cache_file in set_dir.glob('*.jpg'):
+                            file_age = current_time - os.path.getmtime(cache_file)
+                            if file_age > max_age_seconds:
+                                try:
+                                    cache_file.unlink()
+                                    deleted_count += 1
+                                    logger.debug(f"Deleted old cache file: {cache_file}")
+                                except OSError as e:
+                                    logger.warning(f"Failed to delete cache file {cache_file}: {e}")
 
-        logger.info(f"Thumbnail cache cleanup completed: {deleted_count} files deleted")
+                        # Remove empty directories
+                        try:
+                            if not any(set_dir.iterdir()):
+                                set_dir.rmdir()
+                        except OSError:
+                            pass
+
+        logger.info(f"Old cache cleanup completed: {deleted_count} files deleted")
         return deleted_count
 
     except Exception as e:
-        logger.error(f"Error during cache cleanup: {e}")
+        logger.error(f"Error during old cache cleanup: {e}")
         return 0
 
 
 class PeeronPage(NamedTuple):
     """Represents a single instruction page from Peeron"""
     page_number: str
-    thumbnail_url: str
-    cached_thumbnail_url: str | None  # Local cached thumbnail URL
-    image_url: str
+    original_image_url: str           # Original Peeron full-size image URL
+    cached_full_image_path: str       # Local full-size cached image path
+    cached_thumbnail_url: str         # Local thumbnail URL for preview
     alt_text: str
-    rotation: int = 0  # Rotation in degrees (0, 90, 180, 270)
+    rotation: int = 0                 # Rotation in degrees (0, 90, 180, 270)
 
 
 # Peeron instruction scraper
@@ -195,13 +292,28 @@ class PeeronInstructions(object):
         # Placeholder for pages
         self.pages = []
 
-    # Check if instructions exist on Peeron
+    # Check if instructions exist on Peeron (lightweight)
     def exists(self, /) -> bool:
-        """Check if the set exists on Peeron without downloading pages"""
+        """Check if the set exists on Peeron without caching thumbnails"""
         try:
-            pages = self.find_pages()
-            return len(pages) > 0
-        except ErrorException:
+            base_url = get_peeron_instruction_url(self.set_number, self.version_number)
+            scraper = create_peeron_scraper()
+            response = scraper.get(base_url)
+
+            if response.status_code != 200:
+                return False
+
+            soup = BeautifulSoup(response.text, 'html.parser')
+
+            # Check for "Browse instruction library" header (set not found)
+            if soup.find('h1', string="Browse instruction library"):
+                return False
+
+            # Look for thumbnail images to confirm instructions exist
+            thumbnails = soup.select('table[cellspacing="5"] a img[src^="http://belay.peeron.com/thumbs/"]')
+            return len(thumbnails) > 0
+
+        except Exception:
             return False
 
     # Find all available instruction pages on Peeron
@@ -216,12 +328,14 @@ class PeeronInstructions(object):
 
         logger.debug(f"[find_pages] fetching HTML from {base_url!r}")
 
-        # Set up cloudscraper with cookies enabled for Peeron
+        # Set up session with persistent cookies for Peeron (like working dl_peeron.py)
         scraper = create_peeron_scraper()
 
-        # Download the main HTML page
+        # Download the main HTML page to establish session and cookies
         try:
+            logger.debug(f"[find_pages] Establishing session by visiting: {base_url}")
             response = scraper.get(base_url)
+            logger.debug(f"[find_pages] Main page visit: HTTP {response.status_code}")
             if response.status_code != 200:
                 raise ErrorException(f'Failed to load Peeron page for {self.set_number}-{self.version_number}. HTTP {response.status_code}')
         except requests.exceptions.RequestException as e:
@@ -235,34 +349,56 @@ class PeeronInstructions(object):
             raise ErrorException(f'Set {self.set_number}-{self.version_number} not found on Peeron')
 
         # Locate all thumbnail images in the expected table structure
-        thumbnails = soup.select('table[cellspacing="5"] a img[src^="http://belay.peeron.com/thumbs/"]')
+        # Use the configured thumbnail pattern to build the expected URL prefix
+        thumb_base_url = get_peeron_thumbnail_url(self.set_number, self.version_number)
+        thumbnails = soup.select(f'table[cellspacing="5"] a img[src^="{thumb_base_url}"]')
 
         if not thumbnails:
             raise ErrorException(f'No instruction pages found for {self.set_number}-{self.version_number} on Peeron')
 
         pages: list[PeeronPage] = []
-        for img in thumbnails:
+        total_thumbnails = len(thumbnails)
+
+        # Initialize progress if socket is available
+        if self.socket:
+            self.socket.progress_total = total_thumbnails
+            self.socket.progress_count = 0
+            self.socket.progress(message=f"Starting to cache {total_thumbnails} full images")
+
+        for idx, img in enumerate(thumbnails, 1):
             thumb_url = img['src']
 
             # Extract the page number from the thumbnail URL
             page_number = thumb_url.split('/')[-2]
 
-            # Build the full-size image URL
-            image_url = f"{scan_base_url}{page_number}/"
+            # Build the full-size scan URL using the page number
+            full_size_url = f"{scan_base_url}{page_number}/"
 
-            logger.debug(f"[find_pages] Page {page_number}: thumb={thumb_url}, image={image_url}")
+            logger.debug(f"[find_pages] Page {page_number}: thumb={thumb_url}, full_size={full_size_url}")
 
             # Create alt text for the page
             alt_text = f"LEGO Instructions {self.set_number}-{self.version_number} Page {page_number}"
 
-            # Cache the thumbnail
-            cached_thumb_url = cache_thumbnail(thumb_url)
+            # Report progress if socket is available
+            if self.socket:
+                self.socket.progress_count = idx
+                self.socket.progress(message=f"Caching full image {idx} of {total_thumbnails}")
+
+            # Cache the full-size image and generate thumbnail preview using established session
+            cached_full_path, cached_thumb_url = cache_full_image_and_generate_thumbnail(
+                full_size_url, page_number, self.set_number, self.version_number, session=scraper
+            )
+
+            # Skip this page if caching failed
+            if not cached_full_path or not cached_thumb_url:
+                logger.warning(f"[find_pages] Skipping page {page_number} due to caching failure")
+                continue
 
             page = PeeronPage(
                 page_number=page_number,
-                thumbnail_url=thumb_url,
+                original_image_url=full_size_url,
+                cached_full_image_path=cached_full_path,
                 cached_thumbnail_url=cached_thumb_url,
-                image_url=image_url,
                 alt_text=alt_text
             )
             pages.append(page)

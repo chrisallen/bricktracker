@@ -25,6 +25,22 @@ instructions_page = Blueprint(
 )
 
 
+def _render_peeron_select_page(set: str) -> str:
+    """Helper function to render the Peeron page selection interface with cached thumbnails."""
+    peeron = PeeronInstructions(set)
+    peeron_pages = peeron.find_pages()  # This will use the cached thumbnails
+    current_app.logger.debug(f"[peeron_loaded] Found {len(peeron_pages)} pages for {set}")
+    return render_template(
+        'peeron_select.html',
+        download=True,
+        pages=peeron_pages,
+        set=set,
+        path=current_app.config['SOCKET_PATH'],
+        namespace=current_app.config['SOCKET_NAMESPACE'],
+        messages=MESSAGES
+    )
+
+
 # Index
 @instructions_page.route('/', methods=['GET'])
 @exception_handler(__file__)
@@ -142,6 +158,10 @@ def download() -> str:
     except Exception:
         set = ''
 
+    # Check if this is a redirect after Peeron pages were loaded
+    if request.args.get('peeron_loaded'):
+        return _render_peeron_select_page(set)
+
     return render_template(
         'instructions.html',
         download=True,
@@ -161,11 +181,14 @@ def do_download() -> str:
     except Exception:
         set = ''
 
-    # Try Rebrickable first, fallback to Peeron if it fails
-    rebrickable_instructions, peeron_pages = PeeronInstructions.find_instructions_with_peeron_fallback(set)
+    # Check if this is a redirect after Peeron pages were loaded
+    if request.args.get('peeron_loaded'):
+        return _render_peeron_select_page(set)
 
-    # Determine which template to render based on what we found
-    if rebrickable_instructions:
+    # Try Rebrickable first
+    try:
+        from .instructions import BrickInstructions
+        rebrickable_instructions = BrickInstructions.find_instructions(set)
         # Standard Rebrickable instructions found
         return render_template(
             'instructions.html',
@@ -176,26 +199,32 @@ def do_download() -> str:
             namespace=current_app.config['SOCKET_NAMESPACE'],
             messages=MESSAGES
         )
-    elif peeron_pages:
-        # Peeron pages found - show page selection interface
-        return render_template(
-            'peeron_select.html',
-            download=True,
-            pages=peeron_pages,
-            set=set,
-            path=current_app.config['SOCKET_PATH'],
-            namespace=current_app.config['SOCKET_NAMESPACE'],
-            messages=MESSAGES
-        )
-    else:
-        # This shouldn't happen as the fallback method re-raises the original error
-        return render_template(
-            'instructions.html',
-            download=True,
-            instructions=[],
-            set=set,
-            error='No instructions found on Rebrickable or Peeron',
-            path=current_app.config['SOCKET_PATH'],
-            namespace=current_app.config['SOCKET_NAMESPACE'],
-            messages=MESSAGES
-        )
+    except Exception:
+        # Rebrickable failed, check if Peeron has instructions (without caching thumbnails yet)
+        try:
+            peeron = PeeronInstructions(set)
+            # Just check if pages exist, don't cache thumbnails yet
+            if peeron.exists():
+                # Peeron has instructions - show loading interface
+                return render_template(
+                    'peeron_select.html',
+                    download=True,
+                    loading_peeron=True,  # Flag to show loading state
+                    set=set,
+                    path=current_app.config['SOCKET_PATH'],
+                    namespace=current_app.config['SOCKET_NAMESPACE'],
+                    messages=MESSAGES
+                )
+            else:
+                raise Exception("Not found on Peeron either")
+        except Exception:
+            return render_template(
+                'instructions.html',
+                download=True,
+                instructions=[],
+                set=set,
+                error='No instructions found on Rebrickable or Peeron',
+                path=current_app.config['SOCKET_PATH'],
+                namespace=current_app.config['SOCKET_NAMESPACE'],
+                messages=MESSAGES
+            )

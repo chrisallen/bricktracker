@@ -23,9 +23,45 @@
             </div>
           </div>
         </form>
-        {% if pages %}
+        {% if loading_peeron %}
           <div class="alert alert-info" role="alert">
+            <i class="ri-information-line"></i> <strong>Found on Peeron:</strong> {{ set }} was not available on Rebrickable, loading instruction pages from Peeron...
+          </div>
+
+          <!-- Socket elements for peeron-loader -->
+          <div id="peeron-loader-fail" class="alert alert-danger d-none" role="alert"></div>
+          <div id="peeron-loader-complete" class="alert alert-success d-none" role="alert"></div>
+          <div class="mb-3">
+            <p>
+              Progress <span id="peeron-loader-count"></span>
+              <span id="peeron-loader-spinner" class="d-none">
+                <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                <span class="visually-hidden" role="status">Loading...</span>
+              </span>
+            </p>
+            <div id="peeron-loader-progress" class="progress" role="progressbar" aria-label="Loading Peeron pages" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+              <div id="peeron-loader-progress-bar" class="progress-bar" style="width: 0%"></div>
+            </div>
+            <p id="peeron-loader-progress-message" class="text-center d-none"></p>
+          </div>
+        {% endif %}
+
+        {% if loading_peeron %}
+          <!-- Include socket for automatic loading -->
+          {% with set=set, path=path, namespace=namespace, messages=messages %}
+            {% include 'instructions/peeron_loader_socket.html' %}
+          {% endwith %}
+        {% endif %}
+
+        {% if pages %}
+          <div id="peeron-loading-alert" class="alert alert-info" role="alert">
             <i class="ri-information-line"></i> <strong>Instructions found on Peeron:</strong> {{ set }} was not available on Rebrickable, but {{ pages|length }} instruction pages were found on Peeron.
+            <div id="peeron-cache-progress" class="mt-2 d-none">
+              <div class="progress" role="progressbar" aria-label="Caching thumbnails" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                <div id="peeron-cache-progress-bar" class="progress-bar" style="width: 0%"></div>
+              </div>
+              <small id="peeron-cache-message" class="text-muted">Caching thumbnails...</small>
+            </div>
           </div>
           <div class="card mb-3">
             <div class="card-header">
@@ -49,16 +85,17 @@
                           <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="peeron-page-{{ loop.index }}"
                                    data-page-number="{{ page.page_number }}"
-                                   data-thumbnail-url="{{ page.thumbnail_url }}"
-                                   data-image-url="{{ page.image_url }}"
+                                   data-original-image-url="{{ page.original_image_url }}"
+                                   data-cached-full-image-path="{{ page.cached_full_image_path }}"
                                    data-alt-text="{{ page.alt_text }}"
                                    data-rotation="0"
                                    autocomplete="off">
                             <label class="form-check-label w-100" for="peeron-page-{{ loop.index }}">
                               <div class="text-center position-relative">
                                 <div class="position-relative d-inline-block">
-                                  <img id="peeron-img-{{ loop.index }}" src="{{ page.cached_thumbnail_url or page.thumbnail_url }}" alt="{{ page.alt_text }}"
-                                       class="img-fluid mb-2 border rounded" style="max-height: 150px; transform: rotate(0deg); transition: transform 0.3s ease;">
+                                  <img id="peeron-img-{{ loop.index }}" src="{{ page.cached_thumbnail_url }}" alt="{{ page.alt_text }}"
+                                       class="img-fluid mb-2 border rounded peeron-thumbnail" style="max-height: 150px; transform: rotate(0deg); transition: transform 0.3s ease;"
+                                       data-index="{{ loop.index }}" data-total="{{ pages|length }}">
                                   <button type="button" class="btn btn-sm btn-light position-absolute top-0 end-0 p-1 me-1 mt-1 peeron-rotate-btn"
                                           data-target="peeron-img-{{ loop.index }}" data-checkbox="peeron-page-{{ loop.index }}" data-rotation="0"
                                           title="Rotate page" style="font-size: 0.7rem; line-height: 1;">
@@ -94,7 +131,11 @@
               <span id="peeron-download-status-icon" class="me-1"></span><span id="peeron-download-status" class="me-1"></span><button id="peeron-download" type="button" class="btn btn-primary"><i class="ri-download-line"></i> Download selected files</button>
             </div>
           </div>
-          {% include 'instructions/peeron_socket.html' %}
+          {% if not loading_peeron %}
+            <!-- Include normal socket for downloading -->
+            {% include 'instructions/peeron_socket.html' %}
+          {% endif %}
+
         {% endif %}
       </div>
     </div>

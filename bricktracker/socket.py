@@ -6,7 +6,7 @@ from flask_socketio import SocketIO
 
 from .instructions import BrickInstructions
 from .instructions_list import BrickInstructionsList
-from .peeron_instructions import PeeronPage
+from .peeron_instructions import PeeronInstructions, PeeronPage
 from .peeron_pdf import PeeronPDF
 from .set import BrickSet
 from .socket_decorator import authenticated_socket, rebrickable_socket
@@ -23,6 +23,7 @@ MESSAGES: Final[dict[str, str]] = {
     'DOWNLOAD_PEERON_PAGES': 'download_peeron_pages',
     'FAIL': 'fail',
     'IMPORT_SET': 'import_set',
+    'LOAD_PEERON_PAGES': 'load_peeron_pages',
     'LOAD_SET': 'load_set',
     'PROGRESS': 'progress',
     'SET_LOADED': 'set_loaded',
@@ -108,7 +109,31 @@ class BrickSocket(object):
             instructions.download(path)
 
             BrickInstructionsList(force=True)
-            
+
+        @self.socket.on(MESSAGES['LOAD_PEERON_PAGES'], namespace=self.namespace)  # noqa: E501
+        def load_peeron_pages(data: dict[str, Any], /) -> None:
+            logger.debug('Socket: LOAD_PEERON_PAGES={data} (from: {fr})'.format(
+                data=data, fr=request.remote_addr))
+
+            try:
+                set_number = data.get('set', '')
+                if not set_number:
+                    self.fail(message="Set number is required")
+                    return
+
+                # Create Peeron instructions instance with socket for progress reporting
+                peeron = PeeronInstructions(set_number, socket=self)
+
+                # Find pages (this will report progress for thumbnail caching)
+                pages = peeron.find_pages()
+
+                # Complete the operation (JavaScript will handle redirect)
+                self.complete(message=f"Found {len(pages)} instruction pages on Peeron")
+
+            except Exception as e:
+                logger.error(f"Error in load_peeron_pages: {e}")
+                self.fail(message=f"Error loading Peeron pages: {e}")
+
         @self.socket.on(MESSAGES['DOWNLOAD_PEERON_PAGES'], namespace=self.namespace)  # noqa: E501
         @authenticated_socket(self)
         def download_peeron_pages(data: dict[str, Any], /) -> None:
@@ -142,8 +167,9 @@ class BrickSocket(object):
                 for page_data in pages_data:
                     page = PeeronPage(
                         page_number=page_data.get('page_number', ''),
-                        thumbnail_url=page_data.get('thumbnail_url', ''),
-                        image_url=page_data.get('image_url', ''),
+                        original_image_url=page_data.get('original_image_url', ''),
+                        cached_full_image_path=page_data.get('cached_full_image_path', ''),
+                        cached_thumbnail_url='',  # Not needed for PDF generation
                         alt_text=page_data.get('alt_text', ''),
                         rotation=page_data.get('rotation', 0)
                     )
@@ -152,6 +178,8 @@ class BrickSocket(object):
                 # Create PDF generator and start download
                 pdf_generator = PeeronPDF(set_num, version_num, pages, socket=self)
                 pdf_generator.create_pdf()
+
+                # Note: Cache cleanup is handled automatically by pdf_generator.create_pdf()
 
                 # Refresh instructions list to include new PDF
                 BrickInstructionsList(force=True)

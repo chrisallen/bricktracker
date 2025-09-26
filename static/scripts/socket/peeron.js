@@ -132,8 +132,8 @@ class BrickPeeronSocket extends BrickSocket {
 
             const pages = selectedFiles.map(checkbox => ({
                 page_number: checkbox.getAttribute('data-page-number'),
-                thumbnail_url: checkbox.getAttribute('data-thumbnail-url'),
-                image_url: checkbox.getAttribute('data-image-url'),
+                original_image_url: checkbox.getAttribute('data-original-image-url'),
+                cached_full_image_path: checkbox.getAttribute('data-cached-full-image-path'),
                 alt_text: checkbox.getAttribute('data-alt-text'),
                 rotation: parseInt(checkbox.getAttribute('data-rotation') || '0')
             }));
@@ -166,5 +166,41 @@ class BrickPeeronSocket extends BrickSocket {
         if (this.html_button) {
             this.html_button.disabled = !enabled;
         }
+    }
+}
+
+// Simple Peeron page loader using standard socket pattern
+class BrickPeeronPageLoader extends BrickSocket {
+    constructor(set, path, namespace, messages) {
+        // Use 'peeron-loader' as the ID for socket elements
+        super('peeron-loader', path, namespace, messages, false);
+
+        this.set = set;
+        this.setup();
+
+        // Auto-start loading when connected
+        setTimeout(() => {
+            if (this.socket && this.socket.connected) {
+                this.loadPages();
+            } else {
+                this.socket.on('connect', () => this.loadPages());
+            }
+        }, 100);
+    }
+
+    loadPages() {
+        this.socket.emit(this.messages.LOAD_PEERON_PAGES, {
+            set: this.set
+        });
+    }
+
+    // Override complete to redirect when done
+    complete(data) {
+        super.complete(data);
+        // Redirect to show the pages selection interface
+        const params = new URLSearchParams();
+        params.set('set', this.set);
+        params.set('peeron_loaded', '1');
+        window.location.href = `${window.location.pathname}?${params.toString()}`;
     }
 }

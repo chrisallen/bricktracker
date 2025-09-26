@@ -67,86 +67,58 @@ class PeeronPDF(object):
             total_pages = len(self.pages)
             self.socket.update_total(total_pages)
             self.socket.progress_count = 0
-            self.socket.progress(message=f"Starting download of {total_pages} pages")
+            self.socket.progress(message=f"Starting PDF creation from {total_pages} cached pages")
 
-            # Set up cloudscraper session for all downloads
-            scraper = create_peeron_scraper()
+            # Use cached images directly - no downloads needed!
+            cached_files_with_rotation = []
+            missing_pages = []
 
-            # First visit the main instruction page to establish session with Peeron
+            for i, page in enumerate(self.pages):
+                # Check if cached file exists
+                if os.path.isfile(page.cached_full_image_path):
+                    cached_files_with_rotation.append((page.cached_full_image_path, page.rotation))
+
+                    # Update progress
+                    self.socket.progress_count += 1
+                    self.socket.progress(
+                        message=f"Processing cached page {page.page_number} ({i + 1}/{total_pages})"
+                    )
+                else:
+                    missing_pages.append(page.page_number)
+                    logger.warning(f"Cached image missing for page {page.page_number}: {page.cached_full_image_path}")
+
+            if not cached_files_with_rotation:
+                raise DownloadException(f"No cached images available for set {self.set_number}-{self.version_number}. Cache may have been cleared.")
+
+            elif len(cached_files_with_rotation) < total_pages:
+                # Partial success
+                error_msg = f"Only found {len(cached_files_with_rotation)}/{total_pages} cached images."
+                if missing_pages:
+                    error_msg += f" Missing pages: {', '.join(missing_pages)}."
+                logger.warning(error_msg)
+
+            # Create PDF from cached images with rotation
+            self._create_pdf_from_images(cached_files_with_rotation, target_path)
+
+            # Success
+            logger.info(f"Created PDF {self.filename} with {len(cached_files_with_rotation)} pages")
+
+            # Create BrickInstructions instance to get PDF URL
+            instructions = BrickInstructions(self.filename)
+            pdf_url = instructions.url()
+
+            self.socket.complete(
+                message=f'PDF {self.filename} created with {len(cached_files_with_rotation)} pages - <a href="{pdf_url}" target="_blank" class="btn btn-sm btn-primary ms-2"><i class="ri-external-link-line"></i> Open PDF</a>'
+            )
+
+            # Clean up set cache after successful PDF creation
             try:
-                main_page_url = get_peeron_instruction_url(self.set_number, self.version_number)
-                logger.debug(f"Establishing session by visiting: {main_page_url}")
-                main_response = scraper.get(main_page_url)
-                logger.debug(f"Main page visit: HTTP {main_response.status_code}")
+                from .peeron_instructions import clear_set_cache
+                deleted_count = clear_set_cache(self.set_number, self.version_number)
+                if deleted_count > 0:
+                    logger.info(f"[create_pdf] Cleaned up {deleted_count} cache files for set {self.set_number}-{self.version_number}")
             except Exception as e:
-                logger.warning(f"Failed to visit main page: {e}")
-
-            # Download images to temporary files with rotation info
-            temp_files_with_rotation = []
-            failed_pages = []
-
-            try:
-                for i, page in enumerate(self.pages):
-                    # Add delay between requests to avoid being blocked
-                    if i > 0:
-                        delay_ms = get_peeron_download_delay()
-                        time.sleep(delay_ms / 1000.0)  # Convert milliseconds to seconds
-
-                    temp_file = self._download_page_image(page, i + 1, scraper)
-                    if temp_file:
-                        temp_files_with_rotation.append((temp_file, page.rotation))
-                    else:
-                        failed_pages.append(page.page_number)
-
-                if not temp_files_with_rotation:
-                    # Collect detailed error information
-                    error_msg = f"Failed to download any instruction pages for set {self.set_number}-{self.version_number}."
-
-                    # Check if it's a bot protection issue by trying to access the main page
-                    try:
-                        test_response = scraper.get(get_peeron_instruction_url(self.set_number, self.version_number))
-                        if test_response.status_code == 403:
-                            error_msg += " Peeron blocked the request (HTTP 403) - bot protection is active."
-                        elif test_response.status_code == 404:
-                            error_msg += " Set not found on Peeron (HTTP 404)."
-                        elif "Browse instruction library" in test_response.text:
-                            error_msg += " Set exists on Peeron but has no instruction scans available."
-                        else:
-                            min_size = get_min_image_size()
-                            error_msg += f" All pages returned small error images (smaller than {min_size}x{min_size}) - likely bot protection."
-                    except Exception:
-                        error_msg += " Could not connect to Peeron - check internet connection."
-
-                    raise DownloadException(error_msg)
-
-                elif len(temp_files_with_rotation) < total_pages:
-                    # Partial success
-                    error_msg = f"Only downloaded {len(temp_files_with_rotation)}/{total_pages} pages successfully."
-                    if failed_pages:
-                        error_msg += f" Failed pages: {', '.join(failed_pages)}."
-                    logger.warning(error_msg)
-
-                # Create PDF from downloaded images with rotation
-                self._create_pdf_from_images(temp_files_with_rotation, target_path)
-
-                # Success
-                logger.info(f"Created PDF {self.filename} with {len(temp_files_with_rotation)} pages")
-
-                # Create BrickInstructions instance to get PDF URL
-                instructions = BrickInstructions(self.filename)
-                pdf_url = instructions.url()
-
-                self.socket.complete(
-                    message=f'PDF {self.filename} created with {len(temp_files_with_rotation)} pages - <a href="{pdf_url}" target="_blank" class="btn btn-sm btn-primary ms-2"><i class="ri-external-link-line"></i> Open PDF</a>'
-                )
-
-            finally:
-                # Cleanup temporary files
-                for temp_file, _ in temp_files_with_rotation:
-                    try:
-                        os.remove(temp_file)
-                    except Exception as e:
-                        logger.warning(f"Failed to remove temp file {temp_file}: {e}")
+                logger.warning(f"[create_pdf] Failed to clean set cache: {e}")
 
         except Exception as e:
             logger.error(f"Error creating PDF {self.filename}: {e}")
@@ -154,77 +126,6 @@ class PeeronPDF(object):
                 message=f"Error creating PDF {self.filename}: {e}"
             )
 
-    # Download a single page image
-    def _download_page_image(self, page: PeeronPage, page_num: int, scraper, /) -> str | None:
-        """Download a single page image to a temporary file using provided scraper session"""
-        try:
-            logger.debug(f"Attempting to download page {page.page_number} from: {page.image_url}")
-
-            # Download the image using the shared scraper session
-            response = scraper.get(page.image_url, stream=True)
-            logger.debug(f"Page {page.page_number}: HTTP {response.status_code}, Content-Type: {response.headers.get('content-type', 'unknown')}")
-
-            if not response.ok:
-                logger.warning(f"Failed to download page {page.page_number}: HTTP {response.status_code}")
-                return None
-
-            # Check if response is actually an image (not an error page)
-            content_type = response.headers.get('content-type', '')
-            if not content_type.startswith('image/'):
-                # Log first 500 chars of response for debugging
-                try:
-                    response_text = response.text[:500]
-                    logger.warning(f"Page {page.page_number}: Response is not an image (content-type: {content_type}). Response preview: {response_text}")
-                except:
-                    logger.warning(f"Page {page.page_number}: Response is not an image (content-type: {content_type})")
-                return None
-
-            # Create temporary file
-            temp_fd, temp_path = tempfile.mkstemp(suffix='.jpg', prefix=f'peeron_{page.page_number}_')
-
-            try:
-                with os.fdopen(temp_fd, 'wb') as f:
-                    for chunk in response.iter_content(chunk_size=8192):
-                        if chunk:
-                            f.write(chunk)
-
-                # Validate that we actually got an image (not an HTML error page)
-                try:
-                    with Image.open(temp_path) as test_img:
-                        width, height = test_img.size
-                        min_size = get_min_image_size()
-                        if width < min_size or height < min_size:  # Too small to be a real instruction page
-                            logger.warning(f"Page {page.page_number}: Image too small ({width}x{height}) - likely an error page")
-                            os.remove(temp_path)
-                            return None
-                except Exception as img_error:
-                    logger.warning(f"Page {page.page_number}: Invalid image file - {img_error}")
-                    os.remove(temp_path)
-                    return None
-
-                # Update progress
-                self.socket.progress_count += 1
-                self.socket.progress(
-                    message=f"Downloaded page {page.page_number} ({page_num}/{len(self.pages)})"
-                )
-
-                return temp_path
-
-            except Exception as e:
-                # Clean up file descriptor if something went wrong
-                try:
-                    os.close(temp_fd)
-                except:
-                    pass
-                try:
-                    os.remove(temp_path)
-                except:
-                    pass
-                raise e
-
-        except Exception as e:
-            logger.warning(f"Failed to download page {page.page_number}: {e}")
-            return None
 
     # Create PDF from downloaded images
     def _create_pdf_from_images(self, image_paths_and_rotations: list[tuple[str, int]], output_path: str, /) -> None:
