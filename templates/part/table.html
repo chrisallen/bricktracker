@@ -3,7 +3,7 @@
 
 <div class="table-responsive-sm">
   <table data-table="{% if all %}true{% endif %}" class="table table-striped align-middle {% if not all %}sortable mb-0{% endif %}" {% if all %}id="parts"{% endif %}>
-    {{ table.header(color=true, quantity=not no_quantity, sets=all, minifigures=all, checked=not all, hamburger_menu=not all, accordion_id=accordion_id|default('')) }}
+    {{ table.header(color=true, quantity=not no_quantity, sets=all, minifigures=all, checked=not all and not read_only, hamburger_menu=not all and not read_only, accordion_id=accordion_id|default('')) }}
     <tbody>
       {% for item in table_collection %}
       <tr>
@@ -41,12 +41,12 @@
           <td>{{ item.fields.total_sets }}</td>
           <td>{{ item.fields.total_minifigures }}</td>
         {% else %}
-          {% if not config['HIDE_TABLE_CHECKED_PARTS'] %}
+          {% if not config['HIDE_TABLE_CHECKED_PARTS'] and not read_only %}
             <td class="table-td-input">
               <center>{{ form.checkbox('', item.fields.id, item.html_id('checked'), item.url_for_checked(), item.fields.checked | default(false), parent='part', delete=read_only) }}</center>
             </td>
           {% endif %}
-          {% if g.login.is_authenticated() %}
+          {% if g.login.is_authenticated() and not read_only %}
             {% set show_missing_menu = not config['HIDE_TABLE_MISSING_PARTS'] %}
             {% set show_checked_menu = not config['HIDE_TABLE_CHECKED_PARTS'] %}
             {% if show_missing_menu or show_checked_menu %}
