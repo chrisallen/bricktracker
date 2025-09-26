@@ -9,6 +9,7 @@ SELECT
     --"bricktracker_parts"."rebrickable_inventory",
     "bricktracker_parts"."missing",
     "bricktracker_parts"."damaged",
+    "bricktracker_parts"."checked",
     --"rebrickable_parts"."part",
     --"rebrickable_parts"."color_id",
     "rebrickable_parts"."color_name",

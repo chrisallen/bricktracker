@@ -294,6 +294,50 @@ def problem_part(
     return jsonify({problem: amount})
 
 
+# Update checked state of parts during walkthrough
+@set_page.route('/<id>/parts/<part>/<int:color>/<int:spare>/checked', defaults={'figure': None}, methods=['POST'])  # noqa: E501
+@set_page.route('/<id>/minifigures/<figure>/parts/<part>/<int:color>/<int:spare>/checked', methods=['POST'])  # noqa: E501
+@login_required
+@exception_handler(__file__, json=True)
+def checked_part(
+    *,
+    id: str,
+    figure: str | None,
+    part: str,
+    color: int,
+    spare: int,
+) -> Response:
+    brickset = BrickSet().select_specific(id)
+
+    if figure is not None:
+        brickminifigure = BrickMinifigure().select_specific(brickset, figure)
+    else:
+        brickminifigure = None
+
+    brickpart = BrickPart().select_specific(
+        brickset,
+        part,
+        color,
+        spare,
+        minifigure=brickminifigure,
+    )
+
+    checked = brickpart.update_checked(request.json)
+
+    # Info
+    logger.info('Set {set} ({id}): updated part ({part} color: {color}, spare: {spare}, minifigure: {figure}) checked state to {checked}'.format(  # noqa: E501
+        set=brickset.fields.set,
+        id=brickset.fields.id,
+        figure=figure,
+        part=brickpart.fields.part,
+        color=brickpart.fields.color,
+        spare=brickpart.fields.spare,
+        checked=checked
+    ))
+
+    return jsonify({'checked': checked})
+
+
 # Refresh a set
 @set_page.route('/refresh/<set>/', methods=['GET'])
 @set_page.route('/<id>/refresh', methods=['GET'])
