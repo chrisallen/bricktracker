@@ -1,4 +1,4 @@
-{% macro header(title, id, parent, quantity=none, expanded=false, icon=none, class=none, danger=none, image=none, alt=none) %}
+{% macro header(title, id, parent, quantity=none, expanded=false, icon=none, class=none, danger=none, image=none, alt=none, hamburger_menu=none) %}
   {% if danger %}
     {% set icon='alert-fill' %}
   {% endif %}
@@ -43,10 +43,10 @@
   {% endif %}
 {% endmacro %}
 
-{% macro table(table_collection, title, id, parent, target, quantity=none, icon=none, image=none, alt=none, details=none, read_only=none) %}
+{% macro table(table_collection, title, id, parent, target, quantity=none, icon=none, image=none, alt=none, details=none, read_only=none, hamburger_menu=none) %}
   {% set size=table_collection | length %}
   {% if size %}
-    {{ header(title, id, parent, quantity=quantity, icon=icon, class='p-0', image=image, alt=alt) }}
+    {{ header(title, id, parent, quantity=quantity, icon=icon, class='p-0', image=image, alt=alt, hamburger_menu=hamburger_menu) }}
       {% if details %}
         <p class="border-top border-bottom p-2 text-center">
           {% if image %}
@@ -57,7 +57,7 @@
           <a class="btn border bg-secondary-text" href="{{ details }}">{% if icon %}<i class="ri-{{ icon }}"></i>{% endif %} Details</a>
         </p>
       {% endif %}
-      {% with solo=true, all=false %}
+      {% with solo=true, all=false, accordion_id=id %}
         {% include target %}
       {% endwith %}
     {{ footer() }}

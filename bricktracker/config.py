@@ -34,6 +34,7 @@ CONFIG: Final[list[dict[str, Any]]] = [
     {'n': 'HIDE_SET_INSTRUCTIONS', 'c': bool},
     {'n': 'HIDE_TABLE_DAMAGED_PARTS', 'c': bool},
     {'n': 'HIDE_TABLE_MISSING_PARTS', 'c': bool},
+    {'n': 'HIDE_TABLE_CHECKED_PARTS', 'c': bool},
     {'n': 'HIDE_WISHES', 'c': bool},
     {'n': 'MINIFIGURES_DEFAULT_ORDER', 'd': '"rebrickable_minifigures"."name" ASC'},  # noqa: E501
     {'n': 'MINIFIGURES_FOLDER', 'd': 'minifigs', 's': True},
