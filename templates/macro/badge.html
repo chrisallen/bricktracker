@@ -88,7 +88,7 @@
           {% else %}
             {% set text=purchase_location.fields.name %}
           {% endif %}
-          {{ badge(url=purchase_location.url(), solo=solo, last=last, color='light border', icon='building-line', text=text, tooltip=tooltip, collapsible='Location:') }}
+          {{ badge(check=purchase_location, solo=solo, last=last, color='light border', icon='building-line', text=text, tooltip=tooltip, collapsible='Location:') }}
         {% endif %}
       {% endfor %}
     {% else %}
@@ -100,7 +100,7 @@
         {% else %}
           {% set text=purchase_location.fields.name %}
         {% endif %}
-        {{ badge(url=purchase_location.url(), solo=solo, last=last, color='light border', icon='building-line', text=text, tooltip=tooltip, collapsible='Location:') }}
+        {{ badge(check=purchase_location, solo=solo, last=last, color='light border', icon='building-line', text=text, tooltip=tooltip, collapsible='Location:') }}
       {% endif %}
     {% endif %}
   {% endif %}
