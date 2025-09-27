@@ -23,7 +23,24 @@
   - Preserves selection state during dropdown consolidation
   - Consistent search behavior (instant for client-side, Enter key for server-side)
   - Mobile-friendly pagination navigation
-
+- Add Peeron instructions integration
+  - Full image caching system with automatic thumbnail generation
+  - Optimized HTTP calls by downloading full images once and generating thumbnails locally
+  - Automatic cache cleanup after PDF generation to save disk space
+- Add parts checking/inventory system
+  - New "Checked" column in parts tables for tracking inventory progress
+  - Checkboxes to mark parts as verified during set walkthrough
+  - `BK_HIDE_TABLE_CHECKED_PARTS`: Environment variable to hide checked column
+- Add set consolidation/grouping functionality
+  - Automatic grouping of duplicate sets on main sets page
+  - Shows instance count with stack icon badge (e.g., "3 copies")
+  - Expandable drawer interface to view all set copies individually
+  - Full set cards for each instance with all badges, statuses, and functionality
+  - `BK_SETS_CONSOLIDATION`: Environment variable to enable/disable consolidation (default: false)
+  - Backwards compatible - when disabled, behaves exactly like original individual view
+  - Improved theme filtering: handles duplicate theme names correctly
+  - Fixed set number sorting: proper numeric sorting in both ascending and descending order
+  
 ### 1.2.4
 
 > **Warning**
