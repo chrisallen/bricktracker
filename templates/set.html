@@ -29,48 +29,9 @@
                 {% set current_item_id = item.fields.id %}
                 {% for instance in all_instances %}
                 <div class="col-md-6 col-xl-4 d-flex align-items-stretch mb-3">
-                  {% with item=instance, index=loop.index0, tiny=false %}
+                  {% with item=instance, index=loop.index0, tiny=false, current_viewing=(instance.fields.id == current_item_id) %}
                     <div class="position-relative w-100">
                       {% include 'set/card.html' %}
-                      <!-- Custom label overlay for distinguishing instances -->
-                      {% set instance_name = [] %}
-                      {% if instance.fields.storage %}
-                        {% set _ = instance_name.append(instance.fields.storage) %}
-                      {% endif %}
-                      {% if instance.fields.purchase_location %}
-                        {% set _ = instance_name.append("from " + instance.fields.purchase_location) %}
-                      {% endif %}
-                      {% set instance_tags = [] %}
-                      {% for tag in brickset_tags %}
-                        {% if instance.fields[tag.as_column()] %}
-                          {% set _ = instance_tags.append(tag.fields.name) %}
-                        {% endif %}
-                      {% endfor %}
-                      {% if instance_tags %}
-                        {% set _ = instance_name.append("[" + instance_tags | join(", ") + "]") %}
-                      {% endif %}
-                      {% if instance.fields.purchase_date %}
-                        {% set _ = instance_name.append("(" + instance.purchase_date() + ")") %}
-                      {% endif %}
-                      {% if instance_name %}
-                        <div class="position-absolute top-0 end-0 m-2">
-                          <span class="badge bg-dark bg-opacity-75 text-wrap text-start" style="max-width: 150px;">
-                            {{ instance_name | join(" ") }}
-                            {% if instance.fields.id == current_item_id %}
-                              <br><small class="text-info">Currently Viewing</small>
-                            {% endif %}
-                          </span>
-                        </div>
-                      {% else %}
-                        <div class="position-absolute top-0 end-0 m-2">
-                          <span class="badge bg-secondary">
-                            Copy #{{ loop.index }}
-                            {% if instance.fields.id == current_item_id %}
-                              <br><small class="text-info">Current</small>
-                            {% endif %}
-                          </span>
-                        </div>
-                      {% endif %}
                     </div>
                   {% endwith %}
                 </div>
