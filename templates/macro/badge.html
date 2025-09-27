@@ -75,14 +75,34 @@
 {% endmacro %}
 
 {% macro purchase_location(item, purchase_locations, solo=false, last=false) %}
-  {% if purchase_locations and item.fields.purchase_location in purchase_locations.mapping %}
-    {% set purchase_location = purchase_locations.mapping[item.fields.purchase_location] %}
-    {% if last %}
-      {% set tooltip=purchase_location.fields.name %}
+  {% if purchase_locations and item.fields.purchase_location %}
+    {% if '|' in item.fields.purchase_location or ',' in item.fields.purchase_location %}
+      {# Consolidated mode - multiple purchase locations #}
+      {% set separator = '|' if '|' in item.fields.purchase_location else ',' %}
+      {% set location_list = item.fields.purchase_location.split(separator) %}
+      {% for location_id in location_list %}
+        {% if location_id and location_id.strip() and location_id.strip() in purchase_locations.mapping %}
+          {% set purchase_location = purchase_locations.mapping[location_id.strip()] %}
+          {% if last %}
+            {% set tooltip=purchase_location.fields.name %}
+          {% else %}
+            {% set text=purchase_location.fields.name %}
+          {% endif %}
+          {{ badge(url=purchase_location.url(), solo=solo, last=last, color='light border', icon='building-line', text=text, tooltip=tooltip, collapsible='Location:') }}
+        {% endif %}
+      {% endfor %}
     {% else %}
-      {% set text=purchase_location.fields.name %}
+      {# Single purchase location #}
+      {% if item.fields.purchase_location.strip() and item.fields.purchase_location.strip() in purchase_locations.mapping %}
+        {% set purchase_location = purchase_locations.mapping[item.fields.purchase_location.strip()] %}
+        {% if last %}
+          {% set tooltip=purchase_location.fields.name %}
+        {% else %}
+          {% set text=purchase_location.fields.name %}
+        {% endif %}
+        {{ badge(url=purchase_location.url(), solo=solo, last=last, color='light border', icon='building-line', text=text, tooltip=tooltip, collapsible='Location:') }}
+      {% endif %}
     {% endif %}
-    {{ badge(check=purchase_location, solo=solo, last=last, color='light border', icon='building-line', text=text, tooltip=tooltip, collapsible='Location:') }}
   {% endif %}
 {% endmacro %}
 
@@ -103,14 +123,34 @@
 {% endmacro %}
 
 {% macro storage(item, storages, solo=false, last=false) %}
-  {% if storages and item.fields.storage in storages.mapping %}
-    {% set storage = storages.mapping[item.fields.storage] %}
-    {% if last %}
-      {% set tooltip=storage.fields.name %}
+  {% if storages and item.fields.storage %}
+    {% if '|' in item.fields.storage or ',' in item.fields.storage %}
+      {# Consolidated mode - multiple storage locations #}
+      {% set separator = '|' if '|' in item.fields.storage else ',' %}
+      {% set storage_list = item.fields.storage.split(separator) %}
+      {% for storage_id in storage_list %}
+        {% if storage_id and storage_id.strip() and storage_id.strip() in storages.mapping %}
+          {% set storage = storages.mapping[storage_id.strip()] %}
+          {% if last %}
+            {% set tooltip=storage.fields.name %}
+          {% else %}
+            {% set text=storage.fields.name %}
+          {% endif %}
+          {{ badge(url=storage.url(), solo=solo, last=last, color='light text-warning-emphasis bg-warning-subtle border border-warning-subtle', icon='archive-2-line', text=text, alt='Storage', tooltip=tooltip) }}
+        {% endif %}
+      {% endfor %}
     {% else %}
-      {% set text=storage.fields.name %}
+      {# Single storage location #}
+      {% if item.fields.storage.strip() and item.fields.storage.strip() in storages.mapping %}
+        {% set storage = storages.mapping[item.fields.storage.strip()] %}
+        {% if last %}
+          {% set tooltip=storage.fields.name %}
+        {% else %}
+          {% set text=storage.fields.name %}
+        {% endif %}
+        {{ badge(url=storage.url(), solo=solo, last=last, color='light text-warning-emphasis bg-warning-subtle border border-warning-subtle', icon='archive-2-line', text=text, alt='Storage', tooltip=tooltip) }}
+      {% endif %}
     {% endif %}
-    {{ badge(url=item.url_for_storage(), solo=solo, last=last, color='light text-warning-emphasis bg-warning-subtle border border-warning-subtle', icon='archive-2-line', text=text, alt='Storage', tooltip=tooltip) }}
   {% endif %}
 {% endmacro %}
 

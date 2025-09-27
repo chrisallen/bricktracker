@@ -3,9 +3,11 @@
 {% import 'macro/card.html' as card %}
 {% import 'macro/form.html' as form %}
 
-<div {% if not solo %}id="set-{{ item.fields.id }}"{% endif %} class="card mb-3 flex-fill {% if solo %}card-solo{% endif %}"
+<div {% if not solo %}id="set-{{ item.fields.consolidated_id or item.fields.id }}"{% endif %} class="card mb-3 flex-fill {% if solo %}card-solo{% endif %}"
+  data-set-id="{{ item.fields.consolidated_id or item.fields.id }}" data-rebrickable-id="{{ item.fields.set }}"
+  {% if item.fields.instance_count is defined %}data-instance-count="{{ item.fields.instance_count }}" data-instance-ids="{{ item.fields.instance_ids }}"{% endif %}
   {% if not solo and not tiny %}
-    data-index="{{ index }}" data-number="{{ item.fields.set }}" data-name="{{ item.fields.name | lower }}" data-parts="{{ item.fields.number_of_parts }}"
+    data-index="{{ index }}" data-number="{{ item.fields.set }}" data-set="{{ item.fields.set.split('-')[0] | int }}{{ '%05d' | format(item.fields.set.split('-')[1] | int) }}" data-name="{{ item.fields.name | lower }}" data-parts="{{ item.fields.number_of_parts }}"
     data-year="{{ item.fields.year }}" data-theme="{{ item.theme.name | lower }}"
     {% if not config['HIDE_SET_INSTRUCTIONS'] %}
       data-has-missing-instructions="{{ (item.instructions | length == 0) | int }}"
@@ -63,6 +65,9 @@
       {{ badge.year(item.fields.year, solo=solo, last=last) }}
     {% endif %}
     {{ badge.parts(item.fields.number_of_parts, solo=solo, last=last) }}
+    {% if item.fields.instance_count is defined and item.fields.instance_count > 1 %}
+      <span class="badge bg-primary"><i class="ri-stack-line"></i> {{ item.fields.instance_count }} copies</span>
+    {% endif %}
     {{ badge.total_minifigures(item.fields.total_minifigures, solo=solo, last=last) }}
     {{ badge.total_missing(item.fields.total_missing, solo=solo, last=last) }}
     {{ badge.total_damaged(item.fields.total_damaged, solo=solo, last=last) }}

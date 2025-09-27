@@ -6,9 +6,92 @@
 <div class="container">
   <div class="row">
     <div class="col-12">
-      {% with solo=true, delete=delete %}
-        {% include 'set/card.html' %}
-      {% endwith %}
+      {% if all_instances and all_instances | length > 1 %}
+        <!-- Multiple instances view with drawer-style header -->
+        <div class="alert alert-info p-0">
+          <!-- Clickable drawer header -->
+          <div class="alert alert-info mb-0" style="cursor: pointer;" data-bs-toggle="collapse"
+               data-bs-target="#all-instances" aria-expanded="false" aria-controls="all-instances">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h4 class="mb-1">
+                  <i class="ri-stack-line me-2"></i>Multiple Copies Available
+                  <span class="badge bg-primary ms-2">{{ all_instances | length }}</span>
+                </h4>
+                <p class="mb-0">This set has {{ all_instances | length }} copies in your collection. Click to view all copies individually.</p>
+              </div>
+              <i class="ri-arrow-down-s-line fs-4" id="copies-toggle-icon"></i>
+            </div>
+          </div>
+
+          <!-- Collapsible instances section -->
+          <div class="collapse" id="all-instances">
+            <div class="px-3 pb-3">
+              <div class="row">
+                {% set current_item_id = item.fields.id %}
+                {% for instance in all_instances %}
+                <div class="col-md-6 col-xl-4 d-flex align-items-stretch mb-3">
+                  {% with item=instance, index=loop.index0, tiny=false %}
+                    <div class="position-relative w-100">
+                      {% include 'set/card.html' %}
+                      <!-- Custom label overlay for distinguishing instances -->
+                      {% set instance_name = [] %}
+                      {% if instance.fields.storage %}
+                        {% set _ = instance_name.append(instance.fields.storage) %}
+                      {% endif %}
+                      {% if instance.fields.purchase_location %}
+                        {% set _ = instance_name.append("from " + instance.fields.purchase_location) %}
+                      {% endif %}
+                      {% set instance_tags = [] %}
+                      {% for tag in brickset_tags %}
+                        {% if instance.fields[tag.as_column()] %}
+                          {% set _ = instance_tags.append(tag.fields.name) %}
+                        {% endif %}
+                      {% endfor %}
+                      {% if instance_tags %}
+                        {% set _ = instance_name.append("[" + instance_tags | join(", ") + "]") %}
+                      {% endif %}
+                      {% if instance.fields.purchase_date %}
+                        {% set _ = instance_name.append("(" + instance.purchase_date() + ")") %}
+                      {% endif %}
+                      {% if instance_name %}
+                        <div class="position-absolute top-0 end-0 m-2">
+                          <span class="badge bg-dark bg-opacity-75 text-wrap text-start" style="max-width: 150px;">
+                            {{ instance_name | join(" ") }}
+                            {% if instance.fields.id == current_item_id %}
+                              <br><small class="text-info">Currently Viewing</small>
+                            {% endif %}
+                          </span>
+                        </div>
+                      {% else %}
+                        <div class="position-absolute top-0 end-0 m-2">
+                          <span class="badge bg-secondary">
+                            Copy #{{ loop.index }}
+                            {% if instance.fields.id == current_item_id %}
+                              <br><small class="text-info">Current</small>
+                            {% endif %}
+                          </span>
+                        </div>
+                      {% endif %}
+                    </div>
+                  {% endwith %}
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        {% with solo=true, delete=delete %}
+          {% include 'set/card.html' %}
+        {% endwith %}
+      {% else %}
+        <!-- Single instance view -->
+        {% with solo=true, delete=delete %}
+          {% include 'set/card.html' %}
+        {% endwith %}
+      {% endif %}
     </div>
   </div>
 </div>

@@ -111,6 +111,16 @@ class BrickMetadataList(BrickRecordList[T]):
             in new.filter(**kwargs)
         ])
 
+    # Return the items as a dictionary mapping column names to UUIDs
+    @classmethod
+    def as_column_mapping(cls, /, **kwargs) -> dict:
+        new = cls.new()
+
+        return {
+            record.as_column(): record.fields.id
+            for record in new.filter(**kwargs)
+        }
+
     # Grab a specific status
     @classmethod
     def get(cls, id: str | None, /, *, allow_none: bool = False) -> T:
