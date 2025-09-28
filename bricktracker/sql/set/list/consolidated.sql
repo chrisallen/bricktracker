@@ -37,6 +37,7 @@ SELECT
         {% if statuses_dict %}
             {% for column, uuid in statuses_dict.items() %}
                 , MAX("bricktracker_set_statuses"."{{ column }}") AS "{{ column }}"
+                , IFNULL(SUM("bricktracker_set_statuses"."{{ column }}"), 0) AS "{{ column }}_count"
             {% endfor %}
         {% endif %}
     {% endblock %}

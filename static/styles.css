@@ -161,3 +161,21 @@
     text-overflow: ellipsis;
     min-width: 0;
 }
+
+/* Partial Status Checkbox Styling */
+.partial-status {
+    position: relative;
+}
+
+.partial-status::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    right: 2px;
+    bottom: 2px;
+    background: #6f42c1;
+    border-radius: 2px;
+    opacity: 0.8;
+    pointer-events: none;
+}

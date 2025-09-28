@@ -88,7 +88,38 @@
   {% if not tiny and brickset_statuses | length %}
     <ul class="list-group list-group-flush card-check border-bottom-0"{% if current_viewing %} style="border-color: var(--bs-border-color) !important; border-width: 1px !important;"{% endif %}>
       {% for status in brickset_statuses %}
-        <li class="d-flex list-group-item {% if not solo %}p-1{% endif %} text-nowrap">{{ form.checkbox(status.fields.name, item.fields.id, status.as_dataset(), status.url_for_set_state(item.fields.id), item.fields[status.as_column()], parent='set', delete=delete) }}</li>
+        <li class="d-flex list-group-item {% if not solo %}p-1{% endif %} text-nowrap">
+          {% if item.fields.instance_count is defined and item.fields.instance_count > 1 %}
+            {# Consolidated set - show mixed status indicator #}
+            {% set status_count = item.fields[status.as_column() + '_count'] %}
+            {% set total_count = item.fields.instance_count %}
+            {% if status_count == 0 %}
+              {# None checked #}
+              <input class="form-check-input px-1" type="checkbox" disabled>
+              <label class="form-check-label">
+                {{ status.fields.name }}
+                <small class="text-muted ms-1">(0/{{ total_count }})</small>
+              </label>
+            {% elif status_count == total_count %}
+              {# All checked #}
+              <input class="form-check-input px-1" type="checkbox" checked disabled>
+              <label class="form-check-label">
+                {{ status.fields.name }}
+                <small class="text-muted ms-1">({{ total_count }}/{{ total_count }})</small>
+              </label>
+            {% else %}
+              {# Partial - some checked #}
+              <input class="form-check-input px-1 partial-status" type="checkbox" disabled>
+              <label class="form-check-label">
+                {{ status.fields.name }}
+                <small class="text-muted ms-1">({{ status_count }}/{{ total_count }})</small>
+              </label>
+            {% endif %}
+          {% else %}
+            {# Individual set - use normal checkbox #}
+            {{ form.checkbox(status.fields.name, item.fields.id, status.as_dataset(), status.url_for_set_state(item.fields.id), item.fields[status.as_column()], parent='set', delete=delete) }}
+          {% endif %}
+        </li>
       {% endfor %}
     </ul>
   {% endif %}

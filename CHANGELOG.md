@@ -40,6 +40,7 @@
   - Backwards compatible - when disabled, behaves exactly like original individual view
   - Improved theme filtering: handles duplicate theme names correctly
   - Fixed set number sorting: proper numeric sorting in both ascending and descending order
+  - Mixed status indicators for consolidated sets: three-state checkboxes (unchecked/partial/checked) with count badges
   
 ### 1.2.4
 
