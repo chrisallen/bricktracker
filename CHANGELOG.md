@@ -41,6 +41,10 @@
   - Improved theme filtering: handles duplicate theme names correctly
   - Fixed set number sorting: proper numeric sorting in both ascending and descending order
   - Mixed status indicators for consolidated sets: three-state checkboxes (unchecked/partial/checked) with count badges
+    - Enhanced SQL aggregation with `IFNULL(SUM())` for accurate count statistics
+    - Template logic handles three states: none (0/2), all (2/2), partial (1/2) with visual indicators
+    - Purple overlay styling for partial states, disabled checkboxes for read-only consolidated status display
+    - Individual sets maintain full interactive checkbox functionality
   
 ### 1.2.4
 

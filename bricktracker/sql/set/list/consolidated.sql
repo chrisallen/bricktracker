@@ -12,7 +12,7 @@ SELECT
     COUNT("bricktracker_sets"."id") AS "instance_count",
     IFNULL(SUM("problem_join"."total_missing"), 0) AS "total_missing",
     IFNULL(SUM("problem_join"."total_damaged"), 0) AS "total_damaged",
-    IFNULL(SUM("minifigures_join"."total"), 0) AS "total_minifigures",
+    IFNULL(MAX("minifigures_join"."total"), 0) AS "total_minifigures",
     -- Keep one representative instance for display purposes
     GROUP_CONCAT("bricktracker_sets"."id", '|') AS "instance_ids",
     REPLACE(GROUP_CONCAT(DISTINCT "bricktracker_sets"."storage"), ',', '|') AS "storage",
