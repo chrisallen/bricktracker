@@ -3,7 +3,7 @@
 {% import 'macro/card.html' as card %}
 {% import 'macro/form.html' as form %}
 
-<div {% if not solo %}id="set-{{ item.fields.consolidated_id or item.fields.id }}"{% endif %} class="card mb-3 flex-fill {% if solo %}card-solo{% endif %}{% if current_viewing %} border-danger{% endif %}"{% if current_viewing %} style="border-width: 3px !important;"{% endif %}
+<div {% if not solo %}id="set-{{ item.fields.consolidated_id or item.fields.id }}"{% endif %} class="card mb-3 flex-fill {% if solo %}card-solo{% endif %}{% if current_viewing %} border-secondary{% endif %}"{% if current_viewing %} style="border-width: 3px !important;"{% endif %}
   data-set-id="{{ item.fields.consolidated_id or item.fields.id }}" data-rebrickable-id="{{ item.fields.set }}"
   {% if item.fields.instance_count is defined %}data-instance-count="{{ item.fields.instance_count }}" data-instance-ids="{{ item.fields.instance_ids }}"{% endif %}
   {% if not solo and not tiny %}
