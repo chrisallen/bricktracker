@@ -91,7 +91,7 @@ class BrickGridFilter {
                                 attribute: select.value,
                                 bool: true,
                                 value: "1"
-                            })
+                            });
                         }
                     break;
                 }
@@ -106,19 +106,48 @@ class BrickGridFilter {
                 const attribute = current.getAttribute(`data-${filter.attribute}`);
 
                 // Bool check
-                // Attribute not equal value, or undefined and value is truthy
+                // For boolean attributes (like owner/tag filtering)
                 if (filter.bool) {
-                    if ((attribute != null && attribute != filter.value) || (attribute == null && filter.value == "1")) {
-                        current.parentElement.classList.add("d-none");
-                        return;
+                    if (filter.value == "1") {
+                        // Looking for sets WITH this attribute
+                        // Hide if attribute is missing (null) or explicitly "0"
+                        // For owner/tag attributes: missing = doesn't have this owner/tag
+                        if (attribute == null || attribute == "0") {
+                            current.parentElement.classList.add("d-none");
+                            return;
+                        }
+                    } else if (filter.value == "0") {
+                        // Looking for sets WITHOUT this attribute
+                        // Hide if attribute is present and "1"
+                        // For owner/tag attributes: present and "1" = has this owner/tag
+                        if (attribute == "1") {
+                            current.parentElement.classList.add("d-none");
+                            return;
+                        }
+                        // Note: null (missing) is treated as "doesn't have" which is what we want for value="0"
                     }
                 }
 
                 // Value check
-                // Attribute not equal value, or attribute undefined
-                else if ((attribute != null && attribute != filter.value) || attribute == null) {
+                // For consolidated cards, attributes may be comma or pipe-separated (e.g., "storage1,storage2" or "storage1|storage2")
+                else if (attribute == null) {
+                    // Hide if attribute is missing
                     current.parentElement.classList.add("d-none");
                     return;
+                } else if (attribute.includes(',') || attribute.includes('|')) {
+                    // Handle comma or pipe-separated values (consolidated cards)
+                    const separator = attribute.includes('|') ? '|' : ',';
+                    const values = attribute.split(separator).map(v => v.trim());
+                    if (!values.includes(filter.value)) {
+                        current.parentElement.classList.add("d-none");
+                        return;
+                    }
+                } else {
+                    // Handle single values (regular cards)
+                    if (attribute != filter.value) {
+                        current.parentElement.classList.add("d-none");
+                        return;
+                    }
                 }
             }
 

@@ -77,6 +77,7 @@ CONFIG: Final[list[dict[str, Any]]] = [
     {'n': 'RETIRED_SETS_PATH', 'd': './retired_sets.csv'},
     {'n': 'SETS_DEFAULT_ORDER', 'd': '"rebrickable_sets"."number" DESC, "rebrickable_sets"."version" ASC'},  # noqa: E501
     {'n': 'SETS_FOLDER', 'd': 'sets', 's': True},
+    {'n': 'SETS_CONSOLIDATION', 'd': False, 'c': bool},
     {'n': 'SHOW_GRID_FILTERS', 'c': bool},
     {'n': 'SHOW_GRID_SORT', 'c': bool},
     {'n': 'SKIP_SPARE_PARTS', 'c': bool},

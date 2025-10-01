@@ -24,6 +24,7 @@ class BrickSetList(BrickRecordList[BrickSet]):
 
     # Queries
     all_query: str = 'set/list/all'
+    consolidated_query: str = 'set/list/consolidated'
     damaged_minifigure_query: str = 'set/list/damaged_minifigure'
     damaged_part_query: str = 'set/list/damaged_part'
     generic_query: str = 'set/list/generic'
@@ -46,8 +47,25 @@ class BrickSetList(BrickRecordList[BrickSet]):
 
     # All the sets
     def all(self, /) -> Self:
-        # Load the sets from the database
-        self.list(do_theme=True)
+        # Load the sets from the database with metadata context for filtering
+        filter_context = {
+            'owners': BrickSetOwnerList.as_columns(),
+            'statuses': BrickSetStatusList.as_columns(),
+            'tags': BrickSetTagList.as_columns(),
+        }
+        self.list(do_theme=True, **filter_context)
+
+        return self
+
+    # All sets in consolidated/grouped view
+    def all_consolidated(self, /) -> Self:
+        # Load the sets from the database using consolidated query with metadata context
+        filter_context = {
+            'owners_dict': BrickSetOwnerList.as_column_mapping(),
+            'statuses_dict': BrickSetStatusList.as_column_mapping(),
+            'tags_dict': BrickSetTagList.as_column_mapping(),
+        }
+        self.list(override_query=self.consolidated_query, do_theme=True, **filter_context)
 
         return self
 
@@ -64,7 +82,8 @@ class BrickSetList(BrickRecordList[BrickSet]):
         owner_filter: str | None = None,
         purchase_location_filter: str | None = None,
         storage_filter: str | None = None,
-        tag_filter: str | None = None
+        tag_filter: str | None = None,
+        use_consolidated: bool = True
     ) -> tuple[Self, int]:
         # Convert theme name to theme ID for filtering
         theme_id_filter = None
@@ -86,24 +105,51 @@ class BrickSetList(BrickRecordList[BrickSet]):
             'owners': BrickSetOwnerList.as_columns(),
             'statuses': BrickSetStatusList.as_columns(),
             'tags': BrickSetTagList.as_columns(),
+            'owners_dict': BrickSetOwnerList.as_column_mapping(),
+            'statuses_dict': BrickSetStatusList.as_column_mapping(),
+            'tags_dict': BrickSetTagList.as_column_mapping(),
         }
+
+
 
         # Field mapping for sorting
-        field_mapping = {
-            'set': '"rebrickable_sets"."set"',
-            'name': '"rebrickable_sets"."name"',
-            'year': '"rebrickable_sets"."year"',
-            'parts': '"rebrickable_sets"."number_of_parts"',
-            'theme': '"rebrickable_sets"."theme_id"',
-            'minifigures': '"total_minifigures"',  # Use the alias from the SQL query
-            'missing': '"total_missing"',  # Use the alias from the SQL query
-            'damaged': '"total_damaged"',  # Use the alias from the SQL query
-            'purchase-date': '"bricktracker_sets"."purchase_date"',
-            'purchase-price': '"bricktracker_sets"."purchase_price"'
-        }
+        if use_consolidated:
+            field_mapping = {
+                'set': '"rebrickable_sets"."number", "rebrickable_sets"."version"',
+                'name': '"rebrickable_sets"."name"',
+                'year': '"rebrickable_sets"."year"',
+                'parts': '"rebrickable_sets"."number_of_parts"',
+                'theme': '"rebrickable_sets"."theme_id"',
+                'minifigures': '"total_minifigures"',
+                'missing': '"total_missing"',
+                'damaged': '"total_damaged"',
+                'instances': '"instance_count"',  # New field for consolidated view
+                'purchase-date': '"purchase_date"',  # Use the MIN aggregated value
+                'purchase-price': '"purchase_price"'  # Use the MIN aggregated value
+            }
+        else:
+            field_mapping = {
+                'set': '"rebrickable_sets"."number", "rebrickable_sets"."version"',
+                'name': '"rebrickable_sets"."name"',
+                'year': '"rebrickable_sets"."year"',
+                'parts': '"rebrickable_sets"."number_of_parts"',
+                'theme': '"rebrickable_sets"."theme_id"',
+                'minifigures': '"total_minifigures"',  # Use the alias from the SQL query
+                'missing': '"total_missing"',  # Use the alias from the SQL query
+                'damaged': '"total_damaged"',  # Use the alias from the SQL query
+                'purchase-date': '"bricktracker_sets"."purchase_date"',
+                'purchase-price': '"bricktracker_sets"."purchase_price"'
+            }
 
-        # Choose query based on whether filters are applied
-        query_to_use = 'set/list/all_filtered' if has_filters else self.all_query
+        # Choose query based on consolidation preference and filter complexity
+        # Owner/tag filters still need to fall back to non-consolidated for now
+        # due to complex aggregation requirements
+        complex_filters = [owner_filter, tag_filter]
+        if use_consolidated and not any(complex_filters):
+            query_to_use = self.consolidated_query
+        else:
+            # Use filtered query when consolidation is disabled or complex filters applied
+            query_to_use = 'set/list/all_filtered'
 
         # Handle instructions filtering
         if status_filter in ['has-missing-instructions', '-has-missing-instructions']:
@@ -113,6 +159,18 @@ class BrickSetList(BrickRecordList[BrickSet]):
                 status_filter, theme_id_filter, owner_filter,
                 purchase_location_filter, storage_filter, tag_filter
             )
+
+        # Handle special case for set sorting with multiple columns
+        if sort_field == 'set' and field_mapping:
+            # Create custom order clause for set sorting
+            direction = 'DESC' if sort_order.lower() == 'desc' else 'ASC'
+            custom_order = f'"rebrickable_sets"."number" {direction}, "rebrickable_sets"."version" {direction}'
+            filter_context['order'] = custom_order
+            # Remove set from field mapping to avoid double-processing
+            field_mapping_copy = field_mapping.copy()
+            field_mapping_copy.pop('set', None)
+            field_mapping = field_mapping_copy
+            sort_field = None  # Disable automatic ORDER BY construction
 
         # Normal SQL-based filtering and pagination
         result, total_count = self.paginate(
@@ -125,8 +183,11 @@ class BrickSetList(BrickRecordList[BrickSet]):
             **filter_context
         )
 
-        # Populate themes for filter dropdown from ALL sets, not just current page
-        result._populate_themes_global()
+        # Populate themes for filter dropdown from filtered dataset (not just current page)
+        result._populate_themes_from_filtered_dataset(
+            query_to_use,
+            **filter_context
+        )
 
         return result, total_count
 
@@ -143,11 +204,36 @@ class BrickSetList(BrickRecordList[BrickSet]):
     def _theme_name_to_id(self, theme_name: str) -> str | None:
         """Convert a theme name to theme ID for filtering"""
         try:
+            from .sql import BrickSQL
             theme_list = BrickThemeList()
+
+            # Find all theme IDs that match the name
+            matching_theme_ids = []
             for theme_id, theme in theme_list.themes.items():
                 if theme.name.lower() == theme_name.lower():
-                    return str(theme_id)
-            return None
+                    matching_theme_ids.append(str(theme_id))
+
+            if not matching_theme_ids:
+                return None
+
+            # If only one match, return it
+            if len(matching_theme_ids) == 1:
+                return matching_theme_ids[0]
+
+            # Multiple matches - check which theme ID actually has sets in the user's collection
+            sql = BrickSQL()
+            for theme_id in matching_theme_ids:
+                result = sql.fetchone(
+                    'set/check_theme_exists',
+                    theme_id=theme_id
+                )
+                count = result['count'] if result else 0
+                if count > 0:
+                    return theme_id
+
+            # If none have sets, return the first match (fallback)
+            return matching_theme_ids[0]
+
         except Exception:
             # If themes can't be loaded, return None to disable theme filtering
             return None
@@ -240,21 +326,53 @@ class BrickSetList(BrickRecordList[BrickSet]):
                 purchase_location_filter, storage_filter, tag_filter
             )
 
-    def _populate_themes_global(self) -> None:
-        """Populate themes list from ALL sets, not just current page"""
+    def _populate_themes_from_filtered_dataset(self, query_name: str, **filter_context) -> None:
+        """Populate themes list from filtered dataset (all pages, not just current page)"""
         try:
-            # Load all sets to get all possible themes
-            all_sets = BrickSetList().all()
+            from .theme_list import BrickThemeList
+
+            # Use a simplified query to get just distinct theme_ids
+            theme_context = dict(filter_context)
+            theme_context.pop('limit', None)
+            theme_context.pop('offset', None)
+
+            # Use a special lightweight query for themes
+            theme_records = super().select(
+                override_query='set/list/themes_only',
+                **theme_context
+            )
+
+            # Convert to theme names
+            theme_list = BrickThemeList()
             themes = set()
-            for record in all_sets.records:
-                if hasattr(record, 'theme') and hasattr(record.theme, 'name'):
-                    themes.add(record.theme.name)
+            for record in theme_records:
+                theme_id = record.get('theme_id')
+                if theme_id:
+                    theme = theme_list.get(theme_id)
+                    if theme and hasattr(theme, 'name'):
+                        themes.add(theme.name)
 
             self.themes = list(themes)
             self.themes.sort()
+
         except Exception:
-            # Fall back to current page themes
-            self._populate_themes()
+            # Fall back to simpler approach: get themes from ALL sets (ignoring filters)
+            # This is better than showing only current page themes
+            try:
+                from .theme_list import BrickThemeList
+                all_sets = BrickSetList()
+                all_sets.list(do_theme=True)
+
+                themes = set()
+                for record in all_sets.records:
+                    if hasattr(record, 'theme') and hasattr(record.theme, 'name'):
+                        themes.add(record.theme.name)
+
+                self.themes = list(themes)
+                self.themes.sort()
+            except Exception:
+                # Final fallback to current page themes
+                self._populate_themes()
 
     def _matches_search(self, record, search_query: str) -> bool:
         """Check if record matches search query"""
@@ -301,7 +419,7 @@ class BrickSetList(BrickRecordList[BrickSet]):
         reverse = sort_order == 'desc'
 
         if sort_field == 'set':
-            return sorted(records, key=lambda r: r.fields.set, reverse=reverse)
+            return sorted(records, key=lambda r: self._set_sort_key(r.fields.set), reverse=reverse)
         elif sort_field == 'name':
             return sorted(records, key=lambda r: r.fields.name, reverse=reverse)
         elif sort_field == 'year':
@@ -311,6 +429,19 @@ class BrickSetList(BrickRecordList[BrickSet]):
         # Add more sort fields as needed
 
         return records
+
+
+    def _set_sort_key(self, set_number: str) -> tuple:
+        """Generate sort key for set numbers like '10121-1' -> (10121, 1)"""
+        try:
+            if '-' in set_number:
+                main_part, version_part = set_number.split('-', 1)
+                return (int(main_part), int(version_part))
+            else:
+                return (int(set_number), 0)
+        except (ValueError, TypeError):
+            # Fallback to string sorting if parsing fails
+            return (float('inf'), set_number)
 
     # Sets with a minifigure part damaged
     def damaged_minifigure(self, figure: str, /) -> Self:

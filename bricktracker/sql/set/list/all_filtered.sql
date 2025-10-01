@@ -8,7 +8,7 @@ AND (LOWER("rebrickable_sets"."name") LIKE LOWER('%{{ search_query }}%')
 {% endif %}
 
 {% if theme_filter %}
-AND "rebrickable_sets"."theme_id" = '{{ theme_filter }}'
+AND "rebrickable_sets"."theme_id" = {{ theme_filter }}
 {% endif %}
 
 {% if storage_filter %}

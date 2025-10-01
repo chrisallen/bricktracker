@@ -64,13 +64,17 @@ def list() -> str:
             owner_filter=owner_filter,
             purchase_location_filter=purchase_location_filter,
             storage_filter=storage_filter,
-            tag_filter=tag_filter
+            tag_filter=tag_filter,
+            use_consolidated=current_app.config['SETS_CONSOLIDATION']
         )
 
         pagination_context = build_pagination_context(page, per_page, total_count, is_mobile)
     else:
         # ORIGINAL MODE - Single page with all data for client-side search
-        sets = BrickSetList().all()
+        if current_app.config['SETS_CONSOLIDATION']:
+            sets = BrickSetList().all_consolidated()
+        else:
+            sets = BrickSetList().all()
         pagination_context = None
 
     template_context = {
@@ -239,13 +243,44 @@ def deleted(*, id: str) -> str:
 @set_page.route('/<id>/details', methods=['GET'])
 @exception_handler(__file__)
 def details(*, id: str) -> str:
-    return render_template(
-        'set.html',
-        item=BrickSet().select_specific(id),
-        open_instructions=request.args.get('open_instructions'),
-        brickset_statuses=BrickSetStatusList.list(all=True),
-        **set_metadata_lists(as_class=True)
-    )
+    # Load the specific set
+    item = BrickSet().select_specific(id)
+
+    # Check if there are multiple instances of this set
+    all_instances = BrickSetList()
+    # Load all sets with metadata context for tags, owners, etc.
+    filter_context = {
+        'owners': BrickSetOwnerList.as_columns(),
+        'statuses': BrickSetStatusList.as_columns(),
+        'tags': BrickSetTagList.as_columns(),
+    }
+    all_instances.list(do_theme=True, **filter_context)
+
+    # Find all instances with the same set number
+    same_set_instances = [
+        record for record in all_instances.records
+        if record.fields.set == item.fields.set
+    ]
+
+    # If consolidation is enabled and multiple instances exist, show consolidated view
+    if current_app.config['SETS_CONSOLIDATION'] and len(same_set_instances) > 1:
+        return render_template(
+            'set.html',
+            item=item,
+            all_instances=same_set_instances,
+            open_instructions=request.args.get('open_instructions'),
+            brickset_statuses=BrickSetStatusList.list(all=True),
+            **set_metadata_lists(as_class=True)
+        )
+    else:
+        # Single instance or consolidation disabled, show normal view
+        return render_template(
+            'set.html',
+            item=item,
+            open_instructions=request.args.get('open_instructions'),
+            brickset_statuses=BrickSetStatusList.list(all=True),
+            **set_metadata_lists(as_class=True)
+        )
 
 
 # Update problematic pieces of a set

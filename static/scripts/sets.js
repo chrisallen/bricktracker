@@ -194,3 +194,169 @@ function setupPaginationFilterDropdowns() {
     window.location.href = currentUrl.toString();
   }
 }
+
+// Set grouping functionality
+function initializeSetGrouping() {
+  const groupToggle = document.getElementById('group-identical-sets');
+  if (!groupToggle) return;
+
+  // Load saved state from localStorage
+  const savedState = localStorage.getItem('groupIdenticalSets') === 'true';
+  groupToggle.checked = savedState;
+
+  // Apply grouping on page load if enabled
+  if (savedState) {
+    applySetGrouping();
+  }
+
+  // Listen for toggle changes
+  groupToggle.addEventListener('change', function() {
+    // Save state to localStorage
+    localStorage.setItem('groupIdenticalSets', this.checked);
+
+    if (this.checked) {
+      applySetGrouping();
+    } else {
+      removeSetGrouping();
+    }
+  });
+}
+
+function applySetGrouping() {
+  const grid = document.getElementById('grid');
+  if (!grid) return;
+
+  const setCards = Array.from(grid.children);
+  const groupedSets = {};
+
+  // Group sets by rebrickable_set_id
+  setCards.forEach(cardCol => {
+    const setCard = cardCol.querySelector('.card[data-set-id]');
+    if (!setCard) return;
+
+    const setId = setCard.getAttribute('data-set-id');
+    const rebrickableId = setCard.getAttribute('data-rebrickable-id');
+
+    if (!rebrickableId) return;
+
+    if (!groupedSets[rebrickableId]) {
+      groupedSets[rebrickableId] = [];
+    }
+
+    groupedSets[rebrickableId].push({
+      cardCol: cardCol,
+      setId: setId,
+      rebrickableId: rebrickableId
+    });
+  });
+
+  // Process each group
+  Object.keys(groupedSets).forEach(rebrickableId => {
+    const group = groupedSets[rebrickableId];
+
+    if (group.length > 1) {
+      createGroupedSetDisplay(group);
+    }
+  });
+}
+
+function createGroupedSetDisplay(setGroup) {
+  const firstSet = setGroup[0];
+  const firstCard = firstSet.cardCol.querySelector('.card');
+
+  if (!firstCard) return;
+
+  // Calculate aggregate stats
+  let totalMissing = 0;
+  let totalDamaged = 0;
+  let allSetIds = [];
+
+  setGroup.forEach(set => {
+    const card = set.cardCol.querySelector('.card');
+
+    // Get missing and damaged counts from existing data attributes
+    const missingCount = parseInt(card.getAttribute('data-missing') || '0');
+    const damagedCount = parseInt(card.getAttribute('data-damaged') || '0');
+
+    totalMissing += missingCount;
+    totalDamaged += damagedCount;
+    allSetIds.push(set.setId);
+  });
+
+  // Create grouped card container
+  const groupContainer = document.createElement('div');
+  groupContainer.className = firstSet.cardCol.className + ' set-group-container';
+  groupContainer.innerHTML = `
+    <div class="card set-group-card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+          <button class="btn btn-sm btn-outline-primary me-2 group-toggle-btn"
+                  type="button" data-bs-toggle="collapse"
+                  data-bs-target="#group-${setGroup[0].rebrickableId}"
+                  aria-expanded="false">
+            <i class="ri-arrow-right-line"></i>
+          </button>
+          <span class="fw-bold">${firstCard.querySelector('.card-title')?.textContent || 'Set'}</span>
+          <span class="badge bg-secondary ms-2">${setGroup.length} sets</span>
+        </div>
+        <div class="d-flex gap-1">
+          ${totalMissing > 0 ? `<span class="badge bg-warning text-dark">${totalMissing} missing</span>` : ''}
+          ${totalDamaged > 0 ? `<span class="badge bg-danger">${totalDamaged} damaged</span>` : ''}
+        </div>
+      </div>
+      <div class="collapse" id="group-${setGroup[0].rebrickableId}">
+        <div class="card-body">
+          <div class="row set-group-items"></div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Add individual set cards to the group
+  const groupItems = groupContainer.querySelector('.set-group-items');
+  setGroup.forEach(set => {
+    const itemContainer = document.createElement('div');
+    itemContainer.className = 'col-12 mb-2';
+
+    // Clone the original card but make it smaller
+    const clonedCard = set.cardCol.querySelector('.card').cloneNode(true);
+    clonedCard.classList.add('set-group-item');
+
+    itemContainer.appendChild(clonedCard);
+    groupItems.appendChild(itemContainer);
+
+    // Hide the original card
+    set.cardCol.style.display = 'none';
+    set.cardCol.classList.add('grouped-set-hidden');
+  });
+
+  // Insert the grouped container before the first hidden set
+  firstSet.cardCol.parentNode.insertBefore(groupContainer, firstSet.cardCol);
+
+  // Add event listener to toggle arrow icon
+  const toggleBtn = groupContainer.querySelector('.group-toggle-btn');
+  const collapseElement = groupContainer.querySelector('.collapse');
+
+  collapseElement.addEventListener('shown.bs.collapse', () => {
+    toggleBtn.querySelector('i').className = 'ri-arrow-down-line';
+  });
+
+  collapseElement.addEventListener('hidden.bs.collapse', () => {
+    toggleBtn.querySelector('i').className = 'ri-arrow-right-line';
+  });
+}
+
+function removeSetGrouping() {
+  // Show all hidden sets
+  const hiddenSets = document.querySelectorAll('.grouped-set-hidden');
+  hiddenSets.forEach(setCol => {
+    setCol.style.display = '';
+    setCol.classList.remove('grouped-set-hidden');
+  });
+
+  // Remove all group containers
+  const groupContainers = document.querySelectorAll('.set-group-container');
+  groupContainers.forEach(container => {
+    container.remove();
+  });
+}
