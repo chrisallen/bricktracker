@@ -17,6 +17,7 @@ SELECT
     GROUP_CONCAT("bricktracker_sets"."id", '|') AS "instance_ids",
     REPLACE(GROUP_CONCAT(DISTINCT "bricktracker_sets"."storage"), ',', '|') AS "storage",
     MIN("bricktracker_sets"."purchase_date") AS "purchase_date",
+    MAX("bricktracker_sets"."purchase_date") AS "purchase_date_max",
     REPLACE(GROUP_CONCAT(DISTINCT "bricktracker_sets"."purchase_location"), ',', '|') AS "purchase_location",
     ROUND(AVG("bricktracker_sets"."purchase_price"), 1) AS "purchase_price"
     {% block owners %}
