@@ -18,7 +18,7 @@ SELECT
     REPLACE(GROUP_CONCAT(DISTINCT "bricktracker_sets"."storage"), ',', '|') AS "storage",
     MIN("bricktracker_sets"."purchase_date") AS "purchase_date",
     REPLACE(GROUP_CONCAT(DISTINCT "bricktracker_sets"."purchase_location"), ',', '|') AS "purchase_location",
-    MIN("bricktracker_sets"."purchase_price") AS "purchase_price"
+    ROUND(AVG("bricktracker_sets"."purchase_price"), 1) AS "purchase_price"
     {% block owners %}
         {% if owners_dict %}
             {% for column, uuid in owners_dict.items() %}
