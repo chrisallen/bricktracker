@@ -1,0 +1,555 @@
+{% extends 'base.html' %}
+
+{% block title %} - Statistics{% endblock %}
+
+{% block main %}
+<div class="container-fluid">
+
+  <!-- Overview Cards Row -->
+  <div class="row g-3 mb-4">
+    <!-- Collection Summary -->
+    <div class="col-lg-4 col-md-6">
+      <div class="card h-100">
+        <div class="card-header bg-primary text-white">
+          <h5 class="card-title mb-0">
+            <i class="ri-grid-line"></i> Collection Overview
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="row g-2">
+            <div class="col-6">
+              <div class="text-center">
+                <a href="{{ url_for('set.list') }}" class="text-decoration-none">
+                  <div class="h4 text-primary mb-0">{{ collection_summary.total_sets }}</div>
+                  <small class="text-muted">Total Sets</small>
+                </a>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="text-center">
+                <div class="h4 text-info mb-0">{{ collection_summary.unique_sets }}</div>
+                <small class="text-muted">Unique Sets</small>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="text-center">
+                <a href="{{ url_for('part.list') }}" class="text-decoration-none">
+                  <div class="h4 text-success mb-0">{{ "{:,}".format(collection_summary.total_parts_count) }}</div>
+                  <small class="text-muted">Total Parts</small>
+                </a>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="text-center">
+                <div class="h4 text-secondary mb-0">{{ collection_summary.unique_parts }}</div>
+                <small class="text-muted">Unique Parts</small>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="text-center">
+                <a href="{{ url_for('minifigure.list') }}" class="text-decoration-none">
+                  <div class="h4 text-warning mb-0">{{ collection_summary.total_minifigures_count }}</div>
+                  <small class="text-muted">Minifigures</small>
+                </a>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="text-center">
+                <div class="h4 text-info mb-0">{{ collection_summary.unique_minifigures }}</div>
+                <small class="text-muted">Unique Figs</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Financial Summary -->
+    <div class="col-lg-4 col-md-6">
+      <div class="card h-100">
+        <div class="card-header bg-success text-white">
+          <h5 class="card-title mb-0">
+            <i class="ri-money-dollar-circle-line"></i> Financial Summary
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="text-center mb-3">
+            <div class="h3 text-success mb-0">{{ config['PURCHASE_CURRENCY'] }}{{ "%.2f"|format(financial_summary.total_cost) }}</div>
+            <small class="text-muted">Total Investment</small>
+          </div>
+          <div class="row g-2">
+            <div class="col-6">
+              <div class="text-center">
+                <div class="h5 text-primary mb-0">{{ financial_summary.sets_with_price }}</div>
+                <small class="text-muted">Sets with Price</small>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="text-center">
+                <div class="h5 text-info mb-0">{{ financial_summary.percentage_with_price }}%</div>
+                <small class="text-muted">Price Coverage</small>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="text-center">
+                <div class="text-muted small">Average</div>
+                <div class="fw-bold">{{ config['PURCHASE_CURRENCY'] }}{{ "%.2f"|format(financial_summary.average_cost) }}</div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="text-center">
+                <div class="text-muted small">Range</div>
+                <div class="fw-bold">{{ config['PURCHASE_CURRENCY'] }}{{ "%.2f"|format(financial_summary.minimum_cost) }} - {{ config['PURCHASE_CURRENCY'] }}{{ "%.2f"|format(financial_summary.maximum_cost) }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Problems & Storage -->
+    <div class="col-lg-4 col-md-12">
+      <div class="card h-100">
+        <div class="card-header bg-warning text-dark">
+          <h5 class="card-title mb-0">
+            <i class="ri-error-warning-line"></i> Issues & Storage
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="row g-2">
+            <div class="col-6">
+              <div class="text-center">
+                <a href="{{ url_for('part.problem') }}" class="text-decoration-none">
+                  <div class="h4 text-danger mb-0">{{ collection_summary.total_missing_parts }}</div>
+                  <small class="text-muted">Missing Parts</small>
+                </a>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="text-center">
+                <a href="{{ url_for('part.problem') }}" class="text-decoration-none">
+                  <div class="h4 text-warning mb-0">{{ collection_summary.total_damaged_parts }}</div>
+                  <small class="text-muted">Damaged Parts</small>
+                </a>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="text-center">
+                {% if config['HIDE_ALL_STORAGES'] %}
+                  <div class="h4 text-info mb-0">{{ collection_summary.storage_locations_used }}</div>
+                {% else %}
+                  <a href="{{ url_for('storage.list') }}" class="text-decoration-none">
+                    <div class="h4 text-info mb-0">{{ collection_summary.storage_locations_used }}</div>
+                  </a>
+                {% endif %}
+                <small class="text-muted">Storage Locations</small>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="text-center">
+                <div class="h4 text-secondary mb-0">{{ collection_summary.purchase_locations_used }}</div>
+                <small class="text-muted">Purchase Locations</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detailed Statistics Tables -->
+  <div class="row g-3">
+    <!-- Theme Statistics -->
+    {% if theme_statistics %}
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">
+            <i class="ri-palette-line"></i> Sets by Theme
+          </h5>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Theme</th>
+                  <th class="text-center">Sets</th>
+                  <th class="text-center">Parts</th>
+                  <th class="text-center">Spent</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for theme in theme_statistics[:10] %}
+                <tr>
+                  <td>
+                    <a href="{{ url_for('set.list', theme=theme.theme_id) }}" class="text-decoration-none">
+                      {{ theme.theme_name }}
+                    </a>
+                  </td>
+                  <td class="text-center">
+                    <a href="{{ url_for('set.list', theme=theme.theme_id) }}" class="text-decoration-none">
+                      <span class="badge bg-primary">{{ theme.set_count }}</span>
+                    </a>
+                  </td>
+                  <td class="text-center">
+                    <small class="text-muted">{{ "{:,}".format(theme.total_parts) }}</small>
+                  </td>
+                  <td class="text-center">
+                    {% if theme.total_spent %}
+                      <small class="text-success">{{ config['PURCHASE_CURRENCY'] }}{{ "%.0f"|format(theme.total_spent) }}</small>
+                    {% else %}
+                      <small class="text-muted">-</small>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% if theme_statistics|length > 10 %}
+          <div class="card-footer text-center">
+            <small class="text-muted">Showing top 10 themes</small>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Storage Statistics -->
+    {% if storage_statistics %}
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">
+            <i class="ri-archive-2-line"></i> Sets by Storage
+          </h5>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Storage Location</th>
+                  <th class="text-center">Sets</th>
+                  <th class="text-center">Parts</th>
+                  <th class="text-center">Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for storage in storage_statistics %}
+                <tr>
+                  <td>
+                    <a href="{{ url_for('set.list', storage=storage.storage_id) }}" class="text-decoration-none">
+                      {{ storage.storage_name or 'Unknown' }}
+                    </a>
+                  </td>
+                  <td class="text-center">
+                    <a href="{{ url_for('set.list', storage=storage.storage_id) }}" class="text-decoration-none">
+                      <span class="badge bg-info">{{ storage.set_count }}</span>
+                    </a>
+                  </td>
+                  <td class="text-center">
+                    <small class="text-muted">{{ "{:,}".format(storage.total_parts) }}</small>
+                  </td>
+                  <td class="text-center">
+                    {% if storage.total_value %}
+                      <small class="text-success">{{ config['PURCHASE_CURRENCY'] }}{{ "%.0f"|format(storage.total_value) }}</small>
+                    {% else %}
+                      <small class="text-muted">-</small>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Purchase Location Statistics -->
+  {% if purchase_location_statistics %}
+  <div class="row g-3 mt-2">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">
+            <i class="ri-shopping-cart-line"></i> Sets by Purchase Location
+          </h5>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Purchase Location</th>
+                  <th class="text-center">Sets</th>
+                  <th class="text-center">Total Parts</th>
+                  <th class="text-center">Total Spent</th>
+                  <th class="text-center">Avg. Price</th>
+                  <th class="text-center">Price Range</th>
+                  <th class="text-center">Issues</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for location in purchase_location_statistics %}
+                <tr>
+                  <td>
+                    <a href="{{ url_for('set.list', purchase_location=location.location_id) }}" class="text-decoration-none">
+                      {{ location.location_name or 'Unknown' }}
+                    </a>
+                  </td>
+                  <td class="text-center">
+                    <a href="{{ url_for('set.list', purchase_location=location.location_id) }}" class="text-decoration-none">
+                      <span class="badge bg-secondary">{{ location.set_count }}</span>
+                    </a>
+                  </td>
+                  <td class="text-center">
+                    <small class="text-muted">{{ "{:,}".format(location.total_parts) }}</small>
+                  </td>
+                  <td class="text-center">
+                    {% if location.total_spent %}
+                      <span class="text-success fw-bold">{{ config['PURCHASE_CURRENCY'] }}{{ "%.2f"|format(location.total_spent) }}</span>
+                    {% else %}
+                      <small class="text-muted">-</small>
+                    {% endif %}
+                  </td>
+                  <td class="text-center">
+                    {% if location.avg_price %}
+                      <small class="text-info">{{ config['PURCHASE_CURRENCY'] }}{{ "%.2f"|format(location.avg_price) }}</small>
+                    {% else %}
+                      <small class="text-muted">-</small>
+                    {% endif %}
+                  </td>
+                  <td class="text-center">
+                    {% if location.min_price and location.max_price %}
+                      <small class="text-muted">{{ config['PURCHASE_CURRENCY'] }}{{ "%.0f"|format(location.min_price) }}-{{ "%.0f"|format(location.max_price) }}</small>
+                    {% else %}
+                      <small class="text-muted">-</small>
+                    {% endif %}
+                  </td>
+                  <td class="text-center">
+                    {% if location.missing_parts or location.damaged_parts %}
+                      <small class="text-warning">{{ location.missing_parts + location.damaged_parts }}</small>
+                    {% else %}
+                      <small class="text-success">✓</small>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Year-based Statistics -->
+  <div class="row g-3 mt-2">
+    <!-- Sets by Year (Release Year) -->
+    {% if sets_by_year_statistics %}
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">
+            <i class="ri-calendar-line"></i> Sets by Release Year
+          </h5>
+          <small class="text-muted">Statistics grouped by when LEGO released the sets</small>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0 table-sm">
+              <thead class="table-light">
+                <tr>
+                  <th>Year</th>
+                  <th class="text-center">Unique</th>
+                  <th class="text-center">Total</th>
+                  <th class="text-center">Parts</th>
+                  <th class="text-center">Spent</th>
+                  <th class="text-center">Avg/Set</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for year in sets_by_year_statistics[:15] %}
+                <tr>
+                  <td>
+                    <a href="{{ url_for('set.list', year=year.year) }}" class="year-filter-link text-decoration-none" data-year="{{ year.year }}">
+                      <strong>{{ year.year }}</strong>
+                    </a>
+                    {% if year.unique_themes > 1 %}
+                      <small class="text-muted d-block">{{ year.unique_themes }} themes</small>
+                    {% endif %}
+                  </td>
+                  <td class="text-center">
+                    <a href="{{ url_for('set.list', year=year.year) }}" class="year-filter-link text-decoration-none" data-year="{{ year.year }}">
+                      <span class="badge bg-secondary">{{ year.unique_sets }}</span>
+                    </a>
+                  </td>
+                  <td class="text-center">
+                    <a href="{{ url_for('set.list', year=year.year) }}" class="year-filter-link text-decoration-none" data-year="{{ year.year }}">
+                      <span class="badge bg-primary">{{ year.total_sets }}</span>
+                    </a>
+                  </td>
+                  <td class="text-center">
+                    <small class="text-muted">{{ "{:,}".format(year.total_parts) }}</small>
+                  </td>
+                  <td class="text-center">
+                    {% if year.total_spent %}
+                      <small class="text-success">{{ config['PURCHASE_CURRENCY'] }}{{ "%.0f"|format(year.total_spent) }}</small>
+                    {% else %}
+                      <small class="text-muted">-</small>
+                    {% endif %}
+                  </td>
+                  <td class="text-center">
+                    {% if year.avg_price_per_set %}
+                      <small class="text-info">{{ config['PURCHASE_CURRENCY'] }}{{ "%.0f"|format(year.avg_price_per_set) }}</small>
+                    {% else %}
+                      <small class="text-muted">-</small>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% if sets_by_year_statistics|length > 15 %}
+          <div class="card-footer text-center">
+            <small class="text-muted">Showing last 15 years</small>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Purchases by Year -->
+    {% if purchases_by_year_statistics %}
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">
+            <i class="ri-shopping-cart-line"></i> Purchases by Year
+          </h5>
+          <small class="text-muted">Statistics grouped by when you purchased the sets</small>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0 table-sm">
+              <thead class="table-light">
+                <tr>
+                  <th>Year</th>
+                  <th class="text-center">Unique</th>
+                  <th class="text-center">Total</th>
+                  <th class="text-center">Parts</th>
+                  <th class="text-center">Spent</th>
+                  <th class="text-center">Avg/Set</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for year in purchases_by_year_statistics %}
+                <tr>
+                  <td>
+                    <strong>{{ year.purchase_year }}</strong>
+                    <small class="text-muted d-block">
+                      {% if year.months_with_purchases > 1 %}{{ year.months_with_purchases }} months{% endif %}
+                      <span class="text-info">Purchase year</span>
+                    </small>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-secondary">{{ year.unique_sets }}</span>
+                  </td>
+                  <td class="text-center">
+                    <span class="badge bg-primary">{{ year.total_sets }}</span>
+                  </td>
+                  <td class="text-center">
+                    <small class="text-muted">{{ "{:,}".format(year.total_parts) }}</small>
+                  </td>
+                  <td class="text-center">
+                    {% if year.total_spent %}
+                      <strong class="text-success">{{ config['PURCHASE_CURRENCY'] }}{{ "%.2f"|format(year.total_spent) }}</strong>
+                    {% else %}
+                      <small class="text-muted">-</small>
+                    {% endif %}
+                  </td>
+                  <td class="text-center">
+                    {% if year.avg_price_per_set %}
+                      <small class="text-info">{{ config['PURCHASE_CURRENCY'] }}{{ "%.0f"|format(year.avg_price_per_set) }}</small>
+                    {% else %}
+                      <small class="text-muted">-</small>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% if year_summary %}
+          <div class="card-footer">
+            <div class="row text-center">
+              <div class="col-6">
+                <small class="text-muted">Peak Year</small><br>
+                {% if year_summary.peak_spending_year %}
+                  <strong>{{ year_summary.peak_spending_year }}</strong>
+                  <small class="text-success d-block">{{ config['PURCHASE_CURRENCY'] }}{{ "%.0f"|format(year_summary.max_spending) }}</small>
+                {% else %}
+                  <small class="text-muted">N/A</small>
+                {% endif %}
+              </div>
+              <div class="col-6">
+                <small class="text-muted">Active Years</small><br>
+                <strong>{{ year_summary.years_with_purchases }}</strong>
+                <small class="text-muted d-block">years</small>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Year Summary Banner -->
+  {% if year_summary and (year_summary.peak_collection_year or year_summary.oldest_set_year) %}
+  <div class="row g-3 mt-2">
+    <div class="col-12">
+      <div class="alert alert-info">
+        <div class="row text-center">
+          {% if year_summary.oldest_set_year and year_summary.newest_set_year %}
+          <div class="col-md-3">
+            <strong>{{ year_summary.oldest_set_year }} - {{ year_summary.newest_set_year }}</strong><br>
+            <small class="text-muted">Set Year Range</small>
+          </div>
+          {% endif %}
+          {% if year_summary.peak_collection_year %}
+          <div class="col-md-3">
+            <strong>{{ year_summary.peak_collection_year }}</strong><br>
+            <small class="text-muted">Most Sets from Year ({{ year_summary.max_sets_in_year }} sets)</small>
+          </div>
+          {% endif %}
+          {% if year_summary.years_represented %}
+          <div class="col-md-3">
+            <strong>{{ year_summary.years_represented }}</strong><br>
+            <small class="text-muted">Years Represented</small>
+          </div>
+          {% endif %}
+          {% if year_summary.years_with_purchases %}
+          <div class="col-md-3">
+            <strong>{{ year_summary.years_with_purchases }}</strong><br>
+            <small class="text-muted">Years with Purchases</small>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

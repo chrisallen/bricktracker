@@ -46,6 +46,7 @@ def list() -> str:
     purchase_location_filter = request.args.get('purchase_location')
     storage_filter = request.args.get('storage')
     tag_filter = request.args.get('tag')
+    year_filter = request.args.get('year')
 
     # Get pagination configuration
     per_page, is_mobile = get_pagination_config('sets')
@@ -65,6 +66,7 @@ def list() -> str:
             purchase_location_filter=purchase_location_filter,
             storage_filter=storage_filter,
             tag_filter=tag_filter,
+            year_filter=year_filter,
             use_consolidated=current_app.config['SETS_CONSOLIDATION']
         )
 
@@ -77,6 +79,16 @@ def list() -> str:
             sets = BrickSetList().all()
         pagination_context = None
 
+    # Convert theme ID to theme name for dropdown display if needed
+    display_theme_filter = theme_filter
+    if theme_filter and theme_filter.isdigit():
+        # Theme filter is an ID, convert to name for dropdown
+        # Create a fresh BrickSetList instance for theme conversion
+        converter = BrickSetList()
+        theme_name = converter._theme_id_to_name(theme_filter)
+        if theme_name:
+            display_theme_filter = theme_name
+
     template_context = {
         'collection': sets,
         'search_query': search_query,
@@ -84,11 +96,12 @@ def list() -> str:
         'current_sort': sort_field,
         'current_order': sort_order,
         'current_status_filter': status_filter,
-        'current_theme_filter': theme_filter,
+        'current_theme_filter': display_theme_filter,
         'current_owner_filter': owner_filter,
         'current_purchase_location_filter': purchase_location_filter,
         'current_storage_filter': storage_filter,
         'current_tag_filter': tag_filter,
+        'current_year_filter': year_filter,
         'brickset_statuses': BrickSetStatusList.list(),
         **set_metadata_lists(as_class=True)
     }

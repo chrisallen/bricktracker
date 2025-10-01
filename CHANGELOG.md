@@ -41,11 +41,24 @@
   - Improved theme filtering: handles duplicate theme names correctly
   - Fixed set number sorting: proper numeric sorting in both ascending and descending order
   - Mixed status indicators for consolidated sets: three-state checkboxes (unchecked/partial/checked) with count badges
-    - Enhanced SQL aggregation with `IFNULL(SUM())` for accurate count statistics
     - Template logic handles three states: none (0/2), all (2/2), partial (1/2) with visual indicators
     - Purple overlay styling for partial states, disabled checkboxes for read-only consolidated status display
     - Individual sets maintain full interactive checkbox functionality
-  
+- Add comprehensive statistics system (#91)
+  - New Statistics page with collection analytics
+  - Financial overview: total cost, average price, price range, investment tracking
+  - Collection metrics: total sets, unique sets, parts count, minifigures count
+  - Theme distribution statistics with clickable drill-down to filtered sets
+  - Storage location statistics showing sets per location with value calculations
+  - Purchase location analytics with spending patterns and date ranges
+  - Problem tracking: missing and damaged parts statistics
+  - Clickable numbers throughout statistics that filter to relevant sets
+  - `BK_HIDE_STATISTICS`: Environment variable to hide statistics menu item
+  - Year-based analytics: Sets by release year and purchases by year
+    - Sets by Release Year: Shows collection distribution across LEGO release years
+    - Purchases by Year: Tracks spending patterns and acquisition timeline
+    - Year summary with peak collection/spending years and timeline insights
+
 ### 1.2.4
 
 > **Warning**

@@ -93,6 +93,10 @@ AND (LOWER("rebrickable_sets"."name") LIKE LOWER('%{{ search_query }}%')
 AND "rebrickable_sets"."theme_id" = {{ theme_filter }}
 {% endif %}
 
+{% if year_filter %}
+AND "rebrickable_sets"."year" = {{ year_filter }}
+{% endif %}
+
 {% if storage_filter %}
 AND EXISTS (
     SELECT 1 FROM "bricktracker_sets" bs_filter

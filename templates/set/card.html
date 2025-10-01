@@ -8,7 +8,7 @@
   {% if item.fields.instance_count is defined %}data-instance-count="{{ item.fields.instance_count }}" data-instance-ids="{{ item.fields.instance_ids }}"{% endif %}
   {% if not solo and not tiny %}
     data-index="{{ index }}" data-number="{{ item.fields.set }}" data-set="{{ item.fields.set.split('-')[0] | int }}{{ '%05d' | format(item.fields.set.split('-')[1] | int) }}" data-name="{{ item.fields.name | lower }}" data-parts="{{ item.fields.number_of_parts }}"
-    data-year="{{ item.fields.year }}" data-theme="{{ item.theme.name | lower }}"
+    data-year="{{ item.fields.year }}" data-theme="{{ item.theme.name | lower }}" data-theme-id="{{ item.theme.id }}"
     {% if not config['HIDE_SET_INSTRUCTIONS'] %}
       data-has-missing-instructions="{{ (item.instructions | length == 0) | int }}"
     {% endif %}
