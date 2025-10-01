@@ -58,6 +58,10 @@
     - Sets by Release Year: Shows collection distribution across LEGO release years
     - Purchases by Year: Tracks spending patterns and acquisition timeline
     - Year summary with peak collection/spending years and timeline insights
+  - Enhanced statistics interface and functionality
+    - Collapsible sections: All statistics sections have clickable headers to expand/collapse
+    - Collection growth charts: Line charts showing sets, parts, and minifigures over time
+    - Configuration options: `BK_STATISTICS_SHOW_CHARTS` and `BK_STATISTICS_DEFAULT_EXPANDED` environment variables
 
 ### 1.2.4
 
