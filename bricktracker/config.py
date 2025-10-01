@@ -90,4 +90,6 @@ CONFIG: Final[list[dict[str, Any]]] = [
     {'n': 'TIMEZONE', 'd': 'Etc/UTC'},
     {'n': 'USE_REMOTE_IMAGES', 'c': bool},
     {'n': 'WISHES_DEFAULT_ORDER', 'd': '"bricktracker_wishes"."rowid" DESC'},
+    {'n': 'STATISTICS_SHOW_CHARTS', 'd': True, 'c': bool},
+    {'n': 'STATISTICS_DEFAULT_EXPANDED', 'd': True, 'c': bool},
 ]

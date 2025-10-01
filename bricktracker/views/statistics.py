@@ -5,7 +5,7 @@ Provides statistics and analytics pages
 
 import logging
 
-from flask import Blueprint, render_template, request, url_for, redirect
+from flask import Blueprint, render_template, request, url_for, redirect, current_app
 from werkzeug.wrappers.response import Response
 
 from .exceptions import exception_handler
@@ -34,6 +34,11 @@ def overview() -> str:
     purchases_by_year_stats = stats.get_purchases_by_year_statistics()
     year_summary = stats.get_year_summary()
 
+    # Prepare chart data for visualization (only if charts are enabled)
+    chart_data = {}
+    if current_app.config['STATISTICS_SHOW_CHARTS']:
+        chart_data = prepare_chart_data(sets_by_year_stats, purchases_by_year_stats)
+
     # Get filter parameters for clickable statistics
     filter_type = request.args.get('filter_type')
     filter_value = request.args.get('filter_value')
@@ -53,6 +58,7 @@ def overview() -> str:
         sets_by_year_statistics=sets_by_year_stats,
         purchases_by_year_statistics=purchases_by_year_stats,
         year_summary=year_summary,
+        chart_data=chart_data,
         title="Statistics Overview"
     )
 
@@ -125,3 +131,59 @@ def purchase_locations() -> str:
         purchase_location_statistics=purchase_stats,
         title="Purchase Location Statistics"
     )
+
+
+def prepare_chart_data(sets_by_year_stats, purchases_by_year_stats):
+    """Prepare data for Chart.js visualization"""
+    import json
+
+    # Get all years from both datasets
+    all_years = set()
+
+    # Add years from sets by year
+    if sets_by_year_stats:
+        for year_stat in sets_by_year_stats:
+            if 'year' in year_stat:
+                all_years.add(year_stat['year'])
+
+    # Add years from purchases by year
+    if purchases_by_year_stats:
+        for year_stat in purchases_by_year_stats:
+            if 'purchase_year' in year_stat:
+                all_years.add(int(year_stat['purchase_year']))
+
+    # Create sorted list of years
+    years = sorted(list(all_years))
+
+    # Initialize data arrays
+    sets_data = []
+    parts_data = []
+    minifigs_data = []
+
+    # Create lookup dictionaries for quick access
+    sets_by_year_lookup = {}
+    if sets_by_year_stats:
+        for year_stat in sets_by_year_stats:
+            if 'year' in year_stat:
+                sets_by_year_lookup[year_stat['year']] = year_stat
+
+    # Fill data arrays
+    for year in years:
+        # Get sets and parts data from sets_by_year
+        year_data = sets_by_year_lookup.get(year)
+        if year_data:
+            sets_data.append(year_data.get('total_sets', 0))
+            parts_data.append(year_data.get('total_parts', 0))
+            # Use actual minifigure count from the database
+            minifigs_data.append(year_data.get('total_minifigures', 0))
+        else:
+            sets_data.append(0)
+            parts_data.append(0)
+            minifigs_data.append(0)
+
+    return {
+        'years': json.dumps(years),
+        'sets_data': json.dumps(sets_data),
+        'parts_data': json.dumps(parts_data),
+        'minifigs_data': json.dumps(minifigs_data)
+    }

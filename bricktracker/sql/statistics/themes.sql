@@ -15,7 +15,9 @@ SELECT
     ROUND(AVG("bricktracker_sets"."purchase_price"), 2) AS "avg_price",
     -- Problem statistics per theme
     COALESCE(SUM("problem_stats"."missing_parts"), 0) AS "missing_parts",
-    COALESCE(SUM("problem_stats"."damaged_parts"), 0) AS "damaged_parts"
+    COALESCE(SUM("problem_stats"."damaged_parts"), 0) AS "damaged_parts",
+    -- Minifigure statistics per theme
+    COALESCE(SUM("minifigure_stats"."minifigure_count"), 0) AS "total_minifigures"
 FROM "bricktracker_sets"
 INNER JOIN "rebrickable_sets" ON "bricktracker_sets"."set" = "rebrickable_sets"."set"
 LEFT JOIN (
@@ -26,5 +28,12 @@ LEFT JOIN (
     FROM "bricktracker_parts"
     GROUP BY "bricktracker_parts"."id"
 ) "problem_stats" ON "bricktracker_sets"."id" = "problem_stats"."id"
+LEFT JOIN (
+    SELECT
+        "bricktracker_minifigures"."id",
+        SUM("bricktracker_minifigures"."quantity") AS "minifigure_count"
+    FROM "bricktracker_minifigures"
+    GROUP BY "bricktracker_minifigures"."id"
+) "minifigure_stats" ON "bricktracker_sets"."id" = "minifigure_stats"."id"
 GROUP BY "rebrickable_sets"."theme_id"
 ORDER BY "set_count" DESC, "rebrickable_sets"."theme_id" ASC
