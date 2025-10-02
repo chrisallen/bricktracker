@@ -11,7 +11,7 @@
     <pre>{{name}} {% if line %}at line {{line}} of{% else %}in{% endif %} {{file}}: {{error}}</pre>
     <hr>
     <div class="text-end">
-      <a class="btn btn-danger me-1" href="{{ url_for('admin.admin') }}" role="button"><i class="ri-settings-4-line"></i> Administration</a>
+      <a class="btn btn-danger me-1" href="{{ url_for('admin.admin', open_database=true) }}" role="button"><i class="ri-settings-4-line"></i> Administration</a>
       <a class="btn btn-primary" href="{{ url_for('index.index') }}" role="button"><i class="ri-home-line"></i> Home</a>
     </div>
   </div>
