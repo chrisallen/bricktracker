@@ -1,6 +1,6 @@
 import logging
 
-from flask import Blueprint, request, render_template
+from flask import Blueprint, request, render_template, current_app
 from flask_login import login_required
 
 from ...configuration_list import BrickConfigurationList
@@ -102,13 +102,40 @@ def admin() -> str:
         open_tag
     )
 
-    open_database = (
-        open_image is None and
-        open_instructions is None and
-        open_logout is None and
-        not open_metadata and
-        open_retired is None and
-        open_theme is None
+    # Get configurable default expanded sections
+    default_expanded_sections = current_app.config.get('ADMIN_DEFAULT_EXPANDED_SECTIONS', [])
+
+    # Helper function to check if section should be expanded
+    def should_expand(section_name, url_param):
+        # URL parameter takes priority over default config
+        if url_param is not None:
+            return url_param
+        # Check if section is in default expanded list
+        return section_name in default_expanded_sections
+
+    # Apply configurable default expansion logic
+    open_database = should_expand('database', request.args.get('open_database', None))
+    open_image = should_expand('image', open_image)
+    open_instructions = should_expand('instructions', open_instructions)
+    open_logout = should_expand('authentication', open_logout)
+    open_retired = should_expand('retired', open_retired)
+    open_theme = should_expand('theme', open_theme)
+
+    # Metadata sub-sections
+    open_owner = should_expand('owner', open_owner)
+    open_purchase_location = should_expand('purchase_location', open_purchase_location)
+    open_status = should_expand('status', open_status)
+    open_storage = should_expand('storage', open_storage)
+    open_tag = should_expand('tag', open_tag)
+
+    # Recalculate metadata section based on sub-sections or direct config
+    open_metadata = (
+        should_expand('metadata', open_metadata) or
+        open_owner or
+        open_purchase_location or
+        open_status or
+        open_storage or
+        open_tag
     )
 
     return render_template(

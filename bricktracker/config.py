@@ -25,6 +25,7 @@ CONFIG: Final[list[dict[str, Any]]] = [
     {'n': 'HIDE_ADD_SET', 'c': bool},
     {'n': 'HIDE_ADD_BULK_SET', 'c': bool},
     {'n': 'HIDE_ADMIN', 'c': bool},
+    {'n': 'ADMIN_DEFAULT_EXPANDED_SECTIONS', 'd': [], 'c': list},
     {'n': 'HIDE_ALL_INSTRUCTIONS', 'c': bool},
     {'n': 'HIDE_ALL_MINIFIGURES', 'c': bool},
     {'n': 'HIDE_ALL_PARTS', 'c': bool},
