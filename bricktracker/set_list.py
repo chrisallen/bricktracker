@@ -188,13 +188,20 @@ class BrickSetList(BrickRecordList[BrickSet]):
         )
 
         # Populate themes and years for filter dropdown from filtered dataset (not just current page)
+        # For themes dropdown, exclude theme_filter to show ALL available themes
+        themes_context = filter_context.copy()
+        themes_context.pop('theme_filter', None)
         result._populate_themes_from_filtered_dataset(
             query_to_use,
-            **filter_context
+            **themes_context
         )
+        # For years dropdown, exclude ALL filters to show ALL available years
+        years_context = {
+            'search_query': filter_context.get('search_query'),
+        }
         result._populate_years_from_filtered_dataset(
             query_to_use,
-            **filter_context
+            **years_context
         )
 
         return result, total_count
@@ -382,24 +389,36 @@ class BrickSetList(BrickRecordList[BrickSet]):
     def _populate_years_from_filtered_dataset(self, query_name: str, **filter_context) -> None:
         """Populate years list from all available records in filtered dataset"""
         try:
-            # Get all records matching the current filters (not just current page)
-            unlimited_context = filter_context.copy()
-            unlimited_context.pop('limit', None)
-            unlimited_context.pop('offset', None)
+            # Use a simplified query to get just distinct years
+            years_context = dict(filter_context)
+            years_context.pop('limit', None)
+            years_context.pop('offset', None)
 
-            # Query all records for year extraction
-            all_sets = self._query_sets(query_name, **unlimited_context)
+            # Use a special lightweight query for years
+            year_records = super().select(
+                override_query='set/list/years_only',
+                **years_context
+            )
 
-            if all_sets.records:
-                years = set()
-                for record in all_sets.records:
-                    if hasattr(record, 'fields') and hasattr(record.fields, 'year') and record.fields.year:
-                        years.add(record.fields.year)
+            # Extract years from records
+            years = set()
+            for record in year_records:
+                year = record['year'] if 'year' in record.keys() else None
+                if year:
+                    years.add(year)
 
+            if years:
                 self.years = list(years)
                 self.years.sort(reverse=True)  # Most recent years first
-        except Exception:
-            # Final fallback to current page years
+            else:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.warning("No years found in filtered dataset, falling back to current page")
+                self._populate_years()
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Exception in _populate_years_from_filtered_dataset: {e}")
             self._populate_years()
 
     def _populate_themes_from_filtered_dataset(self, query_name: str, **filter_context) -> None:
