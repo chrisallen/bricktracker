@@ -69,6 +69,13 @@
   - URL parameters take priority over configuration (e.g., `?open_database=1`)
   - Database section expanded by default to maintain original behavior
   - Smart metadata handling: sub-section expansion automatically expands parent metadata section
+- Add live environment variable configuration management system
+  - Configuration Management interface in admin panel with live preview and badge system
+  - Live settings: Can be changed without application restart (menu visibility, table display, pagination, features)
+  - Static settings: Require restart but can be edited and saved to .env file (authentication, server, database, API keys)
+  - Advanced badge system showing value status: True/False for booleans, Set/Default/Unset for other values, Changed indicator
+  - Live API endpoints: `/admin/api/config/update` for immediate changes, `/admin/api/config/update-static` for .env updates
+  - Form pre-population with current values and automatic page reload after successful live updates
 - Add performance optimization
   - SQLite WAL Mode:
     - Increased cache size to 10,000 pages (~40MB) for faster query execution

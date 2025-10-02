@@ -1,9 +1,11 @@
 import logging
 
-from flask import Blueprint, request, render_template, current_app
+from flask import Blueprint, request, render_template, current_app, jsonify
 from flask_login import login_required
 
 from ...configuration_list import BrickConfigurationList
+from ...config_manager import ConfigManager
+from ...config import CONFIG
 from ..exceptions import exception_handler
 from ...instructions_list import BrickInstructionsList
 from ...rebrickable_image import RebrickableImage
@@ -25,6 +27,68 @@ from ...theme_list import BrickThemeList
 logger = logging.getLogger(__name__)
 
 admin_page = Blueprint('admin', __name__, url_prefix='/admin')
+
+
+def get_env_values():
+    """Get current environment values, using defaults from config when not set"""
+    import os
+    from pathlib import Path
+
+    env_values = {}
+    config_defaults = {}
+    env_explicit_values = {}  # Track which values are explicitly set
+
+    # Read .env file if it exists
+    env_file = Path('.env')
+    env_from_file = {}
+    if env_file.exists():
+        with open(env_file, 'r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith('#') and '=' in line:
+                    key, value = line.split('=', 1)
+                    env_from_file[key] = value
+
+    # Process each config item
+    for config_item in CONFIG:
+        env_name = f"BK_{config_item['n']}"
+
+        # Store default value (with casting applied)
+        default_value = config_item.get('d', '')
+        if 'c' in config_item and default_value is not None:
+            cast_type = config_item['c']
+            if cast_type == bool and default_value == '':
+                default_value = False  # Default for booleans is False only if no default specified
+            elif cast_type == list and isinstance(default_value, str):
+                default_value = [item.strip() for item in default_value.split(',') if item.strip()]
+            # For int/other types, keep the original default value
+        config_defaults[env_name] = default_value
+
+        # Check if value is explicitly set in .env file or environment
+        is_explicitly_set = env_name in env_from_file or env_name in os.environ
+        env_explicit_values[env_name] = is_explicitly_set
+
+        # Get value from .env file, environment, or default
+        value = env_from_file.get(env_name) or os.environ.get(env_name)
+        if value is None:
+            value = default_value
+        else:
+            # Apply casting if specified
+            if 'c' in config_item and value is not None:
+                cast_type = config_item['c']
+                if cast_type == bool and isinstance(value, str):
+                    value = value.lower() in ('true', '1', 'yes', 'on')
+                elif cast_type == int and value != '':
+                    try:
+                        value = int(value)
+                    except (ValueError, TypeError):
+                        value = config_item.get('d', 0)
+                elif cast_type == list and isinstance(value, str):
+                    value = [item.strip() for item in value.split(',') if item.strip()]
+
+        env_values[env_name] = value
+
+    return env_values, config_defaults, env_explicit_values
 
 
 # Admin
@@ -138,9 +202,13 @@ def admin() -> str:
         open_tag
     )
 
+    env_values, config_defaults, env_explicit_values = get_env_values()
     return render_template(
         'admin.html',
         configuration=BrickConfigurationList.list(),
+        env_values=env_values,
+        config_defaults=config_defaults,
+        env_explicit_values=env_explicit_values,
         database_counters=database_counters,
         database_error=request.args.get('database_error'),
         database_exception=database_exception,
@@ -176,3 +244,103 @@ def admin() -> str:
         tag_error=request.args.get('tag_error'),
         theme=BrickThemeList(),
     )
+
+
+# API Endpoints for Configuration Management
+
+@admin_page.route('/api/config/update', methods=['POST'])
+@login_required
+@exception_handler(__file__)
+def update_config() -> str:
+    """Update live configuration variables"""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({
+                'status': 'error',
+                'message': 'No JSON data provided'
+            }), 400
+
+        updates = data.get('updates', {})
+        if not updates:
+            return jsonify({
+                'status': 'error',
+                'message': 'No updates provided'
+            }), 400
+
+        # Use ConfigManager to update live configuration
+        config_manager = ConfigManager()
+        results = config_manager.update_config(updates)
+
+        # Check if all updates were successful
+        successful_updates = {k: v for k, v in results.items() if "successfully" in v}
+        failed_updates = {k: v for k, v in results.items() if "successfully" not in v}
+
+        logger.info(f"Configuration update: {len(successful_updates)} successful, {len(failed_updates)} failed")
+
+        if failed_updates:
+            logger.warning(f"Failed updates: {failed_updates}")
+
+        return jsonify({
+            'status': 'success' if not failed_updates else 'partial',
+            'results': results,
+            'successful_count': len(successful_updates),
+            'failed_count': len(failed_updates)
+        })
+
+    except Exception as e:
+        logger.error(f"Error updating configuration: {e}")
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+
+@admin_page.route('/api/config/update-static', methods=['POST'])
+@login_required
+@exception_handler(__file__)
+def update_static_config() -> str:
+    """Update static configuration variables (requires restart)"""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({
+                'status': 'error',
+                'message': 'No JSON data provided'
+            }), 400
+
+        updates = data.get('updates', {})
+        if not updates:
+            return jsonify({
+                'status': 'error',
+                'message': 'No updates provided'
+            }), 400
+
+        # Use ConfigManager to update .env file
+        config_manager = ConfigManager()
+
+        # Update each variable in the .env file
+        updated_count = 0
+        for var_name, value in updates.items():
+            try:
+                config_manager._update_env_file(var_name, value)
+                updated_count += 1
+                logger.info(f"Updated static config: {var_name}")
+            except Exception as e:
+                logger.error(f"Failed to update static config {var_name}: {e}")
+                raise e
+
+        logger.info(f"Updated {updated_count} static configuration variables")
+
+        return jsonify({
+            'status': 'success',
+            'message': f'Successfully updated {updated_count} static configuration variables to .env file',
+            'updated_count': updated_count
+        })
+
+    except Exception as e:
+        logger.error(f"Error updating static configuration: {e}")
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
