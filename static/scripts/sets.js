@@ -68,6 +68,9 @@ document.addEventListener("DOMContentLoaded", () => {
       // Setup filter dropdowns for pagination mode
       setupPaginationFilterDropdowns();
 
+      // Initialize filter dropdowns from URL parameters
+      initializeFilterDropdowns();
+
       // Initialize sort button states and icons for pagination mode
       const urlParams = new URLSearchParams(window.location.search);
       const currentSort = urlParams.get('sort');
@@ -75,8 +78,9 @@ document.addEventListener("DOMContentLoaded", () => {
       window.initializeSortButtonStates(currentSort, currentOrder);
 
     } else {
-      // ORIGINAL MODE - Grid search functionality is handled by existing grid scripts
-      // No additional setup needed here
+      // ORIGINAL MODE - Client-side filtering with grid scripts
+      // Initialize filter dropdowns from URL parameters for client-side mode too
+      initializeClientSideFilterDropdowns();
     }
   }
 });
@@ -131,6 +135,195 @@ function setupPaginationSortButtons() {
   }
 }
 
+function initializeFilterDropdowns() {
+  // Set filter dropdown values from URL parameters
+  const urlParams = new URLSearchParams(window.location.search);
+
+  // Set each filter dropdown value if the parameter exists
+  const yearParam = urlParams.get('year');
+  if (yearParam) {
+    const yearDropdown = document.getElementById('grid-year');
+    if (yearDropdown) {
+      yearDropdown.value = yearParam;
+    }
+  }
+
+  const themeParam = urlParams.get('theme');
+  if (themeParam) {
+    const themeDropdown = document.getElementById('grid-theme');
+    if (themeDropdown) {
+      // Try to set the theme value directly first (for theme names)
+      themeDropdown.value = themeParam;
+
+      // If that didn't work and the param is numeric (theme ID),
+      // try to find the corresponding theme name by looking at cards
+      if (themeDropdown.value !== themeParam && /^\d+$/.test(themeParam)) {
+        // Look for a card with this theme ID and get its theme name
+        const cardWithTheme = document.querySelector(`[data-theme-id="${themeParam}"]`);
+        if (cardWithTheme) {
+          const themeName = cardWithTheme.getAttribute('data-theme');
+          if (themeName) {
+            themeDropdown.value = themeName;
+          }
+        }
+      }
+    }
+  }
+
+  const statusParam = urlParams.get('status');
+  if (statusParam) {
+    const statusDropdown = document.getElementById('grid-status');
+    if (statusDropdown) {
+      statusDropdown.value = statusParam;
+    }
+  }
+
+  const ownerParam = urlParams.get('owner');
+  if (ownerParam) {
+    const ownerDropdown = document.getElementById('grid-owner');
+    if (ownerDropdown) {
+      ownerDropdown.value = ownerParam;
+    }
+  }
+
+  const purchaseLocationParam = urlParams.get('purchase_location');
+  if (purchaseLocationParam) {
+    const purchaseLocationDropdown = document.getElementById('grid-purchase-location');
+    if (purchaseLocationDropdown) {
+      purchaseLocationDropdown.value = purchaseLocationParam;
+    }
+  }
+
+  const storageParam = urlParams.get('storage');
+  if (storageParam) {
+    const storageDropdown = document.getElementById('grid-storage');
+    if (storageDropdown) {
+      storageDropdown.value = storageParam;
+    }
+  }
+
+  const tagParam = urlParams.get('tag');
+  if (tagParam) {
+    const tagDropdown = document.getElementById('grid-tag');
+    if (tagDropdown) {
+      tagDropdown.value = tagParam;
+    }
+  }
+}
+
+function initializeClientSideFilterDropdowns() {
+  // Set filter dropdown values from URL parameters and trigger filtering for client-side mode
+  const urlParams = new URLSearchParams(window.location.search);
+  let needsFiltering = false;
+
+  // Check if we have any filter parameters to avoid flash of all content
+  const hasFilterParams = urlParams.has('year') || urlParams.has('theme') || urlParams.has('storage') || urlParams.has('purchase_location');
+
+  // If we have filter parameters, temporarily hide the grid to prevent flash
+  if (hasFilterParams) {
+    const gridElement = document.querySelector('#grid');
+    if (gridElement && gridElement.getAttribute('data-grid') === 'true') {
+      gridElement.style.opacity = '0';
+    }
+  }
+
+  // Set year filter if parameter exists
+  const yearParam = urlParams.get('year');
+  if (yearParam) {
+    const yearDropdown = document.getElementById('grid-year');
+    if (yearDropdown) {
+      yearDropdown.value = yearParam;
+      needsFiltering = true;
+    }
+  }
+
+  // Set theme filter - handle both theme names and theme IDs
+  const themeParam = urlParams.get('theme');
+  if (themeParam) {
+    const themeDropdown = document.getElementById('grid-theme');
+    if (themeDropdown) {
+      if (/^\d+$/.test(themeParam)) {
+        // Theme parameter is an ID, need to convert to theme name by looking at cards
+        const themeNameFromId = findThemeNameById(themeParam);
+        if (themeNameFromId) {
+          themeDropdown.value = themeNameFromId;
+          needsFiltering = true;
+        }
+      } else {
+        // Theme parameter is already a name
+        themeDropdown.value = themeParam.toLowerCase();
+        needsFiltering = true;
+      }
+    }
+  }
+
+  // Set storage filter if parameter exists
+  const storageParam = urlParams.get('storage');
+  if (storageParam) {
+    const storageDropdown = document.getElementById('grid-storage');
+    if (storageDropdown) {
+      storageDropdown.value = storageParam;
+      needsFiltering = true;
+    }
+  }
+
+  // Set purchase location filter if parameter exists
+  const purchaseLocationParam = urlParams.get('purchase_location');
+  if (purchaseLocationParam) {
+    const purchaseLocationDropdown = document.getElementById('grid-purchase-location');
+    if (purchaseLocationDropdown) {
+      purchaseLocationDropdown.value = purchaseLocationParam;
+      needsFiltering = true;
+    }
+  }
+
+  // Trigger filtering if any parameters were set
+  if (needsFiltering) {
+    // Try to trigger filtering immediately
+    const tryToFilter = () => {
+      const gridElement = document.querySelector('#grid');
+      if (gridElement && gridElement.getAttribute('data-grid') === 'true' && window.gridInstances) {
+        const gridInstance = window.gridInstances[gridElement.id];
+        if (gridInstance && gridInstance.filter) {
+          // This is client-side mode, trigger the filter directly
+          gridInstance.filter.filter();
+
+          // Show the grid again after filtering
+          if (hasFilterParams) {
+            gridElement.style.opacity = '1';
+            gridElement.style.transition = 'opacity 0.2s ease-in-out';
+          }
+
+          return true;
+        }
+      }
+      return false;
+    };
+
+    // Try filtering immediately
+    if (!tryToFilter()) {
+      // If not ready, try again with a shorter delay
+      setTimeout(() => {
+        if (!tryToFilter()) {
+          // Final attempt with longer delay
+          setTimeout(tryToFilter, 100);
+        }
+      }, 50);
+    }
+  }
+}
+
+function findThemeNameById(themeId) {
+  // Look through all cards to find the theme name for this theme ID
+  const cards = document.querySelectorAll('.card[data-theme-id]');
+  for (const card of cards) {
+    if (card.getAttribute('data-theme-id') === themeId) {
+      return card.getAttribute('data-theme');
+    }
+  }
+  return null;
+}
+
 function setupPaginationFilterDropdowns() {
   // Filter dropdown functionality for pagination mode
   const filterDropdowns = document.querySelectorAll('#grid-filter select');
@@ -147,6 +340,7 @@ function setupPaginationFilterDropdowns() {
     // Get all filter values
     const statusFilter = document.getElementById('grid-status')?.value || '';
     const themeFilter = document.getElementById('grid-theme')?.value || '';
+    const yearFilter = document.getElementById('grid-year')?.value || '';
     const ownerFilter = document.getElementById('grid-owner')?.value || '';
     const purchaseLocationFilter = document.getElementById('grid-purchase-location')?.value || '';
     const storageFilter = document.getElementById('grid-storage')?.value || '';
@@ -163,6 +357,12 @@ function setupPaginationFilterDropdowns() {
       currentUrl.searchParams.set('theme', themeFilter);
     } else {
       currentUrl.searchParams.delete('theme');
+    }
+
+    if (yearFilter) {
+      currentUrl.searchParams.set('year', yearFilter);
+    } else {
+      currentUrl.searchParams.delete('year');
     }
 
     if (ownerFilter) {

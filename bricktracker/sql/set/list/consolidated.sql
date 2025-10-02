@@ -17,8 +17,9 @@ SELECT
     GROUP_CONCAT("bricktracker_sets"."id", '|') AS "instance_ids",
     REPLACE(GROUP_CONCAT(DISTINCT "bricktracker_sets"."storage"), ',', '|') AS "storage",
     MIN("bricktracker_sets"."purchase_date") AS "purchase_date",
+    MAX("bricktracker_sets"."purchase_date") AS "purchase_date_max",
     REPLACE(GROUP_CONCAT(DISTINCT "bricktracker_sets"."purchase_location"), ',', '|') AS "purchase_location",
-    MIN("bricktracker_sets"."purchase_price") AS "purchase_price"
+    ROUND(AVG("bricktracker_sets"."purchase_price"), 1) AS "purchase_price"
     {% block owners %}
         {% if owners_dict %}
             {% for column, uuid in owners_dict.items() %}
@@ -91,6 +92,10 @@ AND (LOWER("rebrickable_sets"."name") LIKE LOWER('%{{ search_query }}%')
 
 {% if theme_filter %}
 AND "rebrickable_sets"."theme_id" = {{ theme_filter }}
+{% endif %}
+
+{% if year_filter %}
+AND "rebrickable_sets"."year" = {{ year_filter }}
 {% endif %}
 
 {% if storage_filter %}

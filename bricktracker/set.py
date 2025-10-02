@@ -169,6 +169,20 @@ class BrickSet(RebrickableSet):
         else:
             return ''
 
+    # Purchase date max formatted for consolidated sets
+    def purchase_date_max_formatted(self, /, *, standard: bool = False) -> str:
+        if hasattr(self.fields, 'purchase_date_max') and self.fields.purchase_date_max is not None:
+            time = datetime.fromtimestamp(self.fields.purchase_date_max)
+
+            if standard:
+                return time.strftime('%Y/%m/%d')
+            else:
+                return time.strftime(
+                    current_app.config['PURCHASE_DATE_FORMAT']
+                )
+        else:
+            return ''
+
     # Purchase price with currency
     def purchase_price(self, /) -> str:
         if self.fields.purchase_price is not None:

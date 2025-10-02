@@ -65,11 +65,22 @@
   {% endif %}
 {% endmacro %}
 
-{% macro purchase_date(date, solo=false, last=false) %}
-  {% if last %}
-    {% set tooltip=date %}
+{% macro purchase_date(date, solo=false, last=false, date_max_formatted=none) %}
+  {% if date_max_formatted and date_max_formatted != date %}
+    {# Date range for consolidated sets #}
+    {% set date_range = date ~ ' - ' ~ date_max_formatted %}
+    {% if last %}
+      {% set tooltip=date_range %}
+    {% else %}
+      {% set text=date_range %}
+    {% endif %}
   {% else %}
-    {% set text=date %}
+    {# Single date #}
+    {% if last %}
+      {% set tooltip=date %}
+    {% else %}
+      {% set text=date %}
+    {% endif %}
   {% endif %}
   {{ badge(check=date, solo=solo, last=last, color='light border', icon='calendar-line', text=text, tooltip=tooltip, collapsible='Date:') }}
 {% endmacro %}

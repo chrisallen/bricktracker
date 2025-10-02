@@ -17,7 +17,13 @@ class BrickGrid {
     }
 }
 
+// Global grid instances storage
+window.gridInstances = {};
+
 // Helper to setup the grids
 const setup_grids = () => document.querySelectorAll('*[data-grid="true"]').forEach(
-    el => new BrickGrid(el)
+    el => {
+        const grid = new BrickGrid(el);
+        window.gridInstances[el.id] = grid;
+    }
 );

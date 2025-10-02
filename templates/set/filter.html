@@ -108,4 +108,18 @@
       </div>
     </div>
   {% endif %}
+  <div class="col-12 flex-grow-1">
+    <label class="visually-hidden" for="grid-year">Year</label>
+    <div class="input-group">
+      <span class="input-group-text"><i class="ri-calendar-line"></i><span class="ms-1 d-none d-md-inline"> Year</span></span>
+      <select id="grid-year" class="form-select"
+        data-filter="value" data-filter-attribute="year"
+        autocomplete="off">
+        <option value="" {% if not current_year_filter %}selected{% endif %}>All</option>
+        {% for year in collection.years %}
+        <option value="{{ year }}" {% if current_year_filter == year %}selected{% endif %}>{{ year }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
 </div>

@@ -20,6 +20,7 @@ from .instructions_list import BrickInstructionsList
 # All the sets from the database
 class BrickSetList(BrickRecordList[BrickSet]):
     themes: list[str]
+    years: list[int]
     order: str
 
     # Queries
@@ -41,6 +42,7 @@ class BrickSetList(BrickRecordList[BrickSet]):
 
         # Placeholders
         self.themes = []
+        self.years = []
 
         # Store the order for this list
         self.order = current_app.config['SETS_DEFAULT_ORDER']
@@ -83,6 +85,7 @@ class BrickSetList(BrickRecordList[BrickSet]):
         purchase_location_filter: str | None = None,
         storage_filter: str | None = None,
         tag_filter: str | None = None,
+        year_filter: str | None = None,
         use_consolidated: bool = True
     ) -> tuple[Self, int]:
         # Convert theme name to theme ID for filtering
@@ -91,7 +94,7 @@ class BrickSetList(BrickRecordList[BrickSet]):
             theme_id_filter = self._theme_name_to_id(theme_filter)
 
         # Check if any filters are applied
-        has_filters = any([status_filter, theme_id_filter, owner_filter, purchase_location_filter, storage_filter, tag_filter])
+        has_filters = any([status_filter, theme_id_filter, owner_filter, purchase_location_filter, storage_filter, tag_filter, year_filter])
 
         # Prepare filter context
         filter_context = {
@@ -102,6 +105,7 @@ class BrickSetList(BrickRecordList[BrickSet]):
             'purchase_location_filter': purchase_location_filter,
             'storage_filter': storage_filter,
             'tag_filter': tag_filter,
+            'year_filter': year_filter,
             'owners': BrickSetOwnerList.as_columns(),
             'statuses': BrickSetStatusList.as_columns(),
             'tags': BrickSetTagList.as_columns(),
@@ -183,8 +187,12 @@ class BrickSetList(BrickRecordList[BrickSet]):
             **filter_context
         )
 
-        # Populate themes for filter dropdown from filtered dataset (not just current page)
+        # Populate themes and years for filter dropdown from filtered dataset (not just current page)
         result._populate_themes_from_filtered_dataset(
+            query_to_use,
+            **filter_context
+        )
+        result._populate_years_from_filtered_dataset(
             query_to_use,
             **filter_context
         )
@@ -201,16 +209,37 @@ class BrickSetList(BrickRecordList[BrickSet]):
         self.themes = list(themes)
         self.themes.sort()
 
-    def _theme_name_to_id(self, theme_name: str) -> str | None:
-        """Convert a theme name to theme ID for filtering"""
+    def _populate_years(self) -> None:
+        """Populate years list from the current records"""
+        years = set()
+        for record in self.records:
+            if hasattr(record, 'fields') and hasattr(record.fields, 'year') and record.fields.year:
+                years.add(record.fields.year)
+
+        self.years = list(years)
+        self.years.sort(reverse=True)  # Most recent years first
+
+    def _theme_name_to_id(self, theme_name_or_id: str) -> str | None:
+        """Convert a theme name or ID to theme ID for filtering"""
         try:
+            # Check if the input is already a numeric theme ID
+            if theme_name_or_id.isdigit():
+                # Input is already a theme ID, validate it exists
+                theme_list = BrickThemeList()
+                theme_id = int(theme_name_or_id)
+                if theme_id in theme_list.themes:
+                    return str(theme_id)
+                else:
+                    return None
+
+            # Input is a theme name, convert to ID
             from .sql import BrickSQL
             theme_list = BrickThemeList()
 
             # Find all theme IDs that match the name
             matching_theme_ids = []
             for theme_id, theme in theme_list.themes.items():
-                if theme.name.lower() == theme_name.lower():
+                if theme.name.lower() == theme_name_or_id.lower():
                     matching_theme_ids.append(str(theme_id))
 
             if not matching_theme_ids:
@@ -236,6 +265,27 @@ class BrickSetList(BrickRecordList[BrickSet]):
 
         except Exception:
             # If themes can't be loaded, return None to disable theme filtering
+            return None
+
+    def _theme_id_to_name(self, theme_id: str) -> str | None:
+        """Convert a theme ID to theme name (lowercase) for dropdown display"""
+        try:
+            if not theme_id or not theme_id.isdigit():
+                return None
+
+            from .theme_list import BrickThemeList
+            theme_list = BrickThemeList()
+            theme_id_int = int(theme_id)
+
+            if theme_id_int in theme_list.themes:
+                return theme_list.themes[theme_id_int].name.lower()
+
+            return None
+        except Exception as e:
+            # For debugging - log the exception
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Failed to convert theme ID {theme_id} to name: {e}")
             return None
 
     def _all_filtered_paginated_with_instructions(
@@ -309,12 +359,15 @@ class BrickSetList(BrickRecordList[BrickSet]):
             result = BrickSetList()
             result.records = paginated_records
 
-            # Copy themes from the source that has all sets
+            # Copy themes and years from the source that has all sets
             result.themes = all_sets.themes if hasattr(all_sets, 'themes') else []
+            result.years = all_sets.years if hasattr(all_sets, 'years') else []
 
-            # If themes weren't populated, populate them globally
+            # If themes or years weren't populated, populate them from current records
             if not result.themes:
-                result._populate_themes_global()
+                result._populate_themes()
+            if not result.years:
+                result._populate_years()
 
             return result, total_count
 
@@ -325,6 +378,29 @@ class BrickSetList(BrickRecordList[BrickSet]):
                 None, theme_id_filter, owner_filter,
                 purchase_location_filter, storage_filter, tag_filter
             )
+
+    def _populate_years_from_filtered_dataset(self, query_name: str, **filter_context) -> None:
+        """Populate years list from all available records in filtered dataset"""
+        try:
+            # Get all records matching the current filters (not just current page)
+            unlimited_context = filter_context.copy()
+            unlimited_context.pop('limit', None)
+            unlimited_context.pop('offset', None)
+
+            # Query all records for year extraction
+            all_sets = self._query_sets(query_name, **unlimited_context)
+
+            if all_sets.records:
+                years = set()
+                for record in all_sets.records:
+                    if hasattr(record, 'fields') and hasattr(record.fields, 'year') and record.fields.year:
+                        years.add(record.fields.year)
+
+                self.years = list(years)
+                self.years.sort(reverse=True)  # Most recent years first
+        except Exception:
+            # Final fallback to current page years
+            self._populate_years()
 
     def _populate_themes_from_filtered_dataset(self, query_name: str, **filter_context) -> None:
         """Populate themes list from filtered dataset (all pages, not just current page)"""
@@ -364,15 +440,21 @@ class BrickSetList(BrickRecordList[BrickSet]):
                 all_sets.list(do_theme=True)
 
                 themes = set()
+                years = set()
                 for record in all_sets.records:
                     if hasattr(record, 'theme') and hasattr(record.theme, 'name'):
                         themes.add(record.theme.name)
+                    if hasattr(record, 'fields') and hasattr(record.fields, 'year') and record.fields.year:
+                        years.add(record.fields.year)
 
                 self.themes = list(themes)
                 self.themes.sort()
+                self.years = list(years)
+                self.years.sort(reverse=True)
             except Exception:
                 # Final fallback to current page themes
                 self._populate_themes()
+                self._populate_years()
 
     def _matches_search(self, record, search_query: str) -> bool:
         """Check if record matches search query"""
@@ -488,6 +570,7 @@ class BrickSetList(BrickRecordList[BrickSet]):
         **context: Any,
     ) -> None:
         themes = set()
+        years = set()
 
         if order is None:
             order = self.order
@@ -504,11 +587,15 @@ class BrickSetList(BrickRecordList[BrickSet]):
             self.records.append(brickset)
             if do_theme:
                 themes.add(brickset.theme.name)
+                if hasattr(brickset, 'fields') and hasattr(brickset.fields, 'year') and brickset.fields.year:
+                    years.add(brickset.fields.year)
 
         # Convert the set into a list and sort it
         if do_theme:
             self.themes = list(themes)
             self.themes.sort()
+            self.years = list(years)
+            self.years.sort(reverse=True)  # Most recent years first
 
     # Sets missing a minifigure part
     def missing_minifigure(self, figure: str, /) -> Self:
