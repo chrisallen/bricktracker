@@ -69,7 +69,23 @@
   - URL parameters take priority over configuration (e.g., `?open_database=1`)
   - Database section expanded by default to maintain original behavior
   - Smart metadata handling: sub-section expansion automatically expands parent metadata section
-
+- Add performance optimization
+  - SQLite WAL Mode:
+    - Increased cache size to 10,000 pages (~40MB) for faster query execution
+    - Set temp_store to memory for accelerated temporary operations
+    - Enabled foreign key constraints and optimized synchronous mode
+    - Added ANALYZE for improved query planning and statistics
+  - Database Indexes (Migration 0019):
+    - High-impact composite index for problem parts aggregation (`idx_bricktracker_parts_id_missing_damaged`)
+    - Parts lookup optimization (`idx_bricktracker_parts_part_color_spare`)
+    - Set storage filtering (`idx_bricktracker_sets_set_storage`)
+    - Search optimization with case-insensitive indexes (`idx_rebrickable_sets_name_lower`, `idx_rebrickable_parts_name_lower`)
+    - Year and theme filtering optimization (`idx_rebrickable_sets_year`, `idx_rebrickable_sets_theme_id`)
+    - Additional indexes for purchase dates, quantities, sorting, and minifigures aggregation
+  - Statistics Query Optimization:
+    - Replaced separate subqueries with efficient CTEs (Common Table Expressions)
+    - Consolidated aggregations for set, part, minifigure, and financial statistics
+    
 ### 1.2.4
 
 > **Warning**
