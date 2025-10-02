@@ -62,6 +62,13 @@
     - Collapsible sections: All statistics sections have clickable headers to expand/collapse
     - Collection growth charts: Line charts showing sets, parts, and minifigures over time
     - Configuration options: `BK_STATISTICS_SHOW_CHARTS` and `BK_STATISTICS_DEFAULT_EXPANDED` environment variables
+- Add configurable admin page section expansion
+  - `BK_ADMIN_DEFAULT_EXPANDED_SECTIONS`: Environment variable to specify which sections expand by default
+  - Accepts comma-separated list of section names (e.g., "database,theme,instructions")
+  - Valid sections: authentication, instructions, image, theme, retired, metadata, owner, purchase_location, status, storage, tag, database
+  - URL parameters take priority over configuration (e.g., `?open_database=1`)
+  - Database section expanded by default to maintain original behavior
+  - Smart metadata handling: sub-section expansion automatically expands parent metadata section
 
 ### 1.2.4
 
