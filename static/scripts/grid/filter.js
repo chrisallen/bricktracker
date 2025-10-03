@@ -180,7 +180,12 @@ class BrickGridFilter {
             }
 
             // If we passed all filters, we need to display it
-            current.parentElement.classList.remove("d-none");
+            // But also check if it's hidden by duplicate filter
+            if (!current.parentElement.classList.contains("duplicate-filter-hidden")) {
+                current.parentElement.classList.remove("d-none");
+            } else {
+                current.parentElement.classList.add("d-none");
+            }
         });
     }
 }

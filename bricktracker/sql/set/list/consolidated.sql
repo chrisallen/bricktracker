@@ -147,15 +147,21 @@ AND NOT EXISTS (
 
 GROUP BY "rebrickable_sets"."set"
 
+{% if status_filter or duplicate_filter %}
+HAVING 1=1
 {% if status_filter %}
 {% if status_filter == 'has-missing' %}
-HAVING IFNULL(SUM("problem_join"."total_missing"), 0) > 0
+AND IFNULL(SUM("problem_join"."total_missing"), 0) > 0
 {% elif status_filter == '-has-missing' %}
-HAVING IFNULL(SUM("problem_join"."total_missing"), 0) = 0
+AND IFNULL(SUM("problem_join"."total_missing"), 0) = 0
 {% elif status_filter == 'has-damaged' %}
-HAVING IFNULL(SUM("problem_join"."total_damaged"), 0) > 0
+AND IFNULL(SUM("problem_join"."total_damaged"), 0) > 0
 {% elif status_filter == '-has-damaged' %}
-HAVING IFNULL(SUM("problem_join"."total_damaged"), 0) = 0
+AND IFNULL(SUM("problem_join"."total_damaged"), 0) = 0
+{% endif %}
+{% endif %}
+{% if duplicate_filter %}
+AND COUNT("bricktracker_sets"."id") > 1
 {% endif %}
 {% endif %}
 

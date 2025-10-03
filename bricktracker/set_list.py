@@ -86,6 +86,7 @@ class BrickSetList(BrickRecordList[BrickSet]):
         storage_filter: str | None = None,
         tag_filter: str | None = None,
         year_filter: str | None = None,
+        duplicate_filter: bool = False,
         use_consolidated: bool = True
     ) -> tuple[Self, int]:
         # Convert theme name to theme ID for filtering
@@ -94,7 +95,7 @@ class BrickSetList(BrickRecordList[BrickSet]):
             theme_id_filter = self._theme_name_to_id(theme_filter)
 
         # Check if any filters are applied
-        has_filters = any([status_filter, theme_id_filter, owner_filter, purchase_location_filter, storage_filter, tag_filter, year_filter])
+        has_filters = any([status_filter, theme_id_filter, owner_filter, purchase_location_filter, storage_filter, tag_filter, year_filter, duplicate_filter])
 
         # Prepare filter context
         filter_context = {
@@ -106,6 +107,7 @@ class BrickSetList(BrickRecordList[BrickSet]):
             'storage_filter': storage_filter,
             'tag_filter': tag_filter,
             'year_filter': year_filter,
+            'duplicate_filter': duplicate_filter,
             'owners': BrickSetOwnerList.as_columns(),
             'statuses': BrickSetStatusList.as_columns(),
             'tags': BrickSetTagList.as_columns(),

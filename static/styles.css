@@ -178,4 +178,5 @@
     border-radius: 2px;
     opacity: 0.8;
     pointer-events: none;
-}
+}/* Duplicate filter support */
+.duplicate-filter-hidden { display: none !important; }

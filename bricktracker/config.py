@@ -82,6 +82,7 @@ CONFIG: Final[list[dict[str, Any]]] = [
     {'n': 'SETS_CONSOLIDATION', 'd': False, 'c': bool},
     {'n': 'SHOW_GRID_FILTERS', 'c': bool},
     {'n': 'SHOW_GRID_SORT', 'c': bool},
+    {'n': 'SHOW_SETS_DUPLICATE_FILTER', 'd': True, 'c': bool},
     {'n': 'SKIP_SPARE_PARTS', 'c': bool},
     {'n': 'SOCKET_NAMESPACE', 'd': 'bricksocket'},
     {'n': 'SOCKET_PATH', 'd': '/bricksocket/'},

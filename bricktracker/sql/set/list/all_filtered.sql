@@ -70,4 +70,12 @@ AND EXISTS (
 )
 {% endif %}
 {% endif %}
+
+{% if duplicate_filter %}
+AND (
+    SELECT COUNT(*)
+    FROM "bricktracker_sets" as "duplicate_check"
+    WHERE "duplicate_check"."set" = "bricktracker_sets"."set"
+) > 1
+{% endif %}
 {% endblock %}

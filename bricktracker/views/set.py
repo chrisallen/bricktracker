@@ -47,6 +47,7 @@ def list() -> str:
     storage_filter = request.args.get('storage')
     tag_filter = request.args.get('tag')
     year_filter = request.args.get('year')
+    duplicate_filter = request.args.get('duplicate', '').lower() == 'true'
 
     # Get pagination configuration
     per_page, is_mobile = get_pagination_config('sets')
@@ -67,6 +68,7 @@ def list() -> str:
             storage_filter=storage_filter,
             tag_filter=tag_filter,
             year_filter=year_filter,
+            duplicate_filter=duplicate_filter,
             use_consolidated=current_app.config['SETS_CONSOLIDATION']
         )
 
@@ -102,6 +104,7 @@ def list() -> str:
         'current_storage_filter': storage_filter,
         'current_tag_filter': tag_filter,
         'current_year_filter': year_filter,
+        'current_duplicate_filter': duplicate_filter,
         'brickset_statuses': BrickSetStatusList.list(),
         **set_metadata_lists(as_class=True)
     }

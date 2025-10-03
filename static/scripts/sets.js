@@ -19,6 +19,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchInput = document.getElementById('grid-search');
   const searchClear = document.getElementById('grid-search-clear');
 
+  // Initialize duplicate filter functionality
+  initializeDuplicateFilter();
+
   if (searchInput && searchClear) {
     if (isPaginationMode()) {
       // PAGINATION MODE - Server-side search
@@ -559,4 +562,146 @@ function removeSetGrouping() {
   groupContainers.forEach(container => {
     container.remove();
   });
+}
+
+// Initialize duplicate/consolidated filter functionality
+function initializeDuplicateFilter() {
+  const duplicateFilterButton = document.getElementById('duplicate-filter-toggle');
+  if (!duplicateFilterButton) return;
+
+  // Check if the filter should be active from URL parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const isDuplicateFilterActive = urlParams.get('duplicate') === 'true';
+
+  // Set initial button state
+  if (isDuplicateFilterActive) {
+    duplicateFilterButton.classList.remove('btn-outline-secondary');
+    duplicateFilterButton.classList.add('btn-secondary');
+  }
+
+  duplicateFilterButton.addEventListener('click', () => {
+    const isCurrentlyActive = duplicateFilterButton.classList.contains('btn-secondary');
+    const newState = !isCurrentlyActive;
+
+    // Update button appearance
+    if (newState) {
+      duplicateFilterButton.classList.remove('btn-outline-secondary');
+      duplicateFilterButton.classList.add('btn-secondary');
+    } else {
+      duplicateFilterButton.classList.remove('btn-secondary');
+      duplicateFilterButton.classList.add('btn-outline-secondary');
+    }
+
+    if (isPaginationMode()) {
+      // SERVER-SIDE MODE - Update URL parameter
+      performDuplicateFilterServer(newState);
+    } else {
+      // CLIENT-SIDE MODE - Apply filtering directly
+      applyDuplicateFilter(newState);
+    }
+  });
+}
+
+// Server-side duplicate filter
+function performDuplicateFilterServer(showOnlyDuplicates) {
+  const currentUrl = new URL(window.location);
+
+  if (showOnlyDuplicates) {
+    currentUrl.searchParams.set('duplicate', 'true');
+  } else {
+    currentUrl.searchParams.delete('duplicate');
+  }
+
+  // Reset to page 1 when filtering
+  currentUrl.searchParams.set('page', '1');
+  window.location.href = currentUrl.toString();
+}
+
+// Apply duplicate/consolidated filter
+function applyDuplicateFilter(showOnlyDuplicates) {
+  // Get the grid container and all column containers (not just the cards)
+  const gridContainer = document.getElementById('grid');
+  if (!gridContainer) {
+    console.warn('Grid container not found');
+    return;
+  }
+
+  // Try multiple selectors to find column containers
+  let columnContainers = gridContainer.querySelectorAll('.col-md-6');
+  if (columnContainers.length === 0) {
+    columnContainers = gridContainer.querySelectorAll('[class*="col-"]');
+  }
+
+  if (!showOnlyDuplicates) {
+    // Show all column containers by removing the duplicate-filter-hidden class
+    columnContainers.forEach(col => {
+      col.classList.remove('duplicate-filter-hidden');
+    });
+    // Trigger the existing grid filter to refresh
+    triggerGridRefresh();
+    return;
+  }
+
+  // Check if we're in consolidated mode by looking for data-instance-count
+  const consolidatedMode = document.querySelector('[data-instance-count]') !== null;
+
+  if (consolidatedMode) {
+    // CONSOLIDATED MODE: Show only sets with instance count > 1
+    columnContainers.forEach(col => {
+      const card = col.querySelector('[data-set-id]');
+      if (card) {
+        const instanceCount = parseInt(card.dataset.instanceCount || '1');
+        if (instanceCount > 1) {
+          col.classList.remove('duplicate-filter-hidden');
+        } else {
+          col.classList.add('duplicate-filter-hidden');
+        }
+      }
+    });
+  } else {
+    // NON-CONSOLIDATED MODE: Show only sets that appear multiple times
+    const setByCounts = {};
+
+    // Count occurrences of each set
+    columnContainers.forEach(col => {
+      const card = col.querySelector('[data-set-id]');
+      if (card) {
+        const rebrickableId = card.dataset.rebrickableId;
+        if (rebrickableId) {
+          setByCounts[rebrickableId] = (setByCounts[rebrickableId] || 0) + 1;
+        }
+      }
+    });
+
+    // Show/hide based on count
+    columnContainers.forEach(col => {
+      const card = col.querySelector('[data-set-id]');
+      if (card) {
+        const rebrickableId = card.dataset.rebrickableId;
+        if (rebrickableId && setByCounts[rebrickableId] > 1) {
+          col.classList.remove('duplicate-filter-hidden');
+        } else {
+          col.classList.add('duplicate-filter-hidden');
+        }
+      }
+    });
+  }
+
+  // Trigger the existing grid filter to refresh and respect our duplicate filter
+  triggerGridRefresh();
+}
+
+// Helper function to trigger grid filter refresh
+function triggerGridRefresh() {
+  // Check if we have a grid instance with filter capability
+  if (window.gridInstances) {
+    const gridElement = document.getElementById('grid');
+    if (gridElement && window.gridInstances[gridElement.id]) {
+      const gridInstance = window.gridInstances[gridElement.id];
+      if (gridInstance.filter) {
+        // Trigger the existing filter to refresh
+        gridInstance.filter.filter();
+      }
+    }
+  }
 }
