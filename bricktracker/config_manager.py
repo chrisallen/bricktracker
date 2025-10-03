@@ -154,7 +154,8 @@ class ConfigManager:
                 # Update .env file
                 self._update_env_file(var_name, new_value)
                 results[var_name] = "Updated successfully"
-                logger.info(f"Config updated: {var_name}={new_value}")
+                if current_app.debug:
+                    logger.info(f"Config updated: {var_name}={new_value}")
             except Exception as e:
                 results[var_name] = f"Error: {str(e)}"
                 logger.error(f"Failed to update {var_name}: {e}")
