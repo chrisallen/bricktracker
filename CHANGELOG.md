@@ -69,6 +69,12 @@
   - URL parameters take priority over configuration (e.g., `?open_database=1`)
   - Database section expanded by default to maintain original behavior
   - Smart metadata handling: sub-section expansion automatically expands parent metadata section
+- Add duplicate sets filter functionality
+  - New filter button on Sets page to show only duplicate/consolidated sets
+  - `BK_SHOW_SETS_DUPLICATE_FILTER`: Environment variable to show/hide the filter button (default: true)
+  - Works with both server-side and client-side pagination modes
+  - Consolidated mode: Shows sets that have multiple instances
+  - Non-consolidated mode: Shows sets that appear multiple times in collection
 - Add live environment variable configuration management system
   - Configuration Management interface in admin panel with live preview and badge system
   - Live settings: Can be changed without application restart (menu visibility, table display, pagination, features)
@@ -76,6 +82,12 @@
   - Advanced badge system showing value status: True/False for booleans, Set/Default/Unset for other values, Changed indicator
   - Live API endpoints: `/admin/api/config/update` for immediate changes, `/admin/api/config/update-static` for .env updates
   - Form pre-population with current values and automatic page reload after successful live updates
+- **BREAKING CHANGE**: Default minifigures folder path changed from `minifigs` to `minifigures`
+  - Impact: Users who relied on the default `BK_MINIFIGURES_FOLDER` value (without explicitly setting it) will need to either:
+    1. Set `BK_MINIFIGURES_FOLDER=minifigs` in their environment to maintain existing behavior, or
+    2. Rename their existing `minifigs` folder to `minifigures`
+  - No impact: Users who already have `BK_MINIFIGURES_FOLDER` explicitly configured
+  - Improved consistency across documentation and Docker configurations
 - Add performance optimization
   - SQLite WAL Mode:
     - Increased cache size to 10,000 pages (~40MB) for faster query execution

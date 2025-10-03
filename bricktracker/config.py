@@ -39,7 +39,7 @@ CONFIG: Final[list[dict[str, Any]]] = [
     {'n': 'HIDE_TABLE_CHECKED_PARTS', 'c': bool},
     {'n': 'HIDE_WISHES', 'c': bool},
     {'n': 'MINIFIGURES_DEFAULT_ORDER', 'd': '"rebrickable_minifigures"."name" ASC'},  # noqa: E501
-    {'n': 'MINIFIGURES_FOLDER', 'd': 'minifigs', 's': True},
+    {'n': 'MINIFIGURES_FOLDER', 'd': 'minifigures', 's': True},
     {'n': 'MINIFIGURES_PAGINATION_SIZE_DESKTOP', 'd': 10, 'c': int},
     {'n': 'MINIFIGURES_PAGINATION_SIZE_MOBILE', 'd': 5, 'c': int},
     {'n': 'MINIFIGURES_SERVER_SIDE_PAGINATION', 'c': bool},

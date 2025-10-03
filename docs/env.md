@@ -66,7 +66,7 @@
 | Variable | Purpose | Default | Required |
 |----------|---------|----------|-----------|
 | `BK_INSTRUCTIONS_FOLDER` | Instructions storage path | `instructions` | No |
-| `BK_MINIFIGURES_FOLDER` | Minifigures storage path | `minifigs` | No |
+| `BK_MINIFIGURES_FOLDER` | Minifigures storage path | `minifigures` | No |
 | `BK_PARTS_FOLDER` | Parts storage path | `parts` | No |
 | `BK_SETS_FOLDER` | Sets storage path | `sets` | No |
 | `BK_INSTRUCTIONS_ALLOWED_EXTENSIONS` | Allowed instruction file types | `.pdf` | No |
