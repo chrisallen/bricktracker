@@ -83,6 +83,7 @@
         {{ badge.instructions(item, solo=solo, last=last) }}
       {% endif %}
       {{ badge.rebrickable(item, solo=solo, last=last) }}
+      {{ badge.bricklink(item, solo=solo, last=last) }}
     {% endif %}
   </div>
   {% if not tiny and brickset_statuses | length %}

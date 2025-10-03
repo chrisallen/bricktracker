@@ -75,6 +75,10 @@
   - Works with both server-side and client-side pagination modes
   - Consolidated mode: Shows sets that have multiple instances
   - Non-consolidated mode: Shows sets that appear multiple times in collection
+- Add BrickLink links for sets
+  - BrickLink badge links now appear on set cards and set details pages alongside Rebrickable links
+  - `BK_BRICKLINK_LINK_SET_PATTERN`: New environment variable for BrickLink set URL pattern (default: https://www.bricklink.com/v2/catalog/catalogitem.page?S={set_num})
+  - Controlled by existing `BK_BRICKLINK_LINKS` environment variable
 - Add live environment variable configuration management system
   - Configuration Management interface in admin panel with live preview and badge system
   - Live settings: Can be changed without application restart (menu visibility, table display, pagination, features)

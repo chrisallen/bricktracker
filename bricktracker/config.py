@@ -11,6 +11,7 @@ CONFIG: Final[list[dict[str, Any]]] = [
     {'n': 'AUTHENTICATION_PASSWORD', 'd': ''},
     {'n': 'AUTHENTICATION_KEY', 'd': ''},
     {'n': 'BRICKLINK_LINK_PART_PATTERN', 'd': 'https://www.bricklink.com/v2/catalog/catalogitem.page?P={part}&C={color}'},  # noqa: E501
+    {'n': 'BRICKLINK_LINK_SET_PATTERN', 'd': 'https://www.bricklink.com/v2/catalog/catalogitem.page?S={set_num}'},  # noqa: E501
     {'n': 'BRICKLINK_LINKS', 'c': bool},
     {'n': 'DATABASE_PATH', 'd': './app.db'},
     {'n': 'DATABASE_TIMESTAMP_FORMAT', 'd': '%Y-%m-%d-%H-%M-%S'},
