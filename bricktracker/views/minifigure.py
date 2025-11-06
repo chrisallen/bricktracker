@@ -16,6 +16,9 @@ minifigure_page = Blueprint('minifigure', __name__, url_prefix='/minifigures')
 def list() -> str:
     # Get filter parameters from request
     owner_id = request.args.get('owner', 'all')
+    problems_filter = request.args.get('problems', 'all')
+    theme_id = request.args.get('theme', 'all')
+    year = request.args.get('year', 'all')
     search_query, sort_field, sort_order, page = get_request_params()
 
     # Get pagination configuration
@@ -26,6 +29,9 @@ def list() -> str:
         # PAGINATION MODE - Server-side pagination with search
         minifigures, total_count = BrickMinifigureList().all_filtered_paginated(
             owner_id=owner_id,
+            problems_filter=problems_filter,
+            theme_id=theme_id,
+            year=year,
             search_query=search_query,
             page=page,
             per_page=per_page,
@@ -37,19 +43,45 @@ def list() -> str:
     else:
         # ORIGINAL MODE - Single page with all data for client-side search
         if owner_id == 'all' or owner_id is None or owner_id == '':
-            minifigures = BrickMinifigureList().all()
+            minifigures = BrickMinifigureList().all_filtered(problems_filter=problems_filter, theme_id=theme_id, year=year)
         else:
-            minifigures = BrickMinifigureList().all_by_owner(owner_id)
+            minifigures = BrickMinifigureList().all_by_owner_filtered(owner_id=owner_id, problems_filter=problems_filter, theme_id=theme_id, year=year)
 
         pagination_context = None
 
     # Get list of owners for filter dropdown
     owners = BrickSetOwnerList.list()
 
+    # Prepare context for dependent filters
+    filter_context = {}
+    if owner_id != 'all' and owner_id:
+        filter_context['owner_id'] = owner_id
+
+    # Get list of themes for filter dropdown
+    from ..theme_list import BrickThemeList
+    from ..sql import BrickSQL
+    theme_list = BrickThemeList()
+    themes_data = BrickSQL().fetchall('minifigure/themes/list', **filter_context)
+    themes = []
+    for theme_data in themes_data:
+        theme = theme_list.get(theme_data['theme_id'])
+        themes.append({
+            'theme_id': theme_data['theme_id'],
+            'theme_name': theme.name if theme else f"Theme {theme_data['theme_id']}"
+        })
+
+    # Get list of years for filter dropdown
+    years = BrickSQL().fetchall('minifigure/years/list', **filter_context)
+
     template_context = {
         'table_collection': minifigures,
         'owners': owners,
         'selected_owner': owner_id,
+        'selected_problems': problems_filter,
+        'themes': themes,
+        'selected_theme': theme_id,
+        'years': years,
+        'selected_year': year,
         'search_query': search_query,
         'use_pagination': use_pagination,
         'current_sort': sort_field,

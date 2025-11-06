@@ -43,6 +43,19 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
 
         return self
 
+    # Load all minifigures with problems filter
+    def all_filtered(self, /, problems_filter: str = 'all', theme_id: str = 'all', year: str = 'all') -> Self:
+        context = {}
+        if problems_filter and problems_filter != 'all':
+            context['problems_filter'] = problems_filter
+        if theme_id and theme_id != 'all':
+            context['theme_id'] = theme_id
+        if year and year != 'all':
+            context['year'] = year
+
+        self.list(override_query=self.all_query, **context)
+        return self
+
     # Load all minifigures by owner
     def all_by_owner(self, owner_id: str | None = None, /) -> Self:
         # Save the owner_id parameter
@@ -53,10 +66,31 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
 
         return self
 
+    # Load all minifigures by owner with problems filter
+    def all_by_owner_filtered(self, /, owner_id: str | None = None, problems_filter: str = 'all', theme_id: str = 'all', year: str = 'all') -> Self:
+        # Save the owner_id parameter
+        self.fields.owner_id = owner_id
+
+        context = {}
+        if problems_filter and problems_filter != 'all':
+            context['problems_filter'] = problems_filter
+        if theme_id and theme_id != 'all':
+            context['theme_id'] = theme_id
+        if year and year != 'all':
+            context['year'] = year
+
+        # Load the minifigures from the database
+        self.list(override_query=self.all_by_owner_query, **context)
+
+        return self
+
     # Load minifigures with pagination support
     def all_filtered_paginated(
         self,
         owner_id: str | None = None,
+        problems_filter: str = 'all',
+        theme_id: str = 'all',
+        year: str = 'all',
         search_query: str | None = None,
         page: int = 1,
         per_page: int = 50,
@@ -73,6 +107,15 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
 
         if search_query:
             filter_context['search_query'] = search_query
+
+        if problems_filter and problems_filter != 'all':
+            filter_context['problems_filter'] = problems_filter
+
+        if theme_id and theme_id != 'all':
+            filter_context['theme_id'] = theme_id
+
+        if year and year != 'all':
+            filter_context['year'] = year
 
         # Field mapping for sorting
         field_mapping = {

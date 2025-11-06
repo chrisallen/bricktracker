@@ -1,12 +1,49 @@
 <div id="table-filter" class="collapse {% if config['SHOW_GRID_FILTERS'] %}show{% endif %} row row-cols-lg-auto g-1 justify-content-center align-items-center">
   {% if owners | length %}
-  <div class="col-12 flex-grow-1">
+  <div class="col-12 col-md-6 col-lg-3 flex-grow-1">
     <div class="input-group">
       <span class="input-group-text"><i class="ri-user-line"></i><span class="ms-1 d-none d-md-inline"> Owner</span></span>
-      <select id="filter-owner" class="form-select" onchange="filterByOwnerAndKeepOpen()" autocomplete="off">
+      <select id="filter-owner" class="form-select" onchange="applyFiltersAndKeepOpen()" autocomplete="off">
         <option value="all" {% if selected_owner == 'all' %}selected{% endif %}>All owners</option>
         {% for owner in owners %}
           <option value="{{ owner.fields.id }}" {% if selected_owner == owner.fields.id %}selected{% endif %}>{{ owner.fields.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  {% endif %}
+  <div class="col-12 col-md-6 col-lg-3 flex-grow-1">
+    <div class="input-group">
+      <span class="input-group-text"><i class="ri-error-warning-line"></i><span class="ms-1 d-none d-md-inline"> Problems</span></span>
+      <select id="filter-problems" class="form-select" onchange="applyFiltersAndKeepOpen()" autocomplete="off">
+        <option value="all" {% if selected_problems == 'all' %}selected{% endif %}>All minifigures</option>
+        <option value="missing" {% if selected_problems == 'missing' %}selected{% endif %}>With missing parts</option>
+        <option value="damaged" {% if selected_problems == 'damaged' %}selected{% endif %}>With damaged parts</option>
+        <option value="both" {% if selected_problems == 'both' %}selected{% endif %}>With missing and damaged parts</option>
+      </select>
+    </div>
+  </div>
+  {% if themes | length %}
+  <div class="col-12 col-md-6 col-lg-3 flex-grow-1">
+    <div class="input-group">
+      <span class="input-group-text"><i class="ri-price-tag-3-line"></i><span class="ms-1 d-none d-md-inline"> Theme</span></span>
+      <select id="filter-theme" class="form-select" onchange="applyFiltersAndKeepOpen()" autocomplete="off">
+        <option value="all" {% if selected_theme == 'all' %}selected{% endif %}>All themes</option>
+        {% for theme in themes %}
+          <option value="{{ theme.theme_id }}" {% if selected_theme == theme.theme_id|string %}selected{% endif %}>{{ theme.theme_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  {% endif %}
+  {% if years | length %}
+  <div class="col-12 col-md-6 col-lg-3 flex-grow-1">
+    <div class="input-group">
+      <span class="input-group-text"><i class="ri-calendar-line"></i><span class="ms-1 d-none d-md-inline"> Year</span></span>
+      <select id="filter-year" class="form-select" onchange="applyFiltersAndKeepOpen()" autocomplete="off">
+        <option value="all" {% if selected_year == 'all' %}selected{% endif %}>All years</option>
+        {% for year in years %}
+          <option value="{{ year.year }}" {% if selected_year == year.year|string %}selected{% endif %}>{{ year.year }}</option>
         {% endfor %}
       </select>
     </div>

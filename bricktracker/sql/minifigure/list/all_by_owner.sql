@@ -29,6 +29,10 @@ COUNT("bricktracker_minifigures"."id") AS "total_sets"
 INNER JOIN "bricktracker_sets"
 ON "bricktracker_minifigures"."id" IS NOT DISTINCT FROM "bricktracker_sets"."id"
 
+-- Join with rebrickable sets for theme/year filtering
+INNER JOIN "rebrickable_sets"
+ON "bricktracker_sets"."set" IS NOT DISTINCT FROM "rebrickable_sets"."set"
+
 -- Left join with set owners (using dynamic columns)
 LEFT JOIN "bricktracker_set_owners"
 ON "bricktracker_sets"."id" IS NOT DISTINCT FROM "bricktracker_set_owners"."id"
@@ -64,6 +68,12 @@ AND "rebrickable_minifigures"."figure" IS NOT DISTINCT FROM "problem_join"."figu
 {% if owner_id and owner_id != 'all' %}
   {% set _ = conditions.append('"bricktracker_set_owners"."owner_' ~ owner_id ~ '" = 1') %}
 {% endif %}
+{% if theme_id and theme_id != 'all' %}
+  {% set _ = conditions.append('"rebrickable_sets"."theme_id" = ' ~ theme_id) %}
+{% endif %}
+{% if year and year != 'all' %}
+  {% set _ = conditions.append('"rebrickable_sets"."year" = ' ~ year) %}
+{% endif %}
 {% if search_query %}
   {% set _ = conditions.append('(LOWER("rebrickable_minifigures"."name") LIKE LOWER(\'%' ~ search_query ~ '%\'))') %}
 {% endif %}
@@ -75,4 +85,17 @@ WHERE {{ conditions | join(' AND ') }}
 {% block group %}
 GROUP BY
     "rebrickable_minifigures"."figure"
+{% endblock %}
+
+{% block having %}
+{% if problems_filter %}
+HAVING 1=1
+{% if problems_filter == 'missing' %}
+AND SUM(IFNULL("problem_join"."total_missing", 0)) > 0
+{% elif problems_filter == 'damaged' %}
+AND SUM(IFNULL("problem_join"."total_damaged", 0)) > 0
+{% elif problems_filter == 'both' %}
+AND SUM(IFNULL("problem_join"."total_missing", 0)) > 0 AND SUM(IFNULL("problem_join"."total_damaged", 0)) > 0
+{% endif %}
+{% endif %}
 {% endblock %}

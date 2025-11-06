@@ -6,15 +6,51 @@ function isPaginationMode() {
   return tableElement && tableElement.getAttribute('data-table') === 'false';
 }
 
-function filterByOwner() {
-  const select = document.getElementById('filter-owner');
-  const selectedOwner = select.value;
+function applyFilters() {
+  const ownerSelect = document.getElementById('filter-owner');
+  const problemsSelect = document.getElementById('filter-problems');
+  const themeSelect = document.getElementById('filter-theme');
+  const yearSelect = document.getElementById('filter-year');
   const currentUrl = new URL(window.location);
 
-  if (selectedOwner === 'all') {
-    currentUrl.searchParams.delete('owner');
-  } else {
-    currentUrl.searchParams.set('owner', selectedOwner);
+  // Apply owner filter
+  if (ownerSelect) {
+    const selectedOwner = ownerSelect.value;
+    if (selectedOwner === 'all') {
+      currentUrl.searchParams.delete('owner');
+    } else {
+      currentUrl.searchParams.set('owner', selectedOwner);
+    }
+  }
+
+  // Apply problems filter
+  if (problemsSelect) {
+    const selectedProblems = problemsSelect.value;
+    if (selectedProblems === 'all') {
+      currentUrl.searchParams.delete('problems');
+    } else {
+      currentUrl.searchParams.set('problems', selectedProblems);
+    }
+  }
+
+  // Apply theme filter
+  if (themeSelect) {
+    const selectedTheme = themeSelect.value;
+    if (selectedTheme === 'all') {
+      currentUrl.searchParams.delete('theme');
+    } else {
+      currentUrl.searchParams.set('theme', selectedTheme);
+    }
+  }
+
+  // Apply year filter
+  if (yearSelect) {
+    const selectedYear = yearSelect.value;
+    if (selectedYear === 'all') {
+      currentUrl.searchParams.delete('year');
+    } else {
+      currentUrl.searchParams.set('year', selectedYear);
+    }
   }
 
   // Reset to page 1 when filtering
@@ -25,15 +61,25 @@ function filterByOwner() {
   window.location.href = currentUrl.toString();
 }
 
+// Legacy function for compatibility
+function filterByOwner() {
+  applyFilters();
+}
+
 // Initialize filter and sort states for minifigures page
 function initializeCollapsibleStates() {
   initializePageCollapsibleStates('minifigures');
 }
 
 // Keep filters expanded after selection
-function filterByOwnerAndKeepOpen() {
+function applyFiltersAndKeepOpen() {
   preserveCollapsibleStateOnChange('table-filter', 'minifigures-filter-state');
-  filterByOwner();
+  applyFilters();
+}
+
+// Legacy function for compatibility
+function filterByOwnerAndKeepOpen() {
+  applyFiltersAndKeepOpen();
 }
 
 // Setup table search and sort functionality

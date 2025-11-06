@@ -45,6 +45,10 @@ SUM(IFNULL("bricktracker_minifigures"."quantity", 0)) AS "total_minifigures"
 INNER JOIN "bricktracker_sets"
 ON "bricktracker_parts"."id" IS NOT DISTINCT FROM "bricktracker_sets"."id"
 
+-- Join with rebrickable sets for theme/year filtering
+INNER JOIN "rebrickable_sets"
+ON "bricktracker_sets"."set" IS NOT DISTINCT FROM "rebrickable_sets"."set"
+
 -- Left join with set owners (using dynamic columns)
 LEFT JOIN "bricktracker_set_owners"
 ON "bricktracker_sets"."id" IS NOT DISTINCT FROM "bricktracker_set_owners"."id"
@@ -64,6 +68,12 @@ AND "bricktracker_parts"."figure" IS NOT DISTINCT FROM "bricktracker_minifigures
 {% endif %}
 {% if color_id and color_id != 'all' %}
   {% set _ = conditions.append('"bricktracker_parts"."color" = ' ~ color_id) %}
+{% endif %}
+{% if theme_id and theme_id != 'all' %}
+  {% set _ = conditions.append('"rebrickable_sets"."theme_id" = ' ~ theme_id) %}
+{% endif %}
+{% if year and year != 'all' %}
+  {% set _ = conditions.append('"rebrickable_sets"."year" = ' ~ year) %}
 {% endif %}
 {% if search_query %}
   {% set search_condition = '(LOWER("rebrickable_parts"."name") LIKE LOWER(\'%' ~ search_query ~ '%\') OR LOWER("rebrickable_parts"."color_name") LIKE LOWER(\'%' ~ search_query ~ '%\') OR LOWER("bricktracker_parts"."part") LIKE LOWER(\'%' ~ search_query ~ '%\'))' %}

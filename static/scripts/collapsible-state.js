@@ -314,10 +314,13 @@ window.updateUrlParams = function(params, resetPage = true) {
   window.location.href = currentUrl.toString();
 };
 
-// Shared filter application (supports owner and color filters)
+// Shared filter application (supports owner, color, theme, year, and problems filters)
 window.applyPageFilters = function(tableId) {
   const ownerSelect = document.getElementById('filter-owner');
   const colorSelect = document.getElementById('filter-color');
+  const themeSelect = document.getElementById('filter-theme');
+  const yearSelect = document.getElementById('filter-year');
+  const problemsSelect = document.getElementById('filter-problems');
   const params = {};
 
   // Handle owner filter
@@ -328,6 +331,21 @@ window.applyPageFilters = function(tableId) {
   // Handle color filter
   if (colorSelect) {
     params.color = colorSelect.value;
+  }
+
+  // Handle theme filter
+  if (themeSelect) {
+    params.theme = themeSelect.value;
+  }
+
+  // Handle year filter
+  if (yearSelect) {
+    params.year = yearSelect.value;
+  }
+
+  // Handle problems filter (for minifigures page)
+  if (problemsSelect) {
+    params.problems = problemsSelect.value;
   }
 
   // Update URL with new parameters

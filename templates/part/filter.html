@@ -1,6 +1,6 @@
 <div id="table-filter" class="collapse {% if config['SHOW_GRID_FILTERS'] %}show{% endif %} row row-cols-lg-auto g-1 justify-content-center align-items-center">
   {% if owners | length %}
-  <div class="col-12 col-md-6 flex-grow-1">
+  <div class="col-12 col-md-6 col-lg-3 flex-grow-1">
     <div class="input-group">
       <span class="input-group-text"><i class="ri-user-line"></i><span class="ms-1 d-none d-md-inline"> Owner</span></span>
       <select id="filter-owner" class="form-select" onchange="applyFiltersAndKeepOpen()" autocomplete="off">
@@ -13,7 +13,7 @@
   </div>
   {% endif %}
   {% if colors | length %}
-  <div class="col-12 col-md-6 flex-grow-1">
+  <div class="col-12 col-md-6 col-lg-3 flex-grow-1">
     <div class="input-group">
       <span class="input-group-text"><i class="ri-palette-line"></i><span class="ms-1 d-none d-md-inline"> Color</span></span>
       <select id="filter-color" class="form-select" onchange="applyFiltersAndKeepOpen()" autocomplete="off">
@@ -22,6 +22,32 @@
           <option value="{{ color.color_id }}" {% if selected_color == color.color_id|string %}selected{% endif %} data-color-rgb="{{ color.color_rgb }}" data-color-id="{{ color.color_id }}">
             {{ color.color_name }}
           </option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  {% endif %}
+  {% if themes | length %}
+  <div class="col-12 col-md-6 col-lg-3 flex-grow-1">
+    <div class="input-group">
+      <span class="input-group-text"><i class="ri-price-tag-3-line"></i><span class="ms-1 d-none d-md-inline"> Theme</span></span>
+      <select id="filter-theme" class="form-select" onchange="applyFiltersAndKeepOpen()" autocomplete="off">
+        <option value="all" {% if selected_theme == 'all' %}selected{% endif %}>All themes</option>
+        {% for theme in themes %}
+          <option value="{{ theme.theme_id }}" {% if selected_theme == theme.theme_id|string %}selected{% endif %}>{{ theme.theme_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  {% endif %}
+  {% if years | length %}
+  <div class="col-12 col-md-6 col-lg-3 flex-grow-1">
+    <div class="input-group">
+      <span class="input-group-text"><i class="ri-calendar-line"></i><span class="ms-1 d-none d-md-inline"> Year</span></span>
+      <select id="filter-year" class="form-select" onchange="applyFiltersAndKeepOpen()" autocomplete="off">
+        <option value="all" {% if selected_year == 'all' %}selected{% endif %}>All years</option>
+        {% for year in years %}
+          <option value="{{ year.year }}" {% if selected_year == year.year|string %}selected{% endif %}>{{ year.year }}</option>
         {% endfor %}
       </select>
     </div>
