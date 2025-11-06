@@ -172,10 +172,10 @@ def prepare_chart_data(sets_by_year_stats, purchases_by_year_stats):
         # Get sets and parts data from sets_by_year
         year_data = sets_by_year_lookup.get(year)
         if year_data:
-            sets_data.append(year_data.get('total_sets', 0))
-            parts_data.append(year_data.get('total_parts', 0))
+            sets_data.append(year_data.get('total_sets') or 0)
+            parts_data.append(year_data.get('total_parts') or 0)
             # Use actual minifigure count from the database
-            minifigs_data.append(year_data.get('total_minifigures', 0))
+            minifigs_data.append(year_data.get('total_minifigures') or 0)
         else:
             sets_data.append(0)
             parts_data.append(0)

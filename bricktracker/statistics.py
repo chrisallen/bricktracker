@@ -56,14 +56,14 @@ class BrickStatistics:
         """Get financial summary from overview statistics"""
         overview = self.get_overview()
         return {
-            'total_cost': overview.get('total_cost', 0),
-            'average_cost': overview.get('average_cost', 0),
-            'minimum_cost': overview.get('minimum_cost', 0),
-            'maximum_cost': overview.get('maximum_cost', 0),
-            'sets_with_price': overview.get('sets_with_price', 0),
-            'total_sets': overview.get('total_sets', 0),
+            'total_cost': overview.get('total_cost') or 0,
+            'average_cost': overview.get('average_cost') or 0,
+            'minimum_cost': overview.get('minimum_cost') or 0,
+            'maximum_cost': overview.get('maximum_cost') or 0,
+            'sets_with_price': overview.get('sets_with_price') or 0,
+            'total_sets': overview.get('total_sets') or 0,
             'percentage_with_price': round(
-                (overview.get('sets_with_price', 0) / max(overview.get('total_sets', 1), 1)) * 100, 1
+                ((overview.get('sets_with_price') or 0) / max((overview.get('total_sets') or 0), 1)) * 100, 1
             )
         }
 
@@ -71,16 +71,16 @@ class BrickStatistics:
         """Get collection summary from overview statistics"""
         overview = self.get_overview()
         return {
-            'total_sets': overview.get('total_sets', 0),
-            'unique_sets': overview.get('unique_sets', 0),
-            'total_parts_count': overview.get('total_parts_count', 0),
-            'unique_parts': overview.get('unique_parts', 0),
-            'total_minifigures_count': overview.get('total_minifigures_count', 0),
-            'unique_minifigures': overview.get('unique_minifigures', 0),
-            'total_missing_parts': overview.get('total_missing_parts', 0),
-            'total_damaged_parts': overview.get('total_damaged_parts', 0),
-            'storage_locations_used': overview.get('storage_locations_used', 0),
-            'purchase_locations_used': overview.get('purchase_locations_used', 0)
+            'total_sets': overview.get('total_sets') or 0,
+            'unique_sets': overview.get('unique_sets') or 0,
+            'total_parts_count': overview.get('total_parts_count') or 0,
+            'unique_parts': overview.get('unique_parts') or 0,
+            'total_minifigures_count': overview.get('total_minifigures_count') or 0,
+            'unique_minifigures': overview.get('unique_minifigures') or 0,
+            'total_missing_parts': overview.get('total_missing_parts') or 0,
+            'total_damaged_parts': overview.get('total_damaged_parts') or 0,
+            'storage_locations_used': overview.get('storage_locations_used') or 0,
+            'purchase_locations_used': overview.get('purchase_locations_used') or 0
         }
 
     def get_sets_by_year_statistics(self) -> list[dict[str, Any]]:
@@ -106,9 +106,9 @@ class BrickStatistics:
         peak_collection_year = None
         max_sets_in_year = 0
         if sets_by_year:
-            peak_year_data = max(sets_by_year, key=lambda x: x['total_sets'])
-            peak_collection_year = peak_year_data['year']
-            max_sets_in_year = peak_year_data['total_sets']
+            peak_year_data = max(sets_by_year, key=lambda x: x.get('total_sets') or 0)
+            peak_collection_year = peak_year_data.get('year')
+            max_sets_in_year = peak_year_data.get('total_sets') or 0
 
         # Find peak spending year
         peak_spending_year = None
@@ -116,9 +116,9 @@ class BrickStatistics:
         if purchases_by_year:
             spending_years = [y for y in purchases_by_year if y.get('total_spent')]
             if spending_years:
-                peak_spending_data = max(spending_years, key=lambda x: x['total_spent'] or 0)
-                peak_spending_year = peak_spending_data['purchase_year']
-                max_spending = peak_spending_data['total_spent']
+                peak_spending_data = max(spending_years, key=lambda x: x.get('total_spent') or 0)
+                peak_spending_year = peak_spending_data.get('purchase_year')
+                max_spending = peak_spending_data.get('total_spent') or 0
 
         return {
             'years_represented': years_represented,
