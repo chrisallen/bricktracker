@@ -6,6 +6,7 @@ Provides statistics and analytics pages
 import logging
 
 from flask import Blueprint, render_template, request, url_for, redirect, current_app
+from flask_login import login_required
 from werkzeug.wrappers.response import Response
 
 from .exceptions import exception_handler
@@ -17,6 +18,7 @@ statistics_page = Blueprint('statistics', __name__, url_prefix='/statistics')
 
 
 @statistics_page.route('/', methods=['GET'])
+@login_required
 @exception_handler(__file__)
 def overview() -> str:
     """Statistics overview page with metrics"""
@@ -89,6 +91,7 @@ def redirect_to_filtered_sets(filter_type: str, filter_value: str) -> Response:
 
 
 @statistics_page.route('/themes', methods=['GET'])
+@login_required
 @exception_handler(__file__)
 def themes() -> str:
     """Detailed theme statistics page"""
@@ -104,6 +107,7 @@ def themes() -> str:
 
 
 @statistics_page.route('/storage', methods=['GET'])
+@login_required
 @exception_handler(__file__)
 def storage() -> str:
     """Detailed storage statistics page"""
@@ -119,6 +123,7 @@ def storage() -> str:
 
 
 @statistics_page.route('/purchase-locations', methods=['GET'])
+@login_required
 @exception_handler(__file__)
 def purchase_locations() -> str:
     """Detailed purchase location statistics page"""
