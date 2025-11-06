@@ -1,6 +1,6 @@
 <div id="table-filter" class="collapse {% if config['SHOW_GRID_FILTERS'] %}show{% endif %} row row-cols-lg-auto g-1 justify-content-center align-items-center">
   {% if owners | length %}
-  <div class="col-12 col-md-6 col-lg-3 flex-grow-1">
+  <div class="col-12 flex-grow-1">
     <div class="input-group">
       <span class="input-group-text"><i class="ri-user-line"></i><span class="ms-1 d-none d-md-inline"> Owner</span></span>
       <select id="filter-owner" class="form-select" onchange="applyFiltersAndKeepOpen()" autocomplete="off">
@@ -12,7 +12,7 @@
     </div>
   </div>
   {% endif %}
-  <div class="col-12 col-md-6 col-lg-3 flex-grow-1">
+  <div class="col-12 flex-grow-1">
     <div class="input-group">
       <span class="input-group-text"><i class="ri-error-warning-line"></i><span class="ms-1 d-none d-md-inline"> Problems</span></span>
       <select id="filter-problems" class="form-select" onchange="applyFiltersAndKeepOpen()" autocomplete="off">
@@ -24,7 +24,7 @@
     </div>
   </div>
   {% if themes | length %}
-  <div class="col-12 col-md-6 col-lg-3 flex-grow-1">
+  <div class="col-12 flex-grow-1">
     <div class="input-group">
       <span class="input-group-text"><i class="ri-price-tag-3-line"></i><span class="ms-1 d-none d-md-inline"> Theme</span></span>
       <select id="filter-theme" class="form-select" onchange="applyFiltersAndKeepOpen()" autocomplete="off">
@@ -37,7 +37,7 @@
   </div>
   {% endif %}
   {% if years | length %}
-  <div class="col-12 col-md-6 col-lg-3 flex-grow-1">
+  <div class="col-12 flex-grow-1">
     <div class="input-group">
       <span class="input-group-text"><i class="ri-calendar-line"></i><span class="ms-1 d-none d-md-inline"> Year</span></span>
       <select id="filter-year" class="form-select" onchange="applyFiltersAndKeepOpen()" autocomplete="off">
@@ -49,4 +49,9 @@
     </div>
   </div>
   {% endif %}
+  <div class="col-12 col-lg-auto">
+    <button id="table-filter-clear" class="btn btn-outline-danger w-100" type="button" title="Clear all filters">
+      <i class="ri-filter-off-line"></i> <span class="d-none d-md-inline">Clear</span>
+    </button>
+  </div>
 </div>
