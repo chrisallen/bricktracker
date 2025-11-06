@@ -53,12 +53,15 @@ function applyFilters() {
     }
   }
 
-  // Reset to page 1 when filtering
+  // Only reset to page 1 when filtering in server-side pagination mode
   if (isPaginationMode()) {
     currentUrl.searchParams.set('page', '1');
+    // Navigate to updated URL (server-side pagination)
+    window.location.href = currentUrl.toString();
+  } else {
+    // Client-side mode: Update URL without page reload
+    window.history.replaceState({}, '', currentUrl.toString());
   }
-
-  window.location.href = currentUrl.toString();
 }
 
 // Legacy function for compatibility

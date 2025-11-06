@@ -716,7 +716,7 @@ function initializeClearFiltersButton() {
 
   clearFiltersButton.addEventListener('click', () => {
     if (isPaginationMode()) {
-      // SERVER-SIDE PAGINATION MODE: Remove filter parameters from URL
+      // SERVER-SIDE PAGINATION MODE: Remove all filter parameters and redirect to base URL
       const currentUrl = new URL(window.location);
 
       // Remove all filter parameters
@@ -725,10 +725,10 @@ function initializeClearFiltersButton() {
         currentUrl.searchParams.delete(param);
       });
 
-      // Reset to page 1
-      currentUrl.searchParams.set('page', '1');
+      // Also remove page parameter to go back to clean base URL
+      currentUrl.searchParams.delete('page');
 
-      // Navigate to cleaned URL
+      // Navigate to cleaned URL (will be just /sets if no other params)
       window.location.href = currentUrl.toString();
     } else {
       // CLIENT-SIDE MODE: Reset all filter dropdowns to empty string
@@ -755,6 +755,13 @@ function initializeClearFiltersButton() {
         duplicateButton.classList.remove('btn-secondary');
         duplicateButton.classList.add('btn-outline-secondary');
         applyDuplicateFilter(false);
+      }
+
+      // Remove page parameter from URL if present (without reloading)
+      const currentUrl = new URL(window.location);
+      if (currentUrl.searchParams.has('page')) {
+        currentUrl.searchParams.delete('page');
+        window.history.replaceState({}, '', currentUrl.toString());
       }
 
       // Trigger filtering if grid instance exists

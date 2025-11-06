@@ -360,8 +360,12 @@ window.applyPageFilters = function(tableId) {
     params.problems = problemsSelect.value;
   }
 
+  // Check if we're in pagination mode
+  const isPaginationMode = window.isPaginationModeForPage(tableId);
+
   // Update URL with new parameters
-  window.updateUrlParams(params, true);
+  // Only reset to page 1 if in server-side pagination mode
+  window.updateUrlParams(params, isPaginationMode);
 };
 
 // Shared search setup for both pagination and client-side modes
@@ -439,7 +443,7 @@ window.clearPageFilters = function(tableId, filterParams) {
   const isPaginationMode = window.isPaginationModeForPage(tableId);
 
   if (isPaginationMode) {
-    // SERVER-SIDE PAGINATION MODE: Remove filter parameters from URL
+    // SERVER-SIDE PAGINATION MODE: Remove all filter parameters and redirect to base URL
     const currentUrl = new URL(window.location);
 
     // Remove all filter parameters
@@ -447,10 +451,10 @@ window.clearPageFilters = function(tableId, filterParams) {
       currentUrl.searchParams.delete(param);
     });
 
-    // Reset to page 1
-    currentUrl.searchParams.set('page', '1');
+    // Also remove page parameter to go back to clean base URL
+    currentUrl.searchParams.delete('page');
 
-    // Navigate to cleaned URL
+    // Navigate to cleaned URL (will be just /xxx if no other params)
     window.location.href = currentUrl.toString();
   } else {
     // CLIENT-SIDE MODE: Reset all filter dropdowns to "all"
@@ -460,6 +464,13 @@ window.clearPageFilters = function(tableId, filterParams) {
         select.value = 'all';
       }
     });
+
+    // Remove page parameter from URL if present (without reloading)
+    const currentUrl = new URL(window.location);
+    if (currentUrl.searchParams.has('page')) {
+      currentUrl.searchParams.delete('page');
+      window.history.replaceState({}, '', currentUrl.toString());
+    }
 
     // Trigger filter application (will use existing filter logic)
     window.applyPageFilters(tableId);
