@@ -29,46 +29,37 @@
   {% endif %}
 {% endmacro %}
 
-{{ accordion.header('Configuration Management', 'configuration-management', 'admin', icon='settings-4-line') }}
-<div class="p-3">
-  <!-- Configuration Status -->
-  <div id="config-status" class="mb-3">
-    <!-- Status indicators -->
-  </div>
+<!-- Configuration Status -->
+<div id="config-status" class="mb-3 px-3 pt-3">
+  <!-- Status indicators -->
+</div>
 
-  <!-- Badge Legend -->
-  <div class="alert alert-info mb-3">
-    <h6 class="mb-2"><i class="ri-information-line"></i> Badge Legend</h6>
-    <div class="row g-2">
-      <div class="col-md-6">
-        <small>
-          <span class="badge rounded-pill text-bg-success">True</span> Boolean setting enabled<br>
-          <span class="badge rounded-pill text-bg-danger">False</span> Boolean setting disabled<br>
-          <span class="badge rounded-pill text-bg-primary">Set</span> Custom value configured
-        </small>
-      </div>
-      <div class="col-md-6">
-        <small>
-          <span class="badge rounded-pill text-bg-secondary">Unset</span> Not in .env file<br>
-          <span class="badge rounded-pill text-bg-light text-dark">Default Value</span> Using default value<br>
-          <span class="badge rounded-pill text-bg-warning">Changed</span> Modified from default
-        </small>
-      </div>
+<!-- Badge Legend -->
+<div class="alert alert-info mb-3 mx-3">
+  <h6 class="mb-2"><i class="ri-information-line"></i> Badge Legend</h6>
+  <div class="row g-2">
+    <div class="col-md-6">
+      <small>
+        <span class="badge rounded-pill text-bg-success">True</span> Boolean setting enabled<br>
+        <span class="badge rounded-pill text-bg-danger">False</span> Boolean setting disabled<br>
+        <span class="badge rounded-pill text-bg-primary">Set</span> Custom value configured
+      </small>
+    </div>
+    <div class="col-md-6">
+      <small>
+        <span class="badge rounded-pill text-bg-secondary">Unset</span> Not in .env file<br>
+        <span class="badge rounded-pill text-bg-light text-dark">Default Value</span> Using default value<br>
+        <span class="badge rounded-pill text-bg-warning">Changed</span> Modified from default
+      </small>
     </div>
   </div>
+</div>
 
-  <!-- Sub-Drawers -->
-  <div class="accordion" id="configuration-accordion">
-    <!-- Live Settings Sub-Drawer -->
-    <div class="accordion-item">
-      <h2 class="accordion-header" id="live-settings-heading">
-        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#live-settings-collapse" aria-expanded="true" aria-controls="live-settings-collapse">
-          <i class="ri-settings-4-line me-2"></i> Live Settings
-          <span class="badge text-bg-success ms-2">Changes Applied On Save</span>
-        </button>
-      </h2>
-      <div id="live-settings-collapse" class="accordion-collapse collapse show" aria-labelledby="live-settings-heading" data-bs-parent="#configuration-accordion">
-        <div class="accordion-body">
+<!-- Live Settings Accordion -->
+{{ accordion.header('Live Settings', 'live-settings', 'admin', expanded=true, icon='settings-4-line', class='p-3') }}
+  <div class="mb-3">
+    <span class="badge text-bg-success">Changes Applied On Save</span>
+  </div>
           <!-- Action buttons -->
           <div class="d-flex gap-2 justify-content-end mb-4">
             <button id="config-save-all" class="btn btn-success">
@@ -680,23 +671,14 @@
               <input type="text" class="form-control config-text" id="BK_THEMES_PATH" data-var="BK_THEMES_PATH">
             </div>
           </div>
+{{ accordion.footer() }}
 
-
-        </div>
-      </div>
-    </div>
-
-    <!-- Static Settings Sub-Drawer -->
-    <div class="accordion-item">
-      <h2 class="accordion-header" id="static-settings-heading">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#static-settings-collapse" aria-expanded="false" aria-controls="static-settings-collapse">
-          <i class="ri-database-2-line me-2"></i> Static Settings
-          <span class="badge text-bg-warning ms-2">Requires Restart</span>
-        </button>
-      </h2>
-      <div id="static-settings-collapse" class="accordion-collapse collapse" aria-labelledby="static-settings-heading" data-bs-parent="#configuration-accordion">
-        <div class="accordion-body">
-          <!-- Static configuration with editable fields -->
+<!-- Static Settings Accordion -->
+{{ accordion.header('Static Settings', 'static-settings', 'admin', expanded=false, icon='database-2-line', class='p-3') }}
+  <div class="mb-3">
+    <span class="badge text-bg-warning">Requires Restart</span>
+  </div>
+  <!-- Static configuration with editable fields -->
 
           <div class="alert alert-warning">
             <h6><i class="ri-warning-line"></i> Restart Required</h6>
@@ -891,17 +873,12 @@
             </div>
           </div>
 
-          <!-- Save Button for Static Settings -->
-          <div class="d-flex gap-2 justify-content-end mt-4">
-            <button id="config-save-static" class="btn btn-warning">
-              <i class="ri-save-line"></i> Save Static Settings to .env
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+  <!-- Save Button for Static Settings -->
+  <div class="d-flex gap-2 justify-content-end mt-4">
+    <button id="config-save-static" class="btn btn-warning">
+      <i class="ri-save-line"></i> Save Static Settings to .env
+    </button>
   </div>
-</div>
 {{ accordion.footer() }}
 
 <!-- Initialize Configuration Data -->
