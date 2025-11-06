@@ -314,12 +314,14 @@ window.updateUrlParams = function(params, resetPage = true) {
   window.location.href = currentUrl.toString();
 };
 
-// Shared filter application (supports owner, color, theme, year, and problems filters)
+// Shared filter application (supports owner, color, theme, year, storage, tag, and problems filters)
 window.applyPageFilters = function(tableId) {
   const ownerSelect = document.getElementById('filter-owner');
   const colorSelect = document.getElementById('filter-color');
   const themeSelect = document.getElementById('filter-theme');
   const yearSelect = document.getElementById('filter-year');
+  const storageSelect = document.getElementById('filter-storage');
+  const tagSelect = document.getElementById('filter-tag');
   const problemsSelect = document.getElementById('filter-problems');
   const params = {};
 
@@ -341,6 +343,16 @@ window.applyPageFilters = function(tableId) {
   // Handle year filter
   if (yearSelect) {
     params.year = yearSelect.value;
+  }
+
+  // Handle storage filter
+  if (storageSelect) {
+    params.storage = storageSelect.value;
+  }
+
+  // Handle tag filter
+  if (tagSelect) {
+    params.tag = tagSelect.value;
   }
 
   // Handle problems filter (for minifigures page)

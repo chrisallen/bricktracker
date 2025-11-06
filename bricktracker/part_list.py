@@ -248,7 +248,7 @@ class BrickPartList(BrickRecordList[BrickPart]):
 
         return self
 
-    def problem_filtered(self, owner_id: str | None = None, color_id: str | None = None, theme_id: str | None = None, year: str | None = None, /) -> Self:
+    def problem_filtered(self, owner_id: str | None = None, color_id: str | None = None, theme_id: str | None = None, year: str | None = None, storage_id: str | None = None, tag_id: str | None = None, /) -> Self:
         # Save the filter parameters for client-side filtering
         if owner_id is not None:
             self.fields.owner_id = owner_id
@@ -265,6 +265,10 @@ class BrickPartList(BrickRecordList[BrickPart]):
             context['theme_id'] = theme_id
         if year and year != 'all':
             context['year'] = year
+        if storage_id and storage_id != 'all':
+            context['storage_id'] = storage_id
+        if tag_id and tag_id != 'all':
+            context['tag_id'] = tag_id
         if current_app.config.get('SKIP_SPARE_PARTS', False):
             context['skip_spare_parts'] = True
 
@@ -279,6 +283,8 @@ class BrickPartList(BrickRecordList[BrickPart]):
         color_id: str | None = None,
         theme_id: str | None = None,
         year: str | None = None,
+        storage_id: str | None = None,
+        tag_id: str | None = None,
         search_query: str | None = None,
         page: int = 1,
         per_page: int = 50,
@@ -295,6 +301,10 @@ class BrickPartList(BrickRecordList[BrickPart]):
             filter_context['theme_id'] = theme_id
         if year and year != 'all':
             filter_context['year'] = year
+        if storage_id and storage_id != 'all':
+            filter_context['storage_id'] = storage_id
+        if tag_id and tag_id != 'all':
+            filter_context['tag_id'] = tag_id
         if search_query:
             filter_context['search_query'] = search_query
         if current_app.config.get('SKIP_SPARE_PARTS', False):

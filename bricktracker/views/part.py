@@ -105,6 +105,8 @@ def problem() -> str:
     color_id = request.args.get('color', 'all')
     theme_id = request.args.get('theme', 'all')
     year = request.args.get('year', 'all')
+    storage_id = request.args.get('storage', 'all')
+    tag_id = request.args.get('tag', 'all')
     search_query, sort_field, sort_order, page = get_request_params()
 
     # Get pagination configuration
@@ -118,6 +120,8 @@ def problem() -> str:
             color_id=color_id,
             theme_id=theme_id,
             year=year,
+            storage_id=storage_id,
+            tag_id=tag_id,
             search_query=search_query,
             page=page,
             per_page=per_page,
@@ -128,7 +132,7 @@ def problem() -> str:
         pagination_context = build_pagination_context(page, per_page, total_count, is_mobile)
     else:
         # ORIGINAL MODE - Single page with all data for client-side search
-        parts = BrickPartList().problem_filtered(owner_id, color_id, theme_id, year)
+        parts = BrickPartList().problem_filtered(owner_id, color_id, theme_id, year, storage_id, tag_id)
         pagination_context = None
 
     # Get list of owners for filter dropdown
@@ -157,6 +161,12 @@ def problem() -> str:
     # Get list of years for filter dropdown (problem parts only)
     years = BrickSQL().fetchall('part/years/list_problem', **filter_context)
 
+    # Get list of storages for filter dropdown (problem parts only)
+    storages = BrickSQL().fetchall('part/storages/list_problem', **filter_context)
+
+    # Get list of tags for filter dropdown (problem parts only)
+    tags = BrickSQL().fetchall('part/tags/list_problem', **filter_context)
+
     return render_template(
         'problem.html',
         table_collection=parts,
@@ -172,7 +182,11 @@ def problem() -> str:
         themes=themes,
         selected_theme=theme_id,
         years=years,
-        selected_year=year
+        selected_year=year,
+        storages=storages,
+        selected_storage=storage_id,
+        tags=tags,
+        selected_tag=tag_id
     )
 
 

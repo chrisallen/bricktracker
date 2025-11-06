@@ -53,6 +53,12 @@ ON "bricktracker_sets"."set" IS NOT DISTINCT FROM "rebrickable_sets"."set"
 LEFT JOIN "bricktracker_set_owners"
 ON "bricktracker_sets"."id" IS NOT DISTINCT FROM "bricktracker_set_owners"."id"
 
+-- Left join with set tags (for tag filtering)
+{% if tag_id and tag_id != 'all' %}
+LEFT JOIN "bricktracker_set_tags"
+ON "bricktracker_sets"."id" IS NOT DISTINCT FROM "bricktracker_set_tags"."id"
+{% endif %}
+
 -- Left join with minifigures
 LEFT JOIN "bricktracker_minifigures"
 ON "bricktracker_parts"."id" IS NOT DISTINCT FROM "bricktracker_minifigures"."id"
@@ -74,6 +80,12 @@ AND "bricktracker_parts"."figure" IS NOT DISTINCT FROM "bricktracker_minifigures
 {% endif %}
 {% if year and year != 'all' %}
   {% set _ = conditions.append('"rebrickable_sets"."year" = ' ~ year) %}
+{% endif %}
+{% if storage_id and storage_id != 'all' %}
+  {% set _ = conditions.append('"bricktracker_sets"."storage" = \'' ~ storage_id ~ '\'') %}
+{% endif %}
+{% if tag_id and tag_id != 'all' %}
+  {% set _ = conditions.append('"bricktracker_set_tags"."tag_' ~ tag_id ~ '" = 1') %}
 {% endif %}
 {% if search_query %}
   {% set search_condition = '(LOWER("rebrickable_parts"."name") LIKE LOWER(\'%' ~ search_query ~ '%\') OR LOWER("rebrickable_parts"."color_name") LIKE LOWER(\'%' ~ search_query ~ '%\') OR LOWER("bricktracker_parts"."part") LIKE LOWER(\'%' ~ search_query ~ '%\'))' %}

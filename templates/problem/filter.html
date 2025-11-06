@@ -1,6 +1,6 @@
 <div id="table-filter" class="collapse {% if config['SHOW_GRID_FILTERS'] %}show{% endif %} row row-cols-lg-auto g-1 justify-content-center align-items-center">
   {% if owners | length %}
-  <div class="col-12 col-md-6 col-lg-3 flex-grow-1">
+  <div class="col-12 col-md-6 col-lg-2 flex-grow-1">
     <div class="input-group">
       <span class="input-group-text"><i class="ri-user-line"></i><span class="ms-1 d-none d-md-inline"> Owner</span></span>
       <select id="filter-owner" class="form-select" onchange="applyFiltersAndKeepOpen()" autocomplete="off">
@@ -13,7 +13,7 @@
   </div>
   {% endif %}
   {% if colors | length %}
-  <div class="col-12 col-md-6 col-lg-3 flex-grow-1">
+  <div class="col-12 col-md-6 col-lg-2 flex-grow-1">
     <div class="input-group">
       <span class="input-group-text"><i class="ri-palette-line"></i><span class="ms-1 d-none d-md-inline"> Color</span></span>
       <select id="filter-color" class="form-select" onchange="applyFiltersAndKeepOpen()" autocomplete="off">
@@ -28,7 +28,7 @@
   </div>
   {% endif %}
   {% if themes | length %}
-  <div class="col-12 col-md-6 col-lg-3 flex-grow-1">
+  <div class="col-12 col-md-6 col-lg-2 flex-grow-1">
     <div class="input-group">
       <span class="input-group-text"><i class="ri-price-tag-3-line"></i><span class="ms-1 d-none d-md-inline"> Theme</span></span>
       <select id="filter-theme" class="form-select" onchange="applyFiltersAndKeepOpen()" autocomplete="off">
@@ -41,13 +41,39 @@
   </div>
   {% endif %}
   {% if years | length %}
-  <div class="col-12 col-md-6 col-lg-3 flex-grow-1">
+  <div class="col-12 col-md-6 col-lg-2 flex-grow-1">
     <div class="input-group">
       <span class="input-group-text"><i class="ri-calendar-line"></i><span class="ms-1 d-none d-md-inline"> Year</span></span>
       <select id="filter-year" class="form-select" onchange="applyFiltersAndKeepOpen()" autocomplete="off">
         <option value="all" {% if selected_year == 'all' %}selected{% endif %}>All years</option>
         {% for year in years %}
           <option value="{{ year.year }}" {% if selected_year == year.year|string %}selected{% endif %}>{{ year.year }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  {% endif %}
+  {% if storages | length %}
+  <div class="col-12 col-md-6 col-lg-2 flex-grow-1">
+    <div class="input-group">
+      <span class="input-group-text"><i class="ri-inbox-line"></i><span class="ms-1 d-none d-md-inline"> Storage</span></span>
+      <select id="filter-storage" class="form-select" onchange="applyFiltersAndKeepOpen()" autocomplete="off">
+        <option value="all" {% if selected_storage == 'all' %}selected{% endif %}>All storages</option>
+        {% for storage in storages %}
+          <option value="{{ storage.storage_id }}" {% if selected_storage == storage.storage_id %}selected{% endif %}>{{ storage.storage_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  {% endif %}
+  {% if tags | length %}
+  <div class="col-12 col-md-6 col-lg-2 flex-grow-1">
+    <div class="input-group">
+      <span class="input-group-text"><i class="ri-price-tag-line"></i><span class="ms-1 d-none d-md-inline"> Tag</span></span>
+      <select id="filter-tag" class="form-select" onchange="applyFiltersAndKeepOpen()" autocomplete="off">
+        <option value="all" {% if selected_tag == 'all' %}selected{% endif %}>All tags</option>
+        {% for tag in tags %}
+          <option value="{{ tag.tag_id }}" {% if selected_tag == tag.tag_id %}selected{% endif %}>{{ tag.tag_name }}</option>
         {% endfor %}
       </select>
     </div>
