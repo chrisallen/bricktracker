@@ -22,6 +22,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize duplicate filter functionality
   initializeDuplicateFilter();
 
+  // Initialize clear filters button
+  initializeClearFiltersButton();
+
   if (searchInput && searchClear) {
     if (isPaginationMode()) {
       // PAGINATION MODE - Server-side search
@@ -704,4 +707,58 @@ function triggerGridRefresh() {
       }
     }
   }
+}
+
+// Initialize clear filters button functionality
+function initializeClearFiltersButton() {
+  const clearFiltersButton = document.getElementById('grid-filter-clear');
+  if (!clearFiltersButton) return;
+
+  clearFiltersButton.addEventListener('click', () => {
+    if (isPaginationMode()) {
+      // SERVER-SIDE PAGINATION MODE: Remove filter parameters from URL
+      const currentUrl = new URL(window.location);
+
+      // Remove all filter parameters
+      const filterParams = ['status', 'theme', 'year', 'owner', 'purchase_location', 'storage', 'tag', 'duplicate'];
+      filterParams.forEach(param => {
+        currentUrl.searchParams.delete(param);
+      });
+
+      // Reset to page 1
+      currentUrl.searchParams.set('page', '1');
+
+      // Navigate to cleaned URL
+      window.location.href = currentUrl.toString();
+    } else {
+      // CLIENT-SIDE MODE: Reset all filter dropdowns to empty string
+      const filterDropdowns = [
+        'grid-status',
+        'grid-theme',
+        'grid-year',
+        'grid-owner',
+        'grid-purchase-location',
+        'grid-storage',
+        'grid-tag'
+      ];
+
+      filterDropdowns.forEach(dropdownId => {
+        const dropdown = document.getElementById(dropdownId);
+        if (dropdown) {
+          dropdown.value = '';
+        }
+      });
+
+      // Clear duplicate filter if active
+      const duplicateButton = document.getElementById('duplicate-filter-toggle');
+      if (duplicateButton && duplicateButton.classList.contains('btn-secondary')) {
+        duplicateButton.classList.remove('btn-secondary');
+        duplicateButton.classList.add('btn-outline-secondary');
+        applyDuplicateFilter(false);
+      }
+
+      // Trigger filtering if grid instance exists
+      triggerGridRefresh();
+    }
+  });
 }

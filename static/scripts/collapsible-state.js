@@ -434,6 +434,38 @@ window.applyFiltersAndKeepState = function(tableId, storageKey) {
   }
 };
 
+// Shared function to clear all filters for a page (works in both pagination and client-side modes)
+window.clearPageFilters = function(tableId, filterParams) {
+  const isPaginationMode = window.isPaginationModeForPage(tableId);
+
+  if (isPaginationMode) {
+    // SERVER-SIDE PAGINATION MODE: Remove filter parameters from URL
+    const currentUrl = new URL(window.location);
+
+    // Remove all filter parameters
+    filterParams.forEach(param => {
+      currentUrl.searchParams.delete(param);
+    });
+
+    // Reset to page 1
+    currentUrl.searchParams.set('page', '1');
+
+    // Navigate to cleaned URL
+    window.location.href = currentUrl.toString();
+  } else {
+    // CLIENT-SIDE MODE: Reset all filter dropdowns to "all"
+    filterParams.forEach(param => {
+      const select = document.getElementById(`filter-${param}`);
+      if (select) {
+        select.value = 'all';
+      }
+    });
+
+    // Trigger filter application (will use existing filter logic)
+    window.applyPageFilters(tableId);
+  }
+};
+
 // Shared initialization for table pages (parts, problems, minifigures)
 window.initializeTablePage = function(config) {
   const {

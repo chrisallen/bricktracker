@@ -23,5 +23,13 @@ document.addEventListener("DOMContentLoaded", () => {
     },
     hasColorDropdown: true
   });
+
+  // Initialize clear filters button
+  const clearButton = document.getElementById('table-filter-clear');
+  if (clearButton) {
+    clearButton.addEventListener('click', () => {
+      window.clearPageFilters('parts', ['owner', 'color', 'theme', 'year']);
+    });
+  }
 });
 

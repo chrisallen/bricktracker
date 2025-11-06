@@ -166,6 +166,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const currentOrder = urlParams.get('order');
     window.initializeSortButtonStates(currentSort, currentOrder);
   }
+
+  // Initialize clear filters button
+  const clearButton = document.getElementById('table-filter-clear');
+  if (clearButton) {
+    clearButton.addEventListener('click', () => {
+      window.clearPageFilters('minifigures', ['owner', 'problems', 'theme', 'year']);
+    });
+  }
 });
 
 function setupSortButtons() {

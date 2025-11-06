@@ -22,6 +22,9 @@
         <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#grid-filter" aria-expanded="{% if config['SHOW_GRID_FILTERS'] %}true{% else %}false{% endif %}" aria-controls="grid-filter">
           <i class="ri-filter-line"></i> Filters
         </button>
+        <button id="grid-filter-clear" class="btn btn-outline-danger" type="button" title="Clear all filters">
+          <i class="ri-filter-off-line"></i> <span class="d-none d-md-inline">Clear</span>
+        </button>
         {% if config['SHOW_SETS_DUPLICATE_FILTER'] %}
         <button class="btn {% if current_duplicate_filter %}btn-secondary{% else %}btn-outline-secondary{% endif %}" type="button" id="duplicate-filter-toggle" title="Show duplicate sets only">
           <i class="ri-stack-line"></i> Duplicates
