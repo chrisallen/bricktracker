@@ -196,11 +196,12 @@ class RebrickableSet(BrickRecord):
     @staticmethod
     def from_rebrickable(data: dict[str, Any], /, **_) -> dict[str, Any]:
         # Extracting version and number
+        # Note: number can be alphanumeric (e.g., "McDR6US", "COMCON035")
         number, _, version = str(data['set_num']).partition('-')
 
         return {
             'set': str(data['set_num']),
-            'number': int(number),
+            'number': str(number),  # Keep as string to support alphanumeric sets
             'version': int(version),
             'name': str(data['name']),
             'year': int(data['year']),
