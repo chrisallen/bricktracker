@@ -230,10 +230,16 @@ class BrickInstructions(object):
 
         folder: str = current_app.config['INSTRUCTIONS_FOLDER']
 
-        # Compute the path
-        path = os.path.join(folder, self.filename)
-
-        return url_for('static', filename=path)
+        # Determine which route to use based on folder path
+        # If folder contains 'data' (new structure), use data route
+        # Otherwise use static route (legacy)
+        if 'data' in folder:
+            return url_for('data.serve_data_file', folder='instructions', filename=self.filename)
+        else:
+            # Legacy: folder is relative to static/
+            folder_clean = folder.removeprefix('static/')
+            path = os.path.join(folder_clean, self.filename)
+            return url_for('static', filename=path)
 
     # Return the icon depending on the extension
     def icon(self, /) -> str:

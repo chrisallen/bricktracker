@@ -36,11 +36,14 @@ class BrickInstructionsList(object):
 
             # Try to list the files in the instruction folder
             try:
-                # Make a folder relative to static
-                folder: str = os.path.join(
-                    current_app.static_folder,  # type: ignore
-                    current_app.config['INSTRUCTIONS_FOLDER'],
-                )
+                folder_config: str = current_app.config['INSTRUCTIONS_FOLDER']
+
+                # If folder is absolute, use it directly
+                # Otherwise, make it relative to app root (not static folder)
+                if os.path.isabs(folder_config):
+                    folder = folder_config
+                else:
+                    folder = os.path.join(current_app.root_path, folder_config)
 
                 for file in os.scandir(folder):
                     instruction = BrickInstructions(file)
