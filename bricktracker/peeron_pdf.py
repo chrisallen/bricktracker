@@ -188,10 +188,15 @@ class PeeronPDF(object):
     # Get target file path
     def _get_target_path(self, /) -> str:
         """Get the full path where the PDF should be saved"""
-        instructions_folder = os.path.join(
-            current_app.static_folder,  # type: ignore
-            current_app.config['INSTRUCTIONS_FOLDER']
-        )
+        folder = current_app.config['INSTRUCTIONS_FOLDER']
+
+        # If folder is absolute, use it directly
+        # Otherwise, make it relative to app root (not static folder)
+        if os.path.isabs(folder):
+            instructions_folder = folder
+        else:
+            instructions_folder = os.path.join(current_app.root_path, folder)
+
         return os.path.join(instructions_folder, self.filename)
 
     # Create BrickInstructions instance for the generated PDF

@@ -141,6 +141,14 @@ See [Migration Guide](docs/migration_guide.md) for detailed instructions
   - Automatic fallback to nil.png from parts folder for set previews
   - Copy of nil placeholder saved as set image for consistent display across all routes
   - Prevents errors when downloading sets that have no set_img_url in API response
+- Fix instructions download from Rebrickable
+  - Replaced cloudscraper with standard requests library
+  - Resolves 403 Forbidden errors when downloading instruction PDFs
+- Fix instructions display and URL generation
+  - Fixed "Open PDF" button links to use correct data route
+  - Corrected path resolution for data/instructions folder
+  - Fixed instruction listing page to scan correct folder location
+  - Fixed Peeron PDF creation to use correct data folder path
     
 ### 1.2.4
 

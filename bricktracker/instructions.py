@@ -13,7 +13,6 @@ import requests
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 import re
-import cloudscraper
 
 from .exceptions import ErrorException, DownloadException
 if TYPE_CHECKING:
@@ -106,20 +105,34 @@ class BrickInstructions(object):
                     message=f'File {self.filename} already exists, skipped - <a href="{pdf_url}" target="_blank" class="btn btn-sm btn-primary ms-2"><i class="ri-external-link-line"></i> Open PDF</a>'
                 )
 
-            # Fetch PDF via cloudscraper (to bypass Cloudflare)
-            scraper = cloudscraper.create_scraper()
-            scraper.headers.update({
-                "User-Agent": current_app.config['REBRICKABLE_USER_AGENT']
+            # Use plain requests instead of cloudscraper
+            session = requests.Session()
+            session.headers.update({
+                'User-Agent': current_app.config['REBRICKABLE_USER_AGENT'],
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.5',
+                'DNT': '1',
+                'Connection': 'keep-alive',
+                'Upgrade-Insecure-Requests': '1',
+                'Sec-Fetch-Dest': 'document',
+                'Sec-Fetch-Mode': 'navigate',
+                'Sec-Fetch-Site': 'same-origin',
+                'Cache-Control': 'max-age=0'
             })
 
-            # Visit the instructions page first to establish session cookies
+            # Visit the set's instructions listing page first to establish session cookies
+            set_number = None
             if self.rebrickable:
-                instructions_page = f"https://rebrickable.com/instructions/{self.rebrickable.fields.set}/"
-                scraper.get(instructions_page)
-                # Set referer to the instructions page we just visited
-                scraper.headers.update({"Referer": instructions_page})
+                set_number = self.rebrickable.fields.set
+            elif self.set:
+                set_number = self.set
 
-            resp = scraper.get(path, stream=True, allow_redirects=True)
+            if set_number:
+                instructions_page = f"https://rebrickable.com/instructions/{set_number}/"
+                session.get(instructions_page)
+                session.headers.update({"Referer": instructions_page})
+
+            resp = session.get(path, stream=True, allow_redirects=True)
             if not resp.ok:
                 raise DownloadException(f"Failed to download: HTTP {resp.status_code}")
 
@@ -256,20 +269,33 @@ class BrickInstructions(object):
     @staticmethod
     def find_instructions(set: str, /) -> list[Tuple[str, str]]:
         """
-        Scrape Rebrickable’s HTML and return a list of
+        Scrape Rebrickable's HTML and return a list of
         (filename_slug, download_url). Duplicate slugs get _1, _2, …
         """
         page_url = f"https://rebrickable.com/instructions/{set}/"
         logger.debug(f"[find_instructions] fetching HTML from {page_url!r}")
 
-        # Solve Cloudflare’s challenge
-        scraper = cloudscraper.create_scraper()
-        scraper.headers.update({'User-Agent': current_app.config['REBRICKABLE_USER_AGENT']})
-        resp = scraper.get(page_url)
+        # Use plain requests instead of cloudscraper
+        session = requests.Session()
+        session.headers.update({
+            'User-Agent': current_app.config['REBRICKABLE_USER_AGENT'],
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'DNT': '1',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'none',
+            'Cache-Control': 'max-age=0'
+        })
+
+        resp = session.get(page_url)
         if not resp.ok:
             raise ErrorException(f'Failed to load instructions page for {set}. HTTP {resp.status_code}')
 
         soup = BeautifulSoup(resp.content, 'html.parser')
+        # Match download links with or without query parameters (e.g., ?cfe=timestamp&cfk=key)
         link_re = re.compile(r'^/instructions/\d+/.+/download/')
 
         raw: list[tuple[str, str]] = []
@@ -282,8 +308,10 @@ class BrickInstructions(object):
             alt_text = img['alt'].removeprefix('LEGO Building Instructions for ') # type: ignore
             slug = re.sub(r'[^A-Za-z0-9]+', '-', alt_text).strip('-')
 
-            # Build the absolute download URL
+            # Build the absolute download URL - this preserves query parameters
+            # BeautifulSoup's a['href'] includes the full href with ?cfe=...&cfk=... params
             download_url = urljoin('https://rebrickable.com', a['href']) # type: ignore
+            logger.debug(f"[find_instructions] Found download link: {download_url}")
             raw.append((slug, download_url))
 
         if not raw:
