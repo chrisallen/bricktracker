@@ -111,7 +111,15 @@ class BrickInstructions(object):
             scraper.headers.update({
                 "User-Agent": current_app.config['REBRICKABLE_USER_AGENT']
             })
-            resp = scraper.get(path, stream=True)
+
+            # Visit the instructions page first to establish session cookies
+            if self.rebrickable:
+                instructions_page = f"https://rebrickable.com/instructions/{self.rebrickable.fields.set}/"
+                scraper.get(instructions_page)
+                # Set referer to the instructions page we just visited
+                scraper.headers.update({"Referer": instructions_page})
+
+            resp = scraper.get(path, stream=True, allow_redirects=True)
             if not resp.ok:
                 raise DownloadException(f"Failed to download: HTTP {resp.status_code}")
 
@@ -172,11 +180,16 @@ class BrickInstructions(object):
         if filename is None:
             filename = self.filename
 
-        return os.path.join(
-            current_app.static_folder,  # type: ignore
-            current_app.config['INSTRUCTIONS_FOLDER'],
-            filename
-        )
+        folder = current_app.config['INSTRUCTIONS_FOLDER']
+
+        # If folder is absolute, use it directly
+        # Otherwise, make it relative to app root (not static folder)
+        if os.path.isabs(folder):
+            base_path = folder
+        else:
+            base_path = os.path.join(current_app.root_path, folder)
+
+        return os.path.join(base_path, filename)
 
     # Rename an instructions file
     def rename(self, filename: str, /) -> None:
