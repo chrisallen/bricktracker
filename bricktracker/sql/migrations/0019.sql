@@ -1,4 +1,4 @@
--- Migration 0019: Performance optimization indexes
+-- description: Performance optimization indexes
 
 -- High-impact composite index for problem parts aggregation
 -- Used in set listings, statistics, and problem reports

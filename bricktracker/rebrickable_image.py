@@ -53,6 +53,23 @@ class RebrickableImage(object):
         if os.path.exists(path):
             return
 
+        # Check if the original image field is null - copy nil placeholder instead
+        if self.part is not None and self.part.fields.image is None:
+            return
+        if self.minifigure is not None and self.minifigure.fields.image is None:
+            return
+        if self.set.fields.image is None:
+            # Copy nil.png from parts folder to sets folder with set number as filename
+            parts_folder = current_app.config['PARTS_FOLDER']
+            if not os.path.isabs(parts_folder):
+                parts_folder = os.path.join(current_app.root_path, parts_folder)
+            nil_source = os.path.join(parts_folder, f"{RebrickableImage.nil_name()}.{self.extension}")
+
+            if os.path.exists(nil_source):
+                import shutil
+                shutil.copy2(nil_source, path)
+            return
+
         url = self.url()
         if url is None:
             return
@@ -123,7 +140,11 @@ class RebrickableImage(object):
             else:
                 return self.minifigure.fields.image
 
-        return self.set.fields.image
+        # Handle set images - use nil placeholder if image is null
+        if self.set.fields.image is None:
+            return current_app.config['REBRICKABLE_IMAGE_NIL']
+        else:
+            return self.set.fields.image
 
     # Return the name of the nil image file
     @staticmethod

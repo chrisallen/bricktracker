@@ -132,6 +132,15 @@ See [Migration Guide](docs/migration_guide.md) for detailed instructions
   - Statistics Query Optimization:
     - Replaced separate subqueries with efficient CTEs (Common Table Expressions)
     - Consolidated aggregations for set, part, minifigure, and financial statistics
+- Add alphanumeric set number support
+  - Database schema change: Set number column changed from INTEGER to TEXT
+  - Supports LEGO promotional and special edition sets with letters in their numbers
+  - Examples: "McDR6US-1", "COMCON035-1", "EG00021-1"
+- Add default image handling for sets without images
+  - Sets with null/missing images from Rebrickable API now display placeholder image
+  - Automatic fallback to nil.png from parts folder for set previews
+  - Copy of nil placeholder saved as set image for consistent display across all routes
+  - Prevents errors when downloading sets that have no set_img_url in API response
     
 ### 1.2.4
 

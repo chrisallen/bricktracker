@@ -155,9 +155,18 @@ class RebrickableSet(BrickRecord):
 
     # Return a short form of the Rebrickable set
     def short(self, /, *, from_download: bool = False) -> dict[str, Any]:
+        # Use nil image URL if set image is null
+        image_url = self.fields.image
+        if image_url is None:
+            # Return path to nil.png from parts folder
+            image_url = RebrickableImage.static_url(
+                RebrickableImage.nil_name(),
+                'PARTS_FOLDER'
+            )
+
         return {
             'download': from_download,
-            'image': self.fields.image,
+            'image': image_url,
             'name': self.fields.name,
             'set': self.fields.set,
         }
@@ -207,7 +216,7 @@ class RebrickableSet(BrickRecord):
             'year': int(data['year']),
             'theme_id': int(data['theme_id']),
             'number_of_parts': int(data['num_parts']),
-            'image': str(data['set_img_url']),
+            'image': str(data['set_img_url']) if data['set_img_url'] is not None else None,
             'url': str(data['set_url']),
             'last_modified': str(data['last_modified_dt']),
         }
