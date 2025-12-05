@@ -25,6 +25,7 @@ from bricktracker.views.admin.status import admin_status_page
 from bricktracker.views.admin.storage import admin_storage_page
 from bricktracker.views.admin.tag import admin_tag_page
 from bricktracker.views.admin.theme import admin_theme_page
+from bricktracker.views.data import data_page
 from bricktracker.views.error import error_404
 from bricktracker.views.index import index_page
 from bricktracker.views.instructions import instructions_page
@@ -77,6 +78,7 @@ def setup_app(app: Flask) -> None:
 
     # Register app routes
     app.register_blueprint(add_page)
+    app.register_blueprint(data_page)
     app.register_blueprint(index_page)
     app.register_blueprint(instructions_page)
     app.register_blueprint(login_page)

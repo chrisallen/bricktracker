@@ -96,9 +96,16 @@ class RebrickableImage(object):
 
     # Return the path depending on the objects provided
     def path(self, /) -> str:
+        folder = self.folder()
+        # If folder is an absolute path (starts with /), use it directly
+        # Otherwise, make it relative to app root (current_app.root_path)
+        if folder.startswith('/'):
+            base_path = folder
+        else:
+            base_path = os.path.join(current_app.root_path, folder)
+
         return os.path.join(
-            current_app.static_folder,  # type: ignore
-            self.folder(),
+            base_path,
             '{id}.{ext}'.format(id=self.id(), ext=self.extension),
         )
 
@@ -152,10 +159,21 @@ class RebrickableImage(object):
         # _, extension = os.path.splitext(self.part_img_url)
         extension = '.jpg'
 
-        # Compute the path
-        path = os.path.join(folder, '{name}{ext}'.format(
-            name=name,
-            ext=extension,
-        ))
-
-        return url_for('static', filename=path)
+        # Determine which route to use based on folder path
+        # If folder contains 'data' (new structure), use data route
+        # Otherwise use static route (legacy - relative paths like 'parts', 'sets')
+        if 'data' in folder:
+            # Extract the folder type from the folder_name config key
+            # E.g., 'PARTS_FOLDER' -> 'parts', 'SETS_FOLDER' -> 'sets'
+            folder_type = folder_name.replace('_FOLDER', '').lower()
+            filename = '{name}{ext}'.format(name=name, ext=extension)
+            return url_for('data.serve_data_file', folder=folder_type, filename=filename)
+        else:
+            # Legacy: folder is relative to static/ (e.g., 'parts' or 'static/parts')
+            # Strip 'static/' prefix if present to avoid double /static/ in URL
+            folder_clean = folder.removeprefix('static/')
+            path = os.path.join(folder_clean, '{name}{ext}'.format(
+                name=name,
+                ext=extension,
+            ))
+            return url_for('static', filename=path)

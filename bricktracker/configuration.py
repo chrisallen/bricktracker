@@ -60,7 +60,7 @@ class BrickConfiguration(object):
             if self.cast == bool and isinstance(value, str):
                 value = value.lower() in ('true', 'yes', '1')
 
-            # Static path fixup
+            # Static path fixup (legacy - only for paths with s: True flag)
             if self.static_path and isinstance(value, str):
                 value = os.path.normpath(value)
 
@@ -69,6 +69,10 @@ class BrickConfiguration(object):
 
                 # Remove static prefix
                 value = value.removeprefix('static/')
+
+            # Normalize regular paths (not marked as static)
+            elif not self.static_path and isinstance(value, str) and ('FOLDER' in self.name or 'PATH' in self.name):
+                value = os.path.normpath(value)
 
         # Type casting
         if self.cast is not None:

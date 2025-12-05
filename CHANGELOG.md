@@ -4,6 +4,30 @@
 
 ### 1.3
 
+#### Breaking Changes - Data Folder Consolidation
+
+**IMPORTANT**: This version consolidates all user data into a single `data/` folder for easier backup and volume mapping.
+
+- **Path handling**: All relative paths are now resolved relative to the application root (`/app` in Docker)
+  - Example: `data/app.db` → `/app/data/app.db`
+
+- **New default paths** (automatically used for new installations):
+  - Database: `data/app.db` (was: `app.db` in root)
+  - CSV files: `data/*.csv` (was: `*.csv` in root)
+  - Images/PDFs: `data/{sets,parts,minifigures,instructions}/` (was: `static/*`)
+
+- **Migration options**:
+  1. **Migrate to new structure**
+  2. **Keep current setup**
+
+See [Migration Guide](docs/migration_guide.md) for detailed instructions
+
+- **Docker users**:
+  - New setup uses single volume: `data:/app/data/` (replaces 5 separate volumes)
+  - Old volume mounts still work if you set environment variables above
+
+#### Features
+
 - Add individual pagination control system per entity type
   - `BK_SETS_SERVER_SIDE_PAGINATION`: Enable/disable pagination for sets
   - `BK_PARTS_SERVER_SIDE_PAGINATION`: Enable/disable pagination for parts
