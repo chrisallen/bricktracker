@@ -1,6 +1,8 @@
 import logging
+import os
 import sys
 import time
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from flask import current_app, Flask, g
@@ -38,7 +40,46 @@ from bricktracker.views.storage import storage_page
 from bricktracker.views.wish import wish_page
 
 
+def load_env_file() -> None:
+    """Load .env file into os.environ with priority: data/.env > .env (root)"""
+    data_env = Path('data/.env')
+    root_env = Path('.env')
+
+    env_file = None
+    if data_env.exists():
+        env_file = data_env
+        logging.info(f"Loading environment from: {data_env}")
+    elif root_env.exists():
+        env_file = root_env
+        logging.info(f"Loading environment from: {root_env} (consider migrating to data/.env)")
+
+    if env_file:
+        # Simple .env parser (no external dependencies needed)
+        with open(env_file, 'r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+                # Skip comments and empty lines
+                if not line or line.startswith('#'):
+                    continue
+                # Parse key=value
+                if '=' in line:
+                    key, value = line.split('=', 1)
+                    key = key.strip()
+                    value = value.strip()
+                    # Remove quotes if present
+                    if value.startswith('"') and value.endswith('"'):
+                        value = value[1:-1]
+                    elif value.startswith("'") and value.endswith("'"):
+                        value = value[1:-1]
+                    # Only set if not already in environment (environment variables take precedence)
+                    if key not in os.environ:
+                        os.environ[key] = value
+
+
 def setup_app(app: Flask) -> None:
+    # Load .env file before configuration (if not already loaded by Docker Compose)
+    load_env_file()
+
     # Load the configuration
     BrickConfigurationList(app)
 

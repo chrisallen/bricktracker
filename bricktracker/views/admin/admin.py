@@ -1,4 +1,5 @@
 import logging
+import os
 
 from flask import Blueprint, request, render_template, current_app, jsonify
 from flask_login import login_required
@@ -31,22 +32,33 @@ admin_page = Blueprint('admin', __name__, url_prefix='/admin')
 
 def get_env_values():
     """Get current environment values, using defaults from config when not set"""
-    import os
     from pathlib import Path
 
     env_values = {}
     config_defaults = {}
     env_explicit_values = {}  # Track which values are explicitly set
+    env_locked_values = {}  # Track which values are set via Docker environment (locked)
 
-    # Read .env file if it exists
-    env_file = Path('.env')
+    # Read .env file if it exists (check both locations)
+    env_file = None
+    if Path('data/.env').exists():
+        env_file = Path('data/.env')
+    elif Path('.env').exists():
+        env_file = Path('.env')
+
     env_from_file = {}
-    if env_file.exists():
+    if env_file:
         with open(env_file, 'r', encoding='utf-8') as f:
             for line in f:
                 line = line.strip()
                 if line and not line.startswith('#') and '=' in line:
                     key, value = line.split('=', 1)
+                    # Strip quotes from value when reading
+                    value = value.strip()
+                    if value.startswith('"') and value.endswith('"'):
+                        value = value[1:-1]
+                    elif value.startswith("'") and value.endswith("'"):
+                        value = value[1:-1]
                     env_from_file[key] = value
 
     # Process each config item
@@ -63,6 +75,19 @@ def get_env_values():
                 default_value = [item.strip() for item in default_value.split(',') if item.strip()]
             # For int/other types, keep the original default value
         config_defaults[env_name] = default_value
+
+        # Check if value is set via Docker environment and overrides .env file
+        # A variable is "locked" if:
+        # 1. It's set in os.environ (Docker environment), AND
+        # 2. Either it's NOT in .env file, OR the value differs from .env file
+        is_locked = False
+        if env_name in os.environ:
+            env_value = os.environ[env_name]
+            file_value = env_from_file.get(env_name)
+            # Locked if not in file, or values differ
+            if file_value is None or env_value != file_value:
+                is_locked = True
+        env_locked_values[env_name] = is_locked
 
         # Check if value is explicitly set in .env file or environment
         is_explicitly_set = env_name in env_from_file or env_name in os.environ
@@ -88,7 +113,7 @@ def get_env_values():
 
         env_values[env_name] = value
 
-    return env_values, config_defaults, env_explicit_values
+    return env_values, config_defaults, env_explicit_values, env_locked_values
 
 
 # Admin
@@ -202,13 +227,36 @@ def admin() -> str:
         open_tag
     )
 
-    env_values, config_defaults, env_explicit_values = get_env_values()
+    env_values, config_defaults, env_explicit_values, env_locked_values = get_env_values()
+
+    # Check .env file location and set warnings
+    env_file_location = None
+    env_file_warning = False
+    env_file_missing = False
+
+    if os.path.exists('data/.env'):
+        env_file_location = 'data/.env'
+        env_file_warning = False
+        env_file_missing = False
+    elif os.path.exists('.env'):
+        env_file_location = '.env'
+        env_file_warning = True  # Warn: changes won't persist without volume mount
+        env_file_missing = False
+    else:
+        env_file_location = None
+        env_file_warning = False
+        env_file_missing = True  # Warn: no .env file found
+
     return render_template(
         'admin.html',
         configuration=BrickConfigurationList.list(),
         env_values=env_values,
         config_defaults=config_defaults,
         env_explicit_values=env_explicit_values,
+        env_locked_values=env_locked_values,
+        env_file_location=env_file_location,
+        env_file_warning=env_file_warning,
+        env_file_missing=env_file_missing,
         database_counters=database_counters,
         database_error=request.args.get('database_error'),
         database_exception=database_exception,

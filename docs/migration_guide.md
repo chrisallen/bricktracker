@@ -21,6 +21,7 @@ For example: `data/app.db` → `/app/data/app.db`
 ```
 Container (/app/):
 ├── data/                   # NEW: Single volume mount for all user data
+│   ├── .env                # Configuration (recommended location)
 │   ├── app.db              # Database
 │   ├── retired_sets.csv    # Downloaded CSV files
 │   ├── themes.csv
@@ -87,10 +88,13 @@ This is the recommended approach for cleaner backups and simpler bind mount mana
 
    Run:
    ```bash
+   # Move configuration file (optional but recommended)
+   mv .env ./bricktracker-data/.env
+
    # Move database and CSV files
    mv ./data/app.db ./bricktracker-data/
    mv ./data/retired_sets.csv ./bricktracker-data/
-   mv ./data/themes.csv ./bricktracker-data/ 
+   mv ./data/themes.csv ./bricktracker-data/
 
    # Move image and instruction folders
    mv ./instructions/* ./bricktracker-data/instructions/
@@ -106,10 +110,10 @@ This is the recommended approach for cleaner backups and simpler bind mount mana
        volumes:
          - ./bricktracker-data:/app/data/
 
-   # Remove old volume mounts
+   # Remove old volume mounts and env_file (if .env was moved to data/)
    ```
 
-5. **Remove old environment overrides from `.env` (if present):**
+5. **Remove old path overrides from `.env` (if present):**
    Delete any lines starting with:
    - `BK_DATABASE_PATH=`
    - `BK_INSTRUCTIONS_FOLDER=`
@@ -172,6 +176,45 @@ If you want to keep your current volume structure without moving any files:
    ```
 
 That's it! Your existing setup will continue to work.
+
+## Configuration File (.env) Location
+
+### New Behavior (v1.3+)
+
+BrickTracker now supports `.env` in two locations with automatic detection:
+
+1. **data/.env** (recommended - new location)
+   - Included in data volume backup
+   - Settings persist when changed via admin panel
+   - Priority location (checked first)
+   - **No `env_file` needed** - app reads it directly from `/app/data/.env`
+
+2. **.env** (backward compatibility - root)
+   - Continues to work for existing installations
+   - Requires `env_file: .env` in compose.yaml for Docker to load it at startup
+   - Not included in data volume (unless you add `.env` to `data/`)
+
+### Migration Steps for .env
+
+**Option A: Move to data folder (recommended)**
+
+```bash
+# Move .env to data folder
+mv .env data/.env
+
+# Update compose.yaml - remove or comment out env_file
+# The app will automatically find and use /app/data/.env
+```
+
+**Option B: Keep in root (backward compatible)**
+
+```bash
+# No changes needed
+# Keep env_file: .env in compose.yaml
+# App will use .env from root as fallback
+```
+
+**Note:** The application automatically detects which location has the .env file at runtime. No Docker Compose `env_file` directive is needed for `data/.env` because the app reads it directly from the mounted volume.
 
 ## Configuration Reference
 
@@ -257,6 +300,27 @@ To preserve old volume structure without migration, add to `.env`:
    # Should show: app.db, retired_sets.csv, themes.csv, and subdirectories
    ```
 
+### Settings Don't Persist After Restart
+
+**Error:** Admin panel changes revert after `docker compose restart`
+
+**Solution:**
+
+This happens when `.env` is not in a volume. Choose one:
+
+**Option A: Move .env to data folder**
+```bash
+mv .env data/.env
+# Update compose.yaml - remove or comment out env_file
+# The app will automatically find and use /app/data/.env
+```
+
+**Option B: Mount .env as volume**
+```yaml
+volumes:
+  - ./.env:/app/.env
+```
+
 ### Permission Errors
 
 If you see permission errors after migration:
@@ -265,6 +329,14 @@ If you see permission errors after migration:
 # Fix permissions on bind-mounted directory
 sudo chown -R $(id -u):$(id -g) ./bricktracker-data
 ```
+
+**Permission denied writing .env:**
+
+If the admin panel shows an error when saving settings:
+
+1. Ensure .env file is writable by container user
+2. If using volume mount, check host file permissions
+3. In container: `docker exec BrickTracker ls -la /app/.env` or `/app/data/.env`
 
 ### Reverting Migration
 

@@ -107,7 +107,20 @@ class ConfigManager:
     """Manages live configuration updates for BrickTracker"""
 
     def __init__(self):
-        self.env_file_path = Path('.env')
+        # Check for .env in data folder first (v1.3+), fallback to root (backward compatibility)
+        data_env = Path('data/.env')
+        root_env = Path('.env')
+
+        if data_env.exists():
+            self.env_file_path = data_env
+            logger.info("Using configuration file: data/.env")
+        elif root_env.exists():
+            self.env_file_path = root_env
+            logger.info("Using configuration file: .env (consider migrating to data/.env)")
+        else:
+            # Default to data/.env for new installations
+            self.env_file_path = data_env
+            logger.info("Configuration file will be created at: data/.env")
 
     def get_current_config(self) -> Dict[str, Any]:
         """Get current configuration values for live-changeable variables"""

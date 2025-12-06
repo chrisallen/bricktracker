@@ -1,10 +1,21 @@
 {% import 'macro/accordion.html' as accordion %}
 
+<!-- Helper macro to check if variable is locked -->
+{% macro is_locked(var_name) %}{{ 'disabled' if env_locked_values[var_name] else '' }}{% endmacro %}
+
 <!-- Helper macro for config badges with truncation -->
 {% macro config_badges(var_name) %}
   {% set current_value = env_values[var_name] %}
   {% set default_value = config_defaults[var_name] %}
   {% set is_explicitly_set = env_explicit_values[var_name] %}
+  {% set is_locked = env_locked_values[var_name] %}
+
+  <!-- Locked badge (Docker environment variable) -->
+  {% if is_locked %}
+    <span class="badge rounded-pill text-bg-dark ms-2" data-badge-var="{{ var_name }}" data-badge-type="locked" title="Set via Docker environment variable">
+      <i class="ri-lock-line"></i> Locked
+    </span>
+  {% endif %}
 
   <!-- Value badge -->
   {% if not is_explicitly_set %}
@@ -24,7 +35,7 @@
   {% endif %}
 
   <!-- Changed badge -->
-  {% if current_value != default_value %}
+  {% if current_value != default_value and not is_locked %}
     <span class="badge rounded-pill text-bg-warning ms-1" data-badge-var="{{ var_name }}" data-badge-type="changed">Changed</span>
   {% endif %}
 {% endmacro %}
@@ -34,6 +45,38 @@
   <!-- Status indicators -->
 </div>
 
+<!-- Configuration File Location Warning -->
+{% if env_file_warning %}
+<div class="alert alert-warning mb-3 mx-3">
+  <h6 class="mb-2"><i class="ri-alert-line"></i> Configuration Persistence Warning</h6>
+  <p class="mb-2">
+    <strong>Configuration file location:</strong> <code>{{ env_file_location }}</code>
+  </p>
+  <p class="mb-0">
+    <small>
+      Settings changes will <strong>not persist</strong> across container restarts.
+      To persist configuration changes, either:
+      <ul class="mb-0 mt-1">
+        <li>Move <code>.env</code> to <code>data/.env</code> folder (recommended), or</li>
+        <li>Add volume mount: <code>- ./.env:/app/.env</code> to your compose.yaml</li>
+      </ul>
+      See <a href="https://bricktracker.baerentsen.space/migration-guide" target="_blank" class="alert-link">Migration Guide</a> for details.
+    </small>
+  </p>
+</div>
+{% elif env_file_missing %}
+<div class="alert alert-info mb-3 mx-3">
+  <h6 class="mb-2"><i class="ri-information-line"></i> No Configuration File Found</h6>
+  <p class="mb-0">
+    <small>
+      No <code>.env</code> file was found. Currently using default values and Docker environment variables.
+      If you save changes, a new configuration file will be created at <code>data/.env</code> (recommended location).
+      See <a href="https://bricktracker.baerentsen.space/migration-guide" target="_blank" class="alert-link">Migration Guide</a> for details.
+    </small>
+  </p>
+</div>
+{% endif %}
+
 <!-- Badge Legend -->
 <div class="alert alert-info mb-3 mx-3">
   <h6 class="mb-2"><i class="ri-information-line"></i> Badge Legend</h6>
@@ -42,7 +85,8 @@
       <small>
         <span class="badge rounded-pill text-bg-success">True</span> Boolean setting enabled<br>
         <span class="badge rounded-pill text-bg-danger">False</span> Boolean setting disabled<br>
-        <span class="badge rounded-pill text-bg-primary">Set</span> Custom value configured
+        <span class="badge rounded-pill text-bg-primary">Set</span> Custom value configured<br>
+        <span class="badge rounded-pill text-bg-dark"><i class="ri-lock-line"></i> Locked</span> Set via Docker environment (cannot be changed)
       </small>
     </div>
     <div class="col-md-6">
@@ -81,7 +125,7 @@
           <div class="row g-3">
             <div class="col-md-6">
               <div class="form-check form-switch">
-                <input class="form-check-input config-toggle" type="checkbox" id="BK_HIDE_ADD_SET" data-var="BK_HIDE_ADD_SET">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_HIDE_ADD_SET" data-var="BK_HIDE_ADD_SET" {{ is_locked('BK_HIDE_ADD_SET') }}>
                 <label class="form-check-label" for="BK_HIDE_ADD_SET">
                   BK_HIDE_ADD_SET {{ config_badges('BK_HIDE_ADD_SET') }}
                   <div class="text-muted small">Hide the "Add Set" menu entry</div>
@@ -89,7 +133,7 @@
               </div>
 
               <div class="form-check form-switch">
-                <input class="form-check-input config-toggle" type="checkbox" id="BK_HIDE_ADD_BULK_SET" data-var="BK_HIDE_ADD_BULK_SET">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_HIDE_ADD_BULK_SET" data-var="BK_HIDE_ADD_BULK_SET" {{ is_locked('BK_HIDE_ADD_BULK_SET') }}>
                 <label class="form-check-label" for="BK_HIDE_ADD_BULK_SET">
                   BK_HIDE_ADD_BULK_SET {{ config_badges('BK_HIDE_ADD_BULK_SET') }}
                   <div class="text-muted small">Hide the "Add Bulk Set" menu entry</div>
@@ -97,7 +141,7 @@
               </div>
 
               <div class="form-check form-switch">
-                <input class="form-check-input config-toggle" type="checkbox" id="BK_HIDE_ADMIN" data-var="BK_HIDE_ADMIN">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_HIDE_ADMIN" data-var="BK_HIDE_ADMIN" {{ is_locked('BK_HIDE_ADMIN') }}>
                 <label class="form-check-label" for="BK_HIDE_ADMIN">
                   BK_HIDE_ADMIN {{ config_badges('BK_HIDE_ADMIN') }}
                   <div class="text-muted small">Hide the "Admin" menu entry</div>
@@ -105,7 +149,7 @@
               </div>
 
               <div class="form-check form-switch">
-                <input class="form-check-input config-toggle" type="checkbox" id="BK_HIDE_ALL_INSTRUCTIONS" data-var="BK_HIDE_ALL_INSTRUCTIONS">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_HIDE_ALL_INSTRUCTIONS" data-var="BK_HIDE_ALL_INSTRUCTIONS" {{ is_locked('BK_HIDE_ALL_INSTRUCTIONS') }}>
                 <label class="form-check-label" for="BK_HIDE_ALL_INSTRUCTIONS">
                   BK_HIDE_ALL_INSTRUCTIONS {{ config_badges('BK_HIDE_ALL_INSTRUCTIONS') }}
                   <div class="text-muted small">Hide the "Instructions" menu entry</div>
@@ -113,7 +157,7 @@
               </div>
 
               <div class="form-check form-switch">
-                <input class="form-check-input config-toggle" type="checkbox" id="BK_HIDE_ALL_MINIFIGURES" data-var="BK_HIDE_ALL_MINIFIGURES">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_HIDE_ALL_MINIFIGURES" data-var="BK_HIDE_ALL_MINIFIGURES" {{ is_locked('BK_HIDE_ALL_MINIFIGURES') }}>
                 <label class="form-check-label" for="BK_HIDE_ALL_MINIFIGURES">
                   BK_HIDE_ALL_MINIFIGURES {{ config_badges('BK_HIDE_ALL_MINIFIGURES') }}
                   <div class="text-muted small">Hide the "Minifigures" menu entry</div>
@@ -121,7 +165,7 @@
               </div>
 
               <div class="form-check form-switch">
-                <input class="form-check-input config-toggle" type="checkbox" id="BK_HIDE_ALL_PARTS" data-var="BK_HIDE_ALL_PARTS">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_HIDE_ALL_PARTS" data-var="BK_HIDE_ALL_PARTS" {{ is_locked('BK_HIDE_ALL_PARTS') }}>
                 <label class="form-check-label" for="BK_HIDE_ALL_PARTS">
                   BK_HIDE_ALL_PARTS {{ config_badges('BK_HIDE_ALL_PARTS') }}
                   <div class="text-muted small">Hide the "Parts" menu entry</div>
@@ -131,7 +175,7 @@
 
             <div class="col-md-6">
               <div class="form-check form-switch">
-                <input class="form-check-input config-toggle" type="checkbox" id="BK_HIDE_ALL_PROBLEMS_PARTS" data-var="BK_HIDE_ALL_PROBLEMS_PARTS">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_HIDE_ALL_PROBLEMS_PARTS" data-var="BK_HIDE_ALL_PROBLEMS_PARTS" {{ is_locked('BK_HIDE_ALL_PROBLEMS_PARTS') }}>
                 <label class="form-check-label" for="BK_HIDE_ALL_PROBLEMS_PARTS">
                   BK_HIDE_ALL_PROBLEMS_PARTS {{ config_badges('BK_HIDE_ALL_PROBLEMS_PARTS') }}
                   <div class="text-muted small">Hide the "Problems" menu entry</div>
@@ -139,7 +183,7 @@
               </div>
 
               <div class="form-check form-switch">
-                <input class="form-check-input config-toggle" type="checkbox" id="BK_HIDE_ALL_SETS" data-var="BK_HIDE_ALL_SETS">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_HIDE_ALL_SETS" data-var="BK_HIDE_ALL_SETS" {{ is_locked('BK_HIDE_ALL_SETS') }}>
                 <label class="form-check-label" for="BK_HIDE_ALL_SETS">
                   BK_HIDE_ALL_SETS {{ config_badges('BK_HIDE_ALL_SETS') }}
                   <div class="text-muted small">Hide the "Sets" menu entry</div>
@@ -147,7 +191,7 @@
               </div>
 
               <div class="form-check form-switch">
-                <input class="form-check-input config-toggle" type="checkbox" id="BK_HIDE_ALL_STORAGES" data-var="BK_HIDE_ALL_STORAGES">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_HIDE_ALL_STORAGES" data-var="BK_HIDE_ALL_STORAGES" {{ is_locked('BK_HIDE_ALL_STORAGES') }}>
                 <label class="form-check-label" for="BK_HIDE_ALL_STORAGES">
                   BK_HIDE_ALL_STORAGES {{ config_badges('BK_HIDE_ALL_STORAGES') }}
                   <div class="text-muted small">Hide the "Storages" menu entry</div>
@@ -155,7 +199,7 @@
               </div>
 
               <div class="form-check form-switch">
-                <input class="form-check-input config-toggle" type="checkbox" id="BK_HIDE_STATISTICS" data-var="BK_HIDE_STATISTICS">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_HIDE_STATISTICS" data-var="BK_HIDE_STATISTICS" {{ is_locked('BK_HIDE_STATISTICS') }}>
                 <label class="form-check-label" for="BK_HIDE_STATISTICS">
                   BK_HIDE_STATISTICS {{ config_badges('BK_HIDE_STATISTICS') }}
                   <div class="text-muted small">Hide the "Statistics" menu entry</div>
@@ -163,7 +207,7 @@
               </div>
 
               <div class="form-check form-switch">
-                <input class="form-check-input config-toggle" type="checkbox" id="BK_HIDE_WISHES" data-var="BK_HIDE_WISHES">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_HIDE_WISHES" data-var="BK_HIDE_WISHES" {{ is_locked('BK_HIDE_WISHES') }}>
                 <label class="form-check-label" for="BK_HIDE_WISHES">
                   BK_HIDE_WISHES {{ config_badges('BK_HIDE_WISHES') }}
                   <div class="text-muted small">Hide the "Wishes" menu entry</div>
@@ -178,7 +222,7 @@
           <div class="row g-3">
             <div class="col-md-6">
               <div class="form-check form-switch">
-                <input class="form-check-input config-toggle" type="checkbox" id="BK_HIDE_SET_INSTRUCTIONS" data-var="BK_HIDE_SET_INSTRUCTIONS">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_HIDE_SET_INSTRUCTIONS" data-var="BK_HIDE_SET_INSTRUCTIONS" {{ is_locked('BK_HIDE_SET_INSTRUCTIONS') }}>
                 <label class="form-check-label" for="BK_HIDE_SET_INSTRUCTIONS">
                   BK_HIDE_SET_INSTRUCTIONS {{ config_badges('BK_HIDE_SET_INSTRUCTIONS') }}
                   <div class="text-muted small">Hide instructions section in set details</div>
@@ -186,7 +230,7 @@
               </div>
 
               <div class="form-check form-switch">
-                <input class="form-check-input config-toggle" type="checkbox" id="BK_HIDE_TABLE_DAMAGED_PARTS" data-var="BK_HIDE_TABLE_DAMAGED_PARTS">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_HIDE_TABLE_DAMAGED_PARTS" data-var="BK_HIDE_TABLE_DAMAGED_PARTS" {{ is_locked('BK_HIDE_TABLE_DAMAGED_PARTS') }}>
                 <label class="form-check-label" for="BK_HIDE_TABLE_DAMAGED_PARTS">
                   BK_HIDE_TABLE_DAMAGED_PARTS {{ config_badges('BK_HIDE_TABLE_DAMAGED_PARTS') }}
                   <div class="text-muted small">Hide the "Damaged" column in parts tables</div>
@@ -194,7 +238,7 @@
               </div>
 
               <div class="form-check form-switch">
-                <input class="form-check-input config-toggle" type="checkbox" id="BK_HIDE_TABLE_MISSING_PARTS" data-var="BK_HIDE_TABLE_MISSING_PARTS">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_HIDE_TABLE_MISSING_PARTS" data-var="BK_HIDE_TABLE_MISSING_PARTS" {{ is_locked('BK_HIDE_TABLE_MISSING_PARTS') }}>
                 <label class="form-check-label" for="BK_HIDE_TABLE_MISSING_PARTS">
                   BK_HIDE_TABLE_MISSING_PARTS {{ config_badges('BK_HIDE_TABLE_MISSING_PARTS') }}
                   <div class="text-muted small">Hide the "Missing" column in parts tables</div>
@@ -202,7 +246,7 @@
               </div>
 
               <div class="form-check form-switch">
-                <input class="form-check-input config-toggle" type="checkbox" id="BK_HIDE_TABLE_CHECKED_PARTS" data-var="BK_HIDE_TABLE_CHECKED_PARTS">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_HIDE_TABLE_CHECKED_PARTS" data-var="BK_HIDE_TABLE_CHECKED_PARTS" {{ is_locked('BK_HIDE_TABLE_CHECKED_PARTS') }}>
                 <label class="form-check-label" for="BK_HIDE_TABLE_CHECKED_PARTS">
                   BK_HIDE_TABLE_CHECKED_PARTS {{ config_badges('BK_HIDE_TABLE_CHECKED_PARTS') }}
                   <div class="text-muted small">Hide the "Checked" column in parts tables</div>
@@ -212,7 +256,7 @@
 
             <div class="col-md-6">
               <div class="form-check form-switch">
-                <input class="form-check-input config-toggle" type="checkbox" id="BK_SHOW_GRID_FILTERS" data-var="BK_SHOW_GRID_FILTERS">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_SHOW_GRID_FILTERS" data-var="BK_SHOW_GRID_FILTERS" {{ is_locked('BK_SHOW_GRID_FILTERS') }}>
                 <label class="form-check-label" for="BK_SHOW_GRID_FILTERS">
                   BK_SHOW_GRID_FILTERS {{ config_badges('BK_SHOW_GRID_FILTERS') }}
                   <div class="text-muted small">Show filter controls on grid views by default</div>
@@ -220,7 +264,7 @@
               </div>
 
               <div class="form-check form-switch">
-                <input class="form-check-input config-toggle" type="checkbox" id="BK_SHOW_GRID_SORT" data-var="BK_SHOW_GRID_SORT">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_SHOW_GRID_SORT" data-var="BK_SHOW_GRID_SORT" {{ is_locked('BK_SHOW_GRID_SORT') }}>
                 <label class="form-check-label" for="BK_SHOW_GRID_SORT">
                   BK_SHOW_GRID_SORT {{ config_badges('BK_SHOW_GRID_SORT') }}
                   <div class="text-muted small">Show sort options on grids by default</div>
@@ -228,7 +272,7 @@
               </div>
 
               <div class="form-check form-switch">
-                <input class="form-check-input config-toggle" type="checkbox" id="BK_SHOW_SETS_DUPLICATE_FILTER" data-var="BK_SHOW_SETS_DUPLICATE_FILTER">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_SHOW_SETS_DUPLICATE_FILTER" data-var="BK_SHOW_SETS_DUPLICATE_FILTER" {{ is_locked('BK_SHOW_SETS_DUPLICATE_FILTER') }}>
                 <label class="form-check-label" for="BK_SHOW_SETS_DUPLICATE_FILTER">
                   BK_SHOW_SETS_DUPLICATE_FILTER {{ config_badges('BK_SHOW_SETS_DUPLICATE_FILTER') }}
                   <div class="text-muted small">Show duplicate/consolidated filter button on sets page</div>
@@ -236,7 +280,7 @@
               </div>
 
               <div class="form-check form-switch">
-                <input class="form-check-input config-toggle" type="checkbox" id="BK_INDEPENDENT_ACCORDIONS" data-var="BK_INDEPENDENT_ACCORDIONS">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_INDEPENDENT_ACCORDIONS" data-var="BK_INDEPENDENT_ACCORDIONS" {{ is_locked('BK_INDEPENDENT_ACCORDIONS') }}>
                 <label class="form-check-label" for="BK_INDEPENDENT_ACCORDIONS">
                   BK_INDEPENDENT_ACCORDIONS {{ config_badges('BK_INDEPENDENT_ACCORDIONS') }}
                   <div class="text-muted small">Make accordion sections independent (can open multiple)</div>
@@ -244,7 +288,7 @@
               </div>
 
               <div class="form-check form-switch">
-                <input class="form-check-input config-toggle" type="checkbox" id="BK_SETS_CONSOLIDATION" data-var="BK_SETS_CONSOLIDATION">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_SETS_CONSOLIDATION" data-var="BK_SETS_CONSOLIDATION" {{ is_locked('BK_SETS_CONSOLIDATION') }}>
                 <label class="form-check-label" for="BK_SETS_CONSOLIDATION">
                   BK_SETS_CONSOLIDATION {{ config_badges('BK_SETS_CONSOLIDATION') }}
                   <div class="text-muted small">Enable set consolidation/grouping functionality</div>
@@ -264,7 +308,7 @@
               <div class="row g-3">
                 <div class="col-12">
                   <div class="form-check form-switch">
-                    <input class="form-check-input config-toggle" type="checkbox" id="BK_SETS_SERVER_SIDE_PAGINATION" data-var="BK_SETS_SERVER_SIDE_PAGINATION">
+                    <input class="form-check-input config-toggle" type="checkbox" id="BK_SETS_SERVER_SIDE_PAGINATION" data-var="BK_SETS_SERVER_SIDE_PAGINATION" {{ is_locked('BK_SETS_SERVER_SIDE_PAGINATION') }}>
                     <label class="form-check-label" for="BK_SETS_SERVER_SIDE_PAGINATION">
                       BK_SETS_SERVER_SIDE_PAGINATION {{ config_badges('BK_SETS_SERVER_SIDE_PAGINATION') }}
                       <div class="text-muted small">Enable/disable pagination for sets</div>
@@ -294,7 +338,7 @@
               <div class="row g-3">
                 <div class="col-12">
                   <div class="form-check form-switch">
-                    <input class="form-check-input config-toggle" type="checkbox" id="BK_PARTS_SERVER_SIDE_PAGINATION" data-var="BK_PARTS_SERVER_SIDE_PAGINATION">
+                    <input class="form-check-input config-toggle" type="checkbox" id="BK_PARTS_SERVER_SIDE_PAGINATION" data-var="BK_PARTS_SERVER_SIDE_PAGINATION" {{ is_locked('BK_PARTS_SERVER_SIDE_PAGINATION') }}>
                     <label class="form-check-label" for="BK_PARTS_SERVER_SIDE_PAGINATION">
                       BK_PARTS_SERVER_SIDE_PAGINATION {{ config_badges('BK_PARTS_SERVER_SIDE_PAGINATION') }}
                       <div class="text-muted small">Enable/disable pagination for parts</div>
@@ -327,7 +371,7 @@
               <div class="row g-3">
                 <div class="col-12">
                   <div class="form-check form-switch">
-                    <input class="form-check-input config-toggle" type="checkbox" id="BK_MINIFIGURES_SERVER_SIDE_PAGINATION" data-var="BK_MINIFIGURES_SERVER_SIDE_PAGINATION">
+                    <input class="form-check-input config-toggle" type="checkbox" id="BK_MINIFIGURES_SERVER_SIDE_PAGINATION" data-var="BK_MINIFIGURES_SERVER_SIDE_PAGINATION" {{ is_locked('BK_MINIFIGURES_SERVER_SIDE_PAGINATION') }}>
                     <label class="form-check-label" for="BK_MINIFIGURES_SERVER_SIDE_PAGINATION">
                       BK_MINIFIGURES_SERVER_SIDE_PAGINATION {{ config_badges('BK_MINIFIGURES_SERVER_SIDE_PAGINATION') }}
                       <div class="text-muted small">Enable/disable pagination for minifigures</div>
@@ -357,7 +401,7 @@
               <div class="row g-3">
                 <div class="col-12">
                   <div class="form-check form-switch">
-                    <input class="form-check-input config-toggle" type="checkbox" id="BK_PROBLEMS_SERVER_SIDE_PAGINATION" data-var="BK_PROBLEMS_SERVER_SIDE_PAGINATION">
+                    <input class="form-check-input config-toggle" type="checkbox" id="BK_PROBLEMS_SERVER_SIDE_PAGINATION" data-var="BK_PROBLEMS_SERVER_SIDE_PAGINATION" {{ is_locked('BK_PROBLEMS_SERVER_SIDE_PAGINATION') }}>
                     <label class="form-check-label" for="BK_PROBLEMS_SERVER_SIDE_PAGINATION">
                       BK_PROBLEMS_SERVER_SIDE_PAGINATION {{ config_badges('BK_PROBLEMS_SERVER_SIDE_PAGINATION') }}
                       <div class="text-muted small">Enable/disable pagination for problems</div>
@@ -400,7 +444,7 @@
           <div class="row g-3">
             <div class="col-md-6">
               <div class="form-check form-switch">
-                <input class="form-check-input config-toggle" type="checkbox" id="BK_RANDOM" data-var="BK_RANDOM">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_RANDOM" data-var="BK_RANDOM" {{ is_locked('BK_RANDOM') }}>
                 <label class="form-check-label" for="BK_RANDOM">
                   BK_RANDOM {{ config_badges('BK_RANDOM') }}
                   <div class="text-muted small">Shuffle the lists on the front page</div>
@@ -408,7 +452,7 @@
               </div>
 
               <div class="form-check form-switch">
-                <input class="form-check-input config-toggle" type="checkbox" id="BK_BRICKLINK_LINKS" data-var="BK_BRICKLINK_LINKS">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_BRICKLINK_LINKS" data-var="BK_BRICKLINK_LINKS" {{ is_locked('BK_BRICKLINK_LINKS') }}>
                 <label class="form-check-label" for="BK_BRICKLINK_LINKS">
                   BK_BRICKLINK_LINKS {{ config_badges('BK_BRICKLINK_LINKS') }}
                   <div class="text-muted small">Display BrickLink links wherever applicable</div>
@@ -416,7 +460,7 @@
               </div>
 
               <div class="form-check form-switch">
-                <input class="form-check-input config-toggle" type="checkbox" id="BK_REBRICKABLE_LINKS" data-var="BK_REBRICKABLE_LINKS">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_REBRICKABLE_LINKS" data-var="BK_REBRICKABLE_LINKS" {{ is_locked('BK_REBRICKABLE_LINKS') }}>
                 <label class="form-check-label" for="BK_REBRICKABLE_LINKS">
                   BK_REBRICKABLE_LINKS {{ config_badges('BK_REBRICKABLE_LINKS') }}
                   <div class="text-muted small">Display Rebrickable links wherever applicable</div>
@@ -424,7 +468,7 @@
               </div>
 
               <div class="form-check form-switch">
-                <input class="form-check-input config-toggle" type="checkbox" id="BK_SKIP_SPARE_PARTS" data-var="BK_SKIP_SPARE_PARTS">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_SKIP_SPARE_PARTS" data-var="BK_SKIP_SPARE_PARTS" {{ is_locked('BK_SKIP_SPARE_PARTS') }}>
                 <label class="form-check-label" for="BK_SKIP_SPARE_PARTS">
                   BK_SKIP_SPARE_PARTS {{ config_badges('BK_SKIP_SPARE_PARTS') }}
                   <div class="text-muted small">Skip spare parts when importing sets</div>
@@ -434,7 +478,7 @@
 
             <div class="col-md-6">
               <div class="form-check form-switch">
-                <input class="form-check-input config-toggle" type="checkbox" id="BK_USE_REMOTE_IMAGES" data-var="BK_USE_REMOTE_IMAGES">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_USE_REMOTE_IMAGES" data-var="BK_USE_REMOTE_IMAGES" {{ is_locked('BK_USE_REMOTE_IMAGES') }}>
                 <label class="form-check-label" for="BK_USE_REMOTE_IMAGES">
                   BK_USE_REMOTE_IMAGES {{ config_badges('BK_USE_REMOTE_IMAGES') }}
                   <div class="text-muted small">Use remote images from Rebrickable CDN instead of local storage</div>
@@ -442,7 +486,7 @@
               </div>
 
               <div class="form-check form-switch">
-                <input class="form-check-input config-toggle" type="checkbox" id="BK_STATISTICS_SHOW_CHARTS" data-var="BK_STATISTICS_SHOW_CHARTS">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_STATISTICS_SHOW_CHARTS" data-var="BK_STATISTICS_SHOW_CHARTS" {{ is_locked('BK_STATISTICS_SHOW_CHARTS') }}>
                 <label class="form-check-label" for="BK_STATISTICS_SHOW_CHARTS">
                   BK_STATISTICS_SHOW_CHARTS {{ config_badges('BK_STATISTICS_SHOW_CHARTS') }}
                   <div class="text-muted small">Show collection growth charts on statistics page</div>
@@ -450,7 +494,7 @@
               </div>
 
               <div class="form-check form-switch">
-                <input class="form-check-input config-toggle" type="checkbox" id="BK_STATISTICS_DEFAULT_EXPANDED" data-var="BK_STATISTICS_DEFAULT_EXPANDED">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_STATISTICS_DEFAULT_EXPANDED" data-var="BK_STATISTICS_DEFAULT_EXPANDED" {{ is_locked('BK_STATISTICS_DEFAULT_EXPANDED') }}>
                 <label class="form-check-label" for="BK_STATISTICS_DEFAULT_EXPANDED">
                   BK_STATISTICS_DEFAULT_EXPANDED {{ config_badges('BK_STATISTICS_DEFAULT_EXPANDED') }}
                   <div class="text-muted small">Expand all statistics sections by default</div>
@@ -492,7 +536,7 @@
                 BK_ADMIN_DEFAULT_EXPANDED_SECTIONS {{ config_badges('BK_ADMIN_DEFAULT_EXPANDED_SECTIONS') }}
                 <div class="text-muted small">Admin sections to expand by default (comma-separated)</div>
               </label>
-              <input type="text" class="form-control config-text" id="BK_ADMIN_DEFAULT_EXPANDED_SECTIONS" data-var="BK_ADMIN_DEFAULT_EXPANDED_SECTIONS">
+              <input type="text" class="form-control config-text" id="BK_ADMIN_DEFAULT_EXPANDED_SECTIONS" data-var="BK_ADMIN_DEFAULT_EXPANDED_SECTIONS" {{ is_locked('BK_ADMIN_DEFAULT_EXPANDED_SECTIONS') }}>
             </div>
           </div>
 
@@ -505,7 +549,7 @@
                 BK_INSTRUCTIONS_ALLOWED_EXTENSIONS {{ config_badges('BK_INSTRUCTIONS_ALLOWED_EXTENSIONS') }}
                 <div class="text-muted small">Allowed file extensions for instructions (comma-separated)</div>
               </label>
-              <input type="text" class="form-control config-text" id="BK_INSTRUCTIONS_ALLOWED_EXTENSIONS" data-var="BK_INSTRUCTIONS_ALLOWED_EXTENSIONS">
+              <input type="text" class="form-control config-text" id="BK_INSTRUCTIONS_ALLOWED_EXTENSIONS" data-var="BK_INSTRUCTIONS_ALLOWED_EXTENSIONS" {{ is_locked('BK_INSTRUCTIONS_ALLOWED_EXTENSIONS') }}>
             </div>
 
             <div class="col-12">
@@ -513,7 +557,7 @@
                 BK_MINIFIGURES_DEFAULT_ORDER {{ config_badges('BK_MINIFIGURES_DEFAULT_ORDER') }}
                 <div class="text-muted small">SQL ORDER BY clause for minifigures listing</div>
               </label>
-              <input type="text" class="form-control config-text" id="BK_MINIFIGURES_DEFAULT_ORDER" data-var="BK_MINIFIGURES_DEFAULT_ORDER">
+              <input type="text" class="form-control config-text" id="BK_MINIFIGURES_DEFAULT_ORDER" data-var="BK_MINIFIGURES_DEFAULT_ORDER" {{ is_locked('BK_MINIFIGURES_DEFAULT_ORDER') }}>
             </div>
 
             <div class="col-12">
@@ -521,7 +565,7 @@
                 BK_PARTS_DEFAULT_ORDER {{ config_badges('BK_PARTS_DEFAULT_ORDER') }}
                 <div class="text-muted small">SQL ORDER BY clause for parts listing</div>
               </label>
-              <input type="text" class="form-control config-text" id="BK_PARTS_DEFAULT_ORDER" data-var="BK_PARTS_DEFAULT_ORDER">
+              <input type="text" class="form-control config-text" id="BK_PARTS_DEFAULT_ORDER" data-var="BK_PARTS_DEFAULT_ORDER" {{ is_locked('BK_PARTS_DEFAULT_ORDER') }}>
             </div>
 
             <div class="col-12">
@@ -529,7 +573,7 @@
                 BK_SETS_DEFAULT_ORDER {{ config_badges('BK_SETS_DEFAULT_ORDER') }}
                 <div class="text-muted small">SQL ORDER BY clause for sets listing</div>
               </label>
-              <input type="text" class="form-control config-text" id="BK_SETS_DEFAULT_ORDER" data-var="BK_SETS_DEFAULT_ORDER">
+              <input type="text" class="form-control config-text" id="BK_SETS_DEFAULT_ORDER" data-var="BK_SETS_DEFAULT_ORDER" {{ is_locked('BK_SETS_DEFAULT_ORDER') }}>
             </div>
 
 
@@ -538,7 +582,7 @@
                 BK_PURCHASE_LOCATION_DEFAULT_ORDER {{ config_badges('BK_PURCHASE_LOCATION_DEFAULT_ORDER') }}
                 <div class="text-muted small">SQL ORDER BY clause for purchase locations</div>
               </label>
-              <input type="text" class="form-control config-text" id="BK_PURCHASE_LOCATION_DEFAULT_ORDER" data-var="BK_PURCHASE_LOCATION_DEFAULT_ORDER">
+              <input type="text" class="form-control config-text" id="BK_PURCHASE_LOCATION_DEFAULT_ORDER" data-var="BK_PURCHASE_LOCATION_DEFAULT_ORDER" {{ is_locked('BK_PURCHASE_LOCATION_DEFAULT_ORDER') }}>
             </div>
 
             <div class="col-12">
@@ -546,7 +590,7 @@
                 BK_STORAGE_DEFAULT_ORDER {{ config_badges('BK_STORAGE_DEFAULT_ORDER') }}
                 <div class="text-muted small">SQL ORDER BY clause for storage locations</div>
               </label>
-              <input type="text" class="form-control config-text" id="BK_STORAGE_DEFAULT_ORDER" data-var="BK_STORAGE_DEFAULT_ORDER">
+              <input type="text" class="form-control config-text" id="BK_STORAGE_DEFAULT_ORDER" data-var="BK_STORAGE_DEFAULT_ORDER" {{ is_locked('BK_STORAGE_DEFAULT_ORDER') }}>
             </div>
 
             <div class="col-12">
@@ -554,7 +598,7 @@
                 BK_WISHES_DEFAULT_ORDER {{ config_badges('BK_WISHES_DEFAULT_ORDER') }}
                 <div class="text-muted small">SQL ORDER BY clause for wishes listing</div>
               </label>
-              <input type="text" class="form-control config-text" id="BK_WISHES_DEFAULT_ORDER" data-var="BK_WISHES_DEFAULT_ORDER">
+              <input type="text" class="form-control config-text" id="BK_WISHES_DEFAULT_ORDER" data-var="BK_WISHES_DEFAULT_ORDER" {{ is_locked('BK_WISHES_DEFAULT_ORDER') }}>
             </div>
           </div>
 
@@ -567,7 +611,7 @@
                 BK_BRICKLINK_LINK_PART_PATTERN {{ config_badges('BK_BRICKLINK_LINK_PART_PATTERN') }}
                 <div class="text-muted small">Pattern for BrickLink part links (supports {part} and {color})</div>
               </label>
-              <input type="text" class="form-control config-text" id="BK_BRICKLINK_LINK_PART_PATTERN" data-var="BK_BRICKLINK_LINK_PART_PATTERN">
+              <input type="text" class="form-control config-text" id="BK_BRICKLINK_LINK_PART_PATTERN" data-var="BK_BRICKLINK_LINK_PART_PATTERN" {{ is_locked('BK_BRICKLINK_LINK_PART_PATTERN') }}>
             </div>
 
             <div class="col-12">
@@ -575,7 +619,7 @@
                 BK_REBRICKABLE_LINK_MINIFIGURE_PATTERN {{ config_badges('BK_REBRICKABLE_LINK_MINIFIGURE_PATTERN') }}
                 <div class="text-muted small">Pattern for Rebrickable minifigure links (supports {figure})</div>
               </label>
-              <input type="text" class="form-control config-text" id="BK_REBRICKABLE_LINK_MINIFIGURE_PATTERN" data-var="BK_REBRICKABLE_LINK_MINIFIGURE_PATTERN">
+              <input type="text" class="form-control config-text" id="BK_REBRICKABLE_LINK_MINIFIGURE_PATTERN" data-var="BK_REBRICKABLE_LINK_MINIFIGURE_PATTERN" {{ is_locked('BK_REBRICKABLE_LINK_MINIFIGURE_PATTERN') }}>
             </div>
 
             <div class="col-12">
@@ -583,7 +627,7 @@
                 BK_REBRICKABLE_LINK_PART_PATTERN {{ config_badges('BK_REBRICKABLE_LINK_PART_PATTERN') }}
                 <div class="text-muted small">Pattern for Rebrickable part links (supports {part} and {color})</div>
               </label>
-              <input type="text" class="form-control config-text" id="BK_REBRICKABLE_LINK_PART_PATTERN" data-var="BK_REBRICKABLE_LINK_PART_PATTERN">
+              <input type="text" class="form-control config-text" id="BK_REBRICKABLE_LINK_PART_PATTERN" data-var="BK_REBRICKABLE_LINK_PART_PATTERN" {{ is_locked('BK_REBRICKABLE_LINK_PART_PATTERN') }}>
             </div>
 
             <div class="col-12">
@@ -591,7 +635,7 @@
                 BK_REBRICKABLE_LINK_INSTRUCTIONS_PATTERN {{ config_badges('BK_REBRICKABLE_LINK_INSTRUCTIONS_PATTERN') }}
                 <div class="text-muted small">Pattern for Rebrickable instruction links (supports {path})</div>
               </label>
-              <input type="text" class="form-control config-text" id="BK_REBRICKABLE_LINK_INSTRUCTIONS_PATTERN" data-var="BK_REBRICKABLE_LINK_INSTRUCTIONS_PATTERN">
+              <input type="text" class="form-control config-text" id="BK_REBRICKABLE_LINK_INSTRUCTIONS_PATTERN" data-var="BK_REBRICKABLE_LINK_INSTRUCTIONS_PATTERN" {{ is_locked('BK_REBRICKABLE_LINK_INSTRUCTIONS_PATTERN') }}>
             </div>
 
             <div class="col-12">
@@ -599,7 +643,7 @@
                 BK_PEERON_INSTRUCTION_PATTERN {{ config_badges('BK_PEERON_INSTRUCTION_PATTERN') }}
                 <div class="text-muted small">Pattern for Peeron instruction URLs (supports {set_number} and {version_number})</div>
               </label>
-              <input type="text" class="form-control config-text" id="BK_PEERON_INSTRUCTION_PATTERN" data-var="BK_PEERON_INSTRUCTION_PATTERN">
+              <input type="text" class="form-control config-text" id="BK_PEERON_INSTRUCTION_PATTERN" data-var="BK_PEERON_INSTRUCTION_PATTERN" {{ is_locked('BK_PEERON_INSTRUCTION_PATTERN') }}>
             </div>
 
             <div class="col-12">
@@ -607,7 +651,7 @@
                 BK_PEERON_SCAN_PATTERN {{ config_badges('BK_PEERON_SCAN_PATTERN') }}
                 <div class="text-muted small">Pattern for Peeron scan URLs (supports {set_number} and {version_number})</div>
               </label>
-              <input type="text" class="form-control config-text" id="BK_PEERON_SCAN_PATTERN" data-var="BK_PEERON_SCAN_PATTERN">
+              <input type="text" class="form-control config-text" id="BK_PEERON_SCAN_PATTERN" data-var="BK_PEERON_SCAN_PATTERN" {{ is_locked('BK_PEERON_SCAN_PATTERN') }}>
             </div>
 
             <div class="col-12">
@@ -615,7 +659,7 @@
                 BK_PEERON_THUMBNAIL_PATTERN {{ config_badges('BK_PEERON_THUMBNAIL_PATTERN') }}
                 <div class="text-muted small">Pattern for Peeron thumbnail URLs (supports {set_number} and {version_number})</div>
               </label>
-              <input type="text" class="form-control config-text" id="BK_PEERON_THUMBNAIL_PATTERN" data-var="BK_PEERON_THUMBNAIL_PATTERN">
+              <input type="text" class="form-control config-text" id="BK_PEERON_THUMBNAIL_PATTERN" data-var="BK_PEERON_THUMBNAIL_PATTERN" {{ is_locked('BK_PEERON_THUMBNAIL_PATTERN') }}>
             </div>
           </div>
 
@@ -628,7 +672,7 @@
                 BK_REBRICKABLE_IMAGE_NIL {{ config_badges('BK_REBRICKABLE_IMAGE_NIL') }}
                 <div class="text-muted small">URL for missing image placeholder</div>
               </label>
-              <input type="text" class="form-control config-text" id="BK_REBRICKABLE_IMAGE_NIL" data-var="BK_REBRICKABLE_IMAGE_NIL">
+              <input type="text" class="form-control config-text" id="BK_REBRICKABLE_IMAGE_NIL" data-var="BK_REBRICKABLE_IMAGE_NIL" {{ is_locked('BK_REBRICKABLE_IMAGE_NIL') }}>
             </div>
 
             <div class="col-12">
@@ -636,7 +680,7 @@
                 BK_REBRICKABLE_IMAGE_NIL_MINIFIGURE {{ config_badges('BK_REBRICKABLE_IMAGE_NIL_MINIFIGURE') }}
                 <div class="text-muted small">URL for missing minifigure image placeholder</div>
               </label>
-              <input type="text" class="form-control config-text" id="BK_REBRICKABLE_IMAGE_NIL_MINIFIGURE" data-var="BK_REBRICKABLE_IMAGE_NIL_MINIFIGURE">
+              <input type="text" class="form-control config-text" id="BK_REBRICKABLE_IMAGE_NIL_MINIFIGURE" data-var="BK_REBRICKABLE_IMAGE_NIL_MINIFIGURE" {{ is_locked('BK_REBRICKABLE_IMAGE_NIL_MINIFIGURE') }}>
             </div>
 
             <div class="col-12">
@@ -644,7 +688,7 @@
                 BK_RETIRED_SETS_FILE_URL {{ config_badges('BK_RETIRED_SETS_FILE_URL') }}
                 <div class="text-muted small">URL to the retired sets CSV file</div>
               </label>
-              <input type="text" class="form-control config-text" id="BK_RETIRED_SETS_FILE_URL" data-var="BK_RETIRED_SETS_FILE_URL">
+              <input type="text" class="form-control config-text" id="BK_RETIRED_SETS_FILE_URL" data-var="BK_RETIRED_SETS_FILE_URL" {{ is_locked('BK_RETIRED_SETS_FILE_URL') }}>
             </div>
 
             <div class="col-12">
@@ -652,7 +696,7 @@
                 BK_RETIRED_SETS_PATH {{ config_badges('BK_RETIRED_SETS_PATH') }}
                 <div class="text-muted small">Local path to store retired sets CSV</div>
               </label>
-              <input type="text" class="form-control config-text" id="BK_RETIRED_SETS_PATH" data-var="BK_RETIRED_SETS_PATH">
+              <input type="text" class="form-control config-text" id="BK_RETIRED_SETS_PATH" data-var="BK_RETIRED_SETS_PATH" {{ is_locked('BK_RETIRED_SETS_PATH') }}>
             </div>
 
             <div class="col-12">
@@ -660,7 +704,7 @@
                 BK_THEMES_FILE_URL {{ config_badges('BK_THEMES_FILE_URL') }}
                 <div class="text-muted small">URL to the Rebrickable themes CSV file</div>
               </label>
-              <input type="text" class="form-control config-text" id="BK_THEMES_FILE_URL" data-var="BK_THEMES_FILE_URL">
+              <input type="text" class="form-control config-text" id="BK_THEMES_FILE_URL" data-var="BK_THEMES_FILE_URL" {{ is_locked('BK_THEMES_FILE_URL') }}>
             </div>
 
             <div class="col-12">
@@ -668,7 +712,7 @@
                 BK_THEMES_PATH {{ config_badges('BK_THEMES_PATH') }}
                 <div class="text-muted small">Local path to store themes CSV</div>
               </label>
-              <input type="text" class="form-control config-text" id="BK_THEMES_PATH" data-var="BK_THEMES_PATH">
+              <input type="text" class="form-control config-text" id="BK_THEMES_PATH" data-var="BK_THEMES_PATH" {{ is_locked('BK_THEMES_PATH') }}>
             </div>
           </div>
 {{ accordion.footer() }}
@@ -693,14 +737,14 @@
                 BK_AUTHENTICATION_PASSWORD {{ config_badges('BK_AUTHENTICATION_PASSWORD') }}
                 <div class="text-muted small">Password for authentication system</div>
               </label>
-              <input type="password" class="form-control config-static" id="static-BK_AUTHENTICATION_PASSWORD" data-var="BK_AUTHENTICATION_PASSWORD">
+              <input type="password" class="form-control config-static" id="static-BK_AUTHENTICATION_PASSWORD" data-var="BK_AUTHENTICATION_PASSWORD" {{ is_locked('BK_AUTHENTICATION_PASSWORD') }}>
             </div>
             <div class="col-md-6">
               <label for="static-BK_AUTHENTICATION_KEY" class="form-label">
                 BK_AUTHENTICATION_KEY {{ config_badges('BK_AUTHENTICATION_KEY') }}
                 <div class="text-muted small">Secret key for session signing</div>
               </label>
-              <input type="password" class="form-control config-static" id="static-BK_AUTHENTICATION_KEY" data-var="BK_AUTHENTICATION_KEY">
+              <input type="password" class="form-control config-static" id="static-BK_AUTHENTICATION_KEY" data-var="BK_AUTHENTICATION_KEY" {{ is_locked('BK_AUTHENTICATION_KEY') }}>
             </div>
           </div>
 
@@ -712,7 +756,7 @@
                 BK_HOST {{ config_badges('BK_HOST') }}
                 <div class="text-muted small">Server host address to bind to</div>
               </label>
-              <input type="text" class="form-control config-static" id="static-BK_HOST" data-var="BK_HOST">
+              <input type="text" class="form-control config-static" id="static-BK_HOST" data-var="BK_HOST" {{ is_locked('BK_HOST') }}>
             </div>
             <div class="col-md-6">
               <label for="static-BK_PORT" class="form-label">
@@ -723,7 +767,7 @@
             </div>
             <div class="col-md-6">
               <div class="form-check form-switch">
-                <input class="form-check-input config-static-toggle" type="checkbox" id="static-BK_DEBUG" data-var="BK_DEBUG">
+                <input class="form-check-input config-static-toggle" type="checkbox" id="static-BK_DEBUG" data-var="BK_DEBUG" {{ is_locked('BK_DEBUG') }}>
                 <label class="form-check-label" for="static-BK_DEBUG">
                   BK_DEBUG {{ config_badges('BK_DEBUG') }}
                   <div class="text-muted small">Enable debug mode</div>
@@ -735,14 +779,14 @@
                 BK_DOMAIN_NAME {{ config_badges('BK_DOMAIN_NAME') }}
                 <div class="text-muted small">Domain name for CORS configuration</div>
               </label>
-              <input type="text" class="form-control config-static" id="static-BK_DOMAIN_NAME" data-var="BK_DOMAIN_NAME">
+              <input type="text" class="form-control config-static" id="static-BK_DOMAIN_NAME" data-var="BK_DOMAIN_NAME" {{ is_locked('BK_DOMAIN_NAME') }}>
             </div>
             <div class="col-md-6">
               <label for="static-BK_TIMEZONE" class="form-label">
                 BK_TIMEZONE {{ config_badges('BK_TIMEZONE') }}
                 <div class="text-muted small">Application timezone</div>
               </label>
-              <input type="text" class="form-control config-static" id="static-BK_TIMEZONE" data-var="BK_TIMEZONE">
+              <input type="text" class="form-control config-static" id="static-BK_TIMEZONE" data-var="BK_TIMEZONE" {{ is_locked('BK_TIMEZONE') }}>
             </div>
           </div>
 
@@ -754,35 +798,35 @@
                 BK_DATABASE_PATH {{ config_badges('BK_DATABASE_PATH') }}
                 <div class="text-muted small">Path to the SQLite database file</div>
               </label>
-              <input type="text" class="form-control config-static" id="static-BK_DATABASE_PATH" data-var="BK_DATABASE_PATH">
+              <input type="text" class="form-control config-static" id="static-BK_DATABASE_PATH" data-var="BK_DATABASE_PATH" {{ is_locked('BK_DATABASE_PATH') }}>
             </div>
             <div class="col-md-6">
               <label for="static-BK_INSTRUCTIONS_FOLDER" class="form-label">
                 BK_INSTRUCTIONS_FOLDER {{ config_badges('BK_INSTRUCTIONS_FOLDER') }}
                 <div class="text-muted small">Folder for instruction files</div>
               </label>
-              <input type="text" class="form-control config-static" id="static-BK_INSTRUCTIONS_FOLDER" data-var="BK_INSTRUCTIONS_FOLDER">
+              <input type="text" class="form-control config-static" id="static-BK_INSTRUCTIONS_FOLDER" data-var="BK_INSTRUCTIONS_FOLDER" {{ is_locked('BK_INSTRUCTIONS_FOLDER') }}>
             </div>
             <div class="col-md-6">
               <label for="static-BK_PARTS_FOLDER" class="form-label">
                 BK_PARTS_FOLDER {{ config_badges('BK_PARTS_FOLDER') }}
                 <div class="text-muted small">Folder for part images</div>
               </label>
-              <input type="text" class="form-control config-static" id="static-BK_PARTS_FOLDER" data-var="BK_PARTS_FOLDER">
+              <input type="text" class="form-control config-static" id="static-BK_PARTS_FOLDER" data-var="BK_PARTS_FOLDER" {{ is_locked('BK_PARTS_FOLDER') }}>
             </div>
             <div class="col-md-6">
               <label for="static-BK_SETS_FOLDER" class="form-label">
                 BK_SETS_FOLDER {{ config_badges('BK_SETS_FOLDER') }}
                 <div class="text-muted small">Folder for set images</div>
               </label>
-              <input type="text" class="form-control config-static" id="static-BK_SETS_FOLDER" data-var="BK_SETS_FOLDER">
+              <input type="text" class="form-control config-static" id="static-BK_SETS_FOLDER" data-var="BK_SETS_FOLDER" {{ is_locked('BK_SETS_FOLDER') }}>
             </div>
             <div class="col-md-6">
               <label for="static-BK_MINIFIGURES_FOLDER" class="form-label">
                 BK_MINIFIGURES_FOLDER {{ config_badges('BK_MINIFIGURES_FOLDER') }}
                 <div class="text-muted small">Folder for minifigure images</div>
               </label>
-              <input type="text" class="form-control config-static" id="static-BK_MINIFIGURES_FOLDER" data-var="BK_MINIFIGURES_FOLDER">
+              <input type="text" class="form-control config-static" id="static-BK_MINIFIGURES_FOLDER" data-var="BK_MINIFIGURES_FOLDER" {{ is_locked('BK_MINIFIGURES_FOLDER') }}>
             </div>
           </div>
 
@@ -794,21 +838,21 @@
                 BK_REBRICKABLE_API_KEY {{ config_badges('BK_REBRICKABLE_API_KEY') }}
                 <div class="text-muted small">API key for Rebrickable integration</div>
               </label>
-              <input type="password" class="form-control config-static" id="static-BK_REBRICKABLE_API_KEY" data-var="BK_REBRICKABLE_API_KEY">
+              <input type="password" class="form-control config-static" id="static-BK_REBRICKABLE_API_KEY" data-var="BK_REBRICKABLE_API_KEY" {{ is_locked('BK_REBRICKABLE_API_KEY') }}>
             </div>
             <div class="col-md-6">
               <label for="static-BK_USER_AGENT" class="form-label">
                 BK_USER_AGENT {{ config_badges('BK_USER_AGENT') }}
                 <div class="text-muted small">User agent string for HTTP requests</div>
               </label>
-              <input type="text" class="form-control config-static" id="static-BK_USER_AGENT" data-var="BK_USER_AGENT">
+              <input type="text" class="form-control config-static" id="static-BK_USER_AGENT" data-var="BK_USER_AGENT" {{ is_locked('BK_USER_AGENT') }}>
             </div>
             <div class="col-md-6">
               <label for="static-BK_REBRICKABLE_USER_AGENT" class="form-label">
                 BK_REBRICKABLE_USER_AGENT {{ config_badges('BK_REBRICKABLE_USER_AGENT') }}
                 <div class="text-muted small">User agent for Rebrickable API requests</div>
               </label>
-              <input type="text" class="form-control config-static" id="static-BK_REBRICKABLE_USER_AGENT" data-var="BK_REBRICKABLE_USER_AGENT">
+              <input type="text" class="form-control config-static" id="static-BK_REBRICKABLE_USER_AGENT" data-var="BK_REBRICKABLE_USER_AGENT" {{ is_locked('BK_REBRICKABLE_USER_AGENT') }}>
             </div>
           </div>
 
@@ -820,28 +864,28 @@
                 BK_DATABASE_TIMESTAMP_FORMAT {{ config_badges('BK_DATABASE_TIMESTAMP_FORMAT') }}
                 <div class="text-muted small">Database timestamp format</div>
               </label>
-              <input type="text" class="form-control config-static" id="static-BK_DATABASE_TIMESTAMP_FORMAT" data-var="BK_DATABASE_TIMESTAMP_FORMAT">
+              <input type="text" class="form-control config-static" id="static-BK_DATABASE_TIMESTAMP_FORMAT" data-var="BK_DATABASE_TIMESTAMP_FORMAT" {{ is_locked('BK_DATABASE_TIMESTAMP_FORMAT') }}>
             </div>
             <div class="col-md-6">
               <label for="static-BK_FILE_DATETIME_FORMAT" class="form-label">
                 BK_FILE_DATETIME_FORMAT {{ config_badges('BK_FILE_DATETIME_FORMAT') }}
                 <div class="text-muted small">File datetime format</div>
               </label>
-              <input type="text" class="form-control config-static" id="static-BK_FILE_DATETIME_FORMAT" data-var="BK_FILE_DATETIME_FORMAT">
+              <input type="text" class="form-control config-static" id="static-BK_FILE_DATETIME_FORMAT" data-var="BK_FILE_DATETIME_FORMAT" {{ is_locked('BK_FILE_DATETIME_FORMAT') }}>
             </div>
             <div class="col-md-6">
               <label for="static-BK_PURCHASE_DATE_FORMAT" class="form-label">
                 BK_PURCHASE_DATE_FORMAT {{ config_badges('BK_PURCHASE_DATE_FORMAT') }}
                 <div class="text-muted small">Purchase date format</div>
               </label>
-              <input type="text" class="form-control config-static" id="static-BK_PURCHASE_DATE_FORMAT" data-var="BK_PURCHASE_DATE_FORMAT">
+              <input type="text" class="form-control config-static" id="static-BK_PURCHASE_DATE_FORMAT" data-var="BK_PURCHASE_DATE_FORMAT" {{ is_locked('BK_PURCHASE_DATE_FORMAT') }}>
             </div>
             <div class="col-md-6">
               <label for="static-BK_PURCHASE_CURRENCY" class="form-label">
                 BK_PURCHASE_CURRENCY {{ config_badges('BK_PURCHASE_CURRENCY') }}
                 <div class="text-muted small">Purchase currency</div>
               </label>
-              <input type="text" class="form-control config-static" id="static-BK_PURCHASE_CURRENCY" data-var="BK_PURCHASE_CURRENCY">
+              <input type="text" class="form-control config-static" id="static-BK_PURCHASE_CURRENCY" data-var="BK_PURCHASE_CURRENCY" {{ is_locked('BK_PURCHASE_CURRENCY') }}>
             </div>
           </div>
 
@@ -853,18 +897,18 @@
                 BK_SOCKET_NAMESPACE {{ config_badges('BK_SOCKET_NAMESPACE') }}
                 <div class="text-muted small">Socket.IO namespace</div>
               </label>
-              <input type="text" class="form-control config-static" id="static-BK_SOCKET_NAMESPACE" data-var="BK_SOCKET_NAMESPACE">
+              <input type="text" class="form-control config-static" id="static-BK_SOCKET_NAMESPACE" data-var="BK_SOCKET_NAMESPACE" {{ is_locked('BK_SOCKET_NAMESPACE') }}>
             </div>
             <div class="col-md-6">
               <label for="static-BK_SOCKET_PATH" class="form-label">
                 BK_SOCKET_PATH {{ config_badges('BK_SOCKET_PATH') }}
                 <div class="text-muted small">Socket.IO path</div>
               </label>
-              <input type="text" class="form-control config-static" id="static-BK_SOCKET_PATH" data-var="BK_SOCKET_PATH">
+              <input type="text" class="form-control config-static" id="static-BK_SOCKET_PATH" data-var="BK_SOCKET_PATH" {{ is_locked('BK_SOCKET_PATH') }}>
             </div>
             <div class="col-md-6">
               <div class="form-check form-switch">
-                <input class="form-check-input config-static-toggle" type="checkbox" id="static-BK_NO_THREADED_SOCKET" data-var="BK_NO_THREADED_SOCKET">
+                <input class="form-check-input config-static-toggle" type="checkbox" id="static-BK_NO_THREADED_SOCKET" data-var="BK_NO_THREADED_SOCKET" {{ is_locked('BK_NO_THREADED_SOCKET') }}>
                 <label class="form-check-label" for="static-BK_NO_THREADED_SOCKET">
                   BK_NO_THREADED_SOCKET {{ config_badges('BK_NO_THREADED_SOCKET') }}
                   <div class="text-muted small">Disable threaded socket mode</div>

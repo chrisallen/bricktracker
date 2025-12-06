@@ -13,18 +13,25 @@
 
 - **New default paths** (automatically used for new installations):
   - Database: `data/app.db` (was: `app.db` in root)
+  - Configuration: `data/.env` (was: `.env` in root) - *optional, backward compatible*
   - CSV files: `data/*.csv` (was: `*.csv` in root)
   - Images/PDFs: `data/{sets,parts,minifigures,instructions}/` (was: `static/*`)
 
+- **Configuration file (.env) location**:
+  - New recommended location: `data/.env` (included in data volume, settings persist)
+  - Backward compatible: `.env` in root still works (requires volume mount for admin panel persistence)
+  - Priority: `data/.env` > `.env` (automatic detection, no migration required)
+
 - **Migration options**:
-  1. **Migrate to new structure**
-  2. **Keep current setup**
+  1. **Migrate to new structure** (recommended - single volume for all data including .env)
+  2. **Keep current setup** (backward compatible - old paths continue to work)
 
 See [Migration Guide](docs/migration_guide.md) for detailed instructions
 
 - **Docker users**:
   - New setup uses single volume: `data:/app/data/` (replaces 5 separate volumes)
-  - Old volume mounts still work if you set environment variables above
+  - Configuration can be in `data/.env` (recommended) or `.env` (backward compatible)
+  - Old volume mounts still work if you keep environment variables unchanged
 
 #### Features
 
@@ -157,6 +164,14 @@ See [Migration Guide](docs/migration_guide.md) for detailed instructions
   - Ensures all-or-nothing behavior: if any part fails (set info, parts, minifigs), nothing is committed
   - Prevents partial set additions that would leave the database in an inconsistent state
   - Metadata updates (owners, tags) now defer until final commit
+- Admin panel configuration loading for data/.env
+  - Application now loads data/.env into environment at startup
+  - Admin panel correctly displays current values from data/.env
+  - Environment variables from Docker take precedence over .env file values
+- Add configuration persistence warning in admin panel
+  - Warning banner shows when using .env in root (non-persistent)
+  - Success banner shows when using data/.env (persistent)
+  - Provides migration instructions directly in the UI
     
 ### 1.2.4
 
