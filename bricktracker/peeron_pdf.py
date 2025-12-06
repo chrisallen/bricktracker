@@ -4,7 +4,6 @@ import tempfile
 import time
 from typing import Any, TYPE_CHECKING
 
-import cloudscraper
 from flask import current_app
 from PIL import Image
 

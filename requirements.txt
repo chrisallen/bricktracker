@@ -10,6 +10,5 @@ rebrick
 requests
 tzdata
 bs4
-cloudscraper
 fpdf2
 pillow

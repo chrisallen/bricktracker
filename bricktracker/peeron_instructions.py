@@ -7,7 +7,6 @@ from typing import Any, NamedTuple, TYPE_CHECKING
 from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
-import cloudscraper
 from flask import current_app, url_for
 import requests
 
@@ -53,12 +52,12 @@ def get_peeron_scan_url(set_number: str, version_number: str):
 
 
 def create_peeron_scraper():
-    """Create a cloudscraper instance configured for Peeron"""
-    scraper = cloudscraper.create_scraper()
-    scraper.headers.update({
+    """Create a requests session configured for Peeron"""
+    session = requests.Session()
+    session.headers.update({
         "User-Agent": get_peeron_user_agent()
     })
-    return scraper
+    return session
 
 
 def get_peeron_cache_dir():
