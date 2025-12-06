@@ -191,19 +191,15 @@ class BrickMetadata(BrickRecord):
         parameters['set_id'] = brickset.fields.id
         parameters['state'] = state
 
-        rows, _ = BrickSQL().execute_and_commit(
+        rows, _ = BrickSQL().execute(
             self.update_set_state_query,
             parameters=parameters,
+            defer=True,
             name=self.as_column(),
         )
 
-        if rows != 1:
-            raise DatabaseException('Could not update the {kind} "{name}" state for set {set} ({id})'.format(  # noqa: E501
-                kind=self.kind,
-                name=self.fields.name,
-                set=brickset.fields.set,
-                id=brickset.fields.id,
-            ))
+        # Note: rows will be -1 when deferred, so we can't validate here
+        # Validation will happen at final commit in set.py
 
         # Info
         logger.info('{kind} "{name}" state changed to "{state}" for set {set} ({id})'.format(  # noqa: E501

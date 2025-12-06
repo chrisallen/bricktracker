@@ -149,6 +149,14 @@ See [Migration Guide](docs/migration_guide.md) for detailed instructions
   - Corrected path resolution for data/instructions folder
   - Fixed instruction listing page to scan correct folder location
   - Fixed Peeron PDF creation to use correct data folder path
+- Fix foreign key constraint error when adding sets
+  - Rebrickable set is now inserted before BrickTracker set to satisfy FK constraints
+  - Resolves "FOREIGN KEY constraint failed" error when adding sets
+- Fix atomic transaction handling for set downloads
+  - All database operations during set addition now use deferred execution
+  - Ensures all-or-nothing behavior: if any part fails (set info, parts, minifigs), nothing is committed
+  - Prevents partial set additions that would leave the database in an inconsistent state
+  - Metadata updates (owners, tags) now defer until final commit
     
 ### 1.2.4
 
