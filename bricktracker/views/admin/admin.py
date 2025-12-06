@@ -32,12 +32,22 @@ admin_page = Blueprint('admin', __name__, url_prefix='/admin')
 
 def get_env_values():
     """Get current environment values, using defaults from config when not set"""
+    import json
     from pathlib import Path
 
     env_values = {}
     config_defaults = {}
     env_explicit_values = {}  # Track which values are explicitly set
     env_locked_values = {}  # Track which values are set via Docker environment (locked)
+
+    # Get list of variables that were set via Docker environment (before .env was loaded)
+    # This was stored by load_env_file() in app.py
+    docker_env_vars = set()
+    if '_BK_DOCKER_ENV_VARS' in os.environ:
+        try:
+            docker_env_vars = set(json.loads(os.environ['_BK_DOCKER_ENV_VARS']))
+        except (json.JSONDecodeError, TypeError):
+            pass
 
     # Read .env file if it exists (check both locations)
     env_file = None
@@ -76,17 +86,9 @@ def get_env_values():
             # For int/other types, keep the original default value
         config_defaults[env_name] = default_value
 
-        # Check if value is set via Docker environment and overrides .env file
-        # A variable is "locked" if:
-        # 1. It's set in os.environ (Docker environment), AND
-        # 2. Either it's NOT in .env file, OR the value differs from .env file
-        is_locked = False
-        if env_name in os.environ:
-            env_value = os.environ[env_name]
-            file_value = env_from_file.get(env_name)
-            # Locked if not in file, or values differ
-            if file_value is None or env_value != file_value:
-                is_locked = True
+        # Check if value is set via Docker environment directive
+        # A variable is "locked" if it was in os.environ BEFORE our app loaded .env
+        is_locked = env_name in docker_env_vars
         env_locked_values[env_name] = is_locked
 
         # Check if value is explicitly set in .env file or environment

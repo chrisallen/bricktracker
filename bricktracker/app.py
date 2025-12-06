@@ -41,9 +41,23 @@ from bricktracker.views.wish import wish_page
 
 
 def load_env_file() -> None:
-    """Load .env file into os.environ with priority: data/.env > .env (root)"""
+    """Load .env file into os.environ with priority: data/.env > .env (root)
+
+    Also stores which BK_ variables were set via Docker environment (before loading .env)
+    so we can detect locked variables in the admin panel.
+    """
+    import json
+
     data_env = Path('data/.env')
     root_env = Path('.env')
+
+    # Store which BK_ variables were already in environment BEFORE loading .env
+    # These are "locked" (set via Docker's environment: directive)
+    docker_env_vars = {k: v for k, v in os.environ.items() if k.startswith('BK_')}
+
+    # Store this in a way the admin panel can access it
+    # We'll use an environment variable to store the JSON list of locked var names
+    os.environ['_BK_DOCKER_ENV_VARS'] = json.dumps(list(docker_env_vars.keys()))
 
     env_file = None
     if data_env.exists():
