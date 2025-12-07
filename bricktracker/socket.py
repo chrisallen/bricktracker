@@ -75,6 +75,9 @@ class BrickSocket(object):
             **kwargs,
             path=app.config['SOCKET_PATH'],
             async_mode='gevent',
+            # Ping/pong settings for mobile network resilience
+            ping_timeout=30,  # Wait 30s for pong response before disconnecting
+            ping_interval=25,  # Send ping every 25s to keep connection alive
         )
 
         # Store the socket in the app config
@@ -86,8 +89,22 @@ class BrickSocket(object):
             self.connected()
 
         @self.socket.on(MESSAGES['DISCONNECT'], namespace=self.namespace)
-        def disconnect() -> None:
+        def disconnect(reason=None) -> None:
             self.disconnected()
+
+        @self.socket.on('connect_error', namespace=self.namespace)
+        def connect_error(data) -> None:
+            logger.error(f'Socket CONNECT_ERROR: {data}')
+
+        @self.socket.on_error(namespace=self.namespace)
+        def error_handler(e) -> None:
+            logger.error(f'Socket ERROR: {e}')
+            try:
+                user_agent = request.headers.get('User-Agent', 'unknown')
+                remote_addr = request.remote_addr
+                logger.error(f'Socket ERROR details: ip={remote_addr}, ua={user_agent[:80]}...')
+            except Exception:
+                pass
 
         @self.socket.on(MESSAGES['DOWNLOAD_INSTRUCTIONS'], namespace=self.namespace)  # noqa: E501
         @authenticated_socket(self)
@@ -232,13 +249,32 @@ class BrickSocket(object):
 
     # Socket is connected
     def connected(self, /) -> Tuple[str, int]:
-        logger.debug('Socket: client connected')
+        # Get detailed connection info for debugging
+        try:
+            sid = request.sid  # type: ignore
+            transport = request.environ.get('HTTP_UPGRADE', 'polling')
+            user_agent = request.headers.get('User-Agent', 'unknown')
+            remote_addr = request.remote_addr
+
+            # Check if it's likely a mobile device
+            is_mobile = any(x in user_agent.lower() for x in ['iphone', 'ipad', 'android', 'mobile'])
+
+            logger.info(
+                f'Socket CONNECTED: sid={sid}, transport={transport}, '
+                f'ip={remote_addr}, mobile={is_mobile}, ua={user_agent[:80]}...'
+            )
+        except Exception as e:
+            logger.warning(f'Socket connected but failed to get details: {e}')
 
         return '', 301
 
     # Socket is disconnected
     def disconnected(self, /) -> None:
-        logger.debug('Socket: client disconnected')
+        try:
+            sid = request.sid  # type: ignore
+            logger.info(f'Socket DISCONNECTED: sid={sid}')
+        except Exception as e:
+            logger.info(f'Socket disconnected (sid unavailable): {e}')
 
     # Emit a message through the socket
     def emit(self, name: str, *arg, all=False) -> None:

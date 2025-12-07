@@ -186,7 +186,15 @@ class BrickSocket {
         if (this.socket === undefined) {
             this.socket = io.connect(`${window.location.origin}/${this.namespace}`, {
                 path: this.path,
-                transports: ["websocket"],
+                // Adding Polling as iOS is having issues with websockets
+                transports: ["polling", "websocket"],
+                // Increase timeout for slow mobile connections
+                timeout: 30000,
+                // Reconnection settings
+                reconnectionDelay: 1000,
+                reconnectionDelayMax: 5000,
+                // Allow upgrade from polling to websocket
+                upgrade: true,
             });
 
             // Complete
