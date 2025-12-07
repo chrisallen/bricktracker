@@ -35,6 +35,23 @@ See [Migration Guide](docs/migration_guide.md) for detailed instructions
 
 #### Features
 
+- Add spare parts control options
+  - `BK_SKIP_SPARE_PARTS`: Skip importing spare parts when downloading sets from Rebrickable (parts not saved to database)
+  - `BK_HIDE_SPARE_PARTS`: Hide spare parts from all parts lists (parts must still be in database)
+  - Both options are live-changeable in admin configuration panel
+  - Options can be used independently or together for flexible spare parts management
+  - Affects all parts displays: /parts page, set details accordion, minifigure parts, and problem parts
+- Improved WebSocket/Socket.IO reliability for mobile devices
+  - Changed connection strategy to polling-first with automatic WebSocket upgrade
+  - Increased connection timeout to 30 seconds for slow mobile networks
+  - Added ping/pong keepalive settings (30s timeout, 25s interval)
+  - Fixed disconnect handler to properly accept optional reason parameter
+  - Improved server-side connection logging with user agent and transport details
+- Fixed environment variable lock detection in admin configuration panel
+  - Resolved bug where all variables appeared "locked" after saving live settings
+  - Lock detection now correctly identifies only Docker environment variables set before .env loading
+  - Variables set via Docker's `environment:` directive remain properly locked
+  - Variables from data/.env or root .env are correctly shown as editable
 - Add individual pagination control system per entity type
   - `BK_SETS_SERVER_SIDE_PAGINATION`: Enable/disable pagination for sets
   - `BK_PARTS_SERVER_SIDE_PAGINATION`: Enable/disable pagination for parts

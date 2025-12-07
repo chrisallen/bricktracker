@@ -10,7 +10,12 @@ SUM("bricktracker_parts"."damaged") AS "total_damaged",
 {% endblock %}
 
 {% block where %}
-WHERE "bricktracker_parts"."figure" IS NOT DISTINCT FROM :figure
+{% set conditions = [] %}
+{% set _ = conditions.append('"bricktracker_parts"."figure" IS NOT DISTINCT FROM :figure') %}
+{% if skip_spare_parts %}
+  {% set _ = conditions.append('"bricktracker_parts"."spare" = 0') %}
+{% endif %}
+WHERE {{ conditions | join(' AND ') }}
 {% endblock %}
 
 {% block group %}

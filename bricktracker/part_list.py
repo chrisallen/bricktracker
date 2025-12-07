@@ -73,7 +73,8 @@ class BrickPartList(BrickRecordList[BrickPart]):
 
         # Prepare context for query
         context = {}
-        if current_app.config.get('SKIP_SPARE_PARTS', False):
+        # Hide spare parts from display if configured
+        if current_app.config.get('HIDE_SPARE_PARTS', False):
             context['skip_spare_parts'] = True
         if theme_id and theme_id != 'all':
             context['theme_id'] = theme_id
@@ -114,7 +115,8 @@ class BrickPartList(BrickRecordList[BrickPart]):
             filter_context['year'] = year
         if search_query:
             filter_context['search_query'] = search_query
-        if current_app.config.get('SKIP_SPARE_PARTS', False):
+        # Hide spare parts from display if configured
+        if current_app.config.get('HIDE_SPARE_PARTS', False):
             filter_context['skip_spare_parts'] = True
 
         # Field mapping for sorting
@@ -203,8 +205,13 @@ class BrickPartList(BrickRecordList[BrickPart]):
         self.brickset = brickset
         self.minifigure = minifigure
 
+        # Prepare context for hiding spare parts if configured
+        context = {}
+        if current_app.config.get('HIDE_SPARE_PARTS', False):
+            context['skip_spare_parts'] = True
+
         # Load the parts from the database
-        self.list()
+        self.list(**context)
 
         return self
 
@@ -217,8 +224,13 @@ class BrickPartList(BrickRecordList[BrickPart]):
         # Save the  minifigure
         self.minifigure = minifigure
 
+        # Prepare context for hiding spare parts if configured
+        context = {}
+        if current_app.config.get('HIDE_SPARE_PARTS', False):
+            context['skip_spare_parts'] = True
+
         # Load the parts from the database
-        self.list(override_query=self.minifigure_query)
+        self.list(override_query=self.minifigure_query, **context)
 
         return self
 
@@ -269,7 +281,8 @@ class BrickPartList(BrickRecordList[BrickPart]):
             context['storage_id'] = storage_id
         if tag_id and tag_id != 'all':
             context['tag_id'] = tag_id
-        if current_app.config.get('SKIP_SPARE_PARTS', False):
+        # Hide spare parts from display if configured
+        if current_app.config.get('HIDE_SPARE_PARTS', False):
             context['skip_spare_parts'] = True
 
         # Load the problematic parts from the database
@@ -307,7 +320,8 @@ class BrickPartList(BrickRecordList[BrickPart]):
             filter_context['tag_id'] = tag_id
         if search_query:
             filter_context['search_query'] = search_query
-        if current_app.config.get('SKIP_SPARE_PARTS', False):
+        # Hide spare parts from display if configured
+        if current_app.config.get('HIDE_SPARE_PARTS', False):
             filter_context['skip_spare_parts'] = True
 
         # Field mapping for sorting
@@ -407,7 +421,13 @@ class BrickPartList(BrickRecordList[BrickPart]):
 
             # Process each part
             number_of_parts: int = 0
+            skip_spares = current_app.config.get('SKIP_SPARE_PARTS', False)
+
             for part in inventory:
+                # Skip spare parts if configured
+                if skip_spares and part.fields.spare:
+                    continue
+
                 # Count the number of parts for minifigures
                 if minifigure is not None:
                     number_of_parts += part.fields.quantity

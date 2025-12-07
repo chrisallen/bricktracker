@@ -85,6 +85,7 @@ CONFIG: Final[list[dict[str, Any]]] = [
     {'n': 'SHOW_GRID_SORT', 'c': bool},
     {'n': 'SHOW_SETS_DUPLICATE_FILTER', 'd': True, 'c': bool},
     {'n': 'SKIP_SPARE_PARTS', 'c': bool},
+    {'n': 'HIDE_SPARE_PARTS', 'c': bool},
     {'n': 'SOCKET_NAMESPACE', 'd': 'bricksocket'},
     {'n': 'SOCKET_PATH', 'd': '/bricksocket/'},
     {'n': 'STORAGE_DEFAULT_ORDER', 'd': '"bricktracker_metadata_storages"."name" ASC'},  # noqa: E501

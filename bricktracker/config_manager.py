@@ -46,6 +46,7 @@ LIVE_CHANGEABLE_VARS: Final[List[str]] = [
     'BK_SHOW_GRID_SORT',
     'BK_SHOW_SETS_DUPLICATE_FILTER',
     'BK_SKIP_SPARE_PARTS',
+    'BK_HIDE_SPARE_PARTS',
     'BK_USE_REMOTE_IMAGES',
     'BK_PEERON_DOWNLOAD_DELAY',
     'BK_PEERON_MIN_IMAGE_SIZE',
@@ -317,7 +318,8 @@ class ConfigManager:
             'BK_SETS_CONSOLIDATION': 'Enable set consolidation/grouping functionality',
             'BK_SHOW_GRID_FILTERS': 'Show filter options on grids by default',
             'BK_SHOW_GRID_SORT': 'Show sort options on grids by default',
-            'BK_SKIP_SPARE_PARTS': 'Skip spare parts when importing sets',
+            'BK_SKIP_SPARE_PARTS': 'Skip importing spare parts when downloading sets from Rebrickable',
+            'BK_HIDE_SPARE_PARTS': 'Hide spare parts from parts lists (spare parts must still be in database)',
             'BK_USE_REMOTE_IMAGES': 'Use remote images from Rebrickable CDN instead of local',
             'BK_STATISTICS_SHOW_CHARTS': 'Show collection growth charts on statistics page',
             'BK_STATISTICS_DEFAULT_EXPANDED': 'Expand all statistics sections by default'

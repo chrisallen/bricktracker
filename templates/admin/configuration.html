@@ -471,7 +471,15 @@
                 <input class="form-check-input config-toggle" type="checkbox" id="BK_SKIP_SPARE_PARTS" data-var="BK_SKIP_SPARE_PARTS" {{ is_locked('BK_SKIP_SPARE_PARTS') }}>
                 <label class="form-check-label" for="BK_SKIP_SPARE_PARTS">
                   BK_SKIP_SPARE_PARTS {{ config_badges('BK_SKIP_SPARE_PARTS') }}
-                  <div class="text-muted small">Skip spare parts when importing sets</div>
+                  <div class="text-muted small">Skip importing spare parts when downloading sets from Rebrickable</div>
+                </label>
+              </div>
+
+              <div class="form-check form-switch">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_HIDE_SPARE_PARTS" data-var="BK_HIDE_SPARE_PARTS" {{ is_locked('BK_HIDE_SPARE_PARTS') }}>
+                <label class="form-check-label" for="BK_HIDE_SPARE_PARTS">
+                  BK_HIDE_SPARE_PARTS {{ config_badges('BK_HIDE_SPARE_PARTS') }}
+                  <div class="text-muted small">Hide spare parts from parts lists (spare parts must still be in database)</div>
                 </label>
               </div>
             </div>

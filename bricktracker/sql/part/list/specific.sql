@@ -10,6 +10,11 @@ IFNULL("bricktracker_parts"."damaged", 0) AS "total_damaged",
 {% endblock %}
 
 {% block where %}
-WHERE "bricktracker_parts"."id" IS NOT DISTINCT FROM :id
-AND "bricktracker_parts"."figure" IS NOT DISTINCT FROM :figure
+{% set conditions = [] %}
+{% set _ = conditions.append('"bricktracker_parts"."id" IS NOT DISTINCT FROM :id') %}
+{% set _ = conditions.append('"bricktracker_parts"."figure" IS NOT DISTINCT FROM :figure') %}
+{% if skip_spare_parts %}
+  {% set _ = conditions.append('"bricktracker_parts"."spare" = 0') %}
+{% endif %}
+WHERE {{ conditions | join(' AND ') }}
 {% endblock %}
