@@ -53,6 +53,7 @@ LIVE_CHANGEABLE_VARS: Final[List[str]] = [
     'BK_REBRICKABLE_PAGE_SIZE',
     'BK_STATISTICS_SHOW_CHARTS',
     'BK_STATISTICS_DEFAULT_EXPANDED',
+    'BK_DARK_MODE',
     # Default ordering and formatting
     'BK_INSTRUCTIONS_ALLOWED_EXTENSIONS',
     'BK_MINIFIGURES_DEFAULT_ORDER',
@@ -322,6 +323,7 @@ class ConfigManager:
             'BK_HIDE_SPARE_PARTS': 'Hide spare parts from parts lists (spare parts must still be in database)',
             'BK_USE_REMOTE_IMAGES': 'Use remote images from Rebrickable CDN instead of local',
             'BK_STATISTICS_SHOW_CHARTS': 'Show collection growth charts on statistics page',
-            'BK_STATISTICS_DEFAULT_EXPANDED': 'Expand all statistics sections by default'
+            'BK_STATISTICS_DEFAULT_EXPANDED': 'Expand all statistics sections by default',
+            'BK_DARK_MODE': 'Enable dark mode theme'
         }
         return help_text.get(var_name, 'No help available for this variable')

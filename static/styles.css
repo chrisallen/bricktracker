@@ -87,6 +87,11 @@
     border-color: #6c757d;
 }
 
+[data-bs-theme="dark"] .table th .dropdown-toggle:hover {
+    background-color: #2b3035;
+    border-color: #6c757d;
+}
+
 /* Style dropdown items */
 .dropdown-menu .dropdown-header {
     font-size: 0.75rem;
@@ -106,6 +111,11 @@
     color: #212529;
 }
 
+[data-bs-theme="dark"] .dropdown-menu .dropdown-item:hover {
+    background-color: #2b3035;
+    color: #fff;
+}
+
 .dropdown-menu .dropdown-item i {
     width: 1.25rem;
     text-align: center;
@@ -115,6 +125,11 @@
 .sortable {
     --th-color: #000 !important;
     --th-bg:#fff !important;
+}
+
+[data-bs-theme="dark"] .sortable {
+    --th-color: #fff !important;
+    --th-bg: #212529 !important;
 }
 
 .sortable thead th {
@@ -180,3 +195,80 @@
     pointer-events: none;
 }/* Duplicate filter support */
 .duplicate-filter-hidden { display: none !important; }
+
+/* Dark mode link and text fixes */
+[data-bs-theme="dark"] .text-reset {
+    color: var(--bs-body-color) !important;
+}
+
+[data-bs-theme="dark"] a.text-reset:hover {
+    color: var(--bs-link-hover-color) !important;
+}
+
+[data-bs-theme="dark"] .text-dark {
+    color: var(--bs-body-color) !important;
+}
+
+/* Dark mode border fixes */
+[data-bs-theme="dark"] .border-black {
+    border-color: var(--bs-border-color) !important;
+}
+
+/* Dark mode badge fixes */
+[data-bs-theme="dark"] .text-bg-light {
+    background-color: #343a40 !important;
+    color: #f8f9fa !important;
+}
+
+[data-bs-theme="dark"] .bg-white {
+    background-color: #212529 !important;
+}
+
+[data-bs-theme="dark"] .text-black {
+    color: #f8f9fa !important;
+}
+
+/* Dark mode button fixes */
+[data-bs-theme="dark"] .btn-outline-dark {
+    border-color: #f8f9fa;
+    color: #f8f9fa;
+}
+
+[data-bs-theme="dark"] .btn-outline-dark:hover {
+    background-color: #f8f9fa;
+    border-color: #f8f9fa;
+    color: #212529;
+}
+
+[data-bs-theme="dark"] .btn-light {
+    background-color: #343a40;
+    border-color: #495057;
+    color: #f8f9fa;
+}
+
+[data-bs-theme="dark"] .btn-light:hover {
+    background-color: #495057;
+    border-color: #6c757d;
+    color: #fff;
+}
+
+/* Dark mode table fixes */
+[data-bs-theme="dark"] .table-light {
+    --bs-table-bg: #343a40;
+    --bs-table-color: #f8f9fa;
+}
+
+/* Dark mode for card header links */
+[data-bs-theme="dark"] .text-decoration-none.text-dark {
+    color: var(--bs-body-color) !important;
+}
+
+/* Dark mode table text fix - ensure all table text is visible */
+[data-bs-theme="dark"] .table {
+    --bs-table-color: var(--bs-body-color);
+}
+
+[data-bs-theme="dark"] .table tbody td,
+[data-bs-theme="dark"] .table tbody th {
+    color: var(--bs-body-color);
+}

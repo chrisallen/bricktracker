@@ -508,6 +508,14 @@
                   <div class="text-muted small">Expand all statistics sections by default</div>
                 </label>
               </div>
+
+              <div class="form-check form-switch">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_DARK_MODE" data-var="BK_DARK_MODE" {{ is_locked('BK_DARK_MODE') }}>
+                <label class="form-check-label" for="BK_DARK_MODE">
+                  BK_DARK_MODE {{ config_badges('BK_DARK_MODE') }}
+                  <div class="text-muted small">Enable dark mode theme</div>
+                </label>
+              </div>
             </div>
           </div>
 

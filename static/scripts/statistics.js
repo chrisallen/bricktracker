@@ -11,6 +11,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Debug: Log chart data to console
     console.log('Chart Data:', window.chartData);
 
+    // Get current theme colors
+    const isDarkMode = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+    const textColor = isDarkMode ? '#f8f9fa' : '#212529';
+    const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+
     // Common chart configuration
     const commonConfig = {
         type: 'line',
@@ -25,20 +30,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 x: {
                     title: {
                         display: true,
-                        text: 'Release Year'
+                        text: 'Release Year',
+                        color: textColor
+                    },
+                    ticks: {
+                        color: textColor
                     },
                     grid: {
-                        display: false
+                        display: false,
+                        color: gridColor
                     }
                 },
                 y: {
                     beginAtZero: true,
                     title: {
                         display: true,
-                        text: 'Count'
+                        text: 'Count',
+                        color: textColor
                     },
                     ticks: {
-                        precision: 0
+                        precision: 0,
+                        color: textColor
+                    },
+                    grid: {
+                        color: gridColor
                     }
                 }
             },
@@ -110,7 +125,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         ...commonConfig.options.scales.y,
                         title: {
                             display: true,
-                            text: 'Parts Count'
+                            text: 'Parts Count',
+                            color: textColor
                         }
                     }
                 }
@@ -143,7 +159,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         ...commonConfig.options.scales.y,
                         title: {
                             display: true,
-                            text: 'Minifigures Count'
+                            text: 'Minifigures Count',
+                            color: textColor
                         }
                     }
                 }
