@@ -63,6 +63,9 @@ volumes:
 
 ## Migration Options
 
+> **Warning**
+> Backup your data before making any changes! 
+
 ### Option 1: Migrate to New Data Folder Structure (Recommended)
 
 This is the recommended approach for cleaner backups and simpler bind mount management.
