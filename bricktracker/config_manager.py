@@ -217,6 +217,8 @@ class ConfigManager:
     def _update_env_file(self, var_name: str, value: Any) -> None:
         """Update the .env file with new value"""
         if not self.env_file_path.exists():
+            # Ensure parent directory exists
+            self.env_file_path.parent.mkdir(parents=True, exist_ok=True)
             self.env_file_path.touch()
 
         # Read current .env content
