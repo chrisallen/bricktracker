@@ -6,7 +6,8 @@
 
 #### Data Folder Consolidation
 
-**BREAKING CHANGE**: Version 1.3 consolidates all user data into a single `data/` folder for easier backup and volume mapping.
+> **Warning** 
+> **BREAKING CHANGE**: Version 1.3 consolidates all user data into a single `data/` folder for easier backup and volume mapping.
 
 - **Path handling**: All relative paths are now resolved relative to the application root (`/app` in Docker)
   - Example: `data/app.db` → `/app/data/app.db`
@@ -30,12 +31,14 @@ See [Migration Guide](docs/migration_guide.md) for detailed instructions
 
 #### Default Minifigures Folder Change
 
-- **BREAKING CHANGE**: Default minifigures folder path changed from `minifigs` to `minifigures`
-  - **Impact**: Users who relied on the default `BK_MINIFIGURES_FOLDER` value (without explicitly setting it) will need to either:
-    1. Set `BK_MINIFIGURES_FOLDER=minifigs` in their environment to maintain existing behavior, or
-    2. Rename their existing `minifigs` folder to `minifigures`
-  - **No impact**: Users who already have `BK_MINIFIGURES_FOLDER` explicitly configured
-  - Improved consistency across documentation and Docker configurations
+> **Warning**
+> **BREAKING CHANGE**: Default minifigures folder path changed from `minifigs` to `minifigures`
+
+- **Impact**: Users who relied on the default `BK_MINIFIGURES_FOLDER` value (without explicitly setting it) will need to either:
+  1. Set `BK_MINIFIGURES_FOLDER=minifigs` in their environment to maintain existing behavior, or
+  2. Rename their existing `minifigs` folder to `minifigures`
+- **No impact**: Users who already have `BK_MINIFIGURES_FOLDER` explicitly configured
+- Improved consistency across documentation and Docker configurations
 
 ### New Features
 
