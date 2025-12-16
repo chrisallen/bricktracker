@@ -29,7 +29,7 @@ Container (/app/):
 │   ├── parts/              # Part images
 │   ├── minifigures/        # Minifigure images
 │   └── instructions/       # PDF instructions
-└── static/                  # App assets
+└── static/                 # App assets
     ├── brick.png
     ├── styles.css
     └── scripts/
@@ -46,7 +46,7 @@ Container (/app/):
 ├── themes.csv
 └── static/
     ├── instructions/       # Separate bind mount
-    ├── minifigures/        # Separate bind mount
+    ├── minifigs/           # Separate bind mount
     ├── parts/              # Separate bind mount
     ├── sets/               # Separate bind mount
 ```
@@ -56,7 +56,7 @@ Container (/app/):
 volumes:
   - ./data:/app/
   - ./instructions:/app/static/instructions/
-  - ./minifigures:/app/static/minifigures/
+  - ./minifigs:/app/static/minifigs/
   - ./parts:/app/static/parts/
   - ./sets:/app/static/sets/
 ```
@@ -82,9 +82,11 @@ This is the recommended approach for cleaner backups and simpler bind mount mana
    Assuming your old `compose.yaml` had:
    - `./data:/app/` (contains app.db, retired_sets.csv, themes.csv)
    - `./instructions:/app/static/instructions/`
-   - `./minifigures:/app/static/minifigures/`
+   - `./minifigs:/app/static/minifigs/`
    - `./parts:/app/static/parts/`
    - `./sets:/app/static/sets/`
+
+   > Default location for minifigures changed from `minifigs` to `minifigures` 
 
    Run:
    ```bash
@@ -98,7 +100,7 @@ This is the recommended approach for cleaner backups and simpler bind mount mana
 
    # Move image and instruction folders
    mv ./instructions/* ./bricktracker-data/instructions/
-   mv ./minifigures/* ./bricktracker-data/minifigures/
+   mv ./minifigs/* ./bricktracker-data/minifigures/
    mv ./parts/* ./bricktracker-data/parts/
    mv ./sets/* ./bricktracker-data/sets/
    ```
@@ -136,7 +138,7 @@ This is the recommended approach for cleaner backups and simpler bind mount mana
 
 8. **Clean up old directories (after verification):**
    ```bash
-   rm -r ./data ./instructions ./minifigures ./parts ./sets
+   rm -r ./data ./instructions ./minifigs ./parts ./sets
    ```
 
 ### Option 2: Keep Current Setup (No Data Migration)
@@ -244,7 +246,7 @@ To preserve old volume structure without migration, add to `.env`:
 | `BK_RETIRED_SETS_PATH` | `retired_sets.csv` | `/app/retired_sets.csv` |
 | `BK_THEMES_PATH` | `themes.csv` | `/app/themes.csv` |
 | `BK_INSTRUCTIONS_FOLDER` | `static/instructions` | `/app/static/instructions` |
-| `BK_MINIFIGURES_FOLDER` | `static/minifigures` | `/app/static/minifigures` |
+| `BK_MINIFIGURES_FOLDER` | `static/minifigs` | `/app/static/minifigs` |
 | `BK_PARTS_FOLDER` | `static/parts` | `/app/static/parts` |
 | `BK_SETS_FOLDER` | `static/sets` | `/app/static/sets` |
 
