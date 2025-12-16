@@ -134,6 +134,11 @@ See [Migration Guide](docs/migration_guide.md) for detailed instructions
   - Advanced badge system showing value status: True/False for booleans, Set/Default/Unset for other values, Changed indicator
   - Live API endpoints: `/admin/api/config/update` for immediate changes, `/admin/api/config/update-static` for .env updates
   - Form pre-population with current values and automatic page reload after successful live updates
+- Add dark mode support
+  - `BK_DARK_MODE`: Environment variable to enable dark mode theme (default: false)
+  - Uses Bootstrap 5.3's native dark mode with `data-bs-theme` attribute
+  - Live-changeable via Admin > Configuration > Live Settings
+  - Setting persists across sessions via .env file
 - **BREAKING CHANGE**: Default minifigures folder path changed from `minifigs` to `minifigures`
   - Impact: Users who relied on the default `BK_MINIFIGURES_FOLDER` value (without explicitly setting it) will need to either:
     1. Set `BK_MINIFIGURES_FOLDER=minifigs` in their environment to maintain existing behavior, or
