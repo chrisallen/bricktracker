@@ -65,13 +65,13 @@
   </p>
 </div>
 {% elif env_file_missing %}
-<div class="alert alert-info mb-3 mx-3">
+<div class="alert alert-danger mb-3 mx-3">
   <h6 class="mb-2"><i class="ri-information-line"></i> No Configuration File Found</h6>
   <p class="mb-0">
     <small>
-      No <code>.env</code> file was found. Currently using default values and Docker environment variables.
+      No <code>.env</code> file was found at <code>data/.env</code>. Currently using default values and Docker environment variables.
       If you save changes, a new configuration file will be created at <code>data/.env</code> (recommended location).
-      See <a href="https://bricktracker.baerentsen.space/migration-guide" target="_blank" class="alert-link">Migration Guide</a> for details.
+      See <a href="https://bricktracker.baerentsen.space/migration_guide.html" target="_blank" class="alert-link">Migration Guide</a> for details.
     </small>
   </p>
 </div>
