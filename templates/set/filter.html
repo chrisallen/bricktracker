@@ -76,6 +76,8 @@
       </div>
     </div>
   {% endif %}
+  <!-- Force line break here to always have 2 rows: status/theme/owner/purchase_location on row 1, storage/tag/year/clear on row 2 -->
+  <div class="w-100"></div>
   {% if brickset_storages | length %}
     <div class="col-12 flex-grow-1">
       <label class="visually-hidden" for="grid-owner">Storage</label>
