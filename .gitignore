@@ -24,6 +24,7 @@ static/sets/
 /local/
 run_local.sh
 settings.local.json
+/offline/
 
 # Apple idiocy
 .DS_Store
