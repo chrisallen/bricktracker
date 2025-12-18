@@ -18,17 +18,13 @@ A web application for organizing and tracking LEGO sets, parts, and minifigures.
 
 Use the provided [compose.yaml](compose.yaml) file.
 
-See [Quickstart](docs/quickstart.md) to get up and running right away.
+See [Quick Start](https://bricktracker.baerentsen.space/quick-start) to get up and running right away.
 
-See [Setup](docs/setup.md) for a more setup guide.
-
-## Usage
-
-See [first steps](docs/first-steps.md).
+See [Walk Through](https://bricktracker.baerentsen.space/tutorial-first-steps) for a more detailed guide.
 
 ## Documentation
 
 Most of the pages should be self explanatory to use.
-However, you can find more specific documentation in the [documentation](docs/DOCS.md).
+However, you can find more specific documentation in the [documentation](https://bricktracker.baerentsen.space/whatis).
 
-You can find screenshots of the application in the [overview](docs/overview.md) documentation file.
+You can find screenshots of the application in the [overview](https://bricktracker.baerentsen.space/overview) documentation.
