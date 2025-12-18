@@ -18,8 +18,6 @@ A web application for organizing and tracking LEGO sets, parts, and minifigures.
 
 ## Prefered setup: pre-build docker image
 
-Use the provided [compose.yaml](compose.yaml) file.
-
 See [Quick Start](https://bricktracker.baerentsen.space/quick-start) to get up and running right away.
 
 See [Walk Through](https://bricktracker.baerentsen.space/tutorial-first-steps) for a more detailed guide.
