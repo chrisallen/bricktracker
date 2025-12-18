@@ -49,7 +49,7 @@ def serve_data_file(folder: str, filename: str):
     # Check if file exists
     file_path = os.path.join(folder_path, safe_filename)
     if not os.path.isfile(file_path):
-        logger.debug(f"File not found: {file_path}")
+        logger.warning(f"File not found: {file_path} (configured folder: {folder_path})")
         abort(404)
 
     # Verify the resolved path is still within the allowed folder (security check)
