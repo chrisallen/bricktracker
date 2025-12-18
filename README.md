@@ -1,3 +1,5 @@
+<img src="static/brick.png" height="100" width="100">
+
 # BrickTracker
 
 A web application for organizing and tracking LEGO sets, parts, and minifigures. Uses the Rebrickable API to fetch LEGO data and allows users to track missing pieces and collection status.
