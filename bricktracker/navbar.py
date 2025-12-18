@@ -15,6 +15,7 @@ NAVBAR: Final[list[dict[str, Any]]] = [
     {'e': 'minifigure.list', 't': 'Minifigures', 'i': 'group-line', 'f': 'HIDE_ALL_MINIFIGURES'},  # noqa: E501
     {'e': 'instructions.list', 't': 'Instructions', 'i': 'file-line', 'f': 'HIDE_ALL_INSTRUCTIONS'},  # noqa: E501
     {'e': 'storage.list', 't': 'Storages', 'i': 'archive-2-line', 'f': 'HIDE_ALL_STORAGES'},  # noqa: E501
+    {'e': 'statistics.overview', 't': 'Statistics', 'i': 'bar-chart-line', 'f': 'HIDE_STATISTICS'},  # noqa: E501
     {'e': 'wish.list', 't': 'Wishlist', 'i': 'gift-line', 'f': 'HIDE_WISHES'},
     {'e': 'admin.admin', 't': 'Admin', 'i': 'settings-4-line', 'f': 'HIDE_ADMIN'},  # noqa: E501
 ]

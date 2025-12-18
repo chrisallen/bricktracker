@@ -98,7 +98,7 @@ class RebrickablePart(BrickRecord):
                 # Use BrickLink color ID if available and not None, otherwise fall back to Rebrickable color
                 bricklink_color = getattr(self.fields, 'bricklink_color_id', None)
                 color_param = bricklink_color if bricklink_color is not None else self.fields.color
-                print(f'BrickLink URL parameters: part={part_param}, color={color_param}')  # Debugging line, can be removed later
+                # print(f'BrickLink URL parameters: part={part_param}, color={color_param}')  # Debugging line, can be removed later
                 return current_app.config['BRICKLINK_LINK_PART_PATTERN'].format(  # noqa: E501
                     part=part_param,
                     color=color_param,

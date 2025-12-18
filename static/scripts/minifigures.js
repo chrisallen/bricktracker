@@ -1,30 +1,88 @@
 // Minifigures page functionality
-function filterByOwner() {
-  const select = document.getElementById('filter-owner');
-  const selectedOwner = select.value;
+
+// Check if we're in pagination mode (server-side) or original mode (client-side)
+function isPaginationMode() {
+  const tableElement = document.querySelector('#minifigures');
+  return tableElement && tableElement.getAttribute('data-table') === 'false';
+}
+
+function applyFilters() {
+  const ownerSelect = document.getElementById('filter-owner');
+  const problemsSelect = document.getElementById('filter-problems');
+  const themeSelect = document.getElementById('filter-theme');
+  const yearSelect = document.getElementById('filter-year');
   const currentUrl = new URL(window.location);
 
-  if (selectedOwner === 'all') {
-    currentUrl.searchParams.delete('owner');
-  } else {
-    currentUrl.searchParams.set('owner', selectedOwner);
+  // Apply owner filter
+  if (ownerSelect) {
+    const selectedOwner = ownerSelect.value;
+    if (selectedOwner === 'all') {
+      currentUrl.searchParams.delete('owner');
+    } else {
+      currentUrl.searchParams.set('owner', selectedOwner);
+    }
   }
 
-  window.location.href = currentUrl.toString();
+  // Apply problems filter
+  if (problemsSelect) {
+    const selectedProblems = problemsSelect.value;
+    if (selectedProblems === 'all') {
+      currentUrl.searchParams.delete('problems');
+    } else {
+      currentUrl.searchParams.set('problems', selectedProblems);
+    }
+  }
+
+  // Apply theme filter
+  if (themeSelect) {
+    const selectedTheme = themeSelect.value;
+    if (selectedTheme === 'all') {
+      currentUrl.searchParams.delete('theme');
+    } else {
+      currentUrl.searchParams.set('theme', selectedTheme);
+    }
+  }
+
+  // Apply year filter
+  if (yearSelect) {
+    const selectedYear = yearSelect.value;
+    if (selectedYear === 'all') {
+      currentUrl.searchParams.delete('year');
+    } else {
+      currentUrl.searchParams.set('year', selectedYear);
+    }
+  }
+
+  // Only reset to page 1 when filtering in server-side pagination mode
+  if (isPaginationMode()) {
+    currentUrl.searchParams.set('page', '1');
+    // Navigate to updated URL (server-side pagination)
+    window.location.href = currentUrl.toString();
+  } else {
+    // Client-side mode: Update URL without page reload
+    window.history.replaceState({}, '', currentUrl.toString());
+  }
+}
+
+// Legacy function for compatibility
+function filterByOwner() {
+  applyFilters();
+}
+
+// Initialize filter and sort states for minifigures page
+function initializeCollapsibleStates() {
+  initializePageCollapsibleStates('minifigures');
 }
 
 // Keep filters expanded after selection
+function applyFiltersAndKeepOpen() {
+  preserveCollapsibleStateOnChange('table-filter', 'minifigures-filter-state');
+  applyFilters();
+}
+
+// Legacy function for compatibility
 function filterByOwnerAndKeepOpen() {
-  // Remember if filters were open
-  const filterSection = document.getElementById('table-filter');
-  const wasOpen = filterSection && filterSection.classList.contains('show');
-
-  filterByOwner();
-
-  // Store the state to restore after page reload
-  if (wasOpen) {
-    sessionStorage.setItem('keepFiltersOpen', 'true');
-  }
+  applyFiltersAndKeepOpen();
 }
 
 // Setup table search and sort functionality
@@ -32,117 +90,104 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchInput = document.getElementById('table-search');
   const searchClear = document.getElementById('table-search-clear');
 
-  // Restore filter state after page load
-  if (sessionStorage.getItem('keepFiltersOpen') === 'true') {
-    const filterSection = document.getElementById('table-filter');
-    const filterButton = document.querySelector('[data-bs-target="#table-filter"]');
-
-    if (filterSection && filterButton) {
-      filterSection.classList.add('show');
-      filterButton.setAttribute('aria-expanded', 'true');
-    }
-
-    sessionStorage.removeItem('keepFiltersOpen');
-  }
+  // Initialize collapsible states (filter and sort)
+  initializeCollapsibleStates();
 
   if (searchInput && searchClear) {
-    // Wait for table to be initialized by setup_tables
-    setTimeout(() => {
-      const tableElement = document.querySelector('table[data-table="true"]');
-      if (tableElement && window.brickTableInstance) {
-        // Enable custom search for minifigures table
-        window.brickTableInstance.table.searchable = true;
+    if (isPaginationMode()) {
+      // PAGINATION MODE - Server-side search
+      const searchForm = document.createElement('form');
+      searchForm.style.display = 'none';
+      searchInput.parentNode.appendChild(searchForm);
+      searchForm.appendChild(searchInput.cloneNode(true));
 
-        // Connect search input to table
-        searchInput.addEventListener('input', (e) => {
-          window.brickTableInstance.table.search(e.target.value);
-        });
+      // Handle Enter key for search
+      searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          performServerSearch();
+        }
+      });
 
-        // Clear search
-        searchClear.addEventListener('click', () => {
-          searchInput.value = '';
-          window.brickTableInstance.table.search('');
-        });
-
-        // Setup sort buttons
-        setupSortButtons();
+      // Handle search button click (if exists)
+      const searchButton = document.querySelector('[data-search-trigger]');
+      if (searchButton) {
+        searchButton.addEventListener('click', performServerSearch);
       }
-    }, 100);
+
+      // Clear search
+      searchClear.addEventListener('click', () => {
+        searchInput.value = '';
+        performServerSearch();
+      });
+
+      function performServerSearch() {
+        const currentUrl = new URL(window.location);
+        const searchQuery = searchInput.value.trim();
+
+        if (searchQuery) {
+          currentUrl.searchParams.set('search', searchQuery);
+        } else {
+          currentUrl.searchParams.delete('search');
+        }
+
+        // Reset to page 1 when searching
+        currentUrl.searchParams.set('page', '1');
+        window.location.href = currentUrl.toString();
+      }
+
+    } else {
+      // ORIGINAL MODE - Client-side search with Simple DataTables
+      setTimeout(() => {
+        const tableElement = document.querySelector('table[data-table="true"]');
+        if (tableElement && window.brickTableInstance) {
+          // Enable custom search for minifigures table
+          window.brickTableInstance.table.searchable = true;
+
+          // Connect search input to table
+          searchInput.addEventListener('input', (e) => {
+            window.brickTableInstance.table.search(e.target.value);
+          });
+
+          // Clear search
+          searchClear.addEventListener('click', () => {
+            searchInput.value = '';
+            window.brickTableInstance.table.search('');
+          });
+        }
+      }, 100);
+    }
+  }
+
+  // Setup sort buttons for both modes
+  setupSortButtons();
+
+  // Initialize sort button states and icons for pagination mode
+  if (isPaginationMode()) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentSort = urlParams.get('sort');
+    const currentOrder = urlParams.get('order');
+    window.initializeSortButtonStates(currentSort, currentOrder);
+  }
+
+  // Initialize clear filters button
+  const clearButton = document.getElementById('table-filter-clear');
+  if (clearButton) {
+    clearButton.addEventListener('click', () => {
+      window.clearPageFilters('minifigures', ['owner', 'problems', 'theme', 'year']);
+    });
   }
 });
 
 function setupSortButtons() {
-  // Sort button functionality
-  const sortButtons = document.querySelectorAll('[data-sort-attribute]');
-  const clearButton = document.querySelector('[data-sort-clear]');
-
-  sortButtons.forEach(button => {
-    button.addEventListener('click', () => {
-      const attribute = button.dataset.sortAttribute;
-      const isDesc = button.dataset.sortDesc === 'true';
-
-      // Get column index based on attribute
-      const columnMap = {
-        'name': 1,
-        'parts': 2,
-        'quantity': 3,
-        'missing': 4,
-        'damaged': 5,
-        'sets': 6
-      };
-
-      const columnIndex = columnMap[attribute];
-      if (columnIndex !== undefined && window.brickTableInstance) {
-        // Determine sort direction
-        const isCurrentlyActive = button.classList.contains('btn-primary');
-        const currentDirection = button.dataset.currentDirection || (isDesc ? 'desc' : 'asc');
-        const newDirection = isCurrentlyActive ?
-          (currentDirection === 'asc' ? 'desc' : 'asc') :
-          (isDesc ? 'desc' : 'asc');
-
-        // Clear other active buttons
-        sortButtons.forEach(btn => {
-          btn.classList.remove('btn-primary');
-          btn.classList.add('btn-outline-primary');
-          btn.removeAttribute('data-current-direction');
-        });
-
-        // Mark this button as active
-        button.classList.remove('btn-outline-primary');
-        button.classList.add('btn-primary');
-        button.dataset.currentDirection = newDirection;
-
-        // Apply sort using Simple DataTables API
-        window.brickTableInstance.table.columns.sort(columnIndex, newDirection);
-      }
-    });
-  });
-
-  if (clearButton) {
-    clearButton.addEventListener('click', () => {
-      // Clear all sort buttons
-      sortButtons.forEach(btn => {
-        btn.classList.remove('btn-primary');
-        btn.classList.add('btn-outline-primary');
-        btn.removeAttribute('data-current-direction');
-      });
-
-      // Reset table sort - remove all sorting
-      if (window.brickTableInstance) {
-        // Destroy and recreate to clear sorting
-        const tableElement = document.querySelector('#minifigures');
-        const currentPerPage = window.brickTableInstance.table.options.perPage;
-        window.brickTableInstance.table.destroy();
-
-        setTimeout(() => {
-          // Create new instance using the globally available BrickTable class
-          const newInstance = new window.BrickTable(tableElement, currentPerPage);
-          window.brickTableInstance = newInstance;
-
-          // Re-enable search functionality
-          newInstance.table.searchable = true;
-        }, 50);
-      }
-    });
-  }
+  const columnMap = {
+    'name': 1,
+    'parts': 2,
+    'quantity': 3,
+    'missing': 4,
+    'damaged': 5,
+    'sets': 6
+  };
+  // Use shared sort buttons setup from collapsible-state.js
+  window.setupSharedSortButtons('minifigures', 'brickTableInstance', columnMap);
 }

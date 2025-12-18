@@ -59,6 +59,10 @@ class BrickSet(RebrickableSet):
             # Generate an UUID for self
             self.fields.id = str(uuid4())
 
+            # Insert the rebrickable set into database FIRST
+            # This must happen before inserting bricktracker_sets due to FK constraint
+            self.insert_rebrickable()
+
             if not refresh:
                 # Save the storage
                 storage = BrickSetStorageList.get(
@@ -74,7 +78,8 @@ class BrickSet(RebrickableSet):
                 )
                 self.fields.purchase_location = purchase_location.fields.id
 
-                # Insert into database
+                # Insert into database (deferred - will execute at final commit)
+                # All operations are atomic - if anything fails, nothing is committed
                 self.insert(commit=False)
 
                 # Save the owners
@@ -90,9 +95,6 @@ class BrickSet(RebrickableSet):
                 for id in tags:
                     tag = BrickSetTagList.get(id)
                     tag.update_set_state(self, state=True)
-
-            # Insert the rebrickable set into database
-            self.insert_rebrickable()
 
             # Load the inventory
             if not BrickPartList.download(socket, self, refresh=refresh):
@@ -159,6 +161,20 @@ class BrickSet(RebrickableSet):
     def purchase_date(self, /, *, standard: bool = False) -> str:
         if self.fields.purchase_date is not None:
             time = datetime.fromtimestamp(self.fields.purchase_date)
+
+            if standard:
+                return time.strftime('%Y/%m/%d')
+            else:
+                return time.strftime(
+                    current_app.config['PURCHASE_DATE_FORMAT']
+                )
+        else:
+            return ''
+
+    # Purchase date max formatted for consolidated sets
+    def purchase_date_max_formatted(self, /, *, standard: bool = False) -> str:
+        if hasattr(self.fields, 'purchase_date_max') and self.fields.purchase_date_max is not None:
+            time = datetime.fromtimestamp(self.fields.purchase_date_max)
 
             if standard:
                 return time.strftime('%Y/%m/%d')

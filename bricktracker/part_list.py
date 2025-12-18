@@ -57,8 +57,8 @@ class BrickPartList(BrickRecordList[BrickPart]):
 
         return self
 
-    # Load all parts with filters (owner and/or color)
-    def all_filtered(self, owner_id: str | None = None, color_id: str | None = None, /) -> Self:
+    # Load all parts with filters (owner, color, theme, year)
+    def all_filtered(self, owner_id: str | None = None, color_id: str | None = None, theme_id: str | None = None, year: str | None = None, /) -> Self:
         # Save the filter parameters
         if owner_id is not None:
             self.fields.owner_id = owner_id
@@ -71,10 +71,75 @@ class BrickPartList(BrickRecordList[BrickPart]):
         else:
             query = self.all_query
 
+        # Prepare context for query
+        context = {}
+        # Hide spare parts from display if configured
+        if current_app.config.get('HIDE_SPARE_PARTS', False):
+            context['skip_spare_parts'] = True
+        if theme_id and theme_id != 'all':
+            context['theme_id'] = theme_id
+        if year and year != 'all':
+            context['year'] = year
+
         # Load the parts from the database
-        self.list(override_query=query)
+        self.list(override_query=query, **context)
 
         return self
+
+    # Load parts with pagination support
+    def all_filtered_paginated(
+        self,
+        owner_id: str | None = None,
+        color_id: str | None = None,
+        theme_id: str | None = None,
+        year: str | None = None,
+        search_query: str | None = None,
+        page: int = 1,
+        per_page: int = 50,
+        sort_field: str | None = None,
+        sort_order: str = 'asc'
+    ) -> tuple[Self, int]:
+        # Prepare filter context
+        filter_context = {}
+        if owner_id and owner_id != 'all':
+            filter_context['owner_id'] = owner_id
+            list_query = self.all_by_owner_query
+        else:
+            list_query = self.all_query
+
+        if color_id and color_id != 'all':
+            filter_context['color_id'] = color_id
+        if theme_id and theme_id != 'all':
+            filter_context['theme_id'] = theme_id
+        if year and year != 'all':
+            filter_context['year'] = year
+        if search_query:
+            filter_context['search_query'] = search_query
+        # Hide spare parts from display if configured
+        if current_app.config.get('HIDE_SPARE_PARTS', False):
+            filter_context['skip_spare_parts'] = True
+
+        # Field mapping for sorting
+        field_mapping = {
+            'name': '"rebrickable_parts"."name"',
+            'color': '"rebrickable_parts"."color_name"',
+            'quantity': '"total_quantity"',
+            'missing': '"total_missing"',
+            'damaged': '"total_damaged"',
+            'sets': '"total_sets"',
+            'minifigures': '"total_minifigures"'
+        }
+
+        # Use the base pagination method
+        return self.paginate(
+            page=page,
+            per_page=per_page,
+            sort_field=sort_field,
+            sort_order=sort_order,
+            list_query=list_query,
+            field_mapping=field_mapping,
+            **filter_context
+        )
 
     # Base part list
     def list(
@@ -84,6 +149,7 @@ class BrickPartList(BrickRecordList[BrickPart]):
         override_query: str | None = None,
         order: str | None = None,
         limit: int | None = None,
+        offset: int | None = None,
         **context: Any,
     ) -> None:
         if order is None:
@@ -105,12 +171,18 @@ class BrickPartList(BrickRecordList[BrickPart]):
             context_vars['owner_id'] = self.fields.owner_id
         if hasattr(self.fields, 'color_id') and self.fields.color_id is not None:
             context_vars['color_id'] = self.fields.color_id
+        if hasattr(self.fields, 'search_query') and self.fields.search_query:
+            context_vars['search_query'] = self.fields.search_query
+
+        # Merge with any additional context passed in
+        context_vars.update(context)
 
         # Load the sets from the database
         for record in super().select(
             override_query=override_query,
             order=order,
             limit=limit,
+            offset=offset,
             **context_vars
         ):
             part = BrickPart(
@@ -118,9 +190,6 @@ class BrickPartList(BrickRecordList[BrickPart]):
                 minifigure=minifigure,
                 record=record,
             )
-
-            if current_app.config['SKIP_SPARE_PARTS'] and part.fields.spare:
-                continue
 
             self.records.append(part)
 
@@ -136,8 +205,13 @@ class BrickPartList(BrickRecordList[BrickPart]):
         self.brickset = brickset
         self.minifigure = minifigure
 
+        # Prepare context for hiding spare parts if configured
+        context = {}
+        if current_app.config.get('HIDE_SPARE_PARTS', False):
+            context['skip_spare_parts'] = True
+
         # Load the parts from the database
-        self.list()
+        self.list(**context)
 
         return self
 
@@ -150,8 +224,13 @@ class BrickPartList(BrickRecordList[BrickPart]):
         # Save the  minifigure
         self.minifigure = minifigure
 
+        # Prepare context for hiding spare parts if configured
+        context = {}
+        if current_app.config.get('HIDE_SPARE_PARTS', False):
+            context['skip_spare_parts'] = True
+
         # Load the parts from the database
-        self.list(override_query=self.minifigure_query)
+        self.list(override_query=self.minifigure_query, **context)
 
         return self
 
@@ -180,6 +259,92 @@ class BrickPartList(BrickRecordList[BrickPart]):
         self.list(override_query=self.problem_query)
 
         return self
+
+    def problem_filtered(self, owner_id: str | None = None, color_id: str | None = None, theme_id: str | None = None, year: str | None = None, storage_id: str | None = None, tag_id: str | None = None, /) -> Self:
+        # Save the filter parameters for client-side filtering
+        if owner_id is not None:
+            self.fields.owner_id = owner_id
+        if color_id is not None:
+            self.fields.color_id = color_id
+
+        # Prepare context for query
+        context = {}
+        if owner_id and owner_id != 'all':
+            context['owner_id'] = owner_id
+        if color_id and color_id != 'all':
+            context['color_id'] = color_id
+        if theme_id and theme_id != 'all':
+            context['theme_id'] = theme_id
+        if year and year != 'all':
+            context['year'] = year
+        if storage_id and storage_id != 'all':
+            context['storage_id'] = storage_id
+        if tag_id and tag_id != 'all':
+            context['tag_id'] = tag_id
+        # Hide spare parts from display if configured
+        if current_app.config.get('HIDE_SPARE_PARTS', False):
+            context['skip_spare_parts'] = True
+
+        # Load the problematic parts from the database
+        self.list(override_query=self.problem_query, **context)
+
+        return self
+
+    def problem_paginated(
+        self,
+        owner_id: str | None = None,
+        color_id: str | None = None,
+        theme_id: str | None = None,
+        year: str | None = None,
+        storage_id: str | None = None,
+        tag_id: str | None = None,
+        search_query: str | None = None,
+        page: int = 1,
+        per_page: int = 50,
+        sort_field: str | None = None,
+        sort_order: str = 'asc'
+    ) -> tuple[Self, int]:
+        # Prepare filter context
+        filter_context = {}
+        if owner_id and owner_id != 'all':
+            filter_context['owner_id'] = owner_id
+        if color_id and color_id != 'all':
+            filter_context['color_id'] = color_id
+        if theme_id and theme_id != 'all':
+            filter_context['theme_id'] = theme_id
+        if year and year != 'all':
+            filter_context['year'] = year
+        if storage_id and storage_id != 'all':
+            filter_context['storage_id'] = storage_id
+        if tag_id and tag_id != 'all':
+            filter_context['tag_id'] = tag_id
+        if search_query:
+            filter_context['search_query'] = search_query
+        # Hide spare parts from display if configured
+        if current_app.config.get('HIDE_SPARE_PARTS', False):
+            filter_context['skip_spare_parts'] = True
+
+        # Field mapping for sorting
+        field_mapping = {
+            'name': '"rebrickable_parts"."name"',
+            'color': '"rebrickable_parts"."color_name"',
+            'quantity': '"total_quantity"',
+            'missing': '"total_missing"',
+            'damaged': '"total_damaged"',
+            'sets': '"total_sets"',
+            'minifigures': '"total_minifigures"'
+        }
+
+        # Use the base pagination method with problem query
+        return self.paginate(
+            page=page,
+            per_page=per_page,
+            sort_field=sort_field,
+            sort_order=sort_order,
+            list_query=self.problem_query,
+            field_mapping=field_mapping,
+            **filter_context
+        )
 
     # Return a dict with common SQL parameters for a parts list
     def sql_parameters(self, /) -> dict[str, Any]:
@@ -256,7 +421,13 @@ class BrickPartList(BrickRecordList[BrickPart]):
 
             # Process each part
             number_of_parts: int = 0
+            skip_spares = current_app.config.get('SKIP_SPARE_PARTS', False)
+
             for part in inventory:
+                # Skip spare parts if configured
+                if skip_spares and part.fields.spare:
+                    continue
+
                 # Count the number of parts for minifigures
                 if minifigure is not None:
                     number_of_parts += part.fields.quantity

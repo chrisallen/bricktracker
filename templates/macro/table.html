@@ -1,4 +1,4 @@
-{% macro header(image=true, color=false, parts=false, quantity=false, missing=true, missing_parts=false, damaged=true, damaged_parts=false, sets=false, minifigures=false) %}
+{% macro header(image=true, color=false, parts=false, quantity=false, missing=true, missing_parts=false, damaged=true, damaged_parts=false, sets=false, minifigures=false, checked=false, hamburger_menu=false, accordion_id='') %}
   <thead>
     <tr>
       {% if image %}
@@ -25,6 +25,37 @@
       {% endif %}
       {% if minifigures %}
         <th data-table-number="true" scope="col"><i class="ri-group-line fw-normal"></i> Minifigures</th>
+      {% endif %}
+      {% if checked and not config['HIDE_TABLE_CHECKED_PARTS'] %}
+        <th data-table-no-sort-and-search="true" class="no-sort" scope="col"><i class="ri-checkbox-line fw-normal"></i> Checked</th>
+      {% endif %}
+      {% if hamburger_menu and g.login.is_authenticated() %}
+        {% set show_missing_menu = not config['HIDE_TABLE_MISSING_PARTS'] %}
+        {% set show_checked_menu = not config['HIDE_TABLE_CHECKED_PARTS'] %}
+        {% if show_missing_menu or show_checked_menu %}
+          <th data-table-no-sort-and-search="true" class="no-sort text-end" scope="col">
+            <div class="dropdown">
+              <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="hamburger-{{ accordion_id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="ri-menu-line"></i>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="hamburger-{{ accordion_id }}">
+                {% if show_missing_menu %}
+                  <li><h6 class="dropdown-header">Missing Parts</h6></li>
+                  <li><a class="dropdown-item" href="#" id="mark-all-missing-{{ accordion_id }}"><i class="ri-question-line me-2"></i>Mark all as missing</a></li>
+                  <li><a class="dropdown-item" href="#" id="clear-all-missing-{{ accordion_id }}"><i class="ri-close-circle-line me-2"></i>Clear all missing</a></li>
+                {% endif %}
+                {% if show_missing_menu and show_checked_menu %}
+                  <li><hr class="dropdown-divider"></li>
+                {% endif %}
+                {% if show_checked_menu %}
+                  <li><h6 class="dropdown-header">Checked Status</h6></li>
+                  <li><a class="dropdown-item" href="#" id="check-all-{{ accordion_id }}"><i class="ri-checkbox-line me-2"></i>Check all</a></li>
+                  <li><a class="dropdown-item" href="#" id="uncheck-all-{{ accordion_id }}"><i class="ri-checkbox-blank-line me-2"></i>Uncheck all</a></li>
+                {% endif %}
+              </ul>
+            </div>
+          </th>
+        {% endif %}
       {% endif %}
     </tr>
   </thead>

@@ -53,6 +53,23 @@ class RebrickableImage(object):
         if os.path.exists(path):
             return
 
+        # Check if the original image field is null - copy nil placeholder instead
+        if self.part is not None and self.part.fields.image is None:
+            return
+        if self.minifigure is not None and self.minifigure.fields.image is None:
+            return
+        if self.set.fields.image is None:
+            # Copy nil.png from parts folder to sets folder with set number as filename
+            parts_folder = current_app.config['PARTS_FOLDER']
+            if not os.path.isabs(parts_folder):
+                parts_folder = os.path.join(current_app.root_path, parts_folder)
+            nil_source = os.path.join(parts_folder, f"{RebrickableImage.nil_name()}.{self.extension}")
+
+            if os.path.exists(nil_source):
+                import shutil
+                shutil.copy2(nil_source, path)
+            return
+
         url = self.url()
         if url is None:
             return
@@ -96,9 +113,16 @@ class RebrickableImage(object):
 
     # Return the path depending on the objects provided
     def path(self, /) -> str:
+        folder = self.folder()
+        # If folder is an absolute path (starts with /), use it directly
+        # Otherwise, make it relative to app root (current_app.root_path)
+        if folder.startswith('/'):
+            base_path = folder
+        else:
+            base_path = os.path.join(current_app.root_path, folder)
+
         return os.path.join(
-            current_app.static_folder,  # type: ignore
-            self.folder(),
+            base_path,
             '{id}.{ext}'.format(id=self.id(), ext=self.extension),
         )
 
@@ -116,7 +140,11 @@ class RebrickableImage(object):
             else:
                 return self.minifigure.fields.image
 
-        return self.set.fields.image
+        # Handle set images - use nil placeholder if image is null
+        if self.set.fields.image is None:
+            return current_app.config['REBRICKABLE_IMAGE_NIL']
+        else:
+            return self.set.fields.image
 
     # Return the name of the nil image file
     @staticmethod
@@ -152,10 +180,21 @@ class RebrickableImage(object):
         # _, extension = os.path.splitext(self.part_img_url)
         extension = '.jpg'
 
-        # Compute the path
-        path = os.path.join(folder, '{name}{ext}'.format(
-            name=name,
-            ext=extension,
-        ))
-
-        return url_for('static', filename=path)
+        # Determine which route to use based on folder path
+        # If folder contains 'data' (new structure), use data route
+        # Otherwise use static route (legacy - relative paths like 'parts', 'sets')
+        if 'data' in folder:
+            # Extract the folder type from the folder_name config key
+            # E.g., 'PARTS_FOLDER' -> 'parts', 'SETS_FOLDER' -> 'sets'
+            folder_type = folder_name.replace('_FOLDER', '').lower()
+            filename = '{name}{ext}'.format(name=name, ext=extension)
+            return url_for('data.serve_data_file', folder=folder_type, filename=filename)
+        else:
+            # Legacy: folder is relative to static/ (e.g., 'parts' or 'static/parts')
+            # Strip 'static/' prefix if present to avoid double /static/ in URL
+            folder_clean = folder.removeprefix('static/')
+            path = os.path.join(folder_clean, '{name}{ext}'.format(
+                name=name,
+                ext=extension,
+            ))
+            return url_for('static', filename=path)

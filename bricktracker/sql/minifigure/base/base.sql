@@ -28,10 +28,16 @@ ON "bricktracker_minifigures"."figure" IS NOT DISTINCT FROM "rebrickable_minifig
 
 {% block group %}{% endblock %}
 
+{% block having %}{% endblock %}
+
 {% if order %}
 ORDER BY {{ order }}
 {% endif %}
 
 {% if limit %}
 LIMIT {{ limit }}
+{% endif %}
+
+{% if offset %}
+OFFSET {{ offset }}
 {% endif %}

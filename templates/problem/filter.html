@@ -1,0 +1,87 @@
+<div id="table-filter" class="collapse {% if config['SHOW_GRID_FILTERS'] %}show{% endif %} row row-cols-lg-auto g-1 justify-content-center align-items-center">
+  {% if owners | length %}
+  <div class="col-12 flex-grow-1">
+    <div class="input-group">
+      <span class="input-group-text"><i class="ri-user-line"></i><span class="ms-1 d-none d-md-inline"> Owner</span></span>
+      <select id="filter-owner" class="form-select" onchange="applyFiltersAndKeepOpen()" autocomplete="off">
+        <option value="all" {% if selected_owner == 'all' %}selected{% endif %}>All owners</option>
+        {% for owner in owners %}
+          <option value="{{ owner.fields.id }}" {% if selected_owner == owner.fields.id %}selected{% endif %}>{{ owner.fields.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  {% endif %}
+  {% if colors | length %}
+  <div class="col-12 flex-grow-1">
+    <div class="input-group">
+      <span class="input-group-text"><i class="ri-palette-line"></i><span class="ms-1 d-none d-md-inline"> Color</span></span>
+      <select id="filter-color" class="form-select" onchange="applyFiltersAndKeepOpen()" autocomplete="off">
+        <option value="all" {% if selected_color == 'all' %}selected{% endif %}>All colors</option>
+        {% for color in colors %}
+          <option value="{{ color.color_id }}" {% if selected_color == color.color_id|string %}selected{% endif %} data-color-rgb="{{ color.color_rgb }}" data-color-id="{{ color.color_id }}">
+            {{ color.color_name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  {% endif %}
+  {% if themes | length %}
+  <div class="col-12 flex-grow-1">
+    <div class="input-group">
+      <span class="input-group-text"><i class="ri-price-tag-3-line"></i><span class="ms-1 d-none d-md-inline"> Theme</span></span>
+      <select id="filter-theme" class="form-select" onchange="applyFiltersAndKeepOpen()" autocomplete="off">
+        <option value="all" {% if selected_theme == 'all' %}selected{% endif %}>All themes</option>
+        {% for theme in themes %}
+          <option value="{{ theme.theme_id }}" {% if selected_theme == theme.theme_id|string %}selected{% endif %}>{{ theme.theme_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  {% endif %}
+  {% if years | length %}
+  <div class="col-12 flex-grow-1">
+    <div class="input-group">
+      <span class="input-group-text"><i class="ri-calendar-line"></i><span class="ms-1 d-none d-md-inline"> Year</span></span>
+      <select id="filter-year" class="form-select" onchange="applyFiltersAndKeepOpen()" autocomplete="off">
+        <option value="all" {% if selected_year == 'all' %}selected{% endif %}>All years</option>
+        {% for year in years %}
+          <option value="{{ year.year }}" {% if selected_year == year.year|string %}selected{% endif %}>{{ year.year }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  {% endif %}
+  {% if storages | length %}
+  <div class="col-12 flex-grow-1">
+    <div class="input-group">
+      <span class="input-group-text"><i class="ri-inbox-line"></i><span class="ms-1 d-none d-md-inline"> Storage</span></span>
+      <select id="filter-storage" class="form-select" onchange="applyFiltersAndKeepOpen()" autocomplete="off">
+        <option value="all" {% if selected_storage == 'all' %}selected{% endif %}>All storages</option>
+        {% for storage in storages %}
+          <option value="{{ storage.storage_id }}" {% if selected_storage == storage.storage_id %}selected{% endif %}>{{ storage.storage_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  {% endif %}
+  {% if tags | length %}
+  <div class="col-12 flex-grow-1">
+    <div class="input-group">
+      <span class="input-group-text"><i class="ri-price-tag-line"></i><span class="ms-1 d-none d-md-inline"> Tag</span></span>
+      <select id="filter-tag" class="form-select" onchange="applyFiltersAndKeepOpen()" autocomplete="off">
+        <option value="all" {% if selected_tag == 'all' %}selected{% endif %}>All tags</option>
+        {% for tag in tags %}
+          <option value="{{ tag.tag_id }}" {% if selected_tag == tag.tag_id %}selected{% endif %}>{{ tag.tag_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  {% endif %}
+  <div class="col-12 col-lg-auto">
+    <button id="table-filter-clear" class="btn btn-outline-danger w-100" type="button" title="Clear all filters">
+      <i class="ri-filter-off-line"></i> <span class="d-none d-md-inline">Clear</span>
+    </button>
+  </div>
+</div>

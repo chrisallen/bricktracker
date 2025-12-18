@@ -159,6 +159,43 @@ class BrickPart(RebrickablePart):
 
         return self
 
+    # Update checked state for part walkthrough
+    def update_checked(self, json: Any | None, /) -> bool:
+        # Handle both direct 'checked' key and changer.js 'value' key format
+        if json:
+            checked = json.get('checked', json.get('value', False))
+        else:
+            checked = False
+
+        checked = bool(checked)
+
+        # Update the field
+        self.fields.checked = checked
+
+        BrickSQL().execute_and_commit(
+            'part/update/checked',
+            parameters=self.sql_parameters()
+        )
+
+        return checked
+
+    # Compute the url for updating checked state
+    def url_for_checked(self, /) -> str:
+        # Different URL for a minifigure part
+        if self.minifigure is not None:
+            figure = self.minifigure.fields.figure
+        else:
+            figure = None
+
+        return url_for(
+            'set.checked_part',
+            id=self.fields.id,
+            figure=figure,
+            part=self.fields.part,
+            color=self.fields.color,
+            spare=self.fields.spare,
+        )
+
     # Update a problematic part
     def update_problem(self, problem: str, json: Any | None, /) -> int:
         amount: str | int = json.get('value', '')  # type: ignore

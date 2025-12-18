@@ -56,17 +56,22 @@ AND "bricktracker_parts"."figure" IS NOT DISTINCT FROM "bricktracker_minifigures
 {% endblock %}
 
 {% block where %}
-{% set has_where = false %}
+{% set conditions = [] %}
 {% if owner_id and owner_id != 'all' %}
-WHERE "bricktracker_set_owners"."owner_{{ owner_id }}" = 1
-{% set has_where = true %}
+  {% set _ = conditions.append('"bricktracker_set_owners"."owner_' ~ owner_id ~ '" = 1') %}
 {% endif %}
 {% if color_id and color_id != 'all' %}
-{% if has_where %}
-AND "bricktracker_parts"."color" = {{ color_id }}
-{% else %}
-WHERE "bricktracker_parts"."color" = {{ color_id }}
+  {% set _ = conditions.append('"bricktracker_parts"."color" = ' ~ color_id) %}
 {% endif %}
+{% if search_query %}
+  {% set search_condition = '(LOWER("rebrickable_parts"."name") LIKE LOWER(\'%' ~ search_query ~ '%\') OR LOWER("rebrickable_parts"."color_name") LIKE LOWER(\'%' ~ search_query ~ '%\') OR LOWER("bricktracker_parts"."part") LIKE LOWER(\'%' ~ search_query ~ '%\'))' %}
+  {% set _ = conditions.append(search_condition) %}
+{% endif %}
+{% if skip_spare_parts %}
+  {% set _ = conditions.append('"bricktracker_parts"."spare" = 0') %}
+{% endif %}
+{% if conditions %}
+WHERE {{ conditions | join(' AND ') }}
 {% endif %}
 {% endblock %}
 

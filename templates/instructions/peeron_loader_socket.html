@@ -1,0 +1,15 @@
+<script type="text/javascript">
+  document.addEventListener("DOMContentLoaded", () => {
+    new BrickPeeronPageLoader(
+      '{{ set }}',
+      '{{ path }}',
+      '{{ namespace }}',
+      {
+        COMPLETE: '{{ messages['COMPLETE'] }}',
+        FAIL: '{{ messages['FAIL'] }}',
+        LOAD_PEERON_PAGES: '{{ messages['LOAD_PEERON_PAGES'] }}',
+        PROGRESS: '{{ messages['PROGRESS'] }}',
+      }
+    );
+  });
+</script>

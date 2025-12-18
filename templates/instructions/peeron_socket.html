@@ -1,0 +1,10 @@
+<script type="text/javascript">
+  document.addEventListener("DOMContentLoaded", () => {
+    new BrickPeeronSocket('peeron-download', '{{ path }}', '{{ namespace }}', {
+      COMPLETE: '{{ messages['COMPLETE'] }}',
+      DOWNLOAD_PEERON_PAGES: 'download_peeron_pages',
+      FAIL: '{{ messages['FAIL'] }}',
+      PROGRESS: '{{ messages['PROGRESS'] }}',
+    });
+  });
+</script>

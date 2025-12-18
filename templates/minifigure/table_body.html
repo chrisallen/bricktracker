@@ -1,0 +1,22 @@
+{% import 'macro/table.html' as table %}
+
+<tbody>
+  {% for minifigure in table_collection %}
+  <tr>
+    {{ table.image(minifigure.url_for_image(), caption=minifigure.fields.name, alt=minifigure.fields.figure) }}
+    <td data-sort="{{ minifigure.fields.name }}">
+      <a class="text-reset" href="{{ minifigure.url() }}">{{ minifigure.fields.name }}</a>
+      {{ table.rebrickable(minifigure) }}
+    </td>
+    <td data-sort="{{ minifigure.fields.number_of_parts }}">{{ minifigure.fields.number_of_parts }}</td>
+    <td data-sort="{{ minifigure.fields.total_quantity }}">{{ minifigure.fields.total_quantity }}</td>
+    {% if not config['HIDE_TABLE_MISSING_PARTS'] %}
+    <td data-sort="{{ minifigure.fields.total_missing }}">{{ minifigure.fields.total_missing }}</td>
+    {% endif %}
+    {% if not config['HIDE_TABLE_DAMAGED_PARTS'] %}
+    <td data-sort="{{ minifigure.fields.total_damaged }}">{{ minifigure.fields.total_damaged }}</td>
+    {% endif %}
+    <td data-sort="{{ minifigure.fields.total_sets }}">{{ minifigure.fields.total_sets }}</td>
+  </tr>
+  {% endfor %}
+</tbody>

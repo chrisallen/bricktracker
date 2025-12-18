@@ -6,6 +6,8 @@ from flask_socketio import SocketIO
 
 from .instructions import BrickInstructions
 from .instructions_list import BrickInstructionsList
+from .peeron_instructions import PeeronInstructions, PeeronPage
+from .peeron_pdf import PeeronPDF
 from .set import BrickSet
 from .socket_decorator import authenticated_socket, rebrickable_socket
 from .sql import close as sql_close
@@ -18,8 +20,10 @@ MESSAGES: Final[dict[str, str]] = {
     'CONNECT': 'connect',
     'DISCONNECT': 'disconnect',
     'DOWNLOAD_INSTRUCTIONS': 'download_instructions',
+    'DOWNLOAD_PEERON_PAGES': 'download_peeron_pages',
     'FAIL': 'fail',
     'IMPORT_SET': 'import_set',
+    'LOAD_PEERON_PAGES': 'load_peeron_pages',
     'LOAD_SET': 'load_set',
     'PROGRESS': 'progress',
     'SET_LOADED': 'set_loaded',
@@ -71,6 +75,9 @@ class BrickSocket(object):
             **kwargs,
             path=app.config['SOCKET_PATH'],
             async_mode='gevent',
+            # Ping/pong settings for mobile network resilience
+            ping_timeout=30,  # Wait 30s for pong response before disconnecting
+            ping_interval=25,  # Send ping every 25s to keep connection alive
         )
 
         # Store the socket in the app config
@@ -82,8 +89,22 @@ class BrickSocket(object):
             self.connected()
 
         @self.socket.on(MESSAGES['DISCONNECT'], namespace=self.namespace)
-        def disconnect() -> None:
+        def disconnect(reason=None) -> None:
             self.disconnected()
+
+        @self.socket.on('connect_error', namespace=self.namespace)
+        def connect_error(data) -> None:
+            logger.error(f'Socket CONNECT_ERROR: {data}')
+
+        @self.socket.on_error(namespace=self.namespace)
+        def error_handler(e) -> None:
+            logger.error(f'Socket ERROR: {e}')
+            try:
+                user_agent = request.headers.get('User-Agent', 'unknown')
+                remote_addr = request.remote_addr
+                logger.error(f'Socket ERROR details: ip={remote_addr}, ua={user_agent[:80]}...')
+            except Exception:
+                pass
 
         @self.socket.on(MESSAGES['DOWNLOAD_INSTRUCTIONS'], namespace=self.namespace)  # noqa: E501
         @authenticated_socket(self)
@@ -105,6 +126,84 @@ class BrickSocket(object):
             instructions.download(path)
 
             BrickInstructionsList(force=True)
+
+        @self.socket.on(MESSAGES['LOAD_PEERON_PAGES'], namespace=self.namespace)  # noqa: E501
+        def load_peeron_pages(data: dict[str, Any], /) -> None:
+            logger.debug('Socket: LOAD_PEERON_PAGES={data} (from: {fr})'.format(
+                data=data, fr=request.remote_addr))
+
+            try:
+                set_number = data.get('set', '')
+                if not set_number:
+                    self.fail(message="Set number is required")
+                    return
+
+                # Create Peeron instructions instance with socket for progress reporting
+                peeron = PeeronInstructions(set_number, socket=self)
+
+                # Find pages (this will report progress for thumbnail caching)
+                pages = peeron.find_pages()
+
+                # Complete the operation (JavaScript will handle redirect)
+                self.complete(message=f"Found {len(pages)} instruction pages on Peeron")
+
+            except Exception as e:
+                logger.error(f"Error in load_peeron_pages: {e}")
+                self.fail(message=f"Error loading Peeron pages: {e}")
+
+        @self.socket.on(MESSAGES['DOWNLOAD_PEERON_PAGES'], namespace=self.namespace)  # noqa: E501
+        @authenticated_socket(self)
+        def download_peeron_pages(data: dict[str, Any], /) -> None:
+            logger.debug('Socket: DOWNLOAD_PEERON_PAGES={data} (from: {fr})'.format(
+                data=data,
+                fr=request.sid,  # type: ignore
+            ))
+
+            try:
+                # Extract data from the request
+                set_number = data.get('set', '')
+                pages_data = data.get('pages', [])
+
+                if not set_number:
+                    raise ValueError("Set number is required")
+
+                if not pages_data:
+                    raise ValueError("No pages selected")
+
+                # Parse set number
+                if '-' in set_number:
+                    parts = set_number.split('-', 1)
+                    set_num = parts[0]
+                    version_num = parts[1] if len(parts) > 1 else '1'
+                else:
+                    set_num = set_number
+                    version_num = '1'
+
+                # Convert page data to PeeronPage objects
+                pages = []
+                for page_data in pages_data:
+                    page = PeeronPage(
+                        page_number=page_data.get('page_number', ''),
+                        original_image_url=page_data.get('original_image_url', ''),
+                        cached_full_image_path=page_data.get('cached_full_image_path', ''),
+                        cached_thumbnail_url='',  # Not needed for PDF generation
+                        alt_text=page_data.get('alt_text', ''),
+                        rotation=page_data.get('rotation', 0)
+                    )
+                    pages.append(page)
+
+                # Create PDF generator and start download
+                pdf_generator = PeeronPDF(set_num, version_num, pages, socket=self)
+                pdf_generator.create_pdf()
+
+                # Note: Cache cleanup is handled automatically by pdf_generator.create_pdf()
+
+                # Refresh instructions list to include new PDF
+                BrickInstructionsList(force=True)
+
+            except Exception as e:
+                logger.error(f"Error in download_peeron_pages: {e}")
+                self.fail(message=f"Error downloading Peeron pages: {e}")
 
         @self.socket.on(MESSAGES['IMPORT_SET'], namespace=self.namespace)
         @rebrickable_socket(self)
@@ -150,13 +249,32 @@ class BrickSocket(object):
 
     # Socket is connected
     def connected(self, /) -> Tuple[str, int]:
-        logger.debug('Socket: client connected')
+        # Get detailed connection info for debugging
+        try:
+            sid = request.sid  # type: ignore
+            transport = request.environ.get('HTTP_UPGRADE', 'polling')
+            user_agent = request.headers.get('User-Agent', 'unknown')
+            remote_addr = request.remote_addr
+
+            # Check if it's likely a mobile device
+            is_mobile = any(x in user_agent.lower() for x in ['iphone', 'ipad', 'android', 'mobile'])
+
+            logger.info(
+                f'Socket CONNECTED: sid={sid}, transport={transport}, '
+                f'ip={remote_addr}, mobile={is_mobile}, ua={user_agent[:80]}...'
+            )
+        except Exception as e:
+            logger.warning(f'Socket connected but failed to get details: {e}')
 
         return '', 301
 
     # Socket is disconnected
     def disconnected(self, /) -> None:
-        logger.debug('Socket: client disconnected')
+        try:
+            sid = request.sid  # type: ignore
+            logger.info(f'Socket DISCONNECTED: sid={sid}')
+        except Exception as e:
+            logger.info(f'Socket disconnected (sid unavailable): {e}')
 
     # Emit a message through the socket
     def emit(self, name: str, *arg, all=False) -> None:

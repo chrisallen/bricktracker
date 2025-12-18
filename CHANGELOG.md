@@ -1,8 +1,210 @@
 # Changelog
 
-## Unreleased 
+## 1.3
 
-### 1.2.4
+### Breaking Changes 
+
+#### Data Folder Consolidation
+
+> **Warning** 
+> **BREAKING CHANGE**: Version 1.3 consolidates all user data into a single `data/` folder for easier backup and volume mapping.
+
+- **Path handling**: All relative paths are now resolved relative to the application root (`/app` in Docker)
+  - Example: `data/app.db` → `/app/data/app.db`
+
+- **New default paths** (automatically used for new installations):
+  - Database: `data/app.db` (was: `app.db` in root)
+  - Configuration: `data/.env` (was: `.env` in root) - *optional, backward compatible*
+  - CSV files: `data/*.csv` (was: `*.csv` in root)
+  - Images/PDFs: `data/{sets,parts,minifigures,instructions}/` (was: `static/*`)
+
+- **Configuration file (.env) location**:
+  - New recommended location: `data/.env` (included in data volume, settings persist)
+  - Backward compatible: `.env` in root still works (requires volume mount for admin panel persistence)
+  - Priority: `data/.env` > `.env` (automatic detection, no migration required)
+
+- **Migration options**:
+  1. **Migrate to new structure** (recommended - single volume for all data including .env)
+  2. **Keep current setup** (backward compatible - old paths continue to work)
+
+See [Migration Guide](docs/migration_guide.md) for detailed instructions
+
+#### Default Minifigures Folder Change
+
+> **Warning**
+> **BREAKING CHANGE**: Default minifigures folder path changed from `minifigs` to `minifigures`
+
+- **Impact**: Users who relied on the default `BK_MINIFIGURES_FOLDER` value (without explicitly setting it) will need to either:
+  1. Set `BK_MINIFIGURES_FOLDER=minifigs` in their environment to maintain existing behavior, or
+  2. Rename their existing `minifigs` folder to `minifigures`
+- **No impact**: Users who already have `BK_MINIFIGURES_FOLDER` explicitly configured
+- Improved consistency across documentation and Docker configurations
+
+### New Features
+
+- **Live Settings changes**
+  - Added live environment variable configuration management system
+    - Configuration Management interface in admin panel with live preview and badge system
+    - **Live settings**: Can be changed without application restart (menu visibility, table display, pagination, features)
+    - **Static settings**: Require restart but can be edited and saved to .env file (authentication, server, database, API keys)
+    - Advanced badge system showing value status: True/False for booleans, Set/Default/Unset for other values, Changed indicator
+    - Live API endpoints: `/admin/api/config/update` for immediate changes, `/admin/api/config/update-static` for .env updates
+    - Form pre-population with current values and automatic page reload after successful live updates
+  - Fixed environment variable lock detection in admin configuration panel
+    - Resolved bug where all variables appeared "locked" after saving live settings
+    - Lock detection now correctly identifies only Docker environment variables set before .env loading
+    - Variables set via Docker's `environment:` directive remain properly locked
+    - Variables from data/.env or root .env are correctly shown as editable
+  - Added configuration persistence warning in admin panel
+    - Warning banner shows when using .env in root (non-persistent)
+    - Success banner shows when using data/.env (persistent)
+    - Provides migration instructions directly in the UI
+- **Spare Parts**
+  - Added spare parts control options
+    - `BK_SKIP_SPARE_PARTS`: Skip importing spare parts when downloading sets from Rebrickable (parts not saved to database)
+    - `BK_HIDE_SPARE_PARTS`: Hide spare parts from all parts lists (parts must still be in database)
+    - Both options are live-changeable in admin configuration panel
+    - Options can be used independently or together for flexible spare parts management
+    - Affects all parts displays: /parts page, set details accordion, minifigure parts, and problem parts
+- **Pagination**
+  - Added individual pagination control system per entity type
+    - `BK_SETS_SERVER_SIDE_PAGINATION`: Enable/disable pagination for sets
+    - `BK_PARTS_SERVER_SIDE_PAGINATION`: Enable/disable pagination for parts
+    - `BK_MINIFIGURES_SERVER_SIDE_PAGINATION`: Enable/disable pagination for minifigures
+    - Device-specific pagination sizes (desktop/mobile) for each entity type
+    - Supports search, filtering, and sorting in both server-side and client-side modes
+- **Peeron Instructions**
+  - Added Peeron instructions integration
+    - Full image caching system with automatic thumbnail generation
+    - Optimized HTTP calls by downloading full images once and generating thumbnails locally
+    - Automatic cache cleanup after PDF generation to save disk space
+- **Parts checkmark**
+  - Added parts checking/inventory system
+    - New "Checked" column in parts tables for tracking inventory progress
+    - Checkboxes to mark parts as verified during set walkthrough
+    - `BK_HIDE_TABLE_CHECKED_PARTS`: Environment variable to hide checked column
+- **Set Consolidation**
+  - Added set consolidation/grouping functionality
+    - Automatic grouping of duplicate sets on main sets page
+    - Shows instance count with stack icon badge (e.g., "3 copies")
+    - Expandable drawer interface to view all set copies individually
+    - Full set cards for each instance with all badges, statuses, and functionality
+    - `BK_SETS_CONSOLIDATION`: Environment variable to enable/disable consolidation (default: false)
+    - Backwards compatible - when disabled, behaves exactly like original individual view
+    - Improved theme filtering: handles duplicate theme names correctly
+    - Fixed set number sorting: proper numeric sorting in both ascending and descending order
+    - Mixed status indicators for consolidated sets: three-state checkboxes (unchecked/partial/checked) with count badges
+      - Template logic handles three states: none (0/2), all (2/2), partial (1/2) with visual indicators
+      - Purple overlay styling for partial states, disabled checkboxes for read-only consolidated status display
+      - Individual sets maintain full interactive checkbox functionality
+- **Statistics**
+  - Added comprehensive statistics system (#91)
+    - New Statistics page with collection analytics
+    - Financial overview: total cost, average price, price range, investment tracking
+    - Collection metrics: total sets, unique sets, parts count, minifigures count
+    - Theme distribution statistics with clickable drill-down to filtered sets
+    - Storage location statistics showing sets per location with value calculations
+    - Purchase location analytics with spending patterns and date ranges
+    - Problem tracking: missing and damaged parts statistics
+    - Clickable numbers throughout statistics that filter to relevant sets
+    - `BK_HIDE_STATISTICS`: Environment variable to hide statistics menu item
+    - Year-based analytics: Sets by release year and purchases by year
+      - Sets by Release Year: Shows collection distribution across LEGO release years
+      - Purchases by Year: Tracks spending patterns and acquisition timeline
+      - Year summary with peak collection/spending years and timeline insights
+    - Enhanced statistics interface and functionality
+      - Collapsible sections: All statistics sections have clickable headers to expand/collapse
+      - Collection growth charts: Line charts showing sets, parts, and minifigures over time
+      - Configuration options: `BK_STATISTICS_SHOW_CHARTS` and `BK_STATISTICS_DEFAULT_EXPANDED` environment variables
+- **Admin Page Section Expansion**
+  - Added configurable admin page section expansion
+    - `BK_ADMIN_DEFAULT_EXPANDED_SECTIONS`: Environment variable to specify which sections expand by default
+    - Accepts comma-separated list of section names (e.g., "database,theme,instructions")
+    - Valid sections: authentication, instructions, image, theme, retired, metadata, owner, purchase_location, status, storage, tag, database
+    - URL parameters take priority over configuration (e.g., `?open_database=1`)
+    - Database section expanded by default to maintain original behavior
+    - Smart metadata handling: sub-section expansion automatically expands parent metadata section
+- **Duplicate Sets filter**
+  - Added duplicate sets filter functionality
+    - New filter button on Sets page to show only duplicate/consolidated sets
+    - `BK_SHOW_SETS_DUPLICATE_FILTER`: Environment variable to show/hide the filter button (default: true)
+    - Works with both server-side and client-side pagination modes
+    - Consolidated mode: Shows sets that have multiple instances
+    - Non-consolidated mode: Shows sets that appear multiple times in collection
+- **Bricklink Links**
+  - Added BrickLink links for sets
+    - BrickLink badge links now appear on set cards and set details pages alongside Rebrickable links
+    - `BK_BRICKLINK_LINK_SET_PATTERN`: New environment variable for BrickLink set URL pattern (default: https://www.bricklink.com/v2/catalog/catalogitem.page?S={set_num})
+    - Controlled by existing `BK_BRICKLINK_LINKS` environment variable
+- **Dark Mode** 
+  - Added dark mode support
+    - `BK_DARK_MODE`: Environment variable to enable dark mode theme (default: false)
+    - Uses Bootstrap 5.3's native dark mode with `data-bs-theme` attribute
+    - Live-changeable via Admin > Live Settings
+    - Setting persists across sessions via .env file
+- **Alphanumetic Set Number**
+  - Added alphanumeric set number support
+    - Database schema change: Set number column changed from INTEGER to TEXT
+    - Supports LEGO promotional and special edition sets with letters in their numbers
+    - Examples: "McDR6US-1", "COMCON035-1", "EG00021-1"
+    
+### Improvements 
+
+- Improved WebSocket/Socket.IO reliability for mobile devices
+  - Changed connection strategy to polling-first with automatic WebSocket upgrade
+  - Increased connection timeout to 30 seconds for slow mobile networks
+  - Added ping/pong keepalive settings (30s timeout, 25s interval)
+  - Improved server-side connection logging with user agent and transport details
+- Fixed dynamic sort icons across all pages
+  - Sort icons now properly toggle between ascending/descending states
+- Improved DataTable integration
+  - Disabled column header sorting when server-side pagination is enabled
+  - Prevents conflicting sort mechanisms between DataTable and server-side sorting
+- Enhanced color dropdown functionality
+  - Automatic merging of duplicate color entries with same color_id
+  - Keeps entries with valid RGB data, removes entries with None/empty RGB
+  - Preserves selection state during dropdown consolidation
+  - Consistent search behavior (instant for client-side, Enter key for server-side)
+  - Mobile-friendly pagination navigation
+- Added performance optimization
+  - SQLite WAL Mode:
+    - Increased cache size to 10,000 pages (~40MB) for faster query execution
+    - Set temp_store to memory for accelerated temporary operations
+    - Enabled foreign key constraints and optimized synchronous mode
+    - Added ANALYZE for improved query planning and statistics
+  - Database Indexes (Migration 0019):
+    - High-impact composite index for problem parts aggregation (`idx_bricktracker_parts_id_missing_damaged`)
+    - Parts lookup optimization (`idx_bricktracker_parts_part_color_spare`)
+    - Set storage filtering (`idx_bricktracker_sets_set_storage`)
+    - Search optimization with case-insensitive indexes (`idx_rebrickable_sets_name_lower`, `idx_rebrickable_parts_name_lower`)
+    - Year and theme filtering optimization (`idx_rebrickable_sets_year`, `idx_rebrickable_sets_theme_id`)
+    - Additional indexes for purchase dates, quantities, sorting, and minifigures aggregation
+  - Statistics Query Optimization:
+    - Replaced separate subqueries with efficient CTEs (Common Table Expressions)
+    - Consolidated aggregations for set, part, minifigure, and financial statistics
+  - Added default image handling for sets without images
+    - Sets with null/missing images from Rebrickable API now display placeholder image
+    - Automatic fallback to nil.png from parts folder for set previews
+    - Copy of nil placeholder saved as set image for consistent display across all routes
+    - Prevents errors when downloading sets that have no set_img_url in API response
+  - Fixed instructions download from Rebrickable
+    - Replaced cloudscraper with standard requests library
+    - Resolves 403 Forbidden errors when downloading instruction PDFs
+  - Fixed instructions display and URL generation
+    - Fixed "Open PDF" button links to use correct data route
+    - Corrected path resolution for data/instructions folder
+    - Fixed instruction listing page to scan correct folder location
+    - Fixed Peeron PDF creation to use correct data folder path
+  - Fixed foreign key constraint error when adding sets
+    - Rebrickable set is now inserted before BrickTracker set to satisfy FK constraints
+    - Resolves "FOREIGN KEY constraint failed" error when adding sets
+  - Fixed atomic transaction handling for set downloads
+    - All database operations during set addition now use deferred execution
+    - Ensures all-or-nothing behavior: if any part fails (set info, parts, minifigs), nothing is committed
+    - Prevents partial set additions that would leave the database in an inconsistent state
+    - Metadata updates (owners, tags) now defer until final commit
+    
+## 1.2.4
 
 > **Warning**
 > To use the new BrickLink color parameter in URLs, update your `.env` file:

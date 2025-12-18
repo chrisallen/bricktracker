@@ -2,21 +2,15 @@ services:
   bricktracker:
     container_name: BrickTracker
     restart: unless-stopped
+    # image: gitea.baerentsen.space/frederikbaerentsen/bricktracker:dev
     build: .
     ports:
       - "3334:3333"
     volumes:
-      - ./local:/local
-      - ./local/instructions:/app/static/instructions/
-      - ./local/minifigures:/app/static/minifigures/
-      - ./local/parts:/app/static/parts/
-      - ./local/sets:/app/static/sets/
+      - ./local:/app/data  # Changed from ./local to ./data for consistency
     environment:
-      BK_DEBUG: true
-      BK_DATABASE_PATH: /local/app.db
-      BK_INSTRUCTIONS_FOLDER: instructions
-      BK_MINIFIGURES_FOLDER: minifigures
-      BK_PARTS_FOLDER: parts
-      BK_RETIRED_SETS_PATH: /local/retired_sets.csv
-      BK_SETS_FOLDER: sets
-      BK_THEMES_PATH: /local/themes.csv
+      - BK_DEBUG=true
+    # For local development, place .env in data/ folder
+    # The app automatically detects and uses data/.env (no env_file needed)
+    # Uncomment below only if you keep .env in root for backward compatibility
+    # env_file: .env

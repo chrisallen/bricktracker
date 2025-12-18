@@ -2,13 +2,16 @@ FROM python:3-slim
 
 WORKDIR /app
 
+# Copy requirements first (so pip install can be cached)
+COPY requirements.txt .
+
+# Python library requirements
+RUN pip install --no-cache-dir -r requirements.txt
+
 # Bricktracker
 COPY . .
 
-# Fix line endings and set executable permissions for entrypoint script
-RUN sed -i 's/\r$//' entrypoint.sh && chmod +x entrypoint.sh
-
-# Python library requirements
-RUN pip --no-cache-dir install -r requirements.txt
+# Set executable permissions for entrypoint script
+RUN chmod +x entrypoint.sh
 
 ENTRYPOINT ["./entrypoint.sh"]

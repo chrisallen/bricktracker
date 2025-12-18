@@ -17,6 +17,7 @@ static/sets/
 
 # IDE
 .vscode/
+*.code-workspace
 
 # Temporary
 *.csv
@@ -33,3 +34,4 @@ vitepress/
 
 # Local data
 offline/
+data/

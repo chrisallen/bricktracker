@@ -1,6 +1,8 @@
 import logging
+import os
 import sys
 import time
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from flask import current_app, Flask, g
@@ -10,6 +12,7 @@ from bricktracker.configuration_list import BrickConfigurationList
 from bricktracker.login import LoginManager
 from bricktracker.navbar import Navbar
 from bricktracker.sql import close
+from bricktracker.template_filters import replace_query_filter
 from bricktracker.version import __version__
 from bricktracker.views.add import add_page
 from bricktracker.views.admin.admin import admin_page
@@ -24,6 +27,7 @@ from bricktracker.views.admin.status import admin_status_page
 from bricktracker.views.admin.storage import admin_storage_page
 from bricktracker.views.admin.tag import admin_tag_page
 from bricktracker.views.admin.theme import admin_theme_page
+from bricktracker.views.data import data_page
 from bricktracker.views.error import error_404
 from bricktracker.views.index import index_page
 from bricktracker.views.instructions import instructions_page
@@ -31,11 +35,65 @@ from bricktracker.views.login import login_page
 from bricktracker.views.minifigure import minifigure_page
 from bricktracker.views.part import part_page
 from bricktracker.views.set import set_page
+from bricktracker.views.statistics import statistics_page
 from bricktracker.views.storage import storage_page
 from bricktracker.views.wish import wish_page
 
 
+def load_env_file() -> None:
+    """Load .env file into os.environ with priority: data/.env > .env (root)
+
+    Also stores which BK_ variables were set via Docker environment (before loading .env)
+    so we can detect locked variables in the admin panel.
+    """
+    import json
+
+    data_env = Path('data/.env')
+    root_env = Path('.env')
+
+    # Store which BK_ variables were already in environment BEFORE loading .env
+    # These are "locked" (set via Docker's environment: directive)
+    docker_env_vars = {k: v for k, v in os.environ.items() if k.startswith('BK_')}
+
+    # Store this in a way the admin panel can access it
+    # We'll use an environment variable to store the JSON list of locked var names
+    os.environ['_BK_DOCKER_ENV_VARS'] = json.dumps(list(docker_env_vars.keys()))
+
+    env_file = None
+    if data_env.exists():
+        env_file = data_env
+        logging.info(f"Loading environment from: {data_env}")
+    elif root_env.exists():
+        env_file = root_env
+        logging.info(f"Loading environment from: {root_env} (consider migrating to data/.env)")
+
+    if env_file:
+        # Simple .env parser (no external dependencies needed)
+        with open(env_file, 'r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+                # Skip comments and empty lines
+                if not line or line.startswith('#'):
+                    continue
+                # Parse key=value
+                if '=' in line:
+                    key, value = line.split('=', 1)
+                    key = key.strip()
+                    value = value.strip()
+                    # Remove quotes if present
+                    if value.startswith('"') and value.endswith('"'):
+                        value = value[1:-1]
+                    elif value.startswith("'") and value.endswith("'"):
+                        value = value[1:-1]
+                    # Only set if not already in environment (environment variables take precedence)
+                    if key not in os.environ:
+                        os.environ[key] = value
+
+
 def setup_app(app: Flask) -> None:
+    # Load .env file before configuration (if not already loaded by Docker Compose)
+    load_env_file()
+
     # Load the configuration
     BrickConfigurationList(app)
 
@@ -59,7 +117,8 @@ def setup_app(app: Flask) -> None:
     # Setup the login manager
     LoginManager(app)
 
-    # I don't know :-)
+    # Configure proxy header handling for reverse proxy deployments (nginx, Apache, etc.)
+    # This ensures proper client IP detection and HTTPS scheme recognition
     app.wsgi_app = ProxyFix(
         app.wsgi_app,
         x_for=1,
@@ -74,12 +133,14 @@ def setup_app(app: Flask) -> None:
 
     # Register app routes
     app.register_blueprint(add_page)
+    app.register_blueprint(data_page)
     app.register_blueprint(index_page)
     app.register_blueprint(instructions_page)
     app.register_blueprint(login_page)
     app.register_blueprint(minifigure_page)
     app.register_blueprint(part_page)
     app.register_blueprint(set_page)
+    app.register_blueprint(statistics_page)
     app.register_blueprint(storage_page)
     app.register_blueprint(wish_page)
 
@@ -120,6 +181,9 @@ def setup_app(app: Flask) -> None:
 
         # Version
         g.version = __version__
+
+    # Register custom Jinja2 filters
+    app.jinja_env.filters['replace_query'] = replace_query_filter
 
     # Make sure all connections are closed at the end
     @app.teardown_request

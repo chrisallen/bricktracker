@@ -13,4 +13,4 @@ then
 fi
 
 # Execute the WSGI server
-gunicorn --bind "${BK_HOST}:${BK_PORT}" "wsgi:application" --worker-class "gevent" --workers 1 "$@"
+exec gunicorn --bind "${BK_HOST}:${BK_PORT}" "wsgi:application" --worker-class "gevent" --workers 1 "$@"

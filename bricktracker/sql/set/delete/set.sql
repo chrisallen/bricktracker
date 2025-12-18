@@ -3,22 +3,24 @@
 
 BEGIN TRANSACTION;
 
-DELETE FROM "bricktracker_sets"
-WHERE "bricktracker_sets"."id" IS NOT DISTINCT FROM '{{ id }}';
-
-DELETE FROM "bricktracker_set_owners"
-WHERE "bricktracker_set_owners"."id" IS NOT DISTINCT FROM '{{ id }}';
-
-DELETE FROM "bricktracker_set_statuses"
-WHERE "bricktracker_set_statuses"."id" IS NOT DISTINCT FROM '{{ id }}';
-
-DELETE FROM "bricktracker_set_tags"
-WHERE "bricktracker_set_tags"."id" IS NOT DISTINCT FROM '{{ id }}';
+-- Delete child records first (those with foreign keys referencing bricktracker_sets)
+DELETE FROM "bricktracker_parts"
+WHERE "bricktracker_parts"."id" IS NOT DISTINCT FROM '{{ id }}';
 
 DELETE FROM "bricktracker_minifigures"
 WHERE "bricktracker_minifigures"."id" IS NOT DISTINCT FROM '{{ id }}';
 
-DELETE FROM "bricktracker_parts"
-WHERE "bricktracker_parts"."id" IS NOT DISTINCT FROM '{{ id }}';
+DELETE FROM "bricktracker_set_tags"
+WHERE "bricktracker_set_tags"."id" IS NOT DISTINCT FROM '{{ id }}';
+
+DELETE FROM "bricktracker_set_statuses"
+WHERE "bricktracker_set_statuses"."id" IS NOT DISTINCT FROM '{{ id }}';
+
+DELETE FROM "bricktracker_set_owners"
+WHERE "bricktracker_set_owners"."id" IS NOT DISTINCT FROM '{{ id }}';
+
+-- Delete the parent record last
+DELETE FROM "bricktracker_sets"
+WHERE "bricktracker_sets"."id" IS NOT DISTINCT FROM '{{ id }}';
 
 COMMIT;

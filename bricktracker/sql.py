@@ -60,6 +60,29 @@ class BrickSQL(object):
             # Grab a cursor
             self.cursor = self.connection.cursor()
 
+            # SQLite Performance Optimizations
+            logger.debug('SQLite3: applying performance optimizations')
+
+            # Enable WAL (Write-Ahead Logging) mode for better concurrency
+            # Allows multiple readers while writer is active
+            self.connection.execute('PRAGMA journal_mode=WAL')
+
+            # Increase cache size for better query performance
+            # Default is 2000 pages, increase to 10000 pages (~40MB for 4KB pages)
+            self.connection.execute('PRAGMA cache_size=10000')
+
+            # Store temporary tables and indices in memory for speed
+            self.connection.execute('PRAGMA temp_store=memory')
+
+            # Enable foreign key constraints (good practice)
+            self.connection.execute('PRAGMA foreign_keys=ON')
+
+            # Optimize for read performance (trade write speed for read speed)
+            self.connection.execute('PRAGMA synchronous=NORMAL')
+
+            # Analyze database statistics for better query planning
+            self.connection.execute('ANALYZE')
+
             # Grab the version and check
             try:
                 version = self.fetchone('schema/get_version')

@@ -43,6 +43,19 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
 
         return self
 
+    # Load all minifigures with problems filter
+    def all_filtered(self, /, problems_filter: str = 'all', theme_id: str = 'all', year: str = 'all') -> Self:
+        context = {}
+        if problems_filter and problems_filter != 'all':
+            context['problems_filter'] = problems_filter
+        if theme_id and theme_id != 'all':
+            context['theme_id'] = theme_id
+        if year and year != 'all':
+            context['year'] = year
+
+        self.list(override_query=self.all_query, **context)
+        return self
+
     # Load all minifigures by owner
     def all_by_owner(self, owner_id: str | None = None, /) -> Self:
         # Save the owner_id parameter
@@ -52,6 +65,78 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
         self.list(override_query=self.all_by_owner_query)
 
         return self
+
+    # Load all minifigures by owner with problems filter
+    def all_by_owner_filtered(self, /, owner_id: str | None = None, problems_filter: str = 'all', theme_id: str = 'all', year: str = 'all') -> Self:
+        # Save the owner_id parameter
+        self.fields.owner_id = owner_id
+
+        context = {}
+        if problems_filter and problems_filter != 'all':
+            context['problems_filter'] = problems_filter
+        if theme_id and theme_id != 'all':
+            context['theme_id'] = theme_id
+        if year and year != 'all':
+            context['year'] = year
+
+        # Load the minifigures from the database
+        self.list(override_query=self.all_by_owner_query, **context)
+
+        return self
+
+    # Load minifigures with pagination support
+    def all_filtered_paginated(
+        self,
+        owner_id: str | None = None,
+        problems_filter: str = 'all',
+        theme_id: str = 'all',
+        year: str = 'all',
+        search_query: str | None = None,
+        page: int = 1,
+        per_page: int = 50,
+        sort_field: str | None = None,
+        sort_order: str = 'asc'
+    ) -> tuple[Self, int]:
+        # Prepare filter context
+        filter_context = {}
+        if owner_id and owner_id != 'all':
+            filter_context['owner_id'] = owner_id
+            list_query = self.all_by_owner_query
+        else:
+            list_query = self.all_query
+
+        if search_query:
+            filter_context['search_query'] = search_query
+
+        if problems_filter and problems_filter != 'all':
+            filter_context['problems_filter'] = problems_filter
+
+        if theme_id and theme_id != 'all':
+            filter_context['theme_id'] = theme_id
+
+        if year and year != 'all':
+            filter_context['year'] = year
+
+        # Field mapping for sorting
+        field_mapping = {
+            'name': '"rebrickable_minifigures"."name"',
+            'parts': '"rebrickable_minifigures"."number_of_parts"',
+            'quantity': '"total_quantity"',
+            'missing': '"total_missing"',
+            'damaged': '"total_damaged"',
+            'sets': '"total_sets"'
+        }
+
+        # Use the base pagination method
+        return self.paginate(
+            page=page,
+            per_page=per_page,
+            sort_field=sort_field,
+            sort_order=sort_order,
+            list_query=list_query,
+            field_mapping=field_mapping,
+            **filter_context
+        )
 
     # Minifigures with a part damaged part
     def damaged_part(self, part: str, color: int, /) -> Self:
@@ -95,16 +180,19 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
             brickset = None
 
         # Prepare template context for owner filtering
-        context = {}
+        context_vars = {}
         if hasattr(self.fields, 'owner_id') and self.fields.owner_id is not None:
-            context['owner_id'] = self.fields.owner_id
+            context_vars['owner_id'] = self.fields.owner_id
+
+        # Merge with any additional context passed in
+        context_vars.update(context)
 
         # Load the sets from the database
         for record in super().select(
             override_query=override_query,
             order=order,
             limit=limit,
-            **context
+            **context_vars
         ):
             minifigure = BrickMinifigure(brickset=brickset, record=record)
 

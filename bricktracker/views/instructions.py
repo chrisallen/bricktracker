@@ -14,6 +14,7 @@ from .exceptions import exception_handler
 from ..instructions import BrickInstructions
 from ..instructions_list import BrickInstructionsList
 from ..parser import parse_set
+from ..peeron_instructions import PeeronInstructions
 from ..socket import MESSAGES
 from .upload import upload_helper
 
@@ -22,6 +23,22 @@ instructions_page = Blueprint(
     __name__,
     url_prefix='/instructions'
 )
+
+
+def _render_peeron_select_page(set: str) -> str:
+    """Helper function to render the Peeron page selection interface with cached thumbnails."""
+    peeron = PeeronInstructions(set)
+    peeron_pages = peeron.find_pages()  # This will use the cached thumbnails
+    current_app.logger.debug(f"[peeron_loaded] Found {len(peeron_pages)} pages for {set}")
+    return render_template(
+        'peeron_select.html',
+        download=True,
+        pages=peeron_pages,
+        set=set,
+        path=current_app.config['SOCKET_PATH'],
+        namespace=current_app.config['SOCKET_NAMESPACE'],
+        messages=MESSAGES
+    )
 
 
 # Index
@@ -141,6 +158,10 @@ def download() -> str:
     except Exception:
         set = ''
 
+    # Check if this is a redirect after Peeron pages were loaded
+    if request.args.get('peeron_loaded'):
+        return _render_peeron_select_page(set)
+
     return render_template(
         'instructions.html',
         download=True,
@@ -160,12 +181,50 @@ def do_download() -> str:
     except Exception:
         set = ''
 
-    return render_template(
-        'instructions.html',
-        download=True,
-        instructions=BrickInstructions.find_instructions(set),
-        set=set,
-        path=current_app.config['SOCKET_PATH'],
-        namespace=current_app.config['SOCKET_NAMESPACE'],
-        messages=MESSAGES
-    )
+    # Check if this is a redirect after Peeron pages were loaded
+    if request.args.get('peeron_loaded'):
+        return _render_peeron_select_page(set)
+
+    # Try Rebrickable first
+    try:
+        from .instructions import BrickInstructions
+        rebrickable_instructions = BrickInstructions.find_instructions(set)
+        # Standard Rebrickable instructions found
+        return render_template(
+            'instructions.html',
+            download=True,
+            instructions=rebrickable_instructions,
+            set=set,
+            path=current_app.config['SOCKET_PATH'],
+            namespace=current_app.config['SOCKET_NAMESPACE'],
+            messages=MESSAGES
+        )
+    except Exception:
+        # Rebrickable failed, check if Peeron has instructions (without caching thumbnails yet)
+        try:
+            peeron = PeeronInstructions(set)
+            # Just check if pages exist, don't cache thumbnails yet
+            if peeron.exists():
+                # Peeron has instructions - show loading interface
+                return render_template(
+                    'peeron_select.html',
+                    download=True,
+                    loading_peeron=True,  # Flag to show loading state
+                    set=set,
+                    path=current_app.config['SOCKET_PATH'],
+                    namespace=current_app.config['SOCKET_NAMESPACE'],
+                    messages=MESSAGES
+                )
+            else:
+                raise Exception("Not found on Peeron either")
+        except Exception:
+            return render_template(
+                'instructions.html',
+                download=True,
+                instructions=[],
+                set=set,
+                error='No instructions found on Rebrickable or Peeron',
+                path=current_app.config['SOCKET_PATH'],
+                namespace=current_app.config['SOCKET_NAMESPACE'],
+                messages=MESSAGES
+            )

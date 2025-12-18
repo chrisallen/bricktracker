@@ -3,10 +3,12 @@
 {% import 'macro/card.html' as card %}
 {% import 'macro/form.html' as form %}
 
-<div {% if not solo %}id="set-{{ item.fields.id }}"{% endif %} class="card mb-3 flex-fill {% if solo %}card-solo{% endif %}"
+<div {% if not solo %}id="set-{{ item.fields.consolidated_id or item.fields.id }}"{% endif %} class="card mb-3 flex-fill {% if solo %}card-solo{% endif %}{% if current_viewing %} border-secondary{% endif %}"{% if current_viewing %} style="border-width: 3px !important;"{% endif %}
+  data-set-id="{{ item.fields.consolidated_id or item.fields.id }}" data-rebrickable-id="{{ item.fields.set }}"
+  {% if item.fields.instance_count is defined %}data-instance-count="{{ item.fields.instance_count }}" data-instance-ids="{{ item.fields.instance_ids }}"{% endif %}
   {% if not solo and not tiny %}
-    data-index="{{ index }}" data-number="{{ item.fields.set }}" data-name="{{ item.fields.name | lower }}" data-parts="{{ item.fields.number_of_parts }}"
-    data-year="{{ item.fields.year }}" data-theme="{{ item.theme.name | lower }}"
+    data-index="{{ index }}" data-number="{{ item.fields.set }}" data-set="{{ item.fields.set.split('-')[0] | int }}{{ '%05d' | format(item.fields.set.split('-')[1] | int) }}" data-name="{{ item.fields.name | lower }}" data-parts="{{ item.fields.number_of_parts }}"
+    data-year="{{ item.fields.year }}" data-theme="{{ item.theme.name | lower }}" data-theme-id="{{ item.theme.id }}"
     {% if not config['HIDE_SET_INSTRUCTIONS'] %}
       data-has-missing-instructions="{{ (item.instructions | length == 0) | int }}"
     {% endif %}
@@ -54,7 +56,7 @@
 >
   {{ card.header(item, item.fields.name, solo=solo, identifier=item.fields.set) }}
   {{ card.image(item, solo=solo, last=last, caption=item.fields.name, alt=item.fields.set) }}
-  <div class="card-body border-bottom-0 {% if not solo %}p-1{% endif %}">
+  <div class="card-body border-bottom-0 {% if not solo %}p-1{% endif %}"{% if current_viewing %} style="border-color: var(--bs-border-color) !important; border-width: 1px !important;"{% endif %}>
     {{ badge.theme(item.theme.name, solo=solo, last=last) }}
     {% for tag in brickset_tags %}
       {{ badge.tag(item, tag, solo=solo, last=last) }}
@@ -63,6 +65,9 @@
       {{ badge.year(item.fields.year, solo=solo, last=last) }}
     {% endif %}
     {{ badge.parts(item.fields.number_of_parts, solo=solo, last=last) }}
+    {% if item.fields.instance_count is defined and item.fields.instance_count > 1 %}
+      <span class="badge bg-primary"><i class="ri-stack-line"></i> {{ item.fields.instance_count }} copies</span>
+    {% endif %}
     {{ badge.total_minifigures(item.fields.total_minifigures, solo=solo, last=last) }}
     {{ badge.total_missing(item.fields.total_missing, solo=solo, last=last) }}
     {{ badge.total_damaged(item.fields.total_damaged, solo=solo, last=last) }}
@@ -71,24 +76,56 @@
     {% endfor %}
     {{ badge.storage(item, brickset_storages, solo=solo, last=last) }}
     {% if not last %}
-      {{ badge.purchase_date(item.purchase_date(), solo=solo, last=last) }}
+      {{ badge.purchase_date(item.purchase_date(), solo=solo, last=last, date_max_formatted=item.purchase_date_max_formatted()) }}
       {{ badge.purchase_location(item, brickset_purchase_locations, solo=solo, last=last) }}
       {{ badge.purchase_price(item.purchase_price(), solo=solo, last=last) }}
       {% if not solo %}
         {{ badge.instructions(item, solo=solo, last=last) }}
       {% endif %}
       {{ badge.rebrickable(item, solo=solo, last=last) }}
+      {{ badge.bricklink(item, solo=solo, last=last) }}
     {% endif %}
   </div>
   {% if not tiny and brickset_statuses | length %}
-    <ul class="list-group list-group-flush card-check border-bottom-0">
+    <ul class="list-group list-group-flush card-check border-bottom-0"{% if current_viewing %} style="border-color: var(--bs-border-color) !important; border-width: 1px !important;"{% endif %}>
       {% for status in brickset_statuses %}
-        <li class="d-flex list-group-item {% if not solo %}p-1{% endif %} text-nowrap">{{ form.checkbox(status.fields.name, item.fields.id, status.as_dataset(), status.url_for_set_state(item.fields.id), item.fields[status.as_column()], parent='set', delete=delete) }}</li>
+        <li class="d-flex list-group-item {% if not solo %}p-1{% endif %} text-nowrap">
+          {% if item.fields.instance_count is defined and item.fields.instance_count > 1 %}
+            {# Consolidated set - show mixed status indicator #}
+            {% set status_count = item.fields[status.as_column() + '_count'] %}
+            {% set total_count = item.fields.instance_count %}
+            {% if status_count == 0 %}
+              {# None checked #}
+              <input class="form-check-input px-1" type="checkbox" disabled>
+              <label class="form-check-label">
+                {{ status.fields.name }}
+                <small class="text-muted ms-1">(0/{{ total_count }})</small>
+              </label>
+            {% elif status_count == total_count %}
+              {# All checked #}
+              <input class="form-check-input px-1" type="checkbox" checked disabled>
+              <label class="form-check-label">
+                {{ status.fields.name }}
+                <small class="text-muted ms-1">({{ total_count }}/{{ total_count }})</small>
+              </label>
+            {% else %}
+              {# Partial - some checked #}
+              <input class="form-check-input px-1 partial-status" type="checkbox" disabled>
+              <label class="form-check-label">
+                {{ status.fields.name }}
+                <small class="text-muted ms-1">({{ status_count }}/{{ total_count }})</small>
+              </label>
+            {% endif %}
+          {% else %}
+            {# Individual set - use normal checkbox #}
+            {{ form.checkbox(status.fields.name, item.fields.id, status.as_dataset(), status.url_for_set_state(item.fields.id), item.fields[status.as_column()], parent='set', delete=delete) }}
+          {% endif %}
+        </li>
       {% endfor %}
     </ul>
   {% endif %}
   {% if solo %}
-    <div class="accordion accordion-flush border-top" id="set-details">
+    <div class="accordion accordion-flush border-top" id="set-details"{% if current_viewing %} style="border-color: var(--bs-border-color) !important; border-width: 1px !important;"{% endif %}>
       {% if not delete %}
         {% if not config['HIDE_SET_INSTRUCTIONS'] %}
           {{ accordion.header('Instructions', 'instructions', 'set-details', expanded=open_instructions, quantity=item.instructions | length, icon='file-line', class='p-0') }}
@@ -104,14 +141,14 @@
               {% endif %}
             {% endif %}
             {% if g.login.is_authenticated() %}
-              <a class="list-group-item list-group-item-action" href="{{ url_for('instructions.download', set=item.fields.set) }}"><i class="ri-download-line"></i> Download instructions from Rebrickable</a>
+              <a class="list-group-item list-group-item-action" href="{{ url_for('instructions.download', set=item.fields.set) }}"><i class="ri-download-line"></i> Download instructions</a>
             {% endif %}
           </div>
           {{ accordion.footer() }}
         {% endif %}
-        {{ accordion.table(item.parts(), 'Parts', 'parts-inventory', 'set-details', 'part/table.html', icon='shapes-line')}}
+        {{ accordion.table(item.parts(), 'Parts', 'parts-inventory', 'set-details', 'part/table.html', icon='shapes-line', hamburger_menu=g.login.is_authenticated())}}
         {% for minifigure in item.minifigures() %}
-          {{ accordion.table(minifigure.parts(), minifigure.fields.name, minifigure.fields.figure, 'set-details', 'part/table.html', quantity=minifigure.fields.quantity, icon='group-line', image=minifigure.url_for_image(), alt=minifigure.fields.figure, details=minifigure.url())}}
+          {{ accordion.table(minifigure.parts(), minifigure.fields.name, minifigure.fields.figure, 'set-details', 'part/table.html', quantity=minifigure.fields.quantity, icon='group-line', image=minifigure.url_for_image(), alt=minifigure.fields.figure, details=minifigure.url(), hamburger_menu=g.login.is_authenticated())}}
         {% endfor %}
         {% include 'set/management.html' %}
       {% endif %}

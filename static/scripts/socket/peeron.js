@@ -1,0 +1,206 @@
+// Peeron Socket class
+class BrickPeeronSocket extends BrickSocket {
+    constructor(id, path, namespace, messages) {
+        super(id, path, namespace, messages, true);
+
+        // Form elements (built based on the initial id)
+        this.html_button = document.getElementById(id);
+        this.html_files = document.getElementById(`${id}-files`);
+
+        if (this.html_button) {
+            this.html_button.addEventListener("click", (e) => {
+                this.execute();
+            });
+        }
+
+        // Setup select all button
+        this.setup_select_all_button();
+
+        // Setup rotation buttons
+        this.setup_rotation_buttons();
+
+        // Setup the socket
+        this.setup();
+    }
+
+    setup_select_all_button() {
+        const selectAllButton = document.getElementById('peeron-select-all');
+        if (selectAllButton) {
+            selectAllButton.addEventListener('click', () => {
+                const checkboxes = this.get_files();
+                const allChecked = checkboxes.every(cb => cb.checked);
+                checkboxes.forEach(cb => cb.checked = !allChecked);
+
+                // Update button text and icon
+                if (allChecked) {
+                    selectAllButton.innerHTML = '<i class="ri-checkbox-multiple-line"></i> Select All';
+                } else {
+                    selectAllButton.innerHTML = '<i class="ri-checkbox-blank-line"></i> Deselect All';
+                }
+            });
+        }
+    }
+
+    setup_rotation_buttons() {
+        document.querySelectorAll('.peeron-rotate-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault(); // Prevent label click
+                e.stopPropagation(); // Stop event bubbling
+
+                const targetId = button.getAttribute('data-target');
+                const checkboxId = button.getAttribute('data-checkbox');
+                const targetImg = document.getElementById(targetId);
+                const checkbox = document.getElementById(checkboxId);
+
+                if (targetImg && checkbox) {
+                    let currentRotation = parseInt(button.getAttribute('data-rotation') || '0');
+                    currentRotation = (currentRotation + 90) % 360;
+
+                    // Update image rotation
+                    targetImg.style.transform = `rotate(${currentRotation}deg)`;
+                    button.setAttribute('data-rotation', currentRotation.toString());
+
+                    // Store rotation in checkbox data for later use
+                    checkbox.setAttribute('data-rotation', currentRotation.toString());
+
+                    // Update the rotation icon to indicate current state
+                    const icon = button.querySelector('i');
+                    if (icon) {
+                        // Rotate the icon to match the image rotation
+                        icon.style.transform = `rotate(${currentRotation}deg)`;
+                    }
+                }
+            });
+        });
+    }
+
+    // Upon receiving a complete message
+    complete(data) {
+        super.complete(data);
+
+        // Clear progress display after completion
+        if (this.html_progress_message) {
+            this.html_progress_message.classList.add("d-none");
+            this.html_progress_message.textContent = "";
+        }
+
+        if (this.html_count) {
+            this.html_count.classList.add("d-none");
+            this.html_count.textContent = "";
+        }
+
+        // Ensure spinner is hidden
+        this.spinner(false);
+
+        this.toggle(true);
+    }
+
+    // Execute the action
+    execute() {
+        if (!this.disabled && this.socket !== undefined && this.socket.connected) {
+            this.toggle(false);
+
+            this.download_peeron_pages();
+        }
+    }
+
+    // Get the list of checkboxes describing files
+    get_files(checked=false) {
+        let files = [];
+
+        if (this.html_files) {
+            files = [...this.html_files.querySelectorAll('input[type="checkbox"]')];
+
+            if (checked) {
+                files = files.filter(file => file.checked);
+            }
+        }
+
+        return files;
+    }
+
+    // Download Peeron pages
+    download_peeron_pages() {
+        if (this.html_files) {
+            const selectedFiles = this.get_files(true);
+
+            if (selectedFiles.length === 0) {
+                this.fail({message: "Please select at least one page to download."});
+                this.toggle(true);
+                return;
+            }
+
+            const pages = selectedFiles.map(checkbox => ({
+                page_number: checkbox.getAttribute('data-page-number'),
+                original_image_url: checkbox.getAttribute('data-original-image-url'),
+                cached_full_image_path: checkbox.getAttribute('data-cached-full-image-path'),
+                alt_text: checkbox.getAttribute('data-alt-text'),
+                rotation: parseInt(checkbox.getAttribute('data-rotation') || '0')
+            }));
+
+            this.clear();
+            this.spinner(true);
+
+            const setElement = document.querySelector('input[name="download-set"]');
+            const set = setElement ? setElement.value : '';
+
+            this.socket.emit(this.messages.DOWNLOAD_PEERON_PAGES, {
+                set: set,
+                pages: pages,
+                total: pages.length,
+                current: 0
+            });
+        } else {
+            this.fail({message: "Could not find the list of pages to download"});
+        }
+    }
+
+    // Toggle clicking on the button, or sending events
+    toggle(enabled) {
+        super.toggle(enabled);
+
+        if (this.html_files) {
+            this.get_files().forEach(el => el.disabled = !enabled);
+        }
+
+        if (this.html_button) {
+            this.html_button.disabled = !enabled;
+        }
+    }
+}
+
+// Simple Peeron page loader using standard socket pattern
+class BrickPeeronPageLoader extends BrickSocket {
+    constructor(set, path, namespace, messages) {
+        // Use 'peeron-loader' as the ID for socket elements
+        super('peeron-loader', path, namespace, messages, false);
+
+        this.set = set;
+        this.setup();
+
+        // Auto-start loading when connected
+        setTimeout(() => {
+            if (this.socket && this.socket.connected) {
+                this.loadPages();
+            } else {
+                this.socket.on('connect', () => this.loadPages());
+            }
+        }, 100);
+    }
+
+    loadPages() {
+        this.socket.emit(this.messages.LOAD_PEERON_PAGES, {
+            set: this.set
+        });
+    }
+
+    // Override complete to redirect when done
+    complete(data) {
+        super.complete(data);
+        // Redirect to show the pages selection interface
+        const params = new URLSearchParams();
+        params.set('set', this.set);
+        params.set('peeron_loaded', '1');
+        window.location.href = `${window.location.pathname}?${params.toString()}`;
+    }
+}

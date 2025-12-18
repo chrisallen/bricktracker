@@ -155,9 +155,18 @@ class RebrickableSet(BrickRecord):
 
     # Return a short form of the Rebrickable set
     def short(self, /, *, from_download: bool = False) -> dict[str, Any]:
+        # Use nil image URL if set image is null
+        image_url = self.fields.image
+        if image_url is None:
+            # Return path to nil.png from parts folder
+            image_url = RebrickableImage.static_url(
+                RebrickableImage.nil_name(),
+                'PARTS_FOLDER'
+            )
+
         return {
             'download': from_download,
-            'image': self.fields.image,
+            'image': image_url,
             'name': self.fields.name,
             'set': self.fields.set,
         }
@@ -179,6 +188,15 @@ class RebrickableSet(BrickRecord):
 
         return ''
 
+    # Compute the url for the bricklink page
+    def url_for_bricklink(self, /) -> str:
+        if current_app.config['BRICKLINK_LINKS']:
+            return current_app.config['BRICKLINK_LINK_SET_PATTERN'].format(
+                set_num=self.fields.set
+            )
+
+        return ''
+
     # Compute the url for the refresh button
     def url_for_refresh(self, /) -> str:
         return url_for('set.refresh', set=self.fields.set)
@@ -187,17 +205,18 @@ class RebrickableSet(BrickRecord):
     @staticmethod
     def from_rebrickable(data: dict[str, Any], /, **_) -> dict[str, Any]:
         # Extracting version and number
+        # Note: number can be alphanumeric (e.g., "McDR6US", "COMCON035")
         number, _, version = str(data['set_num']).partition('-')
 
         return {
             'set': str(data['set_num']),
-            'number': int(number),
+            'number': str(number),  # Keep as string to support alphanumeric sets
             'version': int(version),
             'name': str(data['name']),
             'year': int(data['year']),
             'theme_id': int(data['theme_id']),
             'number_of_parts': int(data['num_parts']),
-            'image': str(data['set_img_url']),
+            'image': str(data['set_img_url']) if data['set_img_url'] is not None else None,
             'url': str(data['set_url']),
             'last_modified': str(data['last_modified_dt']),
         }
