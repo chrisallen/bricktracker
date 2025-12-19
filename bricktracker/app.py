@@ -104,12 +104,14 @@ def setup_app(app: Flask) -> None:
             level=logging.DEBUG,
             format='[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s',  # noqa: E501
         )
+        logging.getLogger().setLevel(logging.DEBUG)
     else:
         logging.basicConfig(
             stream=sys.stdout,
             level=logging.INFO,
             format='[%(asctime)s] %(levelname)s - %(message)s',
         )
+        logging.getLogger().setLevel(logging.INFO)
 
     # Load the navbar
     Navbar(app)
