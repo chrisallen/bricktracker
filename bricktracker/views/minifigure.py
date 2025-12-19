@@ -42,10 +42,7 @@ def list() -> str:
         pagination_context = build_pagination_context(page, per_page, total_count, is_mobile)
     else:
         # ORIGINAL MODE - Single page with all data for client-side search
-        if owner_id == 'all' or owner_id is None or owner_id == '':
-            minifigures = BrickMinifigureList().all_filtered(problems_filter=problems_filter, theme_id=theme_id, year=year)
-        else:
-            minifigures = BrickMinifigureList().all_by_owner_filtered(owner_id=owner_id, problems_filter=problems_filter, theme_id=theme_id, year=year)
+        minifigures = BrickMinifigureList().all_filtered(owner_id=owner_id, problems_filter=problems_filter, theme_id=theme_id, year=year)
 
         pagination_context = None
 

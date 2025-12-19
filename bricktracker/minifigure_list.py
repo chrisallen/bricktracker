@@ -44,7 +44,11 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
         return self
 
     # Load all minifigures with problems filter
-    def all_filtered(self, /, problems_filter: str = 'all', theme_id: str = 'all', year: str = 'all') -> Self:
+    def all_filtered(self, /, owner_id: str | None = None, problems_filter: str = 'all', theme_id: str = 'all', year: str = 'all') -> Self:
+        # Save the owner_id parameter
+        if owner_id is not None:
+            self.fields.owner_id = owner_id
+
         context = {}
         if problems_filter and problems_filter != 'all':
             context['problems_filter'] = problems_filter
@@ -53,7 +57,13 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
         if year and year != 'all':
             context['year'] = year
 
-        self.list(override_query=self.all_query, **context)
+        # Choose query based on whether owner filtering is needed
+        if owner_id and owner_id != 'all':
+            query = self.all_by_owner_query
+        else:
+            query = self.all_query
+
+        self.list(override_query=query, **context)
         return self
 
     # Load all minifigures by owner
