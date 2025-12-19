@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.3 - Post release fixes
+
+> Still uses docker tag `1.3`
+
+### Bug Fixes
+
+- **Fixed set metadata updates**: Owner, status, and tag checkboxes now properly persist changes on set details page
+  - Fixed `update_set_state()` method to commit database transactions (was using deferred execution without commit)
+  - All metadata updates (owner, status, tags, storage, purchase info) now work consistently
+- **Fixed nil image downloads**: Placeholder images for parts and minifigures without images now download correctly
+  - Removed early returns that prevented nil image downloads
+  - Nil images now properly saved to configured folders (e.g., `/app/data/parts/nil.jpg`)
+- **Fixed error logging for missing files**: File not found errors now show actual configured folder paths instead of just URL paths
+  - Added detailed logging showing both file path and configured folder for easier debugging
+- **Fixed minifigure filters in client-side pagination mode**: Owner and other filters now work correctly when server-side pagination is disabled
+  - Aligned filter behavior with parts page (applies filters server-side, then loads filtered data for client-side search)
+
 ## 1.3
 
 ### Breaking Changes 
