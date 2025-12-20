@@ -33,11 +33,7 @@ class BrickMinifigure(RebrickableMinifigure):
                 )
             )
 
-            if not refresh:
-                # Insert into database
-                self.insert(commit=False)
-
-            # Load the inventory
+            # Load the inventory (needed to count parts for rebrickable record)
             if not BrickPartList.download(
                 socket,
                 self.brickset,
@@ -46,8 +42,13 @@ class BrickMinifigure(RebrickableMinifigure):
             ):
                 return False
 
-            # Insert the rebrickable set into database (after counting parts)
+            # Insert the rebrickable minifigure into database first (parent record)
+            # This must happen before inserting into bricktracker_minifigures due to FK constraint
             self.insert_rebrickable()
+
+            if not refresh:
+                # Insert into bricktracker_minifigures database (child record)
+                self.insert(commit=False)
 
         except Exception as e:
             socket.fail(

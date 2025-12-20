@@ -17,6 +17,7 @@ from werkzeug.wrappers.response import Response
 
 from ..exceptions import exception_handler
 from ...reload import reload
+from ...sql_integrity import BrickIntegrityCheck
 from ...sql_migration_list import BrickSQLMigrationList
 from ...sql import BrickSQL
 from ..upload import upload_helper
@@ -184,3 +185,57 @@ def upgrade() -> str | Response:
         ),
         database_error=request.args.get('database_error')
     )
+
+
+@admin_database_page.route('/integrity/check', methods=['GET'])
+@login_required
+@exception_handler(__file__)
+def integrity_check() -> str:
+    integrity = BrickIntegrityCheck()
+    issues = integrity.check_summary()
+    orphaned_sets = integrity.get_orphaned_sets()
+    orphaned_parts = integrity.get_orphaned_parts()
+    parts_missing_set = integrity.get_parts_missing_set()
+    total_issues = sum(issue.count for issue in issues)
+
+    return render_template(
+        'admin.html',
+        integrity_check=True,
+        integrity_issues=issues,
+        orphaned_sets=orphaned_sets,
+        orphaned_parts=orphaned_parts,
+        parts_missing_set=parts_missing_set,
+        total_issues=total_issues,
+        database_error=request.args.get('database_error')
+    )
+
+
+@admin_database_page.route('/integrity/cleanup', methods=['POST'])
+@login_required
+@exception_handler(
+    __file__,
+    post_redirect='admin_database.integrity_check',
+    error_name='database_error'
+)
+def integrity_cleanup() -> Response:
+    integrity = BrickIntegrityCheck()
+    counts = integrity.cleanup_all()
+    total = sum(counts.values())
+    logger.info(f'Database integrity cleanup: removed {total} orphaned records')
+
+    return redirect(url_for('admin.admin', cleanup_success=total))
+
+
+@admin_database_page.route('/optimize', methods=['POST'])
+@login_required
+@exception_handler(
+    __file__,
+    post_redirect='admin.admin',
+    error_name='database_error'
+)
+def optimize() -> Response:
+    integrity = BrickIntegrityCheck()
+    integrity.optimize_database()
+    logger.info('Database optimization complete')
+
+    return redirect(url_for('admin.admin', optimize_success=1))
