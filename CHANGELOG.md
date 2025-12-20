@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.4
+
+### New Features
+
+- **Export Functionality**
+  - Added comprehensive export system in admin panel for sets, parts, and problem parts
+  - Export accordion in `/admin/` with three main categories:
+    - **Export Sets**: Rebrickable CSV format for collection tracking
+    - **Export All Parts**: Three formats available:
+      - Rebrickable CSV (Part, Color, Quantity)
+      - LEGO Pick-a-Brick CSV (elementId, quantity)
+      - BrickLink XML (wanted list format)
+    - **Export Missing/Damaged Parts**: Same three formats as parts exports
+  - All exports aggregate quantities automatically (parts by part+color, LEGO by element ID)
+  - BrickLink exports use proper BrickLink part numbers and color IDs when available
+  - Filter support: All part exports accept owner, color, theme, and year query parameters
+  - Format information displayed in UI for user guidance
+
 ## 1.3 - Post release fixes
 
 > Still uses docker tag `1.3`
