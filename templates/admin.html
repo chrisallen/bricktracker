@@ -36,6 +36,7 @@
             {% include 'admin/set/refresh.html' %}
             {% else %}
               {% include 'admin/logout.html' %}
+              {% include 'admin/export.html' %}
               {% include 'admin/instructions.html' %}
               {% if not config['USE_REMOTE_IMAGES'] %}
                 {% include 'admin/image.html' %}

@@ -17,6 +17,7 @@ from bricktracker.version import __version__
 from bricktracker.views.add import add_page
 from bricktracker.views.admin.admin import admin_page
 from bricktracker.views.admin.database import admin_database_page
+from bricktracker.views.admin.export import admin_export_page
 from bricktracker.views.admin.image import admin_image_page
 from bricktracker.views.admin.instructions import admin_instructions_page
 from bricktracker.views.admin.owner import admin_owner_page
@@ -149,6 +150,7 @@ def setup_app(app: Flask) -> None:
     # Register admin routes
     app.register_blueprint(admin_page)
     app.register_blueprint(admin_database_page)
+    app.register_blueprint(admin_export_page)
     app.register_blueprint(admin_image_page)
     app.register_blueprint(admin_instructions_page)
     app.register_blueprint(admin_retired_page)
