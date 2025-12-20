@@ -62,12 +62,13 @@ class BrickPart(RebrickablePart):
                 )
             )
 
-            if not refresh:
-                # Insert into database
-                self.insert(commit=False)
-
-            # Insert the rebrickable set into database
+            # Insert the rebrickable part into database first (parent record)
+            # This must happen before inserting into bricktracker_parts due to FK constraint
             self.insert_rebrickable()
+
+            if not refresh:
+                # Insert into bricktracker_parts database (child record)
+                self.insert(commit=False)
 
         except Exception as e:
             socket.fail(
