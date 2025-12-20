@@ -1,0 +1,180 @@
+{% import 'macro/accordion.html' as accordion %}
+
+{{ accordion.header('Database Integrity Check', 'database-integrity', 'admin', expanded=true, icon='shield-check-line') }}
+
+{% if database_error %}
+<div class="alert alert-danger text-start" role="alert"><strong>Error:</strong> {{ database_error }}.</div>
+{% endif %}
+
+<h5 class="border-bottom">Scan Results</h5>
+
+{% if total_issues == 0 %}
+<div class="alert alert-success" role="alert">
+  <i class="ri-checkbox-circle-line"></i> <strong>No integrity issues found!</strong> Your database is healthy.
+</div>
+<div class="text-end">
+  <a class="btn btn-primary" href="{{ url_for('admin.admin') }}" role="button"><i class="ri-arrow-left-long-line"></i> Back to admin</a>
+</div>
+{% else %}
+<div class="alert alert-warning" role="alert">
+  <i class="ri-alert-line"></i> <strong>Found {{ total_issues }} integrity issue(s)</strong> that need attention.
+</div>
+
+<h6 class="mt-3">Summary</h6>
+<table class="table table-sm">
+  <thead>
+    <tr>
+      <th>Issue Type</th>
+      <th>Count</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for issue in integrity_issues %}
+    <tr class="{% if issue.count > 0 %}table-warning{% endif %}">
+      <td><code>{{ issue.issue_type }}</code></td>
+      <td><span class="badge {% if issue.count > 0 %}text-bg-warning{% else %}text-bg-success{% endif %}">{{ issue.count }}</span></td>
+      <td>{{ issue.description }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% if orphaned_sets|length > 0 %}
+<h6 class="mt-4">Orphaned Sets ({{ orphaned_sets|length }})</h6>
+<p class="text-muted small">These sets exist in bricktracker_sets but are missing from rebrickable_sets:</p>
+<table class="table table-sm table-striped">
+  <thead>
+    <tr>
+      <th>Set Number</th>
+      <th>ID</th>
+      <th>Storage</th>
+      <th>Purchase Price</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for set in orphaned_sets %}
+    <tr>
+      <td><code>{{ set.set }}</code></td>
+      <td><code class="small">{{ set.id }}</code></td>
+      <td>{{ set.storage or '-' }}</td>
+      <td>{{ set.purchase_price or '-' }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+{% if orphaned_parts|length > 0 %}
+<h6 class="mt-4">Orphaned Parts ({{ orphaned_parts|length }})</h6>
+<p class="text-muted small">These parts exist in bricktracker_parts but are missing from rebrickable_parts:</p>
+<table class="table table-sm table-striped">
+  <thead>
+    <tr>
+      <th>Part</th>
+      <th>Color</th>
+      <th>Set Number</th>
+      <th>Quantity</th>
+      <th>Spare</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for part in orphaned_parts[:20] %}
+    <tr>
+      <td><code>{{ part.part }}</code></td>
+      <td>{{ part.color }}</td>
+      <td>{{ part.set_number or '-' }}</td>
+      <td>{{ part.quantity }}</td>
+      <td>{{ 'Yes' if part.spare else 'No' }}</td>
+    </tr>
+    {% endfor %}
+    {% if orphaned_parts|length > 20 %}
+    <tr>
+      <td colspan="5" class="text-muted text-center"><em>... and {{ orphaned_parts|length - 20 }} more</em></td>
+    </tr>
+    {% endif %}
+  </tbody>
+</table>
+{% endif %}
+
+{% if parts_missing_set|length > 0 %}
+<h6 class="mt-4">Parts with Missing Set References ({{ parts_missing_set|length }})</h6>
+<p class="text-muted small">These parts reference sets that don't exist in bricktracker_sets:</p>
+<table class="table table-sm table-striped">
+  <thead>
+    <tr>
+      <th>Part</th>
+      <th>Color</th>
+      <th>Set ID</th>
+      <th>Quantity</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for part in parts_missing_set[:20] %}
+    <tr>
+      <td><code>{{ part.part }}</code></td>
+      <td>{{ part.color }}</td>
+      <td><code class="small">{{ part.id }}</code></td>
+      <td>{{ part.quantity }}</td>
+    </tr>
+    {% endfor %}
+    {% if parts_missing_set|length > 20 %}
+    <tr>
+      <td colspan="4" class="text-muted text-center"><em>... and {{ parts_missing_set|length - 20 }} more</em></td>
+    </tr>
+    {% endif %}
+  </tbody>
+</table>
+{% endif %}
+
+<div class="mt-4 text-end">
+  <a class="btn btn-secondary" href="{{ url_for('admin.admin') }}" role="button"><i class="ri-arrow-left-long-line"></i> Back to admin</a>
+  <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cleanupConfirmModal">
+    <i class="ri-delete-bin-line"></i> Clean Up Orphaned Records
+  </button>
+</div>
+{% endif %}
+
+{{ accordion.footer() }}
+
+<!-- Cleanup Confirmation Modal -->
+<div class="modal fade" id="cleanupConfirmModal" tabindex="-1" aria-labelledby="cleanupConfirmModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="cleanupConfirmModalLabel">
+          <i class="ri-alert-line"></i> Confirm Database Cleanup
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-warning" role="alert">
+          <i class="ri-error-warning-line"></i> <strong>Warning!</strong> This action cannot be undone.
+        </div>
+        <p><strong>This will permanently delete:</strong></p>
+        <ul>
+          {% if orphaned_sets|length > 0 %}
+          <li><strong>{{ orphaned_sets|length }}</strong> orphaned set record(s)</li>
+          {% endif %}
+          {% if orphaned_parts|length > 0 %}
+          <li><strong>{{ orphaned_parts|length }}</strong> orphaned part record(s)</li>
+          {% endif %}
+          {% if parts_missing_set|length > 0 %}
+          <li><strong>{{ parts_missing_set|length }}</strong> part(s) with missing set references</li>
+          {% endif %}
+        </ul>
+        <p class="text-muted small"><i class="ri-information-line"></i> <strong>Recommendation:</strong> Download a backup of your database before proceeding.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="ri-close-line"></i> Cancel
+        </button>
+        <form action="{{ url_for('admin_database.integrity_cleanup') }}" method="post" style="display: inline;">
+          <button type="submit" class="btn btn-danger">
+            <i class="ri-delete-bin-line"></i> Yes, Clean Up Now
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

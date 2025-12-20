@@ -1,5 +1,25 @@
 # Changelog
 
+## Upcoming - 1.3.2
+
+### New Features
+
+- **Database Integrity Check and Cleanup**
+  - Added database integrity scanner to detect orphaned records and foreign key violations
+  - New "Check Database Integrity" button in admin panel scans for issues
+  - Detects orphaned sets, parts, and parts with missing set references
+  - Two-step cleanup process with Bootstrap modal confirmation
+  - Warning prompts users to backup database before cleanup
+  - Automatic cleanup removes all orphaned records in one operation
+  - Detailed scan results show affected records with counts and descriptions
+- **Database Optimization**
+  - Added "Optimize Database" button to re-create performance indexes
+  - Safe to run after database imports or restores
+  - Re-creates all indexes from migration #19 using `CREATE INDEX IF NOT EXISTS`
+  - Runs `ANALYZE` to rebuild query statistics
+  - Runs `PRAGMA optimize` for additional query plan optimization
+  - Helpful after importing backup databases that may lack performance optimizations
+
 ## 1.3.1
 
 ### Bug Fixes

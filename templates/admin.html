@@ -30,6 +30,8 @@
             {% include 'admin/database/drop.html' %}
             {% elif import_database %}
             {% include 'admin/database/import.html' %}
+            {% elif integrity_check %}
+            {% include 'admin/database/integrity_check.html' %}
             {% elif upgrade_database %}
             {% include 'admin/database/upgrade.html' %}
             {% elif refresh_set %}
