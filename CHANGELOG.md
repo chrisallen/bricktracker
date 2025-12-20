@@ -1,11 +1,13 @@
 # Changelog
 
-## 1.3 - Post release fixes
-
-> Still uses docker tag `1.3`
+## 1.3.1
 
 ### Bug Fixes
 
+- **Fixed foreign key constraint errors during set imports**: Resolved `FOREIGN KEY constraint failed` errors when importing sets with parts and minifigures
+  - Fixed insertion order in `bricktracker/part.py`: Parent records (`rebrickable_parts`) now inserted before child records (`bricktracker_parts`)
+  - Fixed insertion order in `bricktracker/minifigure.py`: Parent records (`rebrickable_minifigures`) now inserted before child records (`bricktracker_minifigures`)
+  - Ensures foreign key references are valid when SQLite checks constraints
 - **Fixed set metadata updates**: Owner, status, and tag checkboxes now properly persist changes on set details page
   - Fixed `update_set_state()` method to commit database transactions (was using deferred execution without commit)
   - All metadata updates (owner, status, tags, storage, purchase info) now work consistently
