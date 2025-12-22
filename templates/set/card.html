@@ -57,34 +57,8 @@
   {{ card.header(item, item.fields.name, solo=solo, identifier=item.fields.set) }}
   {{ card.image(item, solo=solo, last=last, caption=item.fields.name, alt=item.fields.set) }}
   <div class="card-body border-bottom-0 {% if not solo %}p-1{% endif %}"{% if current_viewing %} style="border-color: var(--bs-border-color) !important; border-width: 1px !important;"{% endif %}>
-    {{ badge.theme(item.theme.name, solo=solo, last=last) }}
-    {% for tag in brickset_tags %}
-      {{ badge.tag(item, tag, solo=solo, last=last) }}
-    {% endfor %}
-    {% if not last %}
-      {{ badge.year(item.fields.year, solo=solo, last=last) }}
-    {% endif %}
-    {{ badge.parts(item.fields.number_of_parts, solo=solo, last=last) }}
-    {% if item.fields.instance_count is defined and item.fields.instance_count > 1 %}
-      <span class="badge bg-primary"><i class="ri-stack-line"></i> {{ item.fields.instance_count }} copies</span>
-    {% endif %}
-    {{ badge.total_minifigures(item.fields.total_minifigures, solo=solo, last=last) }}
-    {{ badge.total_missing(item.fields.total_missing, solo=solo, last=last) }}
-    {{ badge.total_damaged(item.fields.total_damaged, solo=solo, last=last) }}
-    {% for owner in brickset_owners %}
-      {{ badge.owner(item, owner, solo=solo, last=last) }}
-    {% endfor %}
-    {{ badge.storage(item, brickset_storages, solo=solo, last=last) }}
-    {% if not last %}
-      {{ badge.purchase_date(item.purchase_date(), solo=solo, last=last, date_max_formatted=item.purchase_date_max_formatted()) }}
-      {{ badge.purchase_location(item, brickset_purchase_locations, solo=solo, last=last) }}
-      {{ badge.purchase_price(item.purchase_price(), solo=solo, last=last) }}
-      {% if not solo %}
-        {{ badge.instructions(item, solo=solo, last=last) }}
-      {% endif %}
-      {{ badge.rebrickable(item, solo=solo, last=last) }}
-      {{ badge.bricklink(item, solo=solo, last=last) }}
-    {% endif %}
+    {# Render badges in configured order based on context (grid view vs detail view) #}
+    {{ badge.render_ordered_badges(item, brickset_tags, brickset_owners, brickset_storages, brickset_purchase_locations, solo=solo, last=last, context='detail' if solo else 'grid') }}
   </div>
   {% if not tiny and brickset_statuses | length %}
     <ul class="list-group list-group-flush card-check border-bottom-0"{% if current_viewing %} style="border-color: var(--bs-border-color) !important; border-width: 1px !important;"{% endif %}>

@@ -54,6 +54,9 @@ LIVE_CHANGEABLE_VARS: Final[List[str]] = [
     'BK_STATISTICS_SHOW_CHARTS',
     'BK_STATISTICS_DEFAULT_EXPANDED',
     'BK_DARK_MODE',
+    # Badge order preferences
+    'BK_BADGE_ORDER_GRID',
+    'BK_BADGE_ORDER_DETAIL',
     # Default ordering and formatting
     'BK_INSTRUCTIONS_ALLOWED_EXTENSIONS',
     'BK_MINIFIGURES_DEFAULT_ORDER',
@@ -179,8 +182,8 @@ class ConfigManager:
 
     def _cast_value(self, var_name: str, value: Any) -> Any:
         """Cast value to appropriate type based on variable name"""
-        # List variables (admin sections) - Check this FIRST before boolean check
-        if 'sections' in var_name.lower():
+        # List variables (admin sections, badge order) - Check this FIRST before boolean check
+        if any(keyword in var_name.lower() for keyword in ['sections', 'badge_order']):
             if isinstance(value, str):
                 return [section.strip() for section in value.split(',') if section.strip()]
             elif isinstance(value, list):

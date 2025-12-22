@@ -17,15 +17,29 @@
   - BrickLink exports use proper BrickLink part numbers and color IDs when available
   - Filter support: All part exports accept owner, color, theme, and year query parameters
   - Format information displayed in UI for user guidance
-- **Database Integrity Check and Cleanup** (from 1.3.2)
+- **Badge Order Customization**
+  - Added customizable badge ordering for set cards and detail pages
+  - Separate configurations for Grid view (`/sets/` cards) and Detail view (individual set pages)
+  - Configure via environment variables in `.env` file:
+    - `BK_BADGE_ORDER_GRID`: Comma-separated badge keys for grid view (default: theme,year,parts,total_minifigures,owner)
+    - `BK_BADGE_ORDER_DETAIL`: Comma-separated badge keys for detail view (default: all 16 badges)
+  - Can also be configured via Live Settings page in admin panel under "Default Ordering & Formatting"
+  - Changes apply immediately without restart when edited via admin panel
+  - 16 available badge types: theme, tag, year, parts, instance_count, total_minifigures, total_missing, total_damaged, owner, storage, purchase_date, purchase_location, purchase_price, instructions, rebrickable, bricklink
+
+
+## 1.3.1
+
+### New Functionality
+
+- **Database Integrity Check and Cleanup**
   - Added database integrity scanner to detect orphaned records and foreign key violations
   - New "Check Database Integrity" button in admin panel scans for issues
   - Detects orphaned sets, parts, and parts with missing set references
-  - Two-step cleanup process with Bootstrap modal confirmation
   - Warning prompts users to backup database before cleanup
-  - Automatic cleanup removes all orphaned records in one operation
+  - Cleanup removes all orphaned records in one operation
   - Detailed scan results show affected records with counts and descriptions
-- **Database Optimization** (from 1.3.2)
+- **Database Optimization**
   - Added "Optimize Database" button to re-create performance indexes
   - Safe to run after database imports or restores
   - Re-creates all indexes from migration #19 using `CREATE INDEX IF NOT EXISTS`
@@ -35,19 +49,20 @@
 
 ### Bug Fixes
 
-- **Fixed foreign key constraint errors during set imports** (from 1.3.1): Resolved `FOREIGN KEY constraint failed` errors when importing sets with parts and minifigures
+- **Fixed foreign key constraint errors during set imports**: Resolved `FOREIGN KEY constraint failed` errors when importing sets with parts and minifigures
   - Fixed insertion order in `bricktracker/part.py`: Parent records (`rebrickable_parts`) now inserted before child records (`bricktracker_parts`)
   - Fixed insertion order in `bricktracker/minifigure.py`: Parent records (`rebrickable_minifigures`) now inserted before child records (`bricktracker_minifigures`)
   - Ensures foreign key references are valid when SQLite checks constraints
-- **Fixed set metadata updates** (from 1.3.1): Owner, status, and tag checkboxes now properly persist changes on set details page
+  
+- **Fixed set metadata updates**: Owner, status, and tag checkboxes now properly persist changes on set details page
   - Fixed `update_set_state()` method to commit database transactions (was using deferred execution without commit)
   - All metadata updates (owner, status, tags, storage, purchase info) now work consistently
-- **Fixed nil image downloads** (from 1.3.1): Placeholder images for parts and minifigures without images now download correctly
+- **Fixed nil image downloads**: Placeholder images for parts and minifigures without images now download correctly
   - Removed early returns that prevented nil image downloads
   - Nil images now properly saved to configured folders (e.g., `/app/data/parts/nil.jpg`)
-- **Fixed error logging for missing files** (from 1.3.1): File not found errors now show actual configured folder paths instead of just URL paths
+- **Fixed error logging for missing files**: File not found errors now show actual configured folder paths instead of just URL paths
   - Added detailed logging showing both file path and configured folder for easier debugging
-- **Fixed minifigure filters in client-side pagination mode** (from 1.3.1): Owner and other filters now work correctly when server-side pagination is disabled
+- **Fixed minifigure filters in client-side pagination mode**: Owner and other filters now work correctly when server-side pagination is disabled
   - Aligned filter behavior with parts page (applies filters server-side, then loads filtered data for client-side search)
 
 ## 1.3

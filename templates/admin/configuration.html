@@ -561,6 +561,22 @@
 
           <div class="row g-3">
             <div class="col-12">
+              <label for="BK_BADGE_ORDER_GRID" class="form-label">
+                BK_BADGE_ORDER_GRID {{ config_badges('BK_BADGE_ORDER_GRID') }}
+                <div class="text-muted small">Badge order for grid view (comma-separated badge keys)</div>
+              </label>
+              <input type="text" class="form-control config-text" id="BK_BADGE_ORDER_GRID" data-var="BK_BADGE_ORDER_GRID" {{ is_locked('BK_BADGE_ORDER_GRID') }}>
+            </div>
+
+            <div class="col-12">
+              <label for="BK_BADGE_ORDER_DETAIL" class="form-label">
+                BK_BADGE_ORDER_DETAIL {{ config_badges('BK_BADGE_ORDER_DETAIL') }}
+                <div class="text-muted small">Badge order for detail view (comma-separated badge keys)</div>
+              </label>
+              <input type="text" class="form-control config-text" id="BK_BADGE_ORDER_DETAIL" data-var="BK_BADGE_ORDER_DETAIL" {{ is_locked('BK_BADGE_ORDER_DETAIL') }}>
+            </div>
+
+            <div class="col-12">
               <label for="BK_INSTRUCTIONS_ALLOWED_EXTENSIONS" class="form-label">
                 BK_INSTRUCTIONS_ALLOWED_EXTENSIONS {{ config_badges('BK_INSTRUCTIONS_ALLOWED_EXTENSIONS') }}
                 <div class="text-muted small">Allowed file extensions for instructions (comma-separated)</div>

@@ -218,3 +218,69 @@
 {% macro year(year, solo=false, last=false) %}
   {{ badge(check=year, solo=solo, last=last, color='secondary', icon='calendar-line', collapsible='Year:', text=year, alt='Year') }}
 {% endmacro %}
+
+{% macro render_ordered_badges(item, brickset_tags, brickset_owners, brickset_storages, brickset_purchase_locations, solo=false, last=false, context='grid') %}
+  {# Get badge order from config based on context (grid or detail) #}
+  {% if context == 'detail' %}
+    {% set badge_order = config.get('BADGE_ORDER_DETAIL', ['theme', 'tag', 'year', 'parts', 'instance_count', 'total_minifigures', 'total_missing', 'total_damaged', 'owner', 'storage', 'purchase_date', 'purchase_location', 'purchase_price', 'instructions', 'rebrickable', 'bricklink']) %}
+  {% else %}
+    {% set badge_order = config.get('BADGE_ORDER_GRID', ['theme', 'year', 'parts', 'total_minifigures', 'owner']) %}
+  {% endif %}
+
+  {# Render each badge in the configured order #}
+  {% for badge_key in badge_order %}
+    {% if badge_key == 'theme' %}
+      {{ theme(item.theme.name, solo=solo, last=last) }}
+    {% elif badge_key == 'tag' %}
+      {% for tag_item in brickset_tags %}
+        {{ tag(item, tag_item, solo=solo, last=last) }}
+      {% endfor %}
+    {% elif badge_key == 'year' %}
+      {% if not last %}
+        {{ year(item.fields.year, solo=solo, last=last) }}
+      {% endif %}
+    {% elif badge_key == 'parts' %}
+      {{ parts(item.fields.number_of_parts, solo=solo, last=last) }}
+    {% elif badge_key == 'instance_count' %}
+      {% if item.fields.instance_count is defined and item.fields.instance_count > 1 %}
+        <span class="badge bg-primary"><i class="ri-stack-line"></i> {{ item.fields.instance_count }} copies</span>
+      {% endif %}
+    {% elif badge_key == 'total_minifigures' %}
+      {{ total_minifigures(item.fields.total_minifigures, solo=solo, last=last) }}
+    {% elif badge_key == 'total_missing' %}
+      {{ total_missing(item.fields.total_missing, solo=solo, last=last) }}
+    {% elif badge_key == 'total_damaged' %}
+      {{ total_damaged(item.fields.total_damaged, solo=solo, last=last) }}
+    {% elif badge_key == 'owner' %}
+      {% for owner_item in brickset_owners %}
+        {{ owner(item, owner_item, solo=solo, last=last) }}
+      {% endfor %}
+    {% elif badge_key == 'storage' %}
+      {{ storage(item, brickset_storages, solo=solo, last=last) }}
+    {% elif badge_key == 'purchase_date' %}
+      {% if not last %}
+        {{ purchase_date(item.purchase_date(), solo=solo, last=last, date_max_formatted=item.purchase_date_max_formatted()) }}
+      {% endif %}
+    {% elif badge_key == 'purchase_location' %}
+      {% if not last %}
+        {{ purchase_location(item, brickset_purchase_locations, solo=solo, last=last) }}
+      {% endif %}
+    {% elif badge_key == 'purchase_price' %}
+      {% if not last %}
+        {{ purchase_price(item.purchase_price(), solo=solo, last=last) }}
+      {% endif %}
+    {% elif badge_key == 'instructions' %}
+      {% if not last and not solo %}
+        {{ instructions(item, solo=solo, last=last) }}
+      {% endif %}
+    {% elif badge_key == 'rebrickable' %}
+      {% if not last %}
+        {{ rebrickable(item, solo=solo, last=last) }}
+      {% endif %}
+    {% elif badge_key == 'bricklink' %}
+      {% if not last %}
+        {{ bricklink(item, solo=solo, last=last) }}
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+{% endmacro %}
