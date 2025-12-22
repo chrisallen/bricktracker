@@ -26,6 +26,12 @@
   - Can also be configured via Live Settings page in admin panel under "Default Ordering & Formatting"
   - Changes apply immediately without restart when edited via admin panel
   - 16 available badge types: theme, tag, year, parts, instance_count, total_minifigures, total_missing, total_damaged, owner, storage, purchase_date, purchase_location, purchase_price, instructions, rebrickable, bricklink
+- **Front Page Parts Display**
+  - Added latest/random parts section to the front page alongside sets and minifigures
+  - Shows 6 parts with quantity badges and other relevant information
+  - Respects `BK_RANDOM` configuration (random selection when enabled, latest when disabled)
+  - Respects `BK_HIDE_SPARE_PARTS` configuration
+  - Respects `BK_HIDE_ALL_PARTS` configuration for "All parts" button visibility
 
 
 ## 1.3.1
