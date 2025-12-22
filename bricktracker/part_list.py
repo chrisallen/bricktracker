@@ -254,6 +254,21 @@ class BrickPartList(BrickRecordList[BrickPart]):
 
         return self
 
+    # Last added parts
+    def last(self, /, *, limit: int = 6) -> Self:
+        if current_app.config['RANDOM']:
+            order = 'RANDOM()'
+        else:
+            order = '"bricktracker_parts"."rowid" DESC'
+
+        context = {}
+        if current_app.config.get('HIDE_SPARE_PARTS', False):
+            context['skip_spare_parts'] = True
+
+        self.list(override_query=self.last_query, order=order, limit=limit, **context)
+
+        return self
+
     # Load problematic parts
     def problem(self, /) -> Self:
         self.list(override_query=self.problem_query)

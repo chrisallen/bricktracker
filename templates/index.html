@@ -38,5 +38,22 @@
     {% endfor %}
     </div>
   {% endif %}
+  {% if part_collection | length %}
+    <h2 class="border-bottom lh-base pb-1">
+      <i class="ri-shapes-line"></i> {% if config['RANDOM'] %}Random selection of{% else %}Latest added{% endif %} parts
+      {% if not config['HIDE_ALL_PARTS'] %}
+        <a href="{{ url_for('part.list') }}" class="btn btn-sm btn-primary ms-1">All parts</a>
+      {% endif %}
+      </h2>
+    <div class="row" id="grid">
+    {% for item in part_collection %}
+      <div class="col-md-4 col-xl-2 d-flex align-items-stretch">
+        {% with solo=false, tiny=true, last=true, sets_using=[], minifigures_using=[] %}
+          {% include 'part/card.html' %}
+        {% endwith %}
+      </div>
+    {% endfor %}
+    </div>
+  {% endif %}
 </div>
 {% endblock %}
