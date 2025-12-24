@@ -23,7 +23,6 @@ class BrickPart(RebrickablePart):
 
     # Queries
     insert_query: str = 'part/insert'
-    upsert_query: str = 'part/upsert'
     update_on_refresh_query: str = 'part/update_on_refresh'
     generic_query: str = 'part/select/generic'
     select_query: str = 'part/select/specific'

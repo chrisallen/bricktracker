@@ -2,6 +2,15 @@
 
 ## 1.4
 
+### Bug Fixes
+
+- **Fixed set refresh functionality**: Resolved issues with refreshing sets from Rebrickable
+  - Fixed foreign key constraint errors during refresh by reusing existing set IDs instead of generating new UUIDs
+  - Implemented UPDATE-then-INSERT pattern to properly update existing parts while preserving user tracking data
+  - Part quantities now correctly sync with Rebrickable during refresh
+  - User tracking data (`checked`, `missing`, `damaged`) is now preserved across refreshes
+  - New parts from Rebrickable are added to local inventory during refresh
+
 ### New Features
 
 - **Export Functionality**
