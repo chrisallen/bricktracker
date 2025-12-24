@@ -56,8 +56,23 @@ class BrickSet(RebrickableSet):
             # Grabbing the refresh flag
             refresh: bool = bool(data.get('refresh', False))
 
-            # Generate an UUID for self
-            self.fields.id = str(uuid4())
+            # Generate an UUID for self (or use existing ID if refreshing)
+            if refresh:
+                # Find the existing set by set number to get its ID
+                result = BrickSQL().raw_execute(
+                    'SELECT "id" FROM "bricktracker_sets" WHERE "set" = :set',
+                    {'set': self.fields.set}
+                ).fetchone()
+
+                if result:
+                    # Use existing set ID
+                    self.fields.id = result['id']
+                else:
+                    # If set doesn't exist in database, treat as new import
+                    refresh = False
+                    self.fields.id = str(uuid4())
+            else:
+                self.fields.id = str(uuid4())
 
             # Insert the rebrickable set into database FIRST
             # This must happen before inserting bricktracker_sets due to FK constraint

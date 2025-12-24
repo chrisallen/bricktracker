@@ -23,6 +23,8 @@ class BrickPart(RebrickablePart):
 
     # Queries
     insert_query: str = 'part/insert'
+    upsert_query: str = 'part/upsert'
+    update_on_refresh_query: str = 'part/update_on_refresh'
     generic_query: str = 'part/select/generic'
     select_query: str = 'part/select/specific'
 
@@ -66,7 +68,18 @@ class BrickPart(RebrickablePart):
             # This must happen before inserting into bricktracker_parts due to FK constraint
             self.insert_rebrickable()
 
-            if not refresh:
+            if refresh:
+                # Try to update existing part first (preserves checked, missing, and damaged states)
+                # Note: Cannot defer this because we need to check if rows were affected
+                rows, _ = BrickSQL().execute(
+                    self.update_on_refresh_query,
+                    parameters=self.sql_parameters(),
+                    defer=False
+                )
+                # If no rows were updated, the part doesn't exist yet, so insert it
+                if rows == 0:
+                    self.insert(commit=False)
+            else:
                 # Insert into bricktracker_parts database (child record)
                 self.insert(commit=False)
 
