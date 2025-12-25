@@ -87,12 +87,16 @@ class BrickFilterToggle {
         const icon = toggle.querySelector('i');
 
         if (mode === 'not-equals') {
-            icon.className = 'ri-indeterminate-circle-line';
+            // Use ≠ symbol (text character)
+            icon.className = '';
+            icon.textContent = '≠';
             toggle.classList.remove('btn-outline-secondary');
             toggle.classList.add('btn-outline-danger');
             toggle.title = 'NOT equals (click to toggle)';
         } else {
-            icon.className = 'ri-equal-line';
+            // Use = symbol (text character) instead of icon
+            icon.className = '';
+            icon.textContent = '=';
             toggle.classList.remove('btn-outline-danger');
             toggle.classList.add('btn-outline-secondary');
             toggle.title = 'Equals (click to toggle)';
