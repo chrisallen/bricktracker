@@ -64,3 +64,14 @@
     </div>
   {% endif %}
 {% endmacro %}
+
+{% macro filter_toggle(filter_id) %}
+  <button type="button"
+    class="btn btn-outline-secondary filter-toggle"
+    id="{{ filter_id }}-toggle"
+    data-filter-target="{{ filter_id }}"
+    data-filter-mode="equals"
+    title="Toggle between equals and not equals">
+    <i class="ri-equal-line"></i>
+  </button>
+{% endmacro %}

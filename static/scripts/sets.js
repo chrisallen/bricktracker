@@ -145,12 +145,15 @@ function initializeFilterDropdowns() {
   // Set filter dropdown values from URL parameters
   const urlParams = new URLSearchParams(window.location.search);
 
+  // Helper function to strip "-" prefix from filter values
+  const stripNotPrefix = (value) => value && value.startsWith('-') ? value.substring(1) : value;
+
   // Set each filter dropdown value if the parameter exists
   const yearParam = urlParams.get('year');
   if (yearParam) {
     const yearDropdown = document.getElementById('grid-year');
     if (yearDropdown) {
-      yearDropdown.value = yearParam;
+      yearDropdown.value = stripNotPrefix(yearParam);
     }
   }
 
@@ -158,14 +161,15 @@ function initializeFilterDropdowns() {
   if (themeParam) {
     const themeDropdown = document.getElementById('grid-theme');
     if (themeDropdown) {
+      const cleanTheme = stripNotPrefix(themeParam);
       // Try to set the theme value directly first (for theme names)
-      themeDropdown.value = themeParam;
+      themeDropdown.value = cleanTheme;
 
       // If that didn't work and the param is numeric (theme ID),
       // try to find the corresponding theme name by looking at cards
-      if (themeDropdown.value !== themeParam && /^\d+$/.test(themeParam)) {
+      if (themeDropdown.value !== cleanTheme && /^\d+$/.test(cleanTheme)) {
         // Look for a card with this theme ID and get its theme name
-        const cardWithTheme = document.querySelector(`[data-theme-id="${themeParam}"]`);
+        const cardWithTheme = document.querySelector(`[data-theme-id="${cleanTheme}"]`);
         if (cardWithTheme) {
           const themeName = cardWithTheme.getAttribute('data-theme');
           if (themeName) {
@@ -180,7 +184,7 @@ function initializeFilterDropdowns() {
   if (statusParam) {
     const statusDropdown = document.getElementById('grid-status');
     if (statusDropdown) {
-      statusDropdown.value = statusParam;
+      statusDropdown.value = stripNotPrefix(statusParam);
     }
   }
 
@@ -188,7 +192,7 @@ function initializeFilterDropdowns() {
   if (ownerParam) {
     const ownerDropdown = document.getElementById('grid-owner');
     if (ownerDropdown) {
-      ownerDropdown.value = ownerParam;
+      ownerDropdown.value = stripNotPrefix(ownerParam);
     }
   }
 
@@ -196,7 +200,7 @@ function initializeFilterDropdowns() {
   if (purchaseLocationParam) {
     const purchaseLocationDropdown = document.getElementById('grid-purchase-location');
     if (purchaseLocationDropdown) {
-      purchaseLocationDropdown.value = purchaseLocationParam;
+      purchaseLocationDropdown.value = stripNotPrefix(purchaseLocationParam);
     }
   }
 
@@ -204,7 +208,7 @@ function initializeFilterDropdowns() {
   if (storageParam) {
     const storageDropdown = document.getElementById('grid-storage');
     if (storageDropdown) {
-      storageDropdown.value = storageParam;
+      storageDropdown.value = stripNotPrefix(storageParam);
     }
   }
 
@@ -212,7 +216,7 @@ function initializeFilterDropdowns() {
   if (tagParam) {
     const tagDropdown = document.getElementById('grid-tag');
     if (tagDropdown) {
-      tagDropdown.value = tagParam;
+      tagDropdown.value = stripNotPrefix(tagParam);
     }
   }
 }
@@ -221,6 +225,9 @@ function initializeClientSideFilterDropdowns() {
   // Set filter dropdown values from URL parameters and trigger filtering for client-side mode
   const urlParams = new URLSearchParams(window.location.search);
   let needsFiltering = false;
+
+  // Helper function to strip "-" prefix from filter values
+  const stripNotPrefix = (value) => value && value.startsWith('-') ? value.substring(1) : value;
 
   // Check if we have any filter parameters to avoid flash of all content
   const hasFilterParams = urlParams.has('year') || urlParams.has('theme') || urlParams.has('storage') || urlParams.has('purchase_location');
@@ -238,7 +245,7 @@ function initializeClientSideFilterDropdowns() {
   if (yearParam) {
     const yearDropdown = document.getElementById('grid-year');
     if (yearDropdown) {
-      yearDropdown.value = yearParam;
+      yearDropdown.value = stripNotPrefix(yearParam);
       needsFiltering = true;
     }
   }
@@ -248,16 +255,17 @@ function initializeClientSideFilterDropdowns() {
   if (themeParam) {
     const themeDropdown = document.getElementById('grid-theme');
     if (themeDropdown) {
-      if (/^\d+$/.test(themeParam)) {
+      const cleanTheme = stripNotPrefix(themeParam);
+      if (/^\d+$/.test(cleanTheme)) {
         // Theme parameter is an ID, need to convert to theme name by looking at cards
-        const themeNameFromId = findThemeNameById(themeParam);
+        const themeNameFromId = findThemeNameById(cleanTheme);
         if (themeNameFromId) {
           themeDropdown.value = themeNameFromId;
           needsFiltering = true;
         }
       } else {
         // Theme parameter is already a name
-        themeDropdown.value = themeParam.toLowerCase();
+        themeDropdown.value = cleanTheme.toLowerCase();
         needsFiltering = true;
       }
     }
@@ -268,7 +276,7 @@ function initializeClientSideFilterDropdowns() {
   if (storageParam) {
     const storageDropdown = document.getElementById('grid-storage');
     if (storageDropdown) {
-      storageDropdown.value = storageParam;
+      storageDropdown.value = stripNotPrefix(storageParam);
       needsFiltering = true;
     }
   }
@@ -278,7 +286,7 @@ function initializeClientSideFilterDropdowns() {
   if (purchaseLocationParam) {
     const purchaseLocationDropdown = document.getElementById('grid-purchase-location');
     if (purchaseLocationDropdown) {
-      purchaseLocationDropdown.value = purchaseLocationParam;
+      purchaseLocationDropdown.value = stripNotPrefix(purchaseLocationParam);
       needsFiltering = true;
     }
   }
@@ -343,14 +351,30 @@ function setupPaginationFilterDropdowns() {
   function performServerFilter() {
     const currentUrl = new URL(window.location);
 
-    // Get all filter values
-    const statusFilter = document.getElementById('grid-status')?.value || '';
-    const themeFilter = document.getElementById('grid-theme')?.value || '';
-    const yearFilter = document.getElementById('grid-year')?.value || '';
-    const ownerFilter = document.getElementById('grid-owner')?.value || '';
-    const purchaseLocationFilter = document.getElementById('grid-purchase-location')?.value || '';
-    const storageFilter = document.getElementById('grid-storage')?.value || '';
-    const tagFilter = document.getElementById('grid-tag')?.value || '';
+    // Get all filter values (using BrickFilterToggle helper to include "-" prefix if in NOT mode)
+    const statusSelect = document.getElementById('grid-status');
+    const themeSelect = document.getElementById('grid-theme');
+    const yearSelect = document.getElementById('grid-year');
+    const ownerSelect = document.getElementById('grid-owner');
+    const purchaseLocationSelect = document.getElementById('grid-purchase-location');
+    const storageSelect = document.getElementById('grid-storage');
+    const tagSelect = document.getElementById('grid-tag');
+
+    // Helper to safely get filter value with NOT mode support
+    const getFilterValue = (select) => {
+      if (!select) return '';
+      return typeof BrickFilterToggle !== 'undefined'
+        ? BrickFilterToggle.getFilterValue(select)
+        : select.value;
+    };
+
+    const statusFilter = getFilterValue(statusSelect);
+    const themeFilter = getFilterValue(themeSelect);
+    const yearFilter = getFilterValue(yearSelect);
+    const ownerFilter = getFilterValue(ownerSelect);
+    const purchaseLocationFilter = getFilterValue(purchaseLocationSelect);
+    const storageFilter = getFilterValue(storageSelect);
+    const tagFilter = getFilterValue(tagSelect);
 
     // Update URL parameters
     if (statusFilter) {
@@ -746,6 +770,8 @@ function initializeClearFiltersButton() {
         const dropdown = document.getElementById(dropdownId);
         if (dropdown) {
           dropdown.value = '';
+          // Trigger change event to reset toggle button state
+          dropdown.dispatchEvent(new Event('change'));
         }
       });
 
