@@ -41,6 +41,14 @@
   - Respects `BK_RANDOM` configuration (random selection when enabled, latest when disabled)
   - Respects `BK_HIDE_SPARE_PARTS` configuration
   - Respects `BK_HIDE_ALL_PARTS` configuration for "All parts" button visibility
+- **NOT Filter Toggle Buttons**
+  - Added toggle buttons next to all filter dropdowns to switch between "equals" and "not equals" modes
+  - Visual feedback: Button displays red with "not equals" icon (≠) when in NOT mode
+  - Works with all filter types: Status, Theme, Owner, Storage, Purchase Location, Tag, and Year
+  - Supports both client-side and server-side pagination modes
+  - Filter chains persist NOT states across page reloads via URL parameters (e.g., `?theme=-frozen&status=-has-missing`)
+  - Clear filters button resets all toggle states to equals mode
+  - Enables complex filter combinations like "Show me 2025 sets that are NOT Frozen theme AND have missing pieces"
 
 
 ## 1.3.1
