@@ -38,6 +38,11 @@ class BrickChanger {
                 listener = "change";
             break;
 
+            case "TEXTAREA":
+                this.html_type = "textarea";
+                listener = "change";
+            break;
+
             default:
                 throw Error(`Unsupported HTML tag type for BrickChanger: ${this.html_element.tagName}`);
         }
@@ -131,6 +136,7 @@ class BrickChanger {
 
                 case "text":
                 case "select":
+                case "textarea":
                     value = this.html_element.value;
                 break;
 

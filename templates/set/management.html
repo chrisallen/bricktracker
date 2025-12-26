@@ -34,6 +34,9 @@
       <hr>
       <a href="{{ url_for('admin.admin', open_purchase_location=true) }}" class="btn btn-primary" role="button"><i class="ri-settings-4-line"></i> Manage the set purchase locations</a>
     {{ accordion.footer() }}
+    {{ accordion.header('Notes', 'notes', 'set-management', icon='sticky-note-line') }}
+      {{ form.textarea('Notes', item.fields.id, 'description', item.url_for_description(), item.fields.description, rows=4, delete=delete) }}
+    {{ accordion.footer() }}
     {{ accordion.header('Storage', 'storage', 'set-management', icon='archive-2-line') }}
       {% if brickset_storages | length %}
       {{ form.select('Storage', item.fields.id, brickset_storages.as_prefix(), brickset_storages.url_for_set_value(item.fields.id), item.fields.storage, brickset_storages, icon='building-line', delete=delete) }}

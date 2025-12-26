@@ -30,6 +30,7 @@ class BrickSet(RebrickableSet):
     insert_query: str = 'set/insert'
     update_purchase_date_query: str = 'set/update/purchase_date'
     update_purchase_price_query: str = 'set/update/purchase_price'
+    update_description_query: str = 'set/update/description'
 
     # Delete a set
     def delete(self, /) -> None:
@@ -370,3 +371,36 @@ class BrickSet(RebrickableSet):
     # Update purchase price url
     def url_for_purchase_price(self, /) -> str:
         return url_for('set.update_purchase_price', id=self.fields.id)
+
+    # Update description
+    def update_description(self, json: Any | None, /) -> Any:
+        value = json.get('value', None)  # type: ignore
+
+        if value == '':
+            value = None
+
+        self.fields.description = value
+
+        rows, _ = BrickSQL().execute_and_commit(
+            self.update_description_query,
+            parameters=self.sql_parameters()
+        )
+
+        if rows != 1:
+            raise DatabaseException('Could not update the description for set {set} ({id})'.format(  # noqa: E501
+                set=self.fields.set,
+                id=self.fields.id,
+            ))
+
+        # Info
+        logger.info('Description changed to "{value}" for set {set} ({id})'.format(  # noqa: E501
+            value=value,
+            set=self.fields.set,
+            id=self.fields.id,
+        ))
+
+        return value
+
+    # Update description url
+    def url_for_description(self, /) -> str:
+        return url_for('set.update_description', id=self.fields.id)
