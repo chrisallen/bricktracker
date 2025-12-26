@@ -68,13 +68,23 @@ class BrickPart(RebrickablePart):
             self.insert_rebrickable()
 
             if refresh:
+                params = self.sql_parameters()
+
+                # Track this part in the refresh temp table (for orphan cleanup later)
+                BrickSQL().execute(
+                    'part/track_refresh_part',
+                    parameters=params,
+                    defer=False
+                )
+
                 # Try to update existing part first (preserves checked, missing, and damaged states)
                 # Note: Cannot defer this because we need to check if rows were affected
                 rows, _ = BrickSQL().execute(
                     self.update_on_refresh_query,
-                    parameters=self.sql_parameters(),
+                    parameters=params,
                     defer=False
                 )
+
                 # If no rows were updated, the part doesn't exist yet, so insert it
                 if rows == 0:
                     self.insert(commit=False)

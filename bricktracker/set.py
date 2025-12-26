@@ -112,6 +112,12 @@ class BrickSet(RebrickableSet):
                     tag = BrickSetTagList.get(id)
                     tag.update_set_state(self, state=True, commit=False)
 
+            # If refreshing, prepare temp table for tracking parts across both set and minifigs
+            if refresh:
+                sql = BrickSQL()
+                sql.execute('part/create_temp_refresh_tracking_table', defer=False)
+                sql.execute('part/clear_temp_refresh_tracking_table', defer=False)
+
             # Load the inventory
             if not BrickPartList.download(socket, self, refresh=refresh):
                 return False
@@ -119,6 +125,15 @@ class BrickSet(RebrickableSet):
             # Load the minifigures
             if not BrickMinifigureList.download(socket, self, refresh=refresh):
                 return False
+
+            # If refreshing, clean up orphaned parts after all parts have been processed
+            if refresh:
+                # Delete orphaned parts (parts that weren't in the API response)
+                BrickSQL().execute(
+                    'part/delete_untracked_parts',
+                    parameters={'id': self.fields.id},
+                    defer=False
+                )
 
             # Commit the transaction to the database
             socket.auto_progress(

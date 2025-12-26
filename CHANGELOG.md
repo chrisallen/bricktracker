@@ -10,6 +10,9 @@
   - Part quantities now correctly sync with Rebrickable during refresh
   - User tracking data (`checked`, `missing`, `damaged`) is now preserved across refreshes
   - New parts from Rebrickable are added to local inventory during refresh
+  - Orphaned parts (parts no longer in Rebrickable's inventory) are now properly removed during refresh
+  - Refresh now works correctly for both set parts and minifigure parts
+  - Uses temporary tracking table to identify which parts are still valid before cleanup
 
 ### New Features
 
