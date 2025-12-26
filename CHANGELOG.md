@@ -49,6 +49,20 @@
   - Filter chains persist NOT states across page reloads via URL parameters (e.g., `?theme=-frozen&status=-has-missing`)
   - Clear filters button resets all toggle states to equals mode
   - Enables complex filter combinations like "Show me 2025 sets that are NOT Frozen theme AND have missing pieces"
+- **Notes/Comments Field**
+  - Added general notes field to set details for storing custom notes and comments
+  - Accessible via Management -> Notes accordion section on set detail pages
+  - Auto-save functionality with visual feedback (save icon updates on change)
+  - Notes display prominently below badges on set cards when populated
+  - Supports multi-line text input with configurable row height
+  - Clear button to quickly remove notes
+- **Bulk Set Refresh**
+  - Added batch refresh functionality for updating multiple sets at once
+  - New "Bulk Refresh" button appears on Admin -> Sets needing refresh page
+  - Pre-populates text-area with comma-separated list of all sets needing refresh
+  - Follows same pattern as bulk add with progress tracking and set card preview
+  - Shows real-time progress with current set being processed
+  - Failed sets remain in input field for easy retry
 
 
 ## 1.3.1
