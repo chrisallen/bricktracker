@@ -1,0 +1,100 @@
+{% import 'macro/accordion.html' as accordion %}
+
+{% extends 'base.html' %}
+
+{% block title %} - Bulk refresh sets{% endblock %}
+
+{% block main %}
+<div class="container">
+  <div class="alert alert-info" role="alert">
+    <h4 class="alert-heading">Bulk Refresh Sets</h4>
+    <p>This page allows you to refresh multiple sets at once. Sets needing refresh: <strong>{{ refresh_count }}</strong></p>
+    <p class="mb-0">
+      <a href="{{ url_for('admin_set.refresh') }}" class="btn btn-sm btn-outline-info">
+        <i class="ri-arrow-left-line"></i> Back to Refresh List
+      </a>
+    </p>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <div class="card mb-3">
+        <div class="card-header">
+          <h5 class="mb-0">
+            <i class="ri-refresh-line"></i> Bulk Refresh Sets
+          </h5>
+        </div>
+        <div class="card-body">
+          <div id="add-fail" class="alert alert-danger d-none" role="alert"></div>
+          <div id="add-complete"></div>
+
+          <div class="mb-3">
+            <label for="add-set" class="form-label">
+              List of sets to refresh (separated by comma)
+            </label>
+            <textarea
+              class="form-control"
+              id="add-set"
+              rows="4"
+              placeholder="10255-1, 21005-1, 71043-1, ...">{{ set_list }}</textarea>
+            <small class="form-text text-muted">
+              The list above contains all {{ refresh_count }} sets that need refreshing. You can edit it before starting.
+            </small>
+          </div>
+
+          <div class="form-check mb-3">
+            <input type="checkbox" class="form-check-input" id="add-no-confirm" checked disabled>
+            <label class="form-check-label" for="add-no-confirm">
+              Refresh without confirmation
+            </label>
+          </div>
+
+          <hr>
+
+          <div class="mb-3">
+            <p>
+              Progress <span id="add-count"></span>
+              <span id="add-spinner" class="d-none">
+                <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                <span class="visually-hidden" role="status">Loading...</span>
+              </span>
+            </p>
+            <div id="add-progress" class="progress" role="progressbar">
+              <div id="add-progress-bar" class="progress-bar" style="width: 0%"></div>
+            </div>
+            <p id="add-progress-message" class="text-center d-none"></p>
+          </div>
+
+          <div id="add-card" class="d-flex d-none justify-content-center">
+            <div class="card mb-3 col-6">
+              <div class="card-header">
+                <h5 class="mb-0">
+                  <span class="badge text-bg-secondary fw-normal">
+                    <i class="ri-hashtag"></i> <span id="add-card-set"></span>
+                  </span>
+                  <span id="add-card-name"></span>
+                </h5>
+              </div>
+              <div id="add-card-image-container" class="card-img">
+                <img id="add-card-image" loading="lazy">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-footer text-end">
+          <span id="add-status-icon" class="me-1"></span>
+          <span id="add-status" class="me-1"></span>
+          <button id="add" type="button" class="btn btn-primary">
+            <i class="ri-refresh-line"></i> Start Bulk Refresh
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% with id='add', bulk=true, refresh=true %}
+  {% include 'set/socket.html' %}
+{% endwith %}
+{% endblock %}
