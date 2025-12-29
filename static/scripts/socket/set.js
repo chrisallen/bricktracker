@@ -215,7 +215,10 @@ class BrickSetSocket extends BrickSocket {
 
         if (this.html_input) {
             const value = this.html_input.value;
-            this.set_list = value.split(",").map((el) => el.trim())
+            // Split by comma, trim whitespace, and filter out empty strings
+            this.set_list = value.split(",")
+                .map((el) => el.trim())
+                .filter((el) => el !== "")
         }
     }
 
