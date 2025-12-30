@@ -57,6 +57,8 @@ LIVE_CHANGEABLE_VARS: Final[List[str]] = [
     # Badge order preferences
     'BK_BADGE_ORDER_GRID',
     'BK_BADGE_ORDER_DETAIL',
+    'BK_SHOW_NOTES_GRID',
+    'BK_SHOW_NOTES_DETAIL',
     # Default ordering and formatting
     'BK_INSTRUCTIONS_ALLOWED_EXTENSIONS',
     'BK_MINIFIGURES_DEFAULT_ORDER',

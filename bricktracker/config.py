@@ -99,4 +99,6 @@ CONFIG: Final[list[dict[str, Any]]] = [
     {'n': 'DARK_MODE', 'c': bool},
     {'n': 'BADGE_ORDER_GRID', 'd': ['theme', 'year', 'parts', 'total_minifigures', 'owner'], 'c': list},
     {'n': 'BADGE_ORDER_DETAIL', 'd': ['theme', 'tag', 'year', 'parts', 'instance_count', 'total_minifigures', 'total_missing', 'total_damaged', 'owner', 'storage', 'purchase_date', 'purchase_location', 'purchase_price', 'instructions', 'rebrickable', 'bricklink'], 'c': list},
+    {'n': 'SHOW_NOTES_GRID', 'd': False, 'c': bool},
+    {'n': 'SHOW_NOTES_DETAIL', 'd': True, 'c': bool},
 ]

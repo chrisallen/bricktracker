@@ -13,6 +13,15 @@
   - Orphaned parts (parts no longer in Rebrickable's inventory) are now properly removed during refresh
   - Refresh now works correctly for both set parts and minifigure parts
   - Uses temporary tracking table to identify which parts are still valid before cleanup
+- **Fixed bulk import hanging on empty set numbers**: Resolved issue where trailing commas in bulk import input would cause infinite loops
+  - Empty strings from trailing commas (e.g., `"10312, 21348, "`) are now filtered out before processing
+  - Prevents "Set number cannot be empty" errors from blocking the bulk import queue
+- **Added notes display toggles**: Added configuration options to show/hide notes on grid and detail views
+  - New `BK_SHOW_NOTES_GRID` setting (default: `false`) - controls whether notes appear on grid view cards
+  - New `BK_SHOW_NOTES_DETAIL` setting (default: `true`) - controls whether notes appear on set detail pages
+  - Notes display as an info alert box below badges when enabled
+  - Both settings can be toggled in Admin → Live Settings panel without container restart
+  - Fixed consolidated SQL query to include description field for proper notes display in server-side pagination
 
 ### New Features
 

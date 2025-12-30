@@ -576,6 +576,26 @@
               <input type="text" class="form-control config-text" id="BK_BADGE_ORDER_DETAIL" data-var="BK_BADGE_ORDER_DETAIL" {{ is_locked('BK_BADGE_ORDER_DETAIL') }}>
             </div>
 
+            <div class="col-md-6">
+              <div class="form-check form-switch">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_SHOW_NOTES_GRID" data-var="BK_SHOW_NOTES_GRID" {{ is_locked('BK_SHOW_NOTES_GRID') }}>
+                <label class="form-check-label" for="BK_SHOW_NOTES_GRID">
+                  BK_SHOW_NOTES_GRID {{ config_badges('BK_SHOW_NOTES_GRID') }}
+                  <div class="text-muted small">Show notes on grid view cards</div>
+                </label>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="form-check form-switch">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_SHOW_NOTES_DETAIL" data-var="BK_SHOW_NOTES_DETAIL" {{ is_locked('BK_SHOW_NOTES_DETAIL') }}>
+                <label class="form-check-label" for="BK_SHOW_NOTES_DETAIL">
+                  BK_SHOW_NOTES_DETAIL {{ config_badges('BK_SHOW_NOTES_DETAIL') }}
+                  <div class="text-muted small">Show notes on set detail page</div>
+                </label>
+              </div>
+            </div>
+
             <div class="col-12">
               <label for="BK_INSTRUCTIONS_ALLOWED_EXTENSIONS" class="form-label">
                 BK_INSTRUCTIONS_ALLOWED_EXTENSIONS {{ config_badges('BK_INSTRUCTIONS_ALLOWED_EXTENSIONS') }}

@@ -19,7 +19,8 @@ SELECT
     MIN("bricktracker_sets"."purchase_date") AS "purchase_date",
     MAX("bricktracker_sets"."purchase_date") AS "purchase_date_max",
     REPLACE(GROUP_CONCAT(DISTINCT "bricktracker_sets"."purchase_location"), ',', '|') AS "purchase_location",
-    ROUND(AVG("bricktracker_sets"."purchase_price"), 1) AS "purchase_price"
+    ROUND(AVG("bricktracker_sets"."purchase_price"), 1) AS "purchase_price",
+    (SELECT "description" FROM "bricktracker_sets" WHERE "set" = "rebrickable_sets"."set" LIMIT 1) AS "description"
     {% block owners %}
         {% if owners_dict %}
             {% for column, uuid in owners_dict.items() %}
