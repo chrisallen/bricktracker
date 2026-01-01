@@ -65,6 +65,8 @@ class BrickSocket(object):
         )
 
         # Inject CORS if a domain is defined
+        # Note: For reverse proxy deployments, leave BK_DOMAIN_NAME empty to allow all origins
+        # When empty, Socket.IO defaults to permissive CORS which works with reverse proxies
         if app.config['DOMAIN_NAME'] != '':
             kwargs['cors_allowed_origins'] = app.config['DOMAIN_NAME']
 
@@ -75,6 +77,8 @@ class BrickSocket(object):
             **kwargs,
             path=app.config['SOCKET_PATH'],
             async_mode='gevent',
+            # Enable detailed logging in debug mode for troubleshooting
+            logger=app.config['DEBUG'],
             # Ping/pong settings for mobile network resilience
             ping_timeout=30,  # Wait 30s for pong response before disconnecting
             ping_interval=25,  # Send ping every 25s to keep connection alive

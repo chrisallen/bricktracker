@@ -13,6 +13,10 @@
   - Orphaned parts (parts no longer in Rebrickable's inventory) are now properly removed during refresh
   - Refresh now works correctly for both set parts and minifigure parts
   - Uses temporary tracking table to identify which parts are still valid before cleanup
+- **Fixed Socket.IO connections behind reverse proxies**: Resolved WebSocket disconnection issues when using Traefik, Nginx, or other reverse proxies
+  - Root cause: Setting `BK_DOMAIN_NAME` enables strict CORS checking that fails with reverse proxies
+  - Solution: Leave `BK_DOMAIN_NAME` empty for reverse proxy deployments (allows all origins by default)
+  - Added debug logging for Socket.IO connections to help troubleshoot proxy issues
 - **Fixed bulk import hanging on empty set numbers**: Resolved issue where trailing commas in bulk import input would cause infinite loops
   - Empty strings from trailing commas (e.g., `"10312, 21348, "`) are now filtered out before processing
   - Prevents "Set number cannot be empty" errors from blocking the bulk import queue

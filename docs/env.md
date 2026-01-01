@@ -74,7 +74,7 @@
 ## API and Network Configuration
 | Variable | Purpose | Default | Required |
 |----------|---------|----------|-----------|
-| `BK_DOMAIN_NAME` | CORS origin restriction | None | No |
+| `BK_DOMAIN_NAME` | Socket.IO CORS origin restriction (leave empty for reverse proxy) | None | No |
 | `BK_REBRICKABLE_PAGE_SIZE` | Items per API call | `100` | No |
 | `BK_SOCKET_NAMESPACE` | Socket.IO namespace | `bricksocket` | No |
 | `BK_SOCKET_PATH` | Socket.IO path | `/bricksocket/` | No |
