@@ -165,10 +165,26 @@
               </div>
 
               <div class="form-check form-switch">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_HIDE_INDIVIDUAL_MINIFIGURES" data-var="BK_HIDE_INDIVIDUAL_MINIFIGURES" {{ is_locked('BK_HIDE_INDIVIDUAL_MINIFIGURES') }}>
+                <label class="form-check-label" for="BK_HIDE_INDIVIDUAL_MINIFIGURES">
+                  BK_HIDE_INDIVIDUAL_MINIFIGURES {{ config_badges('BK_HIDE_INDIVIDUAL_MINIFIGURES') }}
+                  <div class="text-muted small">Hide individual minifigures page access</div>
+                </label>
+              </div>
+
+              <div class="form-check form-switch">
                 <input class="form-check-input config-toggle" type="checkbox" id="BK_HIDE_ALL_PARTS" data-var="BK_HIDE_ALL_PARTS" {{ is_locked('BK_HIDE_ALL_PARTS') }}>
                 <label class="form-check-label" for="BK_HIDE_ALL_PARTS">
                   BK_HIDE_ALL_PARTS {{ config_badges('BK_HIDE_ALL_PARTS') }}
                   <div class="text-muted small">Hide the "Parts" menu entry</div>
+                </label>
+              </div>
+
+              <div class="form-check form-switch">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_HIDE_INDIVIDUAL_PARTS" data-var="BK_HIDE_INDIVIDUAL_PARTS" {{ is_locked('BK_HIDE_INDIVIDUAL_PARTS') }}>
+                <label class="form-check-label" for="BK_HIDE_INDIVIDUAL_PARTS">
+                  BK_HIDE_INDIVIDUAL_PARTS {{ config_badges('BK_HIDE_INDIVIDUAL_PARTS') }}
+                  <div class="text-muted small">Hide individual parts and part lots dropdown from Parts menu</div>
                 </label>
               </div>
             </div>
@@ -250,6 +266,14 @@
                 <label class="form-check-label" for="BK_HIDE_TABLE_CHECKED_PARTS">
                   BK_HIDE_TABLE_CHECKED_PARTS {{ config_badges('BK_HIDE_TABLE_CHECKED_PARTS') }}
                   <div class="text-muted small">Hide the "Checked" column in parts tables</div>
+                </label>
+              </div>
+
+              <div class="form-check form-switch">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_DISABLE_QUICK_ADD_INDIVIDUAL_PARTS" data-var="BK_DISABLE_QUICK_ADD_INDIVIDUAL_PARTS" {{ is_locked('BK_DISABLE_QUICK_ADD_INDIVIDUAL_PARTS') }}>
+                <label class="form-check-label" for="BK_DISABLE_QUICK_ADD_INDIVIDUAL_PARTS">
+                  BK_DISABLE_QUICK_ADD_INDIVIDUAL_PARTS {{ config_badges('BK_DISABLE_QUICK_ADD_INDIVIDUAL_PARTS') }}
+                  <div class="text-muted small">Disable quick-add individual parts from set parts tables</div>
                 </label>
               </div>
             </div>
@@ -823,6 +847,24 @@
                 <label class="form-check-label" for="static-BK_DEBUG">
                   BK_DEBUG {{ config_badges('BK_DEBUG') }}
                   <div class="text-muted small">Enable debug mode</div>
+                </label>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-check form-switch">
+                <input class="form-check-input config-static-toggle" type="checkbox" id="static-BK_DISABLE_INDIVIDUAL_PARTS" data-var="BK_DISABLE_INDIVIDUAL_PARTS" {{ is_locked('BK_DISABLE_INDIVIDUAL_PARTS') }}>
+                <label class="form-check-label" for="static-BK_DISABLE_INDIVIDUAL_PARTS">
+                  BK_DISABLE_INDIVIDUAL_PARTS {{ config_badges('BK_DISABLE_INDIVIDUAL_PARTS') }}
+                  <div class="text-muted small">Disable individual parts feature (blocks adding/editing, allows viewing existing)</div>
+                </label>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-check form-switch">
+                <input class="form-check-input config-static-toggle" type="checkbox" id="static-BK_DISABLE_INDIVIDUAL_MINIFIGURES" data-var="BK_DISABLE_INDIVIDUAL_MINIFIGURES" {{ is_locked('BK_DISABLE_INDIVIDUAL_MINIFIGURES') }}>
+                <label class="form-check-label" for="static-BK_DISABLE_INDIVIDUAL_MINIFIGURES">
+                  BK_DISABLE_INDIVIDUAL_MINIFIGURES {{ config_badges('BK_DISABLE_INDIVIDUAL_MINIFIGURES') }}
+                  <div class="text-muted small">Disable individual minifigures feature (blocks adding/editing, allows viewing existing)</div>
                 </label>
               </div>
             </div>

@@ -1,0 +1,34 @@
+{% import 'macro/badge.html' as badge %}
+{% import 'macro/card.html' as card %}
+{% import 'macro/form.html' as form %}
+
+<div class="card mb-3 flex-fill">
+  {{ card.header(item, item.fields.name, solo=false, identifier=item.fields.figure, icon='user-line') }}
+  {{ card.image(item, solo=false, last=false, caption=item.fields.name, alt=item.fields.figure, medium=false) }}
+  <div class="card-body border-bottom p-1">
+    {# Always show quantity first #}
+    {{ badge.quantity(item.fields.quantity, solo=false, last=false) }}
+    {# Render all other badges in configured order #}
+    {{ badge.render_ordered_badges(item, brickset_tags, brickset_owners, brickset_storages, brickset_purchase_locations, solo=false, last=false, context='grid') }}
+    {# Description badge at end if exists #}
+    {% if item.fields.description %}
+      <span class="badge text-bg-light text-dark text-wrap" data-bs-toggle="tooltip" title="{{ item.fields.description }}">
+        <i class="ri-file-text-line"></i> {{ item.fields.description[:config.get('DESCRIPTION_BADGE_MAX_LENGTH', 50)] }}{% if item.fields.description | length > config.get('DESCRIPTION_BADGE_MAX_LENGTH', 50) %}...{% endif %}
+      </span>
+    {% endif %}
+  </div>
+  {% if g.login.is_authenticated() %}
+  <div class="card-footer p-1 border-bottom">
+    {{ form.input('Qty', item.fields.id, 'quantity', item.url_for_quantity(), item.fields.quantity, icon='functions') }}
+  </div>
+  {% endif %}
+  {% if brickset_statuses | length %}
+    <ul class="list-group list-group-flush card-check border-bottom-0">
+      {% for status in brickset_statuses %}
+        <li class="d-flex list-group-item p-1 text-nowrap">
+          {{ form.checkbox(status.fields.name, item.fields.id, status.as_dataset(), status.url_for_individual_minifigure_state(item.fields.id), item.fields[status.as_column()]) }}
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+</div>

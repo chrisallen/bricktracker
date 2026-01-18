@@ -57,7 +57,7 @@
           <a class="btn border bg-secondary-text" href="{{ details }}">{% if icon %}<i class="ri-{{ icon }}"></i>{% endif %} Details</a>
         </p>
       {% endif %}
-      {% with solo=true, all=false, accordion_id=id %}
+      {% with solo=true, all=false, accordion_id=id, read_only=read_only, hamburger_menu=hamburger_menu %}
         {% include target %}
       {% endwith %}
     {{ footer() }}

@@ -154,3 +154,74 @@
     <div class="card-footer"></div>
   {% endif %}
 </div>
+
+{% if solo and g.login.is_authenticated() %}
+<!-- Quick Add Individual Part Modal -->
+<div class="modal fade" id="quickAddIndividualPartModal" tabindex="-1" aria-labelledby="quickAddModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="quickAddModalLabel">Add to Individual Parts Inventory</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="quickAddForm">
+          <!-- Part info (read-only) -->
+          <div class="mb-3">
+            <label class="form-label fw-bold">Part</label>
+            <div class="d-flex align-items-center">
+              <img id="quickAddPartImage" src="" alt="" style="max-width: 100px; max-height: 100px;" class="me-3">
+              <div>
+                <div id="quickAddPartName" class="fw-bold"></div>
+                <div id="quickAddPartNumber" class="text-muted small"></div>
+                <div id="quickAddPartColor" class="text-muted small"></div>
+              </div>
+            </div>
+          </div>
+
+          <input type="hidden" id="quickAddPart" name="part">
+          <input type="hidden" id="quickAddColor" name="color">
+
+          <!-- Quantity -->
+          <div class="mb-3">
+            <label for="quickAddQuantity" class="form-label">Quantity <span class="text-danger">*</span></label>
+            <input type="number" class="form-control" id="quickAddQuantity" name="quantity" value="1" min="1" required>
+          </div>
+
+          <!-- Storage (optional) -->
+          <div class="mb-3">
+            <label for="quickAddStorage" class="form-label">Storage (optional)</label>
+            <select class="form-select" id="quickAddStorage" name="storage">
+              <option value="">-- No storage --</option>
+              {% for storage in brickset_storages %}
+                <option value="{{ storage.fields.id }}">{{ storage.fields.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Purchase Location (optional) -->
+          <div class="mb-3">
+            <label for="quickAddPurchaseLocation" class="form-label">Purchase Location (optional)</label>
+            <select class="form-select" id="quickAddPurchaseLocation" name="purchase_location">
+              <option value="">-- No purchase location --</option>
+              {% for location in brickset_purchase_locations %}
+                <option value="{{ location.fields.id }}">{{ location.fields.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Description/Notes (optional) -->
+          <div class="mb-3">
+            <label for="quickAddDescription" class="form-label">Notes (optional)</label>
+            <textarea class="form-control" id="quickAddDescription" name="description" rows="2"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="quickAddSubmit">Add to Inventory</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}

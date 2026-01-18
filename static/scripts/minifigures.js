@@ -93,6 +93,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // Initialize collapsible states (filter and sort)
   initializeCollapsibleStates();
 
+  // Initialize individuals filter
+  initializeIndividualsFilter();
+
   if (searchInput && searchClear) {
     if (isPaginationMode()) {
       // PAGINATION MODE - Server-side search
@@ -174,7 +177,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const clearButton = document.getElementById('table-filter-clear');
   if (clearButton) {
     clearButton.addEventListener('click', () => {
-      window.clearPageFilters('minifigures', ['owner', 'problems', 'theme', 'year']);
+      window.clearPageFilters('minifigures', ['owner', 'problems', 'theme', 'year', 'individuals']);
     });
   }
 });
@@ -190,4 +193,51 @@ function setupSortButtons() {
   };
   // Use shared sort buttons setup from collapsible-state.js
   window.setupSharedSortButtons('minifigures', 'brickTableInstance', columnMap);
+}
+
+// Initialize individuals filter functionality
+function initializeIndividualsFilter() {
+  const individualsFilterButton = document.getElementById('individuals-filter-toggle');
+  if (!individualsFilterButton) return;
+
+  // Check if the filter should be active from URL parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const isIndividualsFilterActive = urlParams.get('individuals') === 'only';
+
+  // Set initial button state
+  if (isIndividualsFilterActive) {
+    individualsFilterButton.classList.remove('btn-outline-secondary');
+    individualsFilterButton.classList.add('btn-secondary');
+  }
+
+  individualsFilterButton.addEventListener('click', () => {
+    const isCurrentlyActive = individualsFilterButton.classList.contains('btn-secondary');
+    const newState = !isCurrentlyActive;
+
+    // Update button appearance
+    if (newState) {
+      individualsFilterButton.classList.remove('btn-outline-secondary');
+      individualsFilterButton.classList.add('btn-secondary');
+    } else {
+      individualsFilterButton.classList.remove('btn-secondary');
+      individualsFilterButton.classList.add('btn-outline-secondary');
+    }
+
+    // Update URL parameter and reload
+    const currentUrl = new URL(window.location);
+
+    if (newState) {
+      currentUrl.searchParams.set('individuals', 'only');
+    } else {
+      currentUrl.searchParams.delete('individuals');
+    }
+
+    // Reset to page 1 when filtering in server-side pagination mode
+    if (isPaginationMode()) {
+      currentUrl.searchParams.set('page', '1');
+    }
+
+    // Navigate to updated URL
+    window.location.href = currentUrl.toString();
+  });
 }

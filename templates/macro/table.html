@@ -32,7 +32,8 @@
       {% if hamburger_menu and g.login.is_authenticated() %}
         {% set show_missing_menu = not config['HIDE_TABLE_MISSING_PARTS'] %}
         {% set show_checked_menu = not config['HIDE_TABLE_CHECKED_PARTS'] %}
-        {% if show_missing_menu or show_checked_menu %}
+        {% set show_quick_add = not config['DISABLE_QUICK_ADD_INDIVIDUAL_PARTS'] and not config['HIDE_INDIVIDUAL_PARTS'] %}
+        {% if show_missing_menu or show_checked_menu or show_quick_add %}
           <th data-table-no-sort-and-search="true" class="no-sort text-end" scope="col">
             <div class="dropdown">
               <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="hamburger-{{ accordion_id }}" data-bs-toggle="dropdown" aria-expanded="false">

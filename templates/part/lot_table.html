@@ -1,0 +1,45 @@
+{% import 'macro/form.html' as form %}
+{% import 'macro/table.html' as table %}
+
+<div class="table-responsive-sm">
+  <table class="table table-striped align-middle sortable mb-0">
+    {{ table.header(color=true, quantity=true, sets=false, minifigures=false, checked=not read_only, hamburger_menu=not read_only, accordion_id=accordion_id|default('')) }}
+    <tbody>
+      {% for item in table_collection %}
+      <tr>
+        {{ table.image(item.url_for_image(), caption=item.fields.name, alt=item.fields.part, accordion=solo) }}
+        <td data-sort="{{ item.fields.name }}">
+          <a class="text-reset" href="{{ item.url() }}">{{ item.fields.name }}</a>
+        </td>
+        <td data-sort="{{ item.fields.color_name }}">
+          {% if item.fields.color_rgb %}<span class="color-rgb color-rgb-table {% if item.fields.color == 9999 %}color-any{% endif %} align-middle border border-black" {% if item.fields.color != 9999 %}style="background-color: #{{ item.fields.color_rgb }};"{% endif %}></span>{% endif %}
+          <span class="align-middle">{{ item.fields.color_name }}</span>
+        </td>
+        <td>{{ item.fields.quantity }}</td>
+        {% if not config['HIDE_TABLE_MISSING_PARTS'] %}
+          <td data-sort="{{ item.fields.missing }}" class="table-td-input">
+            {{ form.input('Missing', item.fields.id, item.html_id('missing'), item.url_for_problem('missing'), item.fields.missing, all=false, read_only=read_only) }}
+          </td>
+        {% endif %}
+        {% if not config['HIDE_TABLE_DAMAGED_PARTS'] %}
+          <td data-sort="{{ item.fields.damaged }}" class="table-td-input">
+            {{ form.input('Damaged', item.fields.id, item.html_id('damaged'), item.url_for_problem('damaged'), item.fields.damaged, all=false, read_only=read_only) }}
+          </td>
+        {% endif %}
+        {% if not config['HIDE_TABLE_CHECKED_PARTS'] and not read_only %}
+          <td class="table-td-input">
+            <center>{{ form.checkbox('', item.fields.id, item.html_id('checked'), item.url_for_checked(), item.fields.checked | default(false), parent='part', delete=read_only) }}</center>
+          </td>
+        {% endif %}
+        {% if g.login.is_authenticated() and not read_only %}
+          {% set show_missing_menu = not config['HIDE_TABLE_MISSING_PARTS'] %}
+          {% set show_checked_menu = not config['HIDE_TABLE_CHECKED_PARTS'] %}
+          {% if show_missing_menu or show_checked_menu %}
+            <td></td>
+          {% endif %}
+        {% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

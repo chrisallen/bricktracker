@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en" data-bs-theme="{{ 'dark' if config.get('DARK_MODE') in [True, 'True', 'true'] else 'light' }}">
-  <head>
+    <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>BrickTracker{% block title %}{% endblock %}</title>
@@ -28,14 +28,90 @@
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             {% for item in config['_NAVBAR'] %}
               {% if item.flag and not config[item.flag] %}
-                <li class="nav-item px-1">
-                  <a {% if request.url_rule.endpoint == item.endpoint %}class="nav-link active" aria-current="page"{% else %}class="nav-link"{% endif %} href="{{ url_for(item.endpoint) }}">
-                    {% if item.icon %}
-                      <i class="ri-{{ item.icon }}"></i>
-                    {% endif %}
-                    {{ item.title }}
-                  </a>
-                </li>
+                {% if item.endpoint == 'add.add' %}
+                  {# Add menu item with optional dropdown for Bulk/Parts #}
+                  {% set has_bulk = not config['HIDE_ADD_BULK_SET'] %}
+                  {% set has_parts = not config['HIDE_INDIVIDUAL_PARTS'] %}
+                  {% if has_bulk or has_parts %}
+                    <li class="nav-item dropdown px-1">
+                      <a {% if request.url_rule.endpoint in ['add.add', 'add.bulk', 'add.parts'] %}class="nav-link active" aria-current="page"{% else %}class="nav-link"{% endif %}
+                         href="{{ url_for(item.endpoint) }}">
+                        {% if item.icon %}
+                          <i class="ri-{{ item.icon }}"></i>
+                        {% endif %}
+                        {{ item.title }}
+                      </a>
+                      <a class="dropdown-toggle dropdown-toggle-split nav-link {% if request.url_rule.endpoint in ['add.add', 'add.bulk', 'add.parts'] %}active{% endif %}"
+                         role="button"
+                         data-bs-toggle="dropdown"
+                         aria-expanded="false">
+                        <span class="visually-hidden">Toggle dropdown</span>
+                      </a>
+                      <ul class="dropdown-menu">
+                        {% if has_bulk %}
+                        <li><a class="dropdown-item" href="{{ url_for('add.bulk') }}"><i class="ri-function-add-line"></i> Bulk add</a></li>
+                        {% endif %}
+                        {% if has_parts %}
+                        <li><a class="dropdown-item" href="{{ url_for('add.parts') }}"><i class="ri-hammer-line"></i> Add parts</a></li>
+                        {% endif %}
+                      </ul>
+                    </li>
+                  {% else %}
+                    {# Just Add link, no dropdown #}
+                    <li class="nav-item px-1">
+                      <a {% if request.url_rule.endpoint == item.endpoint %}class="nav-link active" aria-current="page"{% else %}class="nav-link"{% endif %} href="{{ url_for(item.endpoint) }}">
+                        {% if item.icon %}
+                          <i class="ri-{{ item.icon }}"></i>
+                        {% endif %}
+                        {{ item.title }}
+                      </a>
+                    </li>
+                  {% endif %}
+                {% elif item.endpoint == 'part.list' %}
+                  {# Parts menu item with optional dropdown for Individual Parts/Lots #}
+                  {% set has_individual_parts = not config.get('HIDE_INDIVIDUAL_PARTS', False) %}
+                  {% if has_individual_parts %}
+                    <li class="nav-item dropdown px-1">
+                      <a {% if request.url_rule.endpoint in ['part.list', 'individual_part.list', 'individual_part.list_lots'] %}class="nav-link active" aria-current="page"{% else %}class="nav-link"{% endif %}
+                         href="{{ url_for(item.endpoint) }}">
+                        {% if item.icon %}
+                          <i class="ri-{{ item.icon }}"></i>
+                        {% endif %}
+                        {{ item.title }}
+                      </a>
+                      <a class="dropdown-toggle dropdown-toggle-split nav-link {% if request.url_rule.endpoint in ['part.list', 'individual_part.list', 'individual_part.list_lots'] %}active{% endif %}"
+                         role="button"
+                         data-bs-toggle="dropdown"
+                         aria-expanded="false">
+                        <span class="visually-hidden">Toggle dropdown</span>
+                      </a>
+                      <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ url_for('individual_part.list') }}"><i class="ri-hammer-line"></i> Individual parts</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('individual_part.list_lots') }}"><i class="ri-stack-line"></i> Part lots</a></li>
+                      </ul>
+                    </li>
+                  {% else %}
+                    {# Just Parts link, no dropdown #}
+                    <li class="nav-item px-1">
+                      <a {% if request.url_rule.endpoint == item.endpoint %}class="nav-link active" aria-current="page"{% else %}class="nav-link"{% endif %} href="{{ url_for(item.endpoint) }}">
+                        {% if item.icon %}
+                          <i class="ri-{{ item.icon }}"></i>
+                        {% endif %}
+                        {{ item.title }}
+                      </a>
+                    </li>
+                  {% endif %}
+                {% else %}
+                  {# Regular menu item #}
+                  <li class="nav-item px-1">
+                    <a {% if request.url_rule.endpoint == item.endpoint %}class="nav-link active" aria-current="page"{% else %}class="nav-link"{% endif %} href="{{ url_for(item.endpoint) }}">
+                      {% if item.icon %}
+                        <i class="ri-{{ item.icon }}"></i>
+                      {% endif %}
+                      {{ item.title }}
+                    </a>
+                  </li>
+                {% endif %}
               {% endif %}
             {% endfor %}
           </ul>
@@ -84,7 +160,6 @@
     <!-- BrickTracker scripts -->
     <script src="{{ url_for('static', filename='scripts/collapsible-state.js') }}"></script>
     <script src="{{ url_for('static', filename='scripts/changer.js') }}"></script>
-    <script src="{{ url_for('static', filename='scripts/grid/filter_toggle.js') }}"></script>
     <script src="{{ url_for('static', filename='scripts/grid/filter.js') }}"></script>
     <script src="{{ url_for('static', filename='scripts/grid/grid.js') }}"></script>
     <script src="{{ url_for('static', filename='scripts/grid/sort.js') }}"></script>
@@ -93,7 +168,14 @@
     <script src="{{ url_for('static', filename='scripts/socket/socket.js') }}"></script>
     <script src="{{ url_for('static', filename='scripts/socket/instructions.js') }}"></script>
     <script src="{{ url_for('static', filename='scripts/socket/set.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/socket/minifigure.js') }}"></script>
     <script src="{{ url_for('static', filename='scripts/table.js') }}"></script>
+    {% if request.endpoint == 'add.add' %}
+    <script src="{{ url_for('static', filename='scripts/add.js') }}"></script>
+    {% endif %}
+    {% if request.endpoint == 'add.parts' %}
+    <script src="{{ url_for('static', filename='scripts/add_parts.js') }}"></script>
+    {% endif %}
     {% if request.endpoint == 'minifigure.list' %}
     <script src="{{ url_for('static', filename='scripts/minifigures.js') }}"></script>
     {% endif %}
@@ -110,6 +192,16 @@
     {% if request.endpoint == 'set.details' %}
     <script src="{{ url_for('static', filename='scripts/parts-bulk-operations.js') }}"></script>
     <script src="{{ url_for('static', filename='scripts/set-details.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/quick-add-individual-part.js') }}"></script>
+    {% endif %}
+    {% if request.endpoint == 'part.details' %}
+    <script src="{{ url_for('static', filename='scripts/quick-add-individual-part.js') }}"></script>
+    {% endif %}
+    {% if request.endpoint == 'individual_part.lot_details' %}
+    <script src="{{ url_for('static', filename='scripts/parts-bulk-operations.js') }}"></script>
+    {% endif %}
+    {% if request.endpoint == 'individual_minifigure.details' %}
+    <script src="{{ url_for('static', filename='scripts/parts-bulk-operations.js') }}"></script>
     {% endif %}
     {% if request.endpoint == 'statistics.overview' %}
     <script src="{{ url_for('static', filename='scripts/statistics.js') }}"></script>

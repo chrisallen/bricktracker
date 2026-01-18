@@ -230,27 +230,44 @@
   {# Render each badge in the configured order #}
   {% for badge_key in badge_order %}
     {% if badge_key == 'theme' %}
-      {{ theme(item.theme.name, solo=solo, last=last) }}
+      {# Only sets have themes #}
+      {% if item.theme is defined %}
+        {{ theme(item.theme.name, solo=solo, last=last) }}
+      {% endif %}
     {% elif badge_key == 'tag' %}
       {% for tag_item in brickset_tags %}
         {{ tag(item, tag_item, solo=solo, last=last) }}
       {% endfor %}
     {% elif badge_key == 'year' %}
-      {% if not last %}
+      {# Only sets have years #}
+      {% if not last and item.fields.year is defined %}
         {{ year(item.fields.year, solo=solo, last=last) }}
       {% endif %}
     {% elif badge_key == 'parts' %}
-      {{ parts(item.fields.number_of_parts, solo=solo, last=last) }}
+      {# Only sets and minifigures have number_of_parts #}
+      {% if item.fields.number_of_parts is defined %}
+        {{ parts(item.fields.number_of_parts, solo=solo, last=last) }}
+      {% endif %}
     {% elif badge_key == 'instance_count' %}
+      {# Only consolidated sets have instance_count #}
       {% if item.fields.instance_count is defined and item.fields.instance_count > 1 %}
         <span class="badge bg-primary"><i class="ri-stack-line"></i> {{ item.fields.instance_count }} copies</span>
       {% endif %}
     {% elif badge_key == 'total_minifigures' %}
-      {{ total_minifigures(item.fields.total_minifigures, solo=solo, last=last) }}
+      {# Only sets have total_minifigures #}
+      {% if item.fields.total_minifigures is defined %}
+        {{ total_minifigures(item.fields.total_minifigures, solo=solo, last=last) }}
+      {% endif %}
     {% elif badge_key == 'total_missing' %}
-      {{ total_missing(item.fields.total_missing, solo=solo, last=last) }}
+      {# Sets have total_missing, individual items have missing #}
+      {% if item.fields.total_missing is defined %}
+        {{ total_missing(item.fields.total_missing, solo=solo, last=last) }}
+      {% endif %}
     {% elif badge_key == 'total_damaged' %}
-      {{ total_damaged(item.fields.total_damaged, solo=solo, last=last) }}
+      {# Sets have total_damaged, individual items have damaged #}
+      {% if item.fields.total_damaged is defined %}
+        {{ total_damaged(item.fields.total_damaged, solo=solo, last=last) }}
+      {% endif %}
     {% elif badge_key == 'owner' %}
       {% for owner_item in brickset_owners %}
         {{ owner(item, owner_item, solo=solo, last=last) }}
@@ -258,27 +275,42 @@
     {% elif badge_key == 'storage' %}
       {{ storage(item, brickset_storages, solo=solo, last=last) }}
     {% elif badge_key == 'purchase_date' %}
+      {# Sets and part lots have purchase_date methods, individual parts/minifigures have raw fields #}
       {% if not last %}
-        {{ purchase_date(item.purchase_date(), solo=solo, last=last, date_max_formatted=item.purchase_date_max_formatted()) }}
+        {% if item.purchase_date is defined and item.purchase_date is callable %}
+          {{ purchase_date(item.purchase_date(), solo=solo, last=last, date_max_formatted=item.purchase_date_max_formatted()) }}
+        {% elif item.purchase_date_formatted is defined and item.purchase_date_formatted is callable %}
+          {{ purchase_date(item.purchase_date_formatted(), solo=solo, last=last) }}
+        {% elif item.fields.purchase_date is defined and item.fields.purchase_date %}
+          {{ purchase_date(item.fields.purchase_date, solo=solo, last=last) }}
+        {% endif %}
       {% endif %}
     {% elif badge_key == 'purchase_location' %}
       {% if not last %}
         {{ purchase_location(item, brickset_purchase_locations, solo=solo, last=last) }}
       {% endif %}
     {% elif badge_key == 'purchase_price' %}
+      {# Sets and part lots have purchase_price methods, individual parts/minifigures have raw fields #}
       {% if not last %}
-        {{ purchase_price(item.purchase_price(), solo=solo, last=last) }}
+        {% if item.purchase_price is defined and item.purchase_price is callable %}
+          {{ purchase_price(item.purchase_price(), solo=solo, last=last) }}
+        {% elif item.fields.purchase_price is defined and item.fields.purchase_price %}
+          {{ purchase_price(item.fields.purchase_price, solo=solo, last=last) }}
+        {% endif %}
       {% endif %}
     {% elif badge_key == 'instructions' %}
-      {% if not last and not solo %}
+      {# Only sets have instructions #}
+      {% if not last and not solo and item.instructions is defined %}
         {{ instructions(item, solo=solo, last=last) }}
       {% endif %}
     {% elif badge_key == 'rebrickable' %}
-      {% if not last %}
+      {# Only items with url_for_rebrickable method (sets, parts, minifigures) #}
+      {% if not last and item.url_for_rebrickable is defined %}
         {{ rebrickable(item, solo=solo, last=last) }}
       {% endif %}
     {% elif badge_key == 'bricklink' %}
-      {% if not last %}
+      {# Only items with url_for_bricklink method (sets, parts) #}
+      {% if not last and item.url_for_bricklink is defined %}
         {{ bricklink(item, solo=solo, last=last) }}
       {% endif %}
     {% endif %}
