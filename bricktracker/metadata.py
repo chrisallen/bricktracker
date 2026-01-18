@@ -9,6 +9,8 @@ from .exceptions import DatabaseException, ErrorException, NotFoundException
 from .record import BrickRecord
 from .sql import BrickSQL
 if TYPE_CHECKING:
+    from .individual_minifigure import IndividualMinifigure
+    from .individual_part import IndividualPart
     from .set import BrickSet
 
 logger = logging.getLogger(__name__)
@@ -103,6 +105,26 @@ class BrickMetadata(BrickRecord):
         return url_for(
             self.set_state_endpoint,
             id=id,
+            metadata_id=self.fields.id
+        )
+
+    # URL to change the selected state of this metadata item for an individual part
+    def url_for_individual_part_state(self, part_id: str, /) -> str:
+        # Replace 'set' with 'individual_part' in the endpoint name
+        endpoint = self.set_state_endpoint.replace('set.', 'individual_part.')
+        return url_for(
+            endpoint,
+            id=part_id,
+            metadata_id=self.fields.id
+        )
+
+    # URL to change the selected state of this metadata item for an individual minifigure
+    def url_for_individual_minifigure_state(self, minifigure_id: str, /) -> str:
+        # Replace 'set' with 'individual_minifigure' in the endpoint name
+        endpoint = self.set_state_endpoint.replace('set.', 'individual_minifigure.')
+        return url_for(
+            endpoint,
+            id=minifigure_id,
             metadata_id=self.fields.id
         )
 
@@ -270,3 +292,156 @@ class BrickMetadata(BrickRecord):
         ))
 
         return value
+
+    # Update the selected state of this metadata item for an individual part
+    def update_individual_part_state(
+        self,
+        individual_part: 'IndividualPart',
+        /,
+        *,
+        json: Any | None = None,
+        state: Any | None = None,
+        commit: bool = True
+    ) -> Any:
+        if state is None and json is not None:
+            state = json.get('value', False)
+
+        parameters = self.sql_parameters()
+        parameters['set_id'] = individual_part.fields.id  # set_id parameter accepts any entity id
+        parameters['state'] = state
+
+        # Use the same set query (bricktracker_set_owners/tags/statuses tables accept any entity id)
+        query_name = self.update_set_state_query
+
+        if commit:
+            rows, _ = BrickSQL().execute_and_commit(
+                query_name,
+                parameters=parameters,
+                name=self.as_column(),
+            )
+        else:
+            rows, _ = BrickSQL().execute(
+                query_name,
+                parameters=parameters,
+                defer=True,
+                name=self.as_column(),
+            )
+
+        # When deferred, rows will be -1, so skip the check
+        if commit and rows != 1:
+            raise DatabaseException('Could not update the {kind} state for individual part {part_id}'.format(
+                kind=self.kind,
+                part_id=individual_part.fields.id,
+            ))
+
+        # Info
+        logger.info('{kind} "{name}" state changed to "{state}" for individual part {part_id}'.format(
+            kind=self.kind,
+            name=self.fields.name,
+            state=state,
+            part_id=individual_part.fields.id,
+        ))
+
+        return state
+
+    # Update the selected state of this metadata item for an individual minifigure
+    def update_individual_minifigure_state(
+        self,
+        individual_minifigure: 'IndividualMinifigure',
+        /,
+        *,
+        json: Any | None = None,
+        state: Any | None = None,
+        commit: bool = True
+    ) -> Any:
+        if state is None and json is not None:
+            state = json.get('value', False)
+
+        parameters = self.sql_parameters()
+        parameters['set_id'] = individual_minifigure.fields.id  # set_id parameter accepts any entity id
+        parameters['state'] = state
+
+        # Use the same set query (bricktracker_set_owners/tags/statuses tables accept any entity id)
+        query_name = self.update_set_state_query
+
+        if commit:
+            rows, _ = BrickSQL().execute_and_commit(
+                query_name,
+                parameters=parameters,
+                name=self.as_column(),
+            )
+        else:
+            rows, _ = BrickSQL().execute(
+                query_name,
+                parameters=parameters,
+                defer=True,
+                name=self.as_column(),
+            )
+
+        # When deferred, rows will be -1, so skip the check
+        if commit and rows != 1:
+            raise DatabaseException('Could not update the {kind} state for individual minifigure {minifigure_id}'.format(
+                kind=self.kind,
+                minifigure_id=individual_minifigure.fields.id,
+            ))
+
+        # Info
+        logger.info('{kind} "{name}" state changed to "{state}" for individual minifigure {minifigure_id}'.format(
+            kind=self.kind,
+            name=self.fields.name,
+            state=state,
+            minifigure_id=individual_minifigure.fields.id,
+        ))
+
+        return state
+
+    # Update the selected state of this metadata item for an individual part lot
+    def update_individual_part_lot_state(
+        self,
+        individual_part_lot: 'IndividualPartLot',
+        /,
+        *,
+        json: Any | None = None,
+        state: Any | None = None,
+        commit: bool = True
+    ) -> Any:
+        if state is None and json is not None:
+            state = json.get('value', False)
+
+        parameters = self.sql_parameters()
+        parameters['set_id'] = individual_part_lot.fields.id  # set_id parameter accepts any entity id
+        parameters['state'] = state
+
+        # Use the same set query (bricktracker_set_owners/tags tables accept any entity id)
+        query_name = self.update_set_state_query
+
+        if commit:
+            rows, _ = BrickSQL().execute_and_commit(
+                query_name,
+                parameters=parameters,
+                name=self.as_column(),
+            )
+        else:
+            rows, _ = BrickSQL().execute(
+                query_name,
+                parameters=parameters,
+                defer=True,
+                name=self.as_column(),
+            )
+
+        # When deferred, rows will be -1, so skip the check
+        if commit and rows != 1:
+            raise DatabaseException('Could not update the {kind} state for individual part lot {lot_id}'.format(
+                kind=self.kind,
+                lot_id=individual_part_lot.fields.id,
+            ))
+
+        # Info
+        logger.info('{kind} "{name}" state changed to "{state}" for individual part lot {lot_id}'.format(
+            kind=self.kind,
+            name=self.fields.name,
+            state=state,
+            lot_id=individual_part_lot.fields.id,
+        ))
+
+        return state

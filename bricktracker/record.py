@@ -1,8 +1,29 @@
+from datetime import datetime
 from sqlite3 import Row
 from typing import Any, ItemsView
 
 from .fields import BrickRecordFields
 from .sql import BrickSQL
+
+
+def format_timestamp(timestamp: float | str | None, format_key: str = 'PURCHASE_DATE_FORMAT') -> str:
+    if timestamp is not None:
+        from flask import current_app
+
+        # Handle legacy string dates stored in database (convert to numeric timestamp)
+        if isinstance(timestamp, str):
+            try:
+                # Try parsing as date string first
+                time = datetime.strptime(timestamp, '%Y/%m/%d')
+            except ValueError:
+                # If that fails, return the string as-is (shouldn't happen but safe fallback)
+                return timestamp
+        else:
+            # Normal case: numeric timestamp
+            time = datetime.fromtimestamp(timestamp)
+
+        return time.strftime(current_app.config.get(format_key, '%Y/%m/%d'))
+    return ''
 
 
 # SQLite record
