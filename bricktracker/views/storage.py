@@ -4,6 +4,9 @@ from .exceptions import exception_handler
 from ..set_list import BrickSetList, set_metadata_lists
 from ..set_storage import BrickSetStorage
 from ..set_storage_list import BrickSetStorageList
+from ..individual_minifigure_list import IndividualMinifigureList
+from ..individual_part_list import IndividualPartList
+from ..individual_part_lot_list import IndividualPartLotList
 
 storage_page = Blueprint('storage', __name__, url_prefix='/storages')
 
@@ -28,5 +31,8 @@ def details(*, id: str) -> str:
         'storage.html',
         item=storage,
         sets=BrickSetList().using_storage(storage),
+        individual_minifigures=IndividualMinifigureList().using_storage(storage),
+        individual_parts=IndividualPartList().using_storage(storage),
+        individual_part_lots=IndividualPartLotList().using_storage(storage),
         **set_metadata_lists(as_class=True)
     )

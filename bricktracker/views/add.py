@@ -1,4 +1,4 @@
-from flask import Blueprint, current_app, render_template
+from flask import Blueprint, current_app, render_template, abort
 from flask_login import login_required
 
 from ..configuration_list import BrickConfigurationList
@@ -38,5 +38,25 @@ def bulk() -> str:
         namespace=current_app.config['SOCKET_NAMESPACE'],
         messages=MESSAGES,
         bulk=True,
+        **set_metadata_lists()
+    )
+
+
+# Add individual parts
+@add_page.route('/parts', methods=['GET'])
+@login_required
+@exception_handler(__file__)
+def parts() -> str:
+    # Block route if individual parts feature is disabled
+    if current_app.config.get('DISABLE_INDIVIDUAL_PARTS', False):
+        abort(404)
+
+    BrickConfigurationList.error_unless_is_set('REBRICKABLE_API_KEY')
+
+    return render_template(
+        'add_parts.html',
+        path=current_app.config['SOCKET_PATH'],
+        namespace=current_app.config['SOCKET_NAMESPACE'],
+        messages=MESSAGES,
         **set_metadata_lists()
     )

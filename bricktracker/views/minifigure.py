@@ -1,6 +1,7 @@
 from flask import Blueprint, current_app, render_template, request
 
 from .exceptions import exception_handler
+from ..individual_minifigure_list import IndividualMinifigureList
 from ..minifigure import BrickMinifigure
 from ..minifigure_list import BrickMinifigureList
 from ..pagination_helper import get_pagination_config, build_pagination_context, get_request_params
@@ -19,6 +20,7 @@ def list() -> str:
     problems_filter = request.args.get('problems', 'all')
     theme_id = request.args.get('theme', 'all')
     year = request.args.get('year', 'all')
+    individuals_filter = request.args.get('individuals', 'all')
     search_query, sort_field, sort_order, page = get_request_params()
 
     # Get pagination configuration
@@ -32,6 +34,7 @@ def list() -> str:
             problems_filter=problems_filter,
             theme_id=theme_id,
             year=year,
+            individuals_filter=individuals_filter,
             search_query=search_query,
             page=page,
             per_page=per_page,
@@ -42,7 +45,7 @@ def list() -> str:
         pagination_context = build_pagination_context(page, per_page, total_count, is_mobile)
     else:
         # ORIGINAL MODE - Single page with all data for client-side search
-        minifigures = BrickMinifigureList().all_filtered(owner_id=owner_id, problems_filter=problems_filter, theme_id=theme_id, year=year)
+        minifigures = BrickMinifigureList().all_filtered(owner_id=owner_id, problems_filter=problems_filter, theme_id=theme_id, year=year, individuals_filter=individuals_filter)
 
         pagination_context = None
 
@@ -79,6 +82,7 @@ def list() -> str:
         'selected_theme': theme_id,
         'years': years,
         'selected_year': year,
+        'selected_individuals': individuals_filter,
         'search_query': search_query,
         'use_pagination': use_pagination,
         'current_sort': sort_field,
@@ -101,5 +105,6 @@ def details(*, figure: str) -> str:
         using=BrickSetList().using_minifigure(figure),
         missing=BrickSetList().missing_minifigure(figure),
         damaged=BrickSetList().damaged_minifigure(figure),
+        individual_instances=IndividualMinifigureList().instances_by_figure(figure),
         **set_metadata_lists(as_class=True)
     )
