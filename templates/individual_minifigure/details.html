@@ -27,11 +27,15 @@
         </div>
         <div class="accordion accordion-flush border-top" id="individual-minifigure-details-{{ item.fields.id }}">
           {{ accordion.header('Quantity', 'accordion-quantity-' ~ item.fields.id, 'individual-minifigure-details-' ~ item.fields.id, icon='functions') }}
-            {{ form.input('Quantity', item.fields.id, 'quantity', item.url_for_quantity(), item.fields.quantity, icon='functions') }}
+            {% if writes_disabled %}
+              <div class="alert alert-secondary mb-0"><i class="ri-functions"></i> Quantity: {{ item.fields.quantity }}</div>
+            {% else %}
+              {{ form.input('Quantity', item.fields.id, 'quantity', item.url_for_quantity(), item.fields.quantity, icon='functions') }}
+            {% endif %}
           {{ accordion.footer() }}
-          {{ accordion.table(item.generic_parts(), 'Parts', 'accordion-parts-' ~ item.fields.id, 'individual-minifigure-details-' ~ item.fields.id, 'part/table.html', icon='shapes-line', alt=item.fields.figure, hamburger_menu=g.login.is_authenticated()) }}
-          {% include 'individual_minifigure/management.html' %}
-          {% if g.login.is_authenticated() %}
+          {{ accordion.table(item.generic_parts(), 'Parts', 'accordion-parts-' ~ item.fields.id, 'individual-minifigure-details-' ~ item.fields.id, 'part/table.html', icon='shapes-line', alt=item.fields.figure, read_only=writes_disabled) }}
+          {% set management_read_only = writes_disabled %}{% include 'individual_minifigure/management.html' %}
+          {% if g.login.is_authenticated() and not writes_disabled %}
             {{ accordion.header('Danger zone', 'accordion-danger-zone-' ~ item.fields.id, 'individual-minifigure-details-' ~ item.fields.id, danger=true, class='text-end') }}
               <a href="{{ url_for('individual_minifigure.delete', id=item.fields.id) }}" class="btn btn-danger" role="button" data-bs-toggle="modal" data-bs-target="#deleteModal"><i class="ri-close-line"></i> Delete this individual minifigure instance</a>
             {{ accordion.footer() }}

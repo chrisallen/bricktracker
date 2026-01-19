@@ -60,9 +60,12 @@ def list() -> str:
 def details(*, id: str) -> str:
     item = IndividualMinifigure().select_by_id(id)
 
+    writes_disabled = current_app.config.get('DISABLE_INDIVIDUAL_MINIFIGURES', False)
+
     return render_template(
         'individual_minifigure/details.html',
         item=item,
+        writes_disabled=writes_disabled,
         **set_metadata_lists(as_class=True)
     )
 
