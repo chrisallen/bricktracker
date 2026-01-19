@@ -67,8 +67,11 @@ class RebrickablePart(BrickRecord):
     def sql_parameters(self, /) -> dict[str, Any]:
         parameters = super().sql_parameters()
 
+        # Individual minifigure id takes precedence
+        if hasattr(self, 'individual_minifigure') and self.individual_minifigure is not None:
+            parameters['id'] = self.individual_minifigure.fields.id
         # Set id
-        if self.brickset is not None:
+        elif self.brickset is not None:
             parameters['id'] = self.brickset.fields.id
 
         # Use the minifigure number if present,

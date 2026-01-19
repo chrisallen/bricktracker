@@ -9,6 +9,7 @@ from .exceptions import ErrorException, NotFoundException
 from .rebrickable_part import RebrickablePart
 from .sql import BrickSQL
 if TYPE_CHECKING:
+    from .individual_minifigure import IndividualMinifigure
     from .minifigure import BrickMinifigure
     from .set import BrickSet
     from .socket import BrickSocket
@@ -33,6 +34,7 @@ class BrickPart(RebrickablePart):
         *,
         brickset: 'BrickSet | None' = None,
         minifigure: 'BrickMinifigure | None' = None,
+        individual_minifigure: 'IndividualMinifigure | None' = None,
         record: Row | dict[str, Any] | None = None
     ):
         super().__init__(
@@ -41,7 +43,12 @@ class BrickPart(RebrickablePart):
             record=record
         )
 
-        if self.minifigure is not None:
+        self.individual_minifigure = individual_minifigure
+
+        if self.individual_minifigure is not None:
+            self.identifier = self.individual_minifigure.fields.id
+            self.kind = 'Individual Minifigure'
+        elif self.minifigure is not None:
             self.identifier = self.minifigure.fields.figure
             self.kind = 'Minifigure'
         elif self.brickset is not None:
@@ -182,6 +189,33 @@ class BrickPart(RebrickablePart):
 
         return self
 
+    # Select a specific part from an individual minifigure instance
+    def select_specific_individual_minifigure(
+        self,
+        individual_minifigure: 'IndividualMinifigure',
+        part: str,
+        color: int,
+        spare: int,
+        /,
+    ) -> Self:
+        # Save the parameters to the fields
+        self.individual_minifigure = individual_minifigure
+        self.fields.part = part
+        self.fields.color = color
+        self.fields.spare = spare
+
+        if not self.select(override_query='individual_minifigure/part/select/specific'):
+            raise NotFoundException(
+                'Part {part} with color {color} (spare: {spare}) from individual minifigure {id} was not found in the database'.format(  # noqa: E501
+                    part=self.fields.part,
+                    color=self.fields.color,
+                    spare=self.fields.spare,
+                    id=individual_minifigure.fields.id,
+                ),
+            )
+
+        return self
+
     # Update checked state for part walkthrough
     def update_checked(self, json: Any | None, /) -> bool:
         # Handle both direct 'checked' key and changer.js 'value' key format
@@ -202,22 +236,56 @@ class BrickPart(RebrickablePart):
 
         return checked
 
+    # Update checked state for individual minifigure part
+    def update_checked_individual_minifigure(self, json: Any | None, /) -> bool:
+        # Handle both direct 'checked' key and changer.js 'value' key format
+        if json:
+            checked = json.get('checked', json.get('value', False))
+        else:
+            checked = False
+
+        checked = bool(checked)
+
+        self.fields.checked = checked
+
+        BrickSQL().execute_and_commit(
+            'individual_minifigure/part/update/checked',
+            parameters=self.sql_parameters()
+        )
+
+        return checked
+
     # Compute the url for updating checked state
     def url_for_checked(self, /) -> str:
-        # Different URL for a minifigure part
-        if self.minifigure is not None:
-            figure = self.minifigure.fields.figure
+        # Different URL for individual minifigure part
+        if self.individual_minifigure is not None:
+            return url_for(
+                'individual_minifigure.checked_part',
+                id=self.individual_minifigure.fields.id,
+                part=self.fields.part,
+                color=self.fields.color,
+                spare=self.fields.spare,
+            )
+        # Different URL for a set minifigure part
+        elif self.minifigure is not None:
+            return url_for(
+                'set.checked_part',
+                id=self.fields.id,
+                figure=self.minifigure.fields.figure,
+                part=self.fields.part,
+                color=self.fields.color,
+                spare=self.fields.spare,
+            )
+        # Set part
         else:
-            figure = None
-
-        return url_for(
-            'set.checked_part',
-            id=self.fields.id,
-            figure=figure,
-            part=self.fields.part,
-            color=self.fields.color,
-            spare=self.fields.spare,
-        )
+            return url_for(
+                'set.checked_part',
+                id=self.fields.id,
+                figure=None,
+                part=self.fields.part,
+                color=self.fields.color,
+                spare=self.fields.spare,
+            )
 
     # Update a problematic part
     def update_problem(self, problem: str, json: Any | None, /) -> int:
@@ -249,20 +317,67 @@ class BrickPart(RebrickablePart):
 
         return amount
 
+    # Update a problematic part for individual minifigure
+    def update_problem_individual_minifigure(self, problem: str, json: Any | None, /) -> int:
+        amount: str | int = json.get('value', '')  # type: ignore
+
+        # We need a positive integer
+        try:
+            if amount == '':
+                amount = 0
+
+            amount = int(amount)
+
+            if amount < 0:
+                amount = 0
+        except Exception:
+            raise ErrorException('"{amount}" is not a valid integer'.format(
+                amount=amount
+            ))
+
+        if amount < 0:
+            raise ErrorException('Cannot set a negative amount')
+
+        setattr(self.fields, problem, amount)
+
+        BrickSQL().execute_and_commit(
+            'individual_minifigure/part/update/{problem}'.format(problem=problem),
+            parameters=self.sql_parameters()
+        )
+
+        return amount
+
     # Compute the url for problematic part
     def url_for_problem(self, problem: str, /) -> str:
-        # Different URL for a minifigure part
-        if self.minifigure is not None:
-            figure = self.minifigure.fields.figure
+        # Different URL for individual minifigure part
+        if self.individual_minifigure is not None:
+            return url_for(
+                'individual_minifigure.problem_part',
+                id=self.individual_minifigure.fields.id,
+                part=self.fields.part,
+                color=self.fields.color,
+                spare=self.fields.spare,
+                problem=problem,
+            )
+        # Different URL for set minifigure part
+        elif self.minifigure is not None:
+            return url_for(
+                'set.problem_part',
+                id=self.fields.id,
+                figure=self.minifigure.fields.figure,
+                part=self.fields.part,
+                color=self.fields.color,
+                spare=self.fields.spare,
+                problem=problem,
+            )
+        # Set part
         else:
-            figure = None
-
-        return url_for(
-            'set.problem_part',
-            id=self.fields.id,
-            figure=figure,
-            part=self.fields.part,
-            color=self.fields.color,
-            spare=self.fields.spare,
-            problem=problem,
+            return url_for(
+                'set.problem_part',
+                id=self.fields.id,
+                figure=None,
+                part=self.fields.part,
+                color=self.fields.color,
+                spare=self.fields.spare,
+                problem=problem,
         )

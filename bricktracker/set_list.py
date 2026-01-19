@@ -36,6 +36,7 @@ class BrickSetList(BrickRecordList[BrickSet]):
     using_minifigure_query: str = 'set/list/using_minifigure'
     using_part_query: str = 'set/list/using_part'
     using_storage_query: str = 'set/list/using_storage'
+    using_purchase_location_query: str = 'set/list/using_purchase_location'
 
     def __init__(self, /):
         super().__init__()
@@ -675,6 +676,16 @@ class BrickSetList(BrickRecordList[BrickSet]):
 
         # Load the sets from the database
         self.list(override_query=self.using_storage_query)
+
+        return self
+
+    # Sets using a purchase location
+    def using_purchase_location(self, purchase_location: BrickSetPurchaseLocation, /) -> Self:
+        # Save the parameters to the fields
+        self.fields.purchase_location = purchase_location.fields.id
+
+        # Load the sets from the database
+        self.list(override_query=self.using_purchase_location_query)
 
         return self
 

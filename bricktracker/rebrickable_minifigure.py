@@ -14,7 +14,6 @@ if TYPE_CHECKING:
 class RebrickableMinifigure(BrickRecord):
     brickset: 'BrickSet | None'
 
-    # Queries
     select_query: str = 'rebrickable/minifigure/select'
     insert_query: str = 'rebrickable/minifigure/insert'
 
@@ -27,10 +26,8 @@ class RebrickableMinifigure(BrickRecord):
     ):
         super().__init__()
 
-        # Save the brickset
         self.brickset = brickset
 
-        # Ingest the record if it has one
         if record is not None:
             self.ingest(record)
 
@@ -62,7 +59,6 @@ class RebrickableMinifigure(BrickRecord):
 
         return parameters
 
-    # Self url
     def url(self, /) -> str:
         return url_for(
             'minifigure.details',
@@ -89,17 +85,24 @@ class RebrickableMinifigure(BrickRecord):
         if current_app.config['REBRICKABLE_LINKS']:
             try:
                 return current_app.config['REBRICKABLE_LINK_MINIFIGURE_PATTERN'].format(  # noqa: E501
-                    number=self.fields.figure,
+                    figure=self.fields.figure,
                 )
             except Exception:
                 pass
 
         return ''
 
+    # Compute the url for the bricklink page
+    # Note: BrickLink uses different minifigure IDs than Rebrickable (e.g., 'adv010' vs 'fig-000359')
+    # Rebrickable API doesn't provide BrickLink minifigure IDs, so we can't generate valid links
+    def url_for_bricklink(self, /) -> str:
+        # BrickLink links disabled for minifigures - no ID mapping available
+        # Left function for later, if I find a way to implement it. 
+        return ''
+
     # Normalize from Rebrickable
     @staticmethod
     def from_rebrickable(data: dict[str, Any], /, **_) -> dict[str, Any]:
-        # Extracting  number
         number = int(str(data['set_num'])[5:])
 
         return {

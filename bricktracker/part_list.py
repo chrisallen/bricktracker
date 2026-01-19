@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 class BrickPartList(BrickRecordList[BrickPart]):
     brickset: 'BrickSet | None'
     minifigure: 'BrickMinifigure | None'
+    individual_minifigure: 'IndividualMinifigure | None'
     order: str
 
     # Queries
@@ -57,8 +58,8 @@ class BrickPartList(BrickRecordList[BrickPart]):
 
         return self
 
-    # Load all parts with filters (owner, color, theme, year)
-    def all_filtered(self, owner_id: str | None = None, color_id: str | None = None, theme_id: str | None = None, year: str | None = None, /) -> Self:
+    # Load all parts with filters (owner, color, theme, year, individuals)
+    def all_filtered(self, owner_id: str | None = None, color_id: str | None = None, theme_id: str | None = None, year: str | None = None, individuals_filter: str | None = None, /) -> Self:
         # Save the filter parameters
         if owner_id is not None:
             self.fields.owner_id = owner_id
@@ -80,6 +81,8 @@ class BrickPartList(BrickRecordList[BrickPart]):
             context['theme_id'] = theme_id
         if year and year != 'all':
             context['year'] = year
+        if individuals_filter and individuals_filter == 'only':
+            context['individuals_filter'] = True
 
         # Load the parts from the database
         self.list(override_query=query, **context)
@@ -93,6 +96,7 @@ class BrickPartList(BrickRecordList[BrickPart]):
         color_id: str | None = None,
         theme_id: str | None = None,
         year: str | None = None,
+        individuals_filter: str | None = None,
         search_query: str | None = None,
         page: int = 1,
         per_page: int = 50,
@@ -113,6 +117,8 @@ class BrickPartList(BrickRecordList[BrickPart]):
             filter_context['theme_id'] = theme_id
         if year and year != 'all':
             filter_context['year'] = year
+        if individuals_filter and individuals_filter == 'only':
+            filter_context['individuals_filter'] = True
         if search_query:
             filter_context['search_query'] = search_query
         # Hide spare parts from display if configured
@@ -165,6 +171,11 @@ class BrickPartList(BrickRecordList[BrickPart]):
         else:
             minifigure = None
 
+        if hasattr(self, 'individual_minifigure'):
+            individual_minifigure = self.individual_minifigure
+        else:
+            individual_minifigure = None
+
         # Prepare template context for filtering
         context_vars = {}
         if hasattr(self.fields, 'owner_id') and self.fields.owner_id is not None:
@@ -188,6 +199,7 @@ class BrickPartList(BrickRecordList[BrickPart]):
             part = BrickPart(
                 brickset=brickset,
                 minifigure=minifigure,
+                individual_minifigure=individual_minifigure,
                 record=record,
             )
 
@@ -231,6 +243,24 @@ class BrickPartList(BrickRecordList[BrickPart]):
 
         # Load the parts from the database
         self.list(override_query=self.minifigure_query, **context)
+
+        return self
+
+    # Load parts from an individual minifigure instance
+    def from_individual_minifigure(
+        self,
+        individual_minifigure: 'IndividualMinifigure',
+        /,
+    ) -> Self:
+        from .individual_minifigure import IndividualMinifigure
+
+        # Save the individual minifigure reference
+        self.individual_minifigure = individual_minifigure
+
+        # Load the parts for this individual minifigure instance
+        self.list(
+            override_query='individual_minifigure/part/list/from_instance'
+        )
 
         return self
 
@@ -368,6 +398,10 @@ class BrickPartList(BrickRecordList[BrickPart]):
         # Set id
         if self.brickset is not None:
             parameters['id'] = self.brickset.fields.id
+
+        # Use the individual minifigure ID if present
+        if hasattr(self, 'individual_minifigure') and self.individual_minifigure is not None:
+            parameters['id'] = self.individual_minifigure.fields.id
 
         # Use the minifigure number if present,
         if self.minifigure is not None:
