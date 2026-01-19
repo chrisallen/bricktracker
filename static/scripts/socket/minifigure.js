@@ -1,10 +1,7 @@
-// Set Socket class
-class BrickSetSocket extends BrickSocket {
-    constructor(id, path, namespace, messages, bulk=false, refresh=false) {
-        super(id, path, namespace, messages, bulk);
-
-        // Refresh mode
-        this.refresh = refresh
+// Minifigure Socket class
+class BrickMinifigureSocket extends BrickSocket {
+    constructor(id, path, namespace, messages) {
+        super(id, path, namespace, messages, false);
 
         // Listeners
         this.add_listener = undefined;
@@ -69,78 +66,26 @@ class BrickSetSocket extends BrickSocket {
         }
     }
 
-    // Upon receiving a complete message
-    complete(data) {
-        super.complete(data);
-
-        if (this.bulk) {
-            // Import the next set
-            this.import_set(true, undefined, true);
-        }
-    }
-
     // Execute the action
     execute() {
         if (!this.disabled && this.socket !== undefined && this.socket.connected) {
             this.toggle(false);
 
-            // Split and save the list if bulk
-            if (this.bulk) {
-                this.read_set_list();
-            }
-
-            if (this.bulk || this.refresh || (this.html_no_confim && this.html_no_confim.checked)) {
-                this.import_set(true);
+            if (this.html_no_confim && this.html_no_confim.checked) {
+                this.import_minifigure(true);
             } else {
-                this.load_set();
+                this.load_minifigure();
             }
         }
     }
 
-    // Upon receiving a fail message
-    fail(data) {
-        super.fail(data);
-
-        if (this.bulk && this.html_input) {
-            if (this.set_list_last_set !== undefined) {
-                this.set_list.unshift(this.set_list_last_set);
-                this.set_list_last_set = undefined;
-            }
-
-            this.html_input.value = this.set_list.join(', ');
-        }
-    }
-
-    // Import a set
-    import_set(no_confirm, set, from_complete=false) {
+    // Import a minifigure
+    import_minifigure(no_confirm, figure) {
         if (this.html_input) {
-            if (!this.bulk || !from_complete) {
-                // Reset the progress
-                if (no_confirm) {
-                    this.clear();
-                } else {
-                    this.clear_status();
-                }
-            }
-
-            // Grab from the list if bulk
-            if (this.bulk) {
-                set = this.set_list.shift()
-
-                // Abort if nothing left to process
-                if (set === undefined) {
-                    // Clear the input
-                    this.html_input.value = "";
-
-                    // Settle the form
-                    this.spinner(false);
-                    this.toggle(true);
-
-                    return;
-                }
-
-                // Save the pulled set
-                this.set_list_last_set = set;
+            if (no_confirm) {
+                this.clear();
+            } else {
+                this.clear_status();
             }
 
             // Grab the owners
@@ -181,97 +126,35 @@ class BrickSetSocket extends BrickSocket {
                 this.html_progress_bar.scrollIntoView();
             }
 
-            this.socket.emit(this.messages.IMPORT_SET, {
-                set: (set !== undefined) ? set : this.html_input.value,
+            this.socket.emit(this.messages.IMPORT_MINIFIGURE, {
+                figure: (figure !== undefined) ? figure : this.html_input.value,
                 owners: owners,
                 purchase_location: purchase_location,
                 storage: storage,
                 tags: tags,
-                refresh: this.refresh
+                quantity: 1
             });
         } else {
-            this.fail("Could not find the input field for the set number");
+            this.fail("Could not find the input field for the minifigure number");
         }
     }
 
-    // Load a set
-    load_set() {
+    // Load a minifigure
+    load_minifigure() {
         if (this.html_input) {
             // Reset the progress
             this.clear()
             this.spinner(true);
 
-            this.socket.emit(this.messages.LOAD_SET, {
-                set: this.html_input.value
+            this.socket.emit(this.messages.LOAD_MINIFIGURE, {
+                figure: this.html_input.value
             });
         } else {
-            this.fail("Could not find the input field for the set number");
+            this.fail("Could not find the input field for the minifigure number");
         }
     }
 
-    // Bulk: read the input as a list
-    read_set_list() {
-        this.set_list = [];
-
-        if (this.html_input) {
-            const value = this.html_input.value;
-            // Split by comma, trim whitespace, and filter out empty strings
-            this.set_list = value.split(",")
-                .map((el) => el.trim())
-                .filter((el) => el !== "")
-        }
-    }
-
-    // Set is loaded
-    set_loaded(data) {
-        if (this.html_card) {
-            this.html_card.classList.remove("d-none");
-
-            if (this.html_card_set) {
-                this.html_card_set.textContent = data["set"];
-            }
-
-            if (this.html_card_name) {
-                this.html_card_name.textContent = data["name"];
-            }
-
-            if (this.html_card_image_container) {
-                this.html_card_image_container.setAttribute("style", `background-image: url(${data["image"]})`);
-            }
-
-            if (this.html_card_image) {
-                this.html_card_image.setAttribute("src", data["image"]);
-                this.html_card_image.setAttribute("alt", data["set"]);
-            }
-
-            if (this.html_card_footer) {
-                this.html_card_footer.classList.add("d-none");
-
-                if (!data.download) {
-                    this.html_card_footer.classList.remove("d-none");
-
-                    if (this.html_card_confirm) {
-                        if (this.confirm_listener !== undefined) {
-                            this.html_card_confirm.removeEventListener("click", this.confirm_listener);
-                        }
-
-                        this.confirm_listener = ((bricksocket, set) => (e) => {
-                            if (!bricksocket.disabled) {
-                                bricksocket.toggle(false);
-                                bricksocket.import_set(false, set);
-                            }
-                        })(this, data["set"]);
-
-                        this.html_card_confirm.addEventListener("click", this.confirm_listener);
-
-                        this.html_card_confirm.scrollIntoView();
-                    }
-                }
-            }
-        }
-    }
-
-    // Minifigure is loaded (when bulk adding minifigures through set socket)
+    // Minifigure is loaded
     minifigure_loaded(data) {
         if (this.html_card) {
             this.html_card.classList.remove("d-none");
@@ -307,8 +190,7 @@ class BrickSetSocket extends BrickSocket {
                         this.confirm_listener = ((bricksocket, figure) => (e) => {
                             if (!bricksocket.disabled) {
                                 bricksocket.toggle(false);
-                                // For minifigures, we use import_set with the figure number
-                                bricksocket.import_set(false, figure);
+                                bricksocket.import_minifigure(false, figure);
                             }
                         })(this, data["figure"]);
 
@@ -326,20 +208,12 @@ class BrickSetSocket extends BrickSocket {
         super.setup();
 
         if (this.socket !== undefined) {
-            // Set loaded
-            this.socket.on(this.messages.SET_LOADED, ((bricksocket) => (data) => {
-                bricksocket.set_loaded(data);
+            // Minifigure loaded
+            this.socket.on(this.messages.MINIFIGURE_LOADED, ((bricksocket) => (data) => {
+                bricksocket.minifigure_loaded(data);
             })(this));
-
-            // Minifigure loaded (for bulk add with mixed sets/minifigures)
-            if (this.messages.MINIFIGURE_LOADED) {
-                this.socket.on(this.messages.MINIFIGURE_LOADED, ((bricksocket) => (data) => {
-                    bricksocket.minifigure_loaded(data);
-                })(this));
-            }
         }
     }
-
 
     // Toggle clicking on the button, or sending events
     toggle(enabled) {
@@ -353,7 +227,7 @@ class BrickSetSocket extends BrickSocket {
             this.html_input.disabled = !enabled;
         }
 
-        if (!this.bulk && this.html_no_confim) {
+        if (this.html_no_confim) {
             this.html_no_confim.disabled = !enabled;
         }
 
