@@ -29,11 +29,16 @@
 | `BK_HIDE_ALL_PROBLEMS_PARTS` | Hide problems parts menu entry | `false` | No |
 | `BK_HIDE_TABLE_MISSING_PARTS` | Hide Missing column in tables | `false` | No |
 | `BK_HIDE_TABLE_DAMAGED_PARTS` | Hide Damaged column in tables | `false` | No |
+| `BK_HIDE_TABLE_CHECKED_PARTS` | Hide Checked column in tables | `false` | No |
 | `BK_HIDE_WISHES` | Hide wishlist menu entry | `false` | No |
 | `BK_HIDE_ALL_STORAGES` | Hide storages menu entry | `false` | No |
+| `BK_HIDE_INDIVIDUAL_MINIFIGURES` | Hide individual minifigures UI | `false` | No |
+| `BK_HIDE_INDIVIDUAL_PARTS` | Hide individual parts UI | `false` | No |
 | `BK_SHOW_GRID_SORT` | Show sort options by default | `false` | No |
 | `BK_SHOW_GRID_FILTERS` | Show filter options by default | `false` | No |
 | `BK_INDEPENDENT_ACCORDIONS` | Make accordions independent | `false` | No |
+| `BK_DISABLE_INDIVIDUAL_MINIFIGURES` | Block write operations for individual minifigures | `false` | No |
+| `BK_DISABLE_INDIVIDUAL_PARTS` | Block write operations for individual parts | `false` | No |
 
 ## Sort Order Configuration
 | Variable | Purpose | Default | Required |

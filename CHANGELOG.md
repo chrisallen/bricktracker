@@ -4,11 +4,12 @@
 
 ### Bug Fixes
 
+- **Fixed purchase location templates**: Created missing template files for purchase location pages
 - **Fixed set refresh functionality**: Resolved issues with refreshing sets from Rebrickable
   - Fixed foreign key constraint errors during refresh by reusing existing set IDs instead of generating new UUIDs
   - Implemented UPDATE-then-INSERT pattern to properly update existing parts while preserving user tracking data
   - Part quantities now correctly sync with Rebrickable during refresh
-  - User tracking data (`checked`, `missing`, `damaged`) is now preserved across refreshes
+  - User tracking data (`checked`, `missing`, `damaged`) is preserved across refreshes
   - New parts from Rebrickable are added to local inventory during refresh
   - Orphaned parts (parts no longer in Rebrickable's inventory) are now properly removed during refresh
   - Refresh now works correctly for both set parts and minifigure parts
@@ -24,13 +25,49 @@
   - New `BK_SHOW_NOTES_GRID` setting (default: `false`) - controls whether notes appear on grid view cards
   - New `BK_SHOW_NOTES_DETAIL` setting (default: `true`) - controls whether notes appear on set detail pages
   - Notes display as an info alert box below badges when enabled
-  - Both settings can be toggled in Admin → Live Settings panel without container restart
+  - Both settings can be toggled in Admin -> Live Settings panel without container restart
   - Fixed consolidated SQL query to include description field for proper notes display in server-side pagination
 
 ### New Features
 
+- **Individual Minifigures Tracking**
+  - Track loose/individual minifigures outside of sets
+  - Part-level tracking for individual minifigures with problem states (missing/damaged/checked)
+  - Complete metadata support (owners, tags, statuses, storage, purchase info)
+  - Purchase tracking with date, location, and price
+  - Quick navigation from set minifigures to individual instances
+  - Filter and search capabilities
+  - Feature flags: `BK_HIDE_INDIVIDUAL_MINIFIGURES` (hide UI), `BK_DISABLE_INDIVIDUAL_MINIFIGURES` (block writes)
+
+- **Individual Parts Tracking**
+  - Track loose parts outside of sets and minifigures
+  - Quick-add functionality from set parts tables
+  - Complete metadata support (owners, tags, storage, purchase info)
+  - Problem tracking (missing/damaged/checked states)
+  - Purchase tracking with date, location, and price
+  - Bulk part addition interface
+  - Feature flags: `BK_HIDE_INDIVIDUAL_PARTS` (hide UI), `BK_DISABLE_INDIVIDUAL_PARTS` (block writes)
+
+- **Part Lots System**
+  - Organize individual parts into logical lots/collections
+  - Lot-level metadata (name, description, created date)
+  - Shared metadata across lot (storage, purchase info)
+  - View all parts in a lot with filtering
+
+- **Purchase Location Management**
+  - Centralized purchase location tracking for sets, individual minifigures, parts, and lots
+  - New purchase location management page (`/purchase-locations/`)
+  - Track which items were purchased from each location
+  - Integrated with existing storage and owner metadata systems
+
+- **Rebrickable Color Database**
+  - Caches color information from Rebrickable API
+  - Provides BrickLink color ID mapping
+  - Reduces repeated API calls for color data
+  - Supports export functionality with correct color IDs
+
 - **Export Functionality**
-  - Added comprehensive export system in admin panel for sets, parts, and problem parts
+  - Added export system in admin panel for sets, parts, and problem parts
   - Export accordion in `/admin/` with three main categories:
     - **Export Sets**: Rebrickable CSV format for collection tracking
     - **Export All Parts**: Three formats available:
@@ -40,7 +77,6 @@
     - **Export Missing/Damaged Parts**: Same three formats as parts exports
   - All exports aggregate quantities automatically (parts by part+color, LEGO by element ID)
   - BrickLink exports use proper BrickLink part numbers and color IDs when available
-  - Filter support: All part exports accept owner, color, theme, and year query parameters
   - Format information displayed in UI for user guidance
 - **Badge Order Customization**
   - Added customizable badge ordering for set cards and detail pages
@@ -79,6 +115,58 @@
   - Follows same pattern as bulk add with progress tracking and set card preview
   - Shows real-time progress with current set being processed
   - Failed sets remain in input field for easy retry
+
+### Database Improvements
+
+- **Standardized ON DELETE Behavior**: Unified foreign key deletion handling across all metadata tables
+  - All metadata foreign keys now use RESTRICT (prevent deletion if referenced)
+  - Prevents accidental deletion of storage locations or purchase locations that are in use
+- **Performance Indexes Added**: New composite indexes for common query patterns
+  - `idx_individual_parts_lot_id_part_color` - Optimizes listing parts within a lot
+  - `idx_individual_parts_missing_damaged` - Optimizes finding parts with problems
+  - `idx_individual_minifigure_parts_checked` - Optimizes finding unchecked parts in minifigures
+- **Consolidated Metadata Tables**: Migration 0027 removes foreign key constraints from metadata junction tables
+  - `bricktracker_set_owners`, `bricktracker_set_tags`, `bricktracker_set_statuses` now accept any entity type
+  - Enables reusing metadata tables for sets, individual minifigures, individual parts, and lots
+- **Fixed Schema Drop Script**: Resolved foreign key constraint errors during database reset
+  - Added proper table drop ordering (children before parents)
+  - Implemented `PRAGMA foreign_keys OFF/ON` wrapping
+  - Includes all new tables from migrations 0021-0027
+
+
+### Configuration & Environment Variables
+
+- **New Configuration Options**:
+  - `BK_HIDE_INDIVIDUAL_MINIFIGURES` - Hide individual minifigures UI elements in navigation
+  - `BK_DISABLE_INDIVIDUAL_MINIFIGURES` - Block write operations for individual minifigures (view-only mode)
+  - `BK_HIDE_INDIVIDUAL_PARTS` - Hide individual parts UI elements in navigation
+  - `BK_DISABLE_INDIVIDUAL_PARTS` - Block write operations for individual parts (view-only mode)
+  - `BK_BADGE_ORDER_GRID` - Customize badge order on set cards in grid view (comma-separated list)
+  - `BK_BADGE_ORDER_DETAIL` - Customize badge order on set detail pages (comma-separated list)
+  - `BK_SHOW_NOTES_GRID` - Show notes on set cards in grid view (default: false)
+  - `BK_SHOW_NOTES_DETAIL` - Show notes on set detail pages (default: true)
+  - All new settings support live configuration updates via Admin panel
+
+### Technical Improvements
+
+- **Route Protection Decorators**: New decorator pattern for feature flag enforcement
+  - `@require_individual_minifigures_write` - Blocks writes when feature is disabled
+  - `@require_individual_parts_write` - Blocks writes when feature is disabled
+  - Allows viewing existing data while preventing new additions
+- **SQL Query Organization**: New query directory structure for individual features
+  - `bricktracker/sql/individual_minifigure/` - All individual minifigure queries
+  - `bricktracker/sql/individual_part/` - All individual part queries
+  - `bricktracker/sql/individual_part_lot/` - All part lot queries
+  - `bricktracker/sql/rebrickable_colors/` - Color reference queries
+  - `bricktracker/sql/rebrickable_parts/` - Part reference queries
+- **Database Migrations**: 7 new migrations (0021-0027)
+  - 0021: Individual minifigures and parts tables
+  - 0022: Individual part lots system with proper foreign keys
+  - 0023: Performance indexes for individual features
+  - 0024: Rebrickable colors cache table
+  - 0025: Additional composite indexes for query optimization
+  - 0026: Standardized ON DELETE behavior across metadata tables
+  - 0027: Consolidated metadata tables (remove FK constraints)
 
 
 ## 1.3.1
