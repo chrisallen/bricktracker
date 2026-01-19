@@ -17,10 +17,10 @@ SELECT
     {% block total_sets %}
     NULL AS "total_sets" -- dummy for order: total_sets
     {% endblock %}
-FROM "bricktracker_minifigures"
+FROM "rebrickable_minifigures"
 
-INNER JOIN "rebrickable_minifigures"
-ON "bricktracker_minifigures"."figure" IS NOT DISTINCT FROM "rebrickable_minifigures"."figure"
+LEFT JOIN "bricktracker_minifigures"
+ON "rebrickable_minifigures"."figure" IS NOT DISTINCT FROM "bricktracker_minifigures"."figure"
 
 {% block join %}{% endblock %}
 
