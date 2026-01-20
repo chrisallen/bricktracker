@@ -321,3 +321,13 @@
         display: block;
     }
 }
+
+/* Filter toggle button styling */
+.filter-toggle.btn-outline-secondary {
+    border-color: #dee2e6; /* Lighter gray for better visibility */
+}
+
+.filter-toggle.btn-outline-secondary:hover {
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+}
