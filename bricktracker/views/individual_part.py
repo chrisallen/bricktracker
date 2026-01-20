@@ -48,9 +48,12 @@ def require_individual_parts_write(f):
 def list() -> str:
     parts = IndividualPartList().all()
 
+    writes_disabled = current_app.config.get('DISABLE_INDIVIDUAL_PARTS', False)
+
     return render_template(
         'individual_parts.html',
         parts=parts,
+        writes_disabled=writes_disabled,
         **set_metadata_lists(as_class=True)
     )
 
@@ -181,10 +184,13 @@ def details(*, id: str) -> str:
                 error=e
             ))
 
+    writes_disabled = current_app.config.get('DISABLE_INDIVIDUAL_PARTS', False)
+
     return render_template(
         'individual_part/details.html',
         item=item,
         lot=lot,
+        writes_disabled=writes_disabled,
         **set_metadata_lists(as_class=True)
     )
 
@@ -481,10 +487,13 @@ def lot_details(*, lot_id: str) -> str:
     """Display details for an individual part lot (behaves like a set)"""
     lot = IndividualPartLot().select_by_id(lot_id)
 
+    writes_disabled = current_app.config.get('DISABLE_INDIVIDUAL_PARTS', False)
+
     return render_template(
         'individual_part/lot_details.html',
         item=lot,  # Pass as 'item' like sets do
         solo=True,
+        writes_disabled=writes_disabled,
         **set_metadata_lists(as_class=True)
     )
 

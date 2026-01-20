@@ -31,17 +31,25 @@
         </div>
         {% endif %}
         <div class="card-body border-bottom">
-          <div class="row g-2">
-            <div class="col-12 col-lg-4">
-              {{ form.input('Quantity', item.fields.id, 'quantity', item.url_for_quantity(), item.fields.quantity, icon='functions') }}
+          {% if writes_disabled %}
+            <div class="alert alert-secondary mb-0">
+              <i class="ri-functions"></i> Quantity: {{ item.fields.quantity }} |
+              <i class="ri-question-line"></i> Missing: {{ item.fields.missing or 0 }} |
+              <i class="ri-error-warning-line"></i> Damaged: {{ item.fields.damaged or 0 }}
             </div>
-            <div class="col-12 col-lg-4">
-              {{ form.input('Missing', item.fields.id, 'missing', item.url_for_problem('missing'), item.fields.missing, icon='question-line') }}
+          {% else %}
+            <div class="row g-2">
+              <div class="col-12 col-lg-4">
+                {{ form.input('Quantity', item.fields.id, 'quantity', item.url_for_quantity(), item.fields.quantity, icon='functions') }}
+              </div>
+              <div class="col-12 col-lg-4">
+                {{ form.input('Missing', item.fields.id, 'missing', item.url_for_problem('missing'), item.fields.missing, icon='question-line') }}
+              </div>
+              <div class="col-12 col-lg-4">
+                {{ form.input('Damaged', item.fields.id, 'damaged', item.url_for_problem('damaged'), item.fields.damaged, icon='error-warning-line') }}
+              </div>
             </div>
-            <div class="col-12 col-lg-4">
-              {{ form.input('Damaged', item.fields.id, 'damaged', item.url_for_problem('damaged'), item.fields.damaged, icon='error-warning-line') }}
-            </div>
-          </div>
+          {% endif %}
         </div>
         <div class="accordion accordion-flush border-top" id="individual-part-details-{{ item.fields.id }}">
           {% if lot %}
@@ -61,9 +69,9 @@
             {{ accordion.footer() }}
           {% else %}
             {# Only show management accordion if NOT part of a lot #}
-            {% include 'individual_part/management.html' %}
+            {% set management_read_only = writes_disabled %}{% include 'individual_part/management.html' %}
           {% endif %}
-          {% if g.login.is_authenticated() %}
+          {% if g.login.is_authenticated() and not writes_disabled %}
             {{ accordion.header('Danger zone', 'accordion-danger-zone-' ~ item.fields.id, 'individual-part-details-' ~ item.fields.id, danger=true, class='text-end') }}
               <a href="{{ url_for('individual_part.delete_part', id=item.fields.id) }}" class="btn btn-danger" role="button" data-bs-toggle="modal" data-bs-target="#deleteModal"><i class="ri-close-line"></i> Delete this individual part instance</a>
             {{ accordion.footer() }}

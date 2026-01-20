@@ -37,7 +37,9 @@
   - Purchase tracking with date, location, and price
   - Quick navigation from set minifigures to individual instances
   - Filter and search capabilities
-  - Feature flags: `BK_HIDE_INDIVIDUAL_MINIFIGURES` (hide UI), `BK_DISABLE_INDIVIDUAL_MINIFIGURES` (block writes)
+  - Feature flags:
+    - `BK_HIDE_INDIVIDUAL_MINIFIGURES`: Hides individual minifigures UI elements (navbar menu item, links from minifigure detail pages)
+    - `BK_DISABLE_INDIVIDUAL_MINIFIGURES`: Enables read-only mode - all individual minifigure pages remain accessible but with all editing fields disabled (quantity, parts table, metadata inputs), delete buttons hidden, and write operations blocked.
 
 - **Individual Parts Tracking**
   - Track loose parts outside of sets and minifigures
@@ -46,7 +48,9 @@
   - Problem tracking (missing/damaged/checked states)
   - Purchase tracking with date, location, and price
   - Bulk part addition interface
-  - Feature flags: `BK_HIDE_INDIVIDUAL_PARTS` (hide UI), `BK_DISABLE_INDIVIDUAL_PARTS` (block writes)
+  - Feature flags:
+    - `BK_HIDE_INDIVIDUAL_PARTS`: Hides individual parts UI elements (navbar menu item, "Add Parts" button, links from part detail pages)
+    - `BK_DISABLE_INDIVIDUAL_PARTS`: Enables read-only mode - all individual parts and lot pages remain accessible but with all editing fields disabled (quantity, missing/damaged, parts table, metadata inputs), delete buttons hidden, "Add Parts" menu item removed, and write operations blocked. The /add/ page also hides the "Adding individual parts?" section.
 
 - **Part Lots System**
   - Organize individual parts into logical lots/collections

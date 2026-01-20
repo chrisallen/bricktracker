@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request
+from flask import Blueprint, current_app, render_template, request
 
 from .exceptions import exception_handler
 from ..individual_part_list import IndividualPartList
@@ -201,6 +201,8 @@ def problem() -> str:
 def details(*, part: str, color: int) -> str:
     brickpart = BrickPart().select_generic(part, color)
 
+    writes_disabled = current_app.config.get('DISABLE_INDIVIDUAL_PARTS', False)
+
     return render_template(
         'part.html',
         item=brickpart,
@@ -232,5 +234,6 @@ def details(*, part: str, color: int) -> str:
         similar_prints=BrickPartList().from_print(brickpart),
         individual_parts=IndividualPartList().by_part_and_color(part, color),
         individual_lots=IndividualPartLotList().by_part_and_color(part, color),
+        writes_disabled=writes_disabled,
         **set_metadata_lists(as_class=True)
     )

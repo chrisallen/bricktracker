@@ -19,14 +19,22 @@
   </div>
   {% if g.login.is_authenticated() %}
   <div class="card-footer p-1 border-bottom">
-    {{ form.input('Qty', item.fields.id, 'quantity', item.url_for_quantity(), item.fields.quantity, icon='functions') }}
+    {% if writes_disabled %}
+      <div class="input-group">
+        <span class="input-group-text px-1"><i class="ri-functions me-1"></i><span class="ms-1 d-none d-md-inline"> Qty</span></span>
+        <input class="form-control form-control-sm flex-shrink-1 px-1" type="text" value="{{ item.fields.quantity }}" disabled autocomplete="off">
+        <span class="input-group-text ri-prohibited-line px-1"></span>
+      </div>
+    {% else %}
+      {{ form.input('Qty', item.fields.id, 'quantity', item.url_for_quantity(), item.fields.quantity, icon='functions') }}
+    {% endif %}
   </div>
   {% endif %}
   {% if brickset_statuses | length %}
     <ul class="list-group list-group-flush card-check border-bottom-0">
       {% for status in brickset_statuses %}
         <li class="d-flex list-group-item p-1 text-nowrap">
-          {{ form.checkbox(status.fields.name, item.fields.id, status.as_dataset(), status.url_for_individual_minifigure_state(item.fields.id), item.fields[status.as_column()]) }}
+          {{ form.checkbox(status.fields.name, item.fields.id, status.as_dataset(), status.url_for_individual_minifigure_state(item.fields.id), item.fields[status.as_column()], delete=writes_disabled) }}
         </li>
       {% endfor %}
     </ul>

@@ -31,7 +31,7 @@
                 {% if item.endpoint == 'add.add' %}
                   {# Add menu item with optional dropdown for Bulk/Parts #}
                   {% set has_bulk = not config['HIDE_ADD_BULK_SET'] %}
-                  {% set has_parts = not config['HIDE_INDIVIDUAL_PARTS'] %}
+                  {% set has_parts = not config['HIDE_INDIVIDUAL_PARTS'] and not config['DISABLE_INDIVIDUAL_PARTS'] %}
                   {% if has_bulk or has_parts %}
                     <li class="nav-item dropdown px-1">
                       <a {% if request.url_rule.endpoint in ['add.add', 'add.bulk', 'add.parts'] %}class="nav-link active" aria-current="page"{% else %}class="nav-link"{% endif %}

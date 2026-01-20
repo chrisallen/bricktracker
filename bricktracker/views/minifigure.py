@@ -99,6 +99,8 @@ def list() -> str:
 @minifigure_page.route('/<figure>/details')
 @exception_handler(__file__)
 def details(*, figure: str) -> str:
+    writes_disabled = current_app.config.get('DISABLE_INDIVIDUAL_MINIFIGURES', False)
+
     return render_template(
         'minifigure.html',
         item=BrickMinifigure().select_generic(figure),
@@ -106,5 +108,6 @@ def details(*, figure: str) -> str:
         missing=BrickSetList().missing_minifigure(figure),
         damaged=BrickSetList().damaged_minifigure(figure),
         individual_instances=IndividualMinifigureList().instances_by_figure(figure),
+        writes_disabled=writes_disabled,
         **set_metadata_lists(as_class=True)
     )

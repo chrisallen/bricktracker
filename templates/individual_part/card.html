@@ -26,7 +26,15 @@
   </div>
   {% if g.login.is_authenticated() %}
   <div class="card-footer p-1">
-    {{ form.input('Qty', item.fields.id, 'quantity', item.url_for_quantity(), item.fields.quantity, icon='functions') }}
+    {% if writes_disabled %}
+      <div class="input-group">
+        <span class="input-group-text px-1"><i class="ri-functions me-1"></i><span class="ms-1 d-none d-md-inline"> Qty</span></span>
+        <input class="form-control form-control-sm flex-shrink-1 px-1" type="text" value="{{ item.fields.quantity }}" disabled autocomplete="off">
+        <span class="input-group-text ri-prohibited-line px-1"></span>
+      </div>
+    {% else %}
+      {{ form.input('Qty', item.fields.id, 'quantity', item.url_for_quantity(), item.fields.quantity, icon='functions') }}
+    {% endif %}
   </div>
   {% endif %}
 </div>

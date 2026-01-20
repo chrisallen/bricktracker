@@ -51,9 +51,9 @@
 
   {% if solo %}
     <div class="accordion accordion-flush border-top" id="lot-details">
-      {{ accordion.table(item.parts(), 'Parts', 'parts-inventory', 'lot-details', 'part/lot_table.html', icon='shapes-line', hamburger_menu=g.login.is_authenticated())}}
-      {% include 'individual_part/management.html' %}
-      {% if g.login.is_authenticated() %}
+      {{ accordion.table(item.parts(), 'Parts', 'parts-inventory', 'lot-details', 'part/lot_table.html', icon='shapes-line', hamburger_menu=g.login.is_authenticated(), read_only=writes_disabled)}}
+      {% set management_read_only = writes_disabled %}{% include 'individual_part/management.html' %}
+      {% if g.login.is_authenticated() and not writes_disabled %}
         {{ accordion.header('Danger zone', 'danger-zone', 'lot-details', danger=true, class='text-end') }}
           <a href="{{ url_for('individual_part.delete_lot', lot_id=item.fields.id) }}" class="btn btn-danger" role="button" data-bs-toggle="modal" data-bs-target="#deleteModal">
             <i class="ri-delete-bin-line"></i> Delete entire lot and all parts
@@ -66,7 +66,7 @@
   <div class="card-footer"></div>
 </div>
 
-{% if solo and g.login.is_authenticated() %}
+{% if solo and g.login.is_authenticated() and not writes_disabled %}
 <!-- Delete Confirmation Modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
   <div class="modal-dialog">
