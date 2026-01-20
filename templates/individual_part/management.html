@@ -135,22 +135,6 @@
       {{ form.textarea('', item.fields.id, 'description', item.url_for_description(), item.fields.description or '', rows=4, delete=management_read_only) }}
     {{ accordion.footer() }}
     {% endif %}
-    {% if item.__class__.__name__ != 'IndividualPartLot' %}
-    {{ accordion.header('Statuses', 'accordion-statuses-' ~ item.fields.id, 'accordion-management-' ~ item.fields.id, icon='checkbox-line', class='p-0') }}
-      <ul class="list-group list-group-flush">
-      {% if brickset_statuses | length %}
-        {% for status in brickset_statuses %}
-          <li class="d-flex list-group-item list-group-item-action text-nowrap">{{ form.checkbox(status.fields.name, item.fields.id, status.as_dataset(), status.url_for_individual_part_state(item.fields.id), item.fields[status.as_column()], delete=management_read_only) }}</li>
-        {% endfor %}
-      {% else %}
-        <li class="list-group-item list-group-item-action text-center"><i class="ri-error-warning-line"></i> No status found.</li>
-        {% endif %}
-      </ul>
-      <div class="list-group list-group-flush border-top">
-        <a class="list-group-item list-group-item-action" href="{{ url_for('admin.admin', open_status=true) }}"><i class="ri-settings-4-line"></i> Manage the statuses</a>
-      </div>
-    {{ accordion.footer() }}
-    {% endif %}
     {{ accordion.header('Tags', 'accordion-tags-' ~ item.fields.id, 'accordion-management-' ~ item.fields.id, icon='price-tag-2-line', class='p-0') }}
       <ul class="list-group list-group-flush">
       {% if brickset_tags | length %}
