@@ -289,7 +289,9 @@ class BrickPartList(BrickRecordList[BrickPart]):
         if current_app.config['RANDOM']:
             order = 'RANDOM()'
         else:
-            order = '"bricktracker_parts"."rowid" DESC'
+            # Since bricktracker_parts has a composite primary key, it doesn't have a rowid
+            # Order by id DESC (which are UUIDs with timestamps) to get recent parts
+            order = '"combined"."id" DESC, "combined"."part" ASC'
 
         context = {}
         if current_app.config.get('HIDE_SPARE_PARTS', False):
