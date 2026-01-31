@@ -8,11 +8,17 @@ static/sets
 Dockerfile
 compose.yaml
 
+# Local data directories
+local/
+offline/
+data/
+
 # Documentation
 docs/
 LICENSE
 *.md
 *.sample
+.code-workspace
 
 # Temporary
 *.csv
