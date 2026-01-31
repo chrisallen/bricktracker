@@ -4,6 +4,11 @@
 
 ### Bug Fixes
 
+- **Fixed storage deletion error handling**: Added proper validation and user-friendly error messages when attempting to delete storage locations that are still in use
+  - Shows detailed count of items using the storage (sets, individual minifigures, individual parts, part lots)
+  - Provides clickable link to storage details page for easy navigation
+  - Prevents accidental deletion of storage locations with referenced items
+- **Fixed bulk parts redirect**: Corrected endpoint reference from `individual_part.list_all` to `individual_part.list` after route function rename
 - **Fixed purchase location templates**: Created missing template files for purchase location pages
 - **Fixed set refresh functionality**: Resolved issues with refreshing sets from Rebrickable
   - Fixed foreign key constraint errors during refresh by reusing existing set IDs instead of generating new UUIDs
