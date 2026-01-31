@@ -803,6 +803,19 @@ class IndividualPart(BrickRecord):
                             }
                         )
 
+                # Download part image if available
+                image_url = color_info.get('part_img_url', '')
+                if image_url:
+                    try:
+                        self.download_image(image_url)
+                    except Exception as e:
+                        # Don't fail the whole operation if image download fails
+                        logger.warning('Could not download image for part {part_num} color {color_id}: {error}'.format(
+                            part_num=part_num,
+                            color_id=color_id,
+                            error=e
+                        ))
+
                 parts_added += 1
 
             # Commit all changes
@@ -816,7 +829,7 @@ class IndividualPart(BrickRecord):
 
             # Generate link to individual parts list
             from flask import url_for
-            parts_url = url_for('individual_part.list_all')
+            parts_url = url_for('individual_part.list')
 
             # Send completion with message and link
             socket.complete(

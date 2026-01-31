@@ -45,7 +45,7 @@ def delete(*, id: str) -> str:
         'admin.html',
         delete_storage=True,
         storage=BrickSetStorage().select_specific(id),
-        error=request.args.get('storage_error')
+        storage_error=request.args.get('storage_error')
     )
 
 
