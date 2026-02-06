@@ -42,8 +42,13 @@ window.BrickTable = class BrickTable {
         const hasCustomInterface = isMinifiguresTable || isPartsTablePaginationMode || isProblemsTablePaginationMode;
         const hasCustomSearch = isPartsTable || isProblemsTable || isMinifiguresTable; // Parts, problems, and minifigures always have custom search
 
+        // Disable sorting for parts/problems/minifigures tables to prevent data corruption
+        // These tables should use server-side pagination for sorting, or no sorting in client-side mode
+        const disableSorting = isPartsTable || isProblemsTable || isMinifiguresTable;
+
         this.table = new simpleDatatables.DataTable(`#${table.id}`, {
             columns: columns,
+            sortable: !disableSorting, // Disable header sorting for tables that have issues with it
             paging: !(isPartsTablePaginationMode || isProblemsTablePaginationMode), // Disable built-in pagination for tables in pagination mode
             pagerDelta: 1,
             perPage: per_page,
