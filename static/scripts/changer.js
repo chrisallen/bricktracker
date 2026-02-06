@@ -176,6 +176,14 @@ class BrickChanger {
                 // Not going through dataset to avoid converting
                 this.html_parent.setAttribute(this.parent_dataset, value);
             }
+
+            // Update the data-sort attribute on the parent TD for sortable tables
+            if (this.html_type == "checkbox") {
+                const parentTd = this.html_element.closest('td');
+                if (parentTd && parentTd.hasAttribute('data-sort')) {
+                    parentTd.setAttribute('data-sort', Number(this.html_element.checked));
+                }
+            }
         } catch (error) {
             console.log(error.message);
 
