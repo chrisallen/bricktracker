@@ -42,7 +42,7 @@
           <td>{{ item.fields.total_minifigures }}</td>
         {% else %}
           {% if not config['HIDE_TABLE_CHECKED_PARTS'] and not read_only %}
-            <td class="table-td-input">
+            <td data-sort="{{ item.fields.checked | default(0) | int }}" class="table-td-input">
               <center>{{ form.checkbox('', item.fields.id, item.html_id('checked'), item.url_for_checked(), item.fields.checked | default(false), parent='part', delete=read_only) }}</center>
             </td>
           {% endif %}

@@ -15,7 +15,7 @@
           {% if item.fields.color_rgb %}<span class="color-rgb color-rgb-table {% if item.fields.color == 9999 %}color-any{% endif %} align-middle border border-black" {% if item.fields.color != 9999 %}style="background-color: #{{ item.fields.color_rgb }};"{% endif %}></span>{% endif %}
           <span class="align-middle">{{ item.fields.color_name }}</span>
         </td>
-        <td>{{ item.fields.quantity }}</td>
+        <td data-sort="{{ item.fields.quantity }}">{{ item.fields.quantity }}</td>
         {% if not config['HIDE_TABLE_MISSING_PARTS'] %}
           <td data-sort="{{ item.fields.missing }}" class="table-td-input">
             {{ form.input('Missing', item.fields.id, item.html_id('missing'), item.url_for_problem('missing'), item.fields.missing, all=false, read_only=read_only) }}
@@ -27,7 +27,7 @@
           </td>
         {% endif %}
         {% if not config['HIDE_TABLE_CHECKED_PARTS'] and not read_only %}
-          <td class="table-td-input">
+          <td data-sort="{{ item.fields.checked | default(0) | int }}" class="table-td-input">
             <center>{{ form.checkbox('', item.fields.id, item.html_id('checked'), item.url_for_checked(), item.fields.checked | default(false), parent='part', delete=read_only) }}</center>
           </td>
         {% endif %}

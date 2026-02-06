@@ -27,7 +27,7 @@
         <th data-table-number="true" scope="col"><i class="ri-group-line fw-normal"></i> Minifigures</th>
       {% endif %}
       {% if checked and not config['HIDE_TABLE_CHECKED_PARTS'] %}
-        <th data-table-no-sort-and-search="true" class="no-sort" scope="col"><i class="ri-checkbox-line fw-normal"></i> Checked</th>
+        <th data-table-number="true" scope="col"><i class="ri-checkbox-line fw-normal"></i> Checked</th>
       {% endif %}
       {% if hamburger_menu and g.login.is_authenticated() %}
         {% set show_missing_menu = not config['HIDE_TABLE_MISSING_PARTS'] %}
