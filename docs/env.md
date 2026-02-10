@@ -44,8 +44,8 @@
 | Variable | Purpose | Default | Required |
 |----------|---------|----------|-----------|
 | `BK_SETS_DEFAULT_ORDER` | Default set sorting | `"rebrickable_sets"."number" DESC` | No |
-| `BK_PARTS_DEFAULT_ORDER` | Default part sorting | `"inventory"."name" ASC` | No |
-| `BK_MINIFIGURES_DEFAULT_ORDER` | Default minifig sorting | `"minifigures"."name" ASC` | No |
+| `BK_PARTS_DEFAULT_ORDER` | Default part sorting | `"rebrickable_parts"."name" ASC, "rebrickable_parts"."color_name" ASC, "combined"."spare" ASC` | No |
+| `BK_MINIFIGURES_DEFAULT_ORDER` | Default minifig sorting | `"rebrickable_minifigures"."name" ASC` | No |
 | `BK_WISHES_DEFAULT_ORDER` | Default wishlist sorting | `"bricktracker_wishes"."rowid" DESC` | No |
 | `BK_STORAGE_DEFAULT_ORDER` | Default storage sorting | `"bricktracker_metadata_storages"."name" ASC` | No |
 | `BK_PURCHASE_LOCATION_DEFAULT_ORDER` | Default purchase location sorting | `"bricktracker_metadata_purchase_locations"."name" ASC` | No |
@@ -111,10 +111,10 @@
 BK_SETS_DEFAULT_ORDER="rebrickable_sets"."year" ASC
 
 # Sort parts by missing count descending
-BK_PARTS_DEFAULT_ORDER="total_missing" DESC, "inventory"."name" ASC
+BK_PARTS_DEFAULT_ORDER="total_missing" DESC, "rebrickable_parts"."name" ASC
 
-# Sort minifigures by ID
-BK_MINIFIGURES_DEFAULT_ORDER="minifigures"."fig_num" ASC
+# Sort minifigures by figure number
+BK_MINIFIGURES_DEFAULT_ORDER="rebrickable_minifigures"."figure" ASC
 
 # Sort wishlist by set number
 BK_WISHES_DEFAULT_ORDER="bricktracker_wishes"."set" ASC
