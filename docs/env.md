@@ -39,6 +39,7 @@
 | `BK_INDEPENDENT_ACCORDIONS` | Make accordions independent | `false` | No |
 | `BK_DISABLE_INDIVIDUAL_MINIFIGURES` | Block write operations for individual minifigures | `false` | No |
 | `BK_DISABLE_INDIVIDUAL_PARTS` | Block write operations for individual parts | `false` | No |
+| `BK_HIDE_QUICK_ADD_INDIVIDUAL_PARTS` | Hide quick-add buttons in parts tables | `false` | No |
 
 ## Sort Order Configuration
 | Variable | Purpose | Default | Required |

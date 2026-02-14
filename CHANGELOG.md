@@ -43,6 +43,10 @@
   - Click the "Checked" header to sort by checked/unchecked status
   - Works in both parts table and part lots table
 
+- **Quick-add individual parts toggle**: New `BK_HIDE_QUICK_ADD_INDIVIDUAL_PARTS` setting to hide the quick-add menu in set parts tables
+  - Hides the "Add to individual parts" option in the row menu dropdown
+  - Useful when you want individual parts tracking enabled but don't need quick-add from set inventory
+
 - **Individual Minifigures Tracking**
   - Track loose/individual minifigures outside of sets
   - Part-level tracking for individual minifigures with problem states (missing/damaged/checked)

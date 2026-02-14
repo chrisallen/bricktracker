@@ -49,7 +49,7 @@
           {% if g.login.is_authenticated() and not read_only %}
             {% set show_missing_menu = not config['HIDE_TABLE_MISSING_PARTS'] %}
             {% set show_checked_menu = not config['HIDE_TABLE_CHECKED_PARTS'] %}
-            {% set show_quick_add = not config['DISABLE_QUICK_ADD_INDIVIDUAL_PARTS'] and not config['HIDE_INDIVIDUAL_PARTS'] %}
+            {% set show_quick_add = not config['DISABLE_QUICK_ADD_INDIVIDUAL_PARTS'] and not config['HIDE_INDIVIDUAL_PARTS'] and not config['HIDE_QUICK_ADD_INDIVIDUAL_PARTS'] %}
             {% if show_missing_menu or show_checked_menu or show_quick_add %}
               <td class="text-end">
                 {% if show_quick_add %}
