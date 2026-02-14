@@ -4,6 +4,10 @@
 
 ### Bug Fixes
 
+- **Fixed client-side table sorting corruption** (Issue #136): Resolved data corruption when using sort buttons with DataTables header sorting in client-side pagination mode
+  - Sort buttons now trigger actual table header clicks instead of using separate `columns.sort()`
+  - Header clicks sync button states to match current sort
+  - Prevents misaligned images, colors, and links when mixing sorting methods
 - **Fixed storage deletion error handling**: Added proper validation and user-friendly error messages when attempting to delete storage locations that are still in use
   - Shows detailed count of items using the storage (sets, individual minifigures, individual parts, part lots)
   - Provides clickable link to storage details page for easy navigation
@@ -34,6 +38,10 @@
   - Fixed consolidated SQL query to include description field for proper notes display in server-side pagination
 
 ### New Features
+
+- **Sortable Checked column** (Issue #137): The "Checked" column in set inventory tables can now be sorted
+  - Click the "Checked" header to sort by checked/unchecked status
+  - Works in both parts table and part lots table
 
 - **Individual Minifigures Tracking**
   - Track loose/individual minifigures outside of sets
