@@ -6,7 +6,10 @@ from typing import Any, Self, TYPE_CHECKING
 from urllib.parse import urlparse
 from uuid import uuid4
 
-from flask import url_for
+from flask import (
+    current_app,
+    url_for,
+)
 
 from .exceptions import NotFoundException, DatabaseException, ErrorException
 from .individual_part import IndividualPart
@@ -222,54 +225,38 @@ class IndividualPartLot(BrickRecord):
 
                 # Create individual part with lot_id
                 part_uuid = str(uuid4())
-
-                # Use the add method but with lot_id
-                # We need to insert the part with the lot_id
                 sql = BrickSQL()
 
-                # First ensure the part exists in rebrickable_parts (BEFORE inserting individual part)
+                # Ensure color and part/color combination exist in rebrickable tables
                 IndividualPart.get_or_fetch_color(color_id)
+                part_name = cart_item.get('part_name', '')
+                color_name = cart_item.get('color_name', '')
+                image_url = color_info.get('part_img_url', '')
 
-                # Ensure part/color combination exists in rebrickable_parts
-                try:
-                    # Check if part exists
-                    result = sql.fetchone('rebrickable_parts/check_exists', parameters={'part': part_num, 'color_id': color_id})
-                    exists = result[0] > 0
+                # Extract image_id from element_ids or URL
+                element_ids = color_info.get('elements', [])
+                if element_ids and len(element_ids) > 0:
+                    image_id = str(element_ids[0])
+                elif image_url:
+                    image_id, _ = os.path.splitext(os.path.basename(urlparse(image_url).path))
+                else:
+                    image_id = None
 
-                    if not exists:
-                        # Insert part data
-                        part_name = cart_item.get('part_name', '')
-                        color_name = cart_item.get('color_name', '')
-                        image_url = color_info.get('part_img_url', '')
-
-                        # Extract image_id from element_ids or URL
-                        element_ids = color_info.get('elements', [])
-                        if element_ids and len(element_ids) > 0:
-                            image_id = str(element_ids[0])
-                        elif image_url:
-                            image_id, _ = os.path.splitext(os.path.basename(urlparse(image_url).path))
-                        else:
-                            image_id = None
-
-                        sql.execute('rebrickable_parts/insert_part_color', parameters={
-                            'part': part_num,
-                            'name': part_name,
-                            'color_id': color_id,
-                            'color_name': color_name,
-                            'color_rgb': color_info.get('rgb', ''),
-                            'color_transparent': color_info.get('is_trans', False),
-                            'image': image_url,
-                            'image_id': image_id,
-                            'url': current_app.config['REBRICKABLE_LINK_PART_PATTERN'].format(part=part_num, color=color_id),
-                            'bricklink_color_id': color_info.get('bricklink_color_id', None),
-                            'bricklink_color_name': color_info.get('bricklink_color_name', None)
-                        })
-                except Exception as e:
-                    logger.warning('Could not ensure part data for {part_num}/{color_id}: {error}'.format(
-                        part_num=part_num,
-                        color_id=color_id,
-                        error=e
-                    ))
+                sql.execute('rebrickable_parts/insert_part_color', parameters={
+                    'part': part_num,
+                    'name': part_name,
+                    'color_id': color_id,
+                    'color_name': color_name,
+                    'color_rgb': color_info.get('rgb', ''),
+                    'color_transparent': color_info.get('is_trans', False),
+                    'image': image_url,
+                    'image_id': image_id,
+                    'url': current_app.config['REBRICKABLE_LINK_PART_PATTERN'].format(part=part_num, color=color_id),
+                    'bricklink_color_id': color_info.get('bricklink_color_id', None),
+                    'bricklink_color_name': color_info.get('bricklink_color_name', None)
+                })
+                # Commit so the foreign key constraint can be satisfied
+                sql.commit()
 
                 # Now insert the part with lot_id (NO individual metadata - inherited from lot)
                 sql.execute('individual_part/insert_with_lot', parameters={

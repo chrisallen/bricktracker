@@ -175,6 +175,53 @@ window.setupSharedSortButtons = function(tableId, tableInstanceGlobal, columnMap
   const clearButton = document.querySelector('[data-sort-clear]');
   const isPaginationMode = isPaginationModeForTable(tableId);
 
+  // Listen for table header clicks to sync button states when user sorts via headers
+  if (!isPaginationMode) {
+    const tableElement = document.querySelector(`#${tableId}`);
+    if (tableElement) {
+      tableElement.addEventListener('click', (e) => {
+        // Check if a sortable header was clicked
+        const header = e.target.closest('th');
+        if (header && !header.classList.contains('no-sort')) {
+          // Find the column index of the clicked header
+          const headers = Array.from(tableElement.querySelectorAll('thead th'));
+          const clickedIndex = headers.indexOf(header);
+
+          // Find which attribute maps to this column index
+          let clickedAttribute = null;
+          for (const [attr, idx] of Object.entries(columnMap)) {
+            if (idx === clickedIndex) {
+              clickedAttribute = attr;
+              break;
+            }
+          }
+
+          // Update button states to match the header sort
+          sortButtons.forEach(btn => {
+            if (btn.dataset.sortAttribute === clickedAttribute) {
+              // Activate this button
+              btn.classList.remove('btn-outline-primary');
+              btn.classList.add('btn-primary');
+              // Determine direction from header class (after click is processed)
+              setTimeout(() => {
+                if (header.classList.contains('datatable-ascending')) {
+                  btn.dataset.currentDirection = 'asc';
+                } else if (header.classList.contains('datatable-descending')) {
+                  btn.dataset.currentDirection = 'desc';
+                }
+              }, 10);
+            } else {
+              // Deactivate other buttons
+              btn.classList.remove('btn-primary');
+              btn.classList.add('btn-outline-primary');
+              btn.removeAttribute('data-current-direction');
+            }
+          });
+        }
+      });
+    }
+  }
+
   sortButtons.forEach(button => {
     button.addEventListener('click', () => {
       const attribute = button.dataset.sortAttribute;
@@ -206,34 +253,49 @@ window.setupSharedSortButtons = function(tableId, tableInstanceGlobal, columnMap
 
       } else {
         // ORIGINAL MODE - Client-side sorting via Simple DataTables
+        // Instead of using columns.sort() API, we click the actual table header
+        // This ensures DataTables handles everything correctly and avoids data corruption
         const columnIndex = columnMap[attribute];
-        const tableInstance = window[tableInstanceGlobal];
+        const tableElement = document.querySelector(`#${tableId}`);
 
-        if (columnIndex !== undefined && tableInstance) {
-          // Determine sort direction
-          const isCurrentlyActive = button.classList.contains('btn-primary');
-          const currentDirection = button.dataset.currentDirection || (isDesc ? 'desc' : 'asc');
-          const newDirection = isCurrentlyActive ?
-            (currentDirection === 'asc' ? 'desc' : 'asc') :
-            (isDesc ? 'desc' : 'asc');
+        if (columnIndex !== undefined && tableElement) {
+          const headers = tableElement.querySelectorAll('thead th');
+          const targetHeader = headers[columnIndex];
 
-          // Clear other active buttons
-          sortButtons.forEach(btn => {
-            btn.classList.remove('btn-primary');
-            btn.classList.add('btn-outline-primary');
-            btn.removeAttribute('data-current-direction');
-          });
+          if (targetHeader) {
+            // Determine desired sort direction
+            const isCurrentlyActive = button.classList.contains('btn-primary');
+            const currentDirection = button.dataset.currentDirection || (isDesc ? 'desc' : 'asc');
+            const newDirection = isCurrentlyActive ?
+              (currentDirection === 'asc' ? 'desc' : 'asc') :
+              (isDesc ? 'desc' : 'asc');
 
-          // Mark this button as active
-          button.classList.remove('btn-outline-primary');
-          button.classList.add('btn-primary');
-          button.dataset.currentDirection = newDirection;
+            // Check current header sort state
+            const headerIsAsc = targetHeader.classList.contains('datatable-ascending');
+            const headerIsDesc = targetHeader.classList.contains('datatable-descending');
 
-          // Apply sort using Simple DataTables API
-          tableInstance.table.columns.sort(columnIndex, newDirection);
+            // Click header to achieve desired sort direction
+            if (newDirection === 'asc') {
+              if (!headerIsAsc) {
+                targetHeader.click();
+                // If it went to desc, click again to get asc
+                if (targetHeader.classList.contains('datatable-descending')) {
+                  targetHeader.click();
+                }
+              }
+            } else { // desc
+              if (!headerIsDesc) {
+                targetHeader.click();
+                // If it went to asc, click again to get desc
+                if (targetHeader.classList.contains('datatable-ascending')) {
+                  targetHeader.click();
+                }
+              }
+            }
 
-          // Update sort icon to reflect new direction
-          updateSortIcon(newDirection);
+            // Update sort icon to reflect new direction
+            updateSortIcon(newDirection);
+          }
         }
       }
     });
