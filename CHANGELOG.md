@@ -36,6 +36,9 @@
   - Notes display as an info alert box below badges when enabled
   - Both settings can be toggled in Admin -> Live Settings panel without container restart
   - Fixed consolidated SQL query to include description field for proper notes display in server-side pagination
+- **Fixed permission denied when running as non-root user** (Issue #138): Resolved container startup failure when using `user:` directive in docker-compose
+  - Added `chmod -R a+rX /app` to Dockerfile to ensure all files are readable regardless of build environment
+  - Added commented `user:` example in `compose.yaml` to document non-root support
 
 ### Breaking Changes
 

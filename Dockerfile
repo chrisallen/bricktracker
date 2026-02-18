@@ -11,6 +11,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Bricktracker
 COPY . .
 
+# Ensure all files are readable by non-root users (supports user: directive in compose)
+RUN chmod -R a+rX /app
+
 # Set executable permissions for entrypoint script
 RUN chmod +x entrypoint.sh
 
