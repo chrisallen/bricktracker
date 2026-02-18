@@ -37,6 +37,16 @@
   - Both settings can be toggled in Admin -> Live Settings panel without container restart
   - Fixed consolidated SQL query to include description field for proper notes display in server-side pagination
 
+### Breaking Changes
+
+- **Parts default order column names changed**: The `BK_PARTS_DEFAULT_ORDER` environment variable now uses `"combined"` instead of `"bricktracker_parts"` for column references
+  - If you have a custom `BK_PARTS_DEFAULT_ORDER` setting, update column references:
+    - `"bricktracker_parts"."spare"` → `"combined"."spare"`
+    - `"bricktracker_parts"."part"` → `"combined"."part"`
+    - `"bricktracker_parts"."quantity"` → `"combined"."quantity"`
+  - Or remove the custom setting to use the new defaults
+  - See `.env.sample` for the full list of available column names
+
 ### New Features
 
 - **Sortable Checked column** (Issue #137): The "Checked" column in set inventory tables can now be sorted
