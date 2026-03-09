@@ -16,9 +16,13 @@ class BrickSetSocket extends BrickSocket {
         this.html_input = document.getElementById(`${id}-set`);
         this.html_no_confim = document.getElementById(`${id}-no-confirm`);
         this.html_owners = document.getElementById(`${id}-owners`);
+        this.html_purchase_date = document.getElementById(`${id}-purchase-date`);
         this.html_purchase_location = document.getElementById(`${id}-purchase-location`);
+        this.html_purchase_price = document.getElementById(`${id}-purchase-price`);
+        this.html_statuses = document.getElementById(`${id}-statuses`);
         this.html_storage = document.getElementById(`${id}-storage`);
         this.html_tags = document.getElementById(`${id}-tags`);
+        this.html_description = document.getElementById(`${id}-description`);
 
         // Card elements
         this.html_card = document.getElementById(`${id}-card`);
@@ -181,12 +185,44 @@ class BrickSetSocket extends BrickSocket {
                 this.html_progress_bar.scrollIntoView();
             }
 
+            // Grab the purchase date
+            let purchase_date = '';
+            if (this.html_purchase_date) {
+                purchase_date = this.html_purchase_date.value;
+            }
+
+            // Grab the purchase price
+            let purchase_price = '';
+            if (this.html_purchase_price) {
+                purchase_price = this.html_purchase_price.value;
+            }
+
+            // Grab the statuses
+            const statuses = [];
+            if (this.html_statuses) {
+                this.html_statuses.querySelectorAll('input').forEach(input => {
+                    if (input.checked) {
+                        statuses.push(input.value);
+                    }
+                });
+            }
+
+            // Grab the description/notes
+            let description = '';
+            if (this.html_description) {
+                description = this.html_description.value;
+            }
+
             this.socket.emit(this.messages.IMPORT_SET, {
                 set: (set !== undefined) ? set : this.html_input.value,
                 owners: owners,
+                purchase_date: purchase_date,
                 purchase_location: purchase_location,
+                purchase_price: purchase_price,
+                statuses: statuses,
                 storage: storage,
                 tags: tags,
+                description: description,
                 refresh: this.refresh
             });
         } else {
@@ -361,8 +397,20 @@ class BrickSetSocket extends BrickSocket {
             this.html_owners.querySelectorAll('input').forEach(input => input.disabled = !enabled);
         }
 
+        if (this.html_purchase_date) {
+            this.html_purchase_date.disabled = !enabled;
+        }
+
         if (this.html_purchase_location) {
             this.html_purchase_location.disabled = !enabled;
+        }
+
+        if (this.html_purchase_price) {
+            this.html_purchase_price.disabled = !enabled;
+        }
+
+        if (this.html_statuses) {
+            this.html_statuses.querySelectorAll('input').forEach(input => input.disabled = !enabled);
         }
 
         if (this.html_storage) {
@@ -371,6 +419,10 @@ class BrickSetSocket extends BrickSocket {
 
         if (this.html_tags) {
             this.html_tags.querySelectorAll('input').forEach(input => input.disabled = !enabled);
+        }
+
+        if (this.html_description) {
+            this.html_description.disabled = !enabled;
         }
 
         if (this.html_card_confirm) {

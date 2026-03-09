@@ -4,6 +4,7 @@ from flask_login import login_required
 from ..configuration_list import BrickConfigurationList
 from .exceptions import exception_handler
 from ..set_list import set_metadata_lists
+from ..set_status_list import BrickSetStatusList
 from ..socket import MESSAGES
 
 add_page = Blueprint('add', __name__, url_prefix='/add')
@@ -21,6 +22,7 @@ def add() -> str:
         path=current_app.config['SOCKET_PATH'],
         namespace=current_app.config['SOCKET_NAMESPACE'],
         messages=MESSAGES,
+        brickset_statuses=BrickSetStatusList.list(all=True),
         **set_metadata_lists()
     )
 
@@ -38,6 +40,7 @@ def bulk() -> str:
         namespace=current_app.config['SOCKET_NAMESPACE'],
         messages=MESSAGES,
         bulk=True,
+        brickset_statuses=BrickSetStatusList.list(all=True),
         **set_metadata_lists()
     )
 

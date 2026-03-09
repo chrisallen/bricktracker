@@ -1,5 +1,13 @@
 // Add page - handles both sets and individual minifigures
 document.addEventListener("DOMContentLoaded", () => {
+  // Initialize date pickers
+  document.querySelectorAll('[data-add-date="true"]').forEach(el => {
+    new Datepicker(el, {
+      buttonClass: 'btn',
+      format: 'yyyy/mm/dd',
+    });
+  });
+
   // Get template data from data attributes
   const addContainer = document.getElementById('add-set');
   if (!addContainer) return;

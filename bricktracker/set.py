@@ -94,6 +94,36 @@ class BrickSet(RebrickableSet):
                 )
                 self.fields.purchase_location = purchase_location.fields.id
 
+                # Save the purchase date
+                purchase_date = data.get('purchase_date', None)
+                if purchase_date == '':
+                    purchase_date = None
+                if purchase_date is not None:
+                    try:
+                        purchase_date = datetime.strptime(
+                            purchase_date, '%Y/%m/%d'
+                        ).timestamp()
+                    except Exception:
+                        purchase_date = None
+                self.fields.purchase_date = purchase_date
+
+                # Save the purchase price
+                purchase_price = data.get('purchase_price', None)
+                if purchase_price == '':
+                    purchase_price = None
+                if purchase_price is not None:
+                    try:
+                        purchase_price = float(purchase_price)
+                    except Exception:
+                        purchase_price = None
+                self.fields.purchase_price = purchase_price
+
+                # Save the description/notes
+                description = data.get('description', None)
+                if description == '':
+                    description = None
+                self.fields.description = description
+
                 # Insert into database (deferred - will execute at final commit)
                 # All operations are atomic - if anything fails, nothing is committed
                 self.insert(commit=False)
@@ -104,6 +134,13 @@ class BrickSet(RebrickableSet):
                 for id in owners:
                     owner = BrickSetOwnerList.get(id)
                     owner.update_set_state(self, state=True, commit=False)
+
+                # Save the statuses (deferred - will execute at final commit)
+                statuses: list[str] = list(data.get('statuses', []))
+
+                for id in statuses:
+                    status = BrickSetStatusList.get(id)
+                    status.update_set_state(self, state=True, commit=False)
 
                 # Save the tags (deferred - will execute at final commit)
                 tags: list[str] = list(data.get('tags', []))
