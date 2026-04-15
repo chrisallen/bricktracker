@@ -1,6 +1,8 @@
-from flask import Blueprint, render_template, request
+from flask import Blueprint, current_app, render_template, request
 
 from .exceptions import exception_handler
+from ..individual_part_list import IndividualPartList
+from ..individual_part_lot_list import IndividualPartLotList
 from ..minifigure_list import BrickMinifigureList
 from ..pagination_helper import get_pagination_config, build_pagination_context, get_request_params
 from ..part import BrickPart
@@ -21,6 +23,7 @@ def list() -> str:
     color_id = request.args.get('color', 'all')
     theme_id = request.args.get('theme', 'all')
     year = request.args.get('year', 'all')
+    individuals_filter = request.args.get('individuals', 'all')
     search_query, sort_field, sort_order, page = get_request_params()
 
     # Get pagination configuration
@@ -34,6 +37,7 @@ def list() -> str:
             color_id=color_id,
             theme_id=theme_id,
             year=year,
+            individuals_filter=individuals_filter,
             search_query=search_query,
             page=page,
             per_page=per_page,
@@ -44,7 +48,7 @@ def list() -> str:
         pagination_context = build_pagination_context(page, per_page, total_count, is_mobile)
     else:
         # ORIGINAL MODE - Single page with all data for client-side search
-        parts = BrickPartList().all_filtered(owner_id, color_id, theme_id, year)
+        parts = BrickPartList().all_filtered(owner_id, color_id, theme_id, year, individuals_filter)
         pagination_context = None
 
     # Get list of owners for filter dropdown
@@ -83,6 +87,7 @@ def list() -> str:
         'selected_theme': theme_id,
         'years': years,
         'selected_year': year,
+        'selected_individuals': individuals_filter,
         'search_query': search_query,
         'use_pagination': use_pagination,
         'current_sort': sort_field,
@@ -196,6 +201,8 @@ def problem() -> str:
 def details(*, part: str, color: int) -> str:
     brickpart = BrickPart().select_generic(part, color)
 
+    writes_disabled = current_app.config.get('DISABLE_INDIVIDUAL_PARTS', False)
+
     return render_template(
         'part.html',
         item=brickpart,
@@ -225,5 +232,8 @@ def details(*, part: str, color: int) -> str:
         ),
         different_color=BrickPartList().with_different_color(brickpart),
         similar_prints=BrickPartList().from_print(brickpart),
+        individual_parts=IndividualPartList().by_part_and_color(part, color),
+        individual_lots=IndividualPartLotList().by_part_and_color(part, color),
+        writes_disabled=writes_disabled,
         **set_metadata_lists(as_class=True)
     )

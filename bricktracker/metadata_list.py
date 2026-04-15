@@ -184,3 +184,23 @@ class BrickMetadataList(BrickRecordList[T]):
             cls.set_value_endpoint,
             id=id,
         )
+
+    # URL to change the selected value of this metadata item for an individual part
+    @classmethod
+    def url_for_individual_part_value(cls, part_id: str, /) -> str:
+        # Replace 'set' with 'individual_part' in the endpoint name
+        endpoint = cls.set_value_endpoint.replace('set.', 'individual_part.')
+        return url_for(
+            endpoint,
+            id=part_id,
+        )
+
+    # URL to change the selected value of this metadata item for an individual minifigure
+    @classmethod
+    def url_for_individual_minifigure_value(cls, minifigure_id: str, /) -> str:
+        # Replace 'set' with 'individual_minifigure' in the endpoint name
+        endpoint = cls.set_value_endpoint.replace('set.', 'individual_minifigure.')
+        return url_for(
+            endpoint,
+            id=minifigure_id,
+        )

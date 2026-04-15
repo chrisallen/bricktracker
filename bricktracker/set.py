@@ -30,6 +30,7 @@ class BrickSet(RebrickableSet):
     insert_query: str = 'set/insert'
     update_purchase_date_query: str = 'set/update/purchase_date'
     update_purchase_price_query: str = 'set/update/purchase_price'
+    update_description_query: str = 'set/update/description'
 
     # Delete a set
     def delete(self, /) -> None:
@@ -56,8 +57,23 @@ class BrickSet(RebrickableSet):
             # Grabbing the refresh flag
             refresh: bool = bool(data.get('refresh', False))
 
-            # Generate an UUID for self
-            self.fields.id = str(uuid4())
+            # Generate an UUID for self (or use existing ID if refreshing)
+            if refresh:
+                # Find the existing set by set number to get its ID
+                result = BrickSQL().raw_execute(
+                    'SELECT "id" FROM "bricktracker_sets" WHERE "set" = :set',
+                    {'set': self.fields.set}
+                ).fetchone()
+
+                if result:
+                    # Use existing set ID
+                    self.fields.id = result['id']
+                else:
+                    # If set doesn't exist in database, treat as new import
+                    refresh = False
+                    self.fields.id = str(uuid4())
+            else:
+                self.fields.id = str(uuid4())
 
             # Insert the rebrickable set into database FIRST
             # This must happen before inserting bricktracker_sets due to FK constraint
@@ -78,23 +94,66 @@ class BrickSet(RebrickableSet):
                 )
                 self.fields.purchase_location = purchase_location.fields.id
 
+                # Save the purchase date
+                purchase_date = data.get('purchase_date', None)
+                if purchase_date == '':
+                    purchase_date = None
+                if purchase_date is not None:
+                    try:
+                        purchase_date = datetime.strptime(
+                            purchase_date, '%Y/%m/%d'
+                        ).timestamp()
+                    except Exception:
+                        purchase_date = None
+                self.fields.purchase_date = purchase_date
+
+                # Save the purchase price
+                purchase_price = data.get('purchase_price', None)
+                if purchase_price == '':
+                    purchase_price = None
+                if purchase_price is not None:
+                    try:
+                        purchase_price = float(purchase_price)
+                    except Exception:
+                        purchase_price = None
+                self.fields.purchase_price = purchase_price
+
+                # Save the description/notes
+                description = data.get('description', None)
+                if description == '':
+                    description = None
+                self.fields.description = description
+
                 # Insert into database (deferred - will execute at final commit)
                 # All operations are atomic - if anything fails, nothing is committed
                 self.insert(commit=False)
 
-                # Save the owners
+                # Save the owners (deferred - will execute at final commit)
                 owners: list[str] = list(data.get('owners', []))
 
                 for id in owners:
                     owner = BrickSetOwnerList.get(id)
-                    owner.update_set_state(self, state=True)
+                    owner.update_set_state(self, state=True, commit=False)
 
-                # Save the tags
+                # Save the statuses (deferred - will execute at final commit)
+                statuses: list[str] = list(data.get('statuses', []))
+
+                for id in statuses:
+                    status = BrickSetStatusList.get(id)
+                    status.update_set_state(self, state=True, commit=False)
+
+                # Save the tags (deferred - will execute at final commit)
                 tags: list[str] = list(data.get('tags', []))
 
                 for id in tags:
                     tag = BrickSetTagList.get(id)
-                    tag.update_set_state(self, state=True)
+                    tag.update_set_state(self, state=True, commit=False)
+
+            # If refreshing, prepare temp table for tracking parts across both set and minifigs
+            if refresh:
+                sql = BrickSQL()
+                sql.execute('part/create_temp_refresh_tracking_table', defer=False)
+                sql.execute('part/clear_temp_refresh_tracking_table', defer=False)
 
             # Load the inventory
             if not BrickPartList.download(socket, self, refresh=refresh):
@@ -103,6 +162,15 @@ class BrickSet(RebrickableSet):
             # Load the minifigures
             if not BrickMinifigureList.download(socket, self, refresh=refresh):
                 return False
+
+            # If refreshing, clean up orphaned parts after all parts have been processed
+            if refresh:
+                # Delete orphaned parts (parts that weren't in the API response)
+                BrickSQL().execute(
+                    'part/delete_untracked_parts',
+                    parameters={'id': self.fields.id},
+                    defer=False
+                )
 
             # Commit the transaction to the database
             socket.auto_progress(
@@ -355,3 +423,36 @@ class BrickSet(RebrickableSet):
     # Update purchase price url
     def url_for_purchase_price(self, /) -> str:
         return url_for('set.update_purchase_price', id=self.fields.id)
+
+    # Update description
+    def update_description(self, json: Any | None, /) -> Any:
+        value = json.get('value', None)  # type: ignore
+
+        if value == '':
+            value = None
+
+        self.fields.description = value
+
+        rows, _ = BrickSQL().execute_and_commit(
+            self.update_description_query,
+            parameters=self.sql_parameters()
+        )
+
+        if rows != 1:
+            raise DatabaseException('Could not update the description for set {set} ({id})'.format(  # noqa: E501
+                set=self.fields.set,
+                id=self.fields.id,
+            ))
+
+        # Info
+        logger.info('Description changed to "{value}" for set {set} ({id})'.format(  # noqa: E501
+            value=value,
+            set=self.fields.set,
+            id=self.fields.id,
+        ))
+
+        return value
+
+    # Update description url
+    def url_for_description(self, /) -> str:
+        return url_for('set.update_description', id=self.fields.id)

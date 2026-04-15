@@ -4,6 +4,7 @@ SELECT
     "bricktracker_sets"."purchase_date",
     "bricktracker_sets"."purchase_location",
     "bricktracker_sets"."purchase_price",
+    "bricktracker_sets"."description",
     "rebrickable_sets"."set",
     "rebrickable_sets"."number",
     "rebrickable_sets"."version",

@@ -24,6 +24,11 @@
         <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#table-filter" aria-expanded="{% if config['SHOW_GRID_FILTERS'] %}true{% else %}false{% endif %}" aria-controls="table-filter">
           <i class="ri-filter-line"></i> Filters
         </button>
+        {% if not config.get('HIDE_INDIVIDUAL_PARTS', False) %}
+        <button class="btn {% if selected_individuals == 'only' %}btn-secondary{% else %}btn-outline-secondary{% endif %}" type="button" id="individuals-filter-toggle" title="Show individual parts only">
+          <i class="ri-shapes-line"></i> Individuals
+        </button>
+        {% endif %}
       </div>
     </div>
   </div>

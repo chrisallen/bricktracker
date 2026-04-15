@@ -64,3 +64,38 @@
     </div>
   {% endif %}
 {% endmacro %}
+
+{% macro textarea(name, id, prefix, url, value, all=none, read_only=none, icon=none, rows=3, delete=false) %}
+  {% if all or read_only %}
+    {{ value }}
+  {% else %}
+    <label class="visually-hidden" for="{{ prefix }}-{{ id }}">{{ name }}</label>
+    <div class="input-group">
+      {% if icon %}<span class="input-group-text px-1"><i class="ri-{{ icon }} me-1"></i><span class="ms-1 d-none d-md-inline"> {{ name }}</span></span>{% endif %}
+      <textarea class="form-control form-control-sm flex-shrink-1 px-1" id="{{ prefix }}-{{ id }}" rows="{{ rows }}"
+      {% if g.login.is_authenticated() and not delete %}
+        data-changer-id="{{ id }}" data-changer-prefix="{{ prefix }}" data-changer-url="{{ url }}"
+      {% else %}
+        disabled
+      {% endif %}
+        autocomplete="off">{% if value %}{{ value }}{% endif %}</textarea>
+      {% if g.login.is_authenticated() and not delete %}
+        <span id="status-{{ prefix }}-{{ id }}" class="input-group-text ri-save-line px-1"></span>
+        <button id="clear-{{ prefix }}-{{ id }}" type="button" class="btn btn-sm btn-light btn-outline-danger border px-1"><i class="ri-eraser-line"></i></button>
+      {% else %}
+        <span class="input-group-text ri-prohibited-line px-1"></span>
+      {% endif %}
+    </div>
+  {% endif %}
+{% endmacro %}
+
+{% macro filter_toggle(filter_id) %}
+  <button type="button"
+    class="btn btn-outline-secondary filter-toggle"
+    id="{{ filter_id }}-toggle"
+    data-filter-target="{{ filter_id }}"
+    data-filter-mode="equals"
+    title="Toggle between equals and not equals">
+    <i>=</i>
+  </button>
+{% endmacro %}

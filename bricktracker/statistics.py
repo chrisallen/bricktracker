@@ -53,17 +53,18 @@ class BrickStatistics:
         return [dict(row) for row in results]
 
     def get_financial_summary(self) -> dict[str, Any]:
-        """Get financial summary from overview statistics"""
+        """Get financial summary from overview statistics (includes all item types)"""
         overview = self.get_overview()
         return {
-            'total_cost': overview.get('total_cost') or 0,
-            'average_cost': overview.get('average_cost') or 0,
-            'minimum_cost': overview.get('minimum_cost') or 0,
-            'maximum_cost': overview.get('maximum_cost') or 0,
+            'total_cost': overview.get('combined_total_cost') or 0,
+            'average_cost': overview.get('combined_average_cost') or 0,
+            'minimum_cost': overview.get('combined_minimum_cost') or 0,
+            'maximum_cost': overview.get('combined_maximum_cost') or 0,
+            'items_with_price': overview.get('total_items_with_price') or 0,
             'sets_with_price': overview.get('sets_with_price') or 0,
             'total_sets': overview.get('total_sets') or 0,
             'percentage_with_price': round(
-                ((overview.get('sets_with_price') or 0) / max((overview.get('total_sets') or 0), 1)) * 100, 1
+                ((overview.get('total_items_with_price') or 0) / max((overview.get('total_sets') or 0), 1)) * 100, 1
             )
         }
 

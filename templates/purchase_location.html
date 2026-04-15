@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %} - Purchase Location {{ item.fields.name}}{% endblock %}
+
+{% block main %}
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      {% with solo=true %}
+        {% include 'purchase_location/card.html' %}
+      {% endwith %}
+    </div>
+  </div>
+</div>
+{% endblock %}

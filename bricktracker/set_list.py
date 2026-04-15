@@ -36,6 +36,7 @@ class BrickSetList(BrickRecordList[BrickSet]):
     using_minifigure_query: str = 'set/list/using_minifigure'
     using_part_query: str = 'set/list/using_part'
     using_storage_query: str = 'set/list/using_storage'
+    using_purchase_location_query: str = 'set/list/using_purchase_location'
 
     def __init__(self, /):
         super().__init__()
@@ -92,7 +93,15 @@ class BrickSetList(BrickRecordList[BrickSet]):
         # Convert theme name to theme ID for filtering
         theme_id_filter = None
         if theme_filter:
-            theme_id_filter = self._theme_name_to_id(theme_filter)
+            # Check if this is a NOT filter
+            if theme_filter.startswith('-'):
+                # Extract the actual theme value without the "-" prefix
+                actual_theme = theme_filter[1:]
+                theme_id = self._theme_name_to_id(actual_theme)
+                # Re-add the "-" prefix to the theme ID
+                theme_id_filter = f'-{theme_id}' if theme_id else None
+            else:
+                theme_id_filter = self._theme_name_to_id(theme_filter)
 
         # Check if any filters are applied
         has_filters = any([status_filter, theme_id_filter, owner_filter, purchase_location_filter, storage_filter, tag_filter, year_filter, duplicate_filter])
@@ -667,6 +676,16 @@ class BrickSetList(BrickRecordList[BrickSet]):
 
         # Load the sets from the database
         self.list(override_query=self.using_storage_query)
+
+        return self
+
+    # Sets using a purchase location
+    def using_purchase_location(self, purchase_location: BrickSetPurchaseLocation, /) -> Self:
+        # Save the parameters to the fields
+        self.fields.purchase_location = purchase_location.fields.id
+
+        # Load the sets from the database
+        self.list(override_query=self.using_purchase_location_query)
 
         return self
 

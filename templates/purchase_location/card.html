@@ -1,0 +1,34 @@
+{% import 'macro/accordion.html' as accordion with context %}
+{% import 'macro/badge.html' as badge %}
+{% import 'macro/card.html' as card %}
+
+<div class="card mb-3 flex-fill {% if solo %}card-solo{% endif %}">
+  {{ card.header(item, item.fields.name, solo=solo, icon='map-pin-line') }}
+  <div class="card-body border-bottom-0 {% if not solo %}p-1{% endif %}">
+    {{ badge.total_sets(sets | length, solo=solo, last=last) }}
+    {% if individual_minifigures | length %}
+      {{ badge.badge(check=individual_minifigures | length, solo=solo, last=last, color='info', icon='user-line', collapsible='Individual Minifigures:', text=individual_minifigures | length) }}
+    {% endif %}
+    {% if individual_parts | length %}
+      {{ badge.badge(check=individual_parts | length, solo=solo, last=last, color='success', icon='shapes-line', collapsible='Individual Parts:', text=individual_parts | length) }}
+    {% endif %}
+    {% if individual_part_lots | length %}
+      {{ badge.badge(check=individual_part_lots | length, solo=solo, last=last, color='warning', icon='hammer-line', collapsible='Part Lots:', text=individual_part_lots | length) }}
+    {% endif %}
+  </div>
+  {% if solo %}
+    <div class="accordion accordion-flush border-top" id="purchase-location-details">
+      {{ accordion.cards(sets, 'Sets', 'sets-purchased', 'purchase-location-details', 'set/card.html', expanded=true, icon='hashtag') }}
+      {% if individual_minifigures | length %}
+        {{ accordion.cards(individual_minifigures, 'Individual Minifigures', 'individual-minifigures-purchased', 'purchase-location-details', 'individual_minifigure/card.html', expanded=false, icon='user-line') }}
+      {% endif %}
+      {% if individual_parts | length %}
+        {{ accordion.cards(individual_parts, 'Individual Parts', 'individual-parts-purchased', 'purchase-location-details', 'individual_part/card.html', expanded=false, icon='shapes-line') }}
+      {% endif %}
+      {% if individual_part_lots | length %}
+        {{ accordion.cards(individual_part_lots, 'Individual Part Lots', 'individual-part-lots-purchased', 'purchase-location-details', 'individual_part/lot_card.html', expanded=false, icon='hammer-line') }}
+      {% endif %}
+    </div>
+    <div class="card-footer"></div>
+  {% endif %}
+</div>

@@ -3,6 +3,8 @@ services:
     container_name: BrickTracker
     restart: unless-stopped
     image: gitea.baerentsen.space/frederikbaerentsen/bricktracker:latest
+    # Optional: Run as non-root user (uncomment to enable)
+    # user: "1000:1000"
     ports:
       - "3333:3333"
     volumes:

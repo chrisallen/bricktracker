@@ -17,6 +17,7 @@ from bricktracker.version import __version__
 from bricktracker.views.add import add_page
 from bricktracker.views.admin.admin import admin_page
 from bricktracker.views.admin.database import admin_database_page
+from bricktracker.views.admin.export import admin_export_page
 from bricktracker.views.admin.image import admin_image_page
 from bricktracker.views.admin.instructions import admin_instructions_page
 from bricktracker.views.admin.owner import admin_owner_page
@@ -30,10 +31,13 @@ from bricktracker.views.admin.theme import admin_theme_page
 from bricktracker.views.data import data_page
 from bricktracker.views.error import error_404
 from bricktracker.views.index import index_page
+from bricktracker.views.individual_minifigure import individual_minifigure_page
+from bricktracker.views.individual_part import individual_part_page
 from bricktracker.views.instructions import instructions_page
 from bricktracker.views.login import login_page
 from bricktracker.views.minifigure import minifigure_page
 from bricktracker.views.part import part_page
+from bricktracker.views.purchase_location import purchase_location_page
 from bricktracker.views.set import set_page
 from bricktracker.views.statistics import statistics_page
 from bricktracker.views.storage import storage_page
@@ -137,10 +141,13 @@ def setup_app(app: Flask) -> None:
     app.register_blueprint(add_page)
     app.register_blueprint(data_page)
     app.register_blueprint(index_page)
+    app.register_blueprint(individual_minifigure_page)
+    app.register_blueprint(individual_part_page)
     app.register_blueprint(instructions_page)
     app.register_blueprint(login_page)
     app.register_blueprint(minifigure_page)
     app.register_blueprint(part_page)
+    app.register_blueprint(purchase_location_page)
     app.register_blueprint(set_page)
     app.register_blueprint(statistics_page)
     app.register_blueprint(storage_page)
@@ -149,6 +156,7 @@ def setup_app(app: Flask) -> None:
     # Register admin routes
     app.register_blueprint(admin_page)
     app.register_blueprint(admin_database_page)
+    app.register_blueprint(admin_export_page)
     app.register_blueprint(admin_image_page)
     app.register_blueprint(admin_instructions_page)
     app.register_blueprint(admin_retired_page)

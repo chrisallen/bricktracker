@@ -95,6 +95,18 @@ class RebrickableSet(BrickRecord):
             socket.auto_progress(message='Parsing set number')
             set = parse_set(str(data['set']))
 
+            # Check if this is actually a minifigure (starts with fig-)
+            # If so, redirect to the minifigure handler
+            if set.startswith('fig-'):
+                from .individual_minifigure import IndividualMinifigure
+                # Transform data: minifigure handler expects 'figure' key instead of 'set'
+                minifig_data = data.copy()
+                minifig_data['figure'] = minifig_data.pop('set')
+                if from_download:
+                    return IndividualMinifigure().download(socket, minifig_data)
+                else:
+                    return IndividualMinifigure().load(socket, minifig_data)
+
             socket.auto_progress(
                 message='Set {set}: loading from Rebrickable'.format(
                     set=set,

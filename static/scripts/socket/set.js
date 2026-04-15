@@ -16,9 +16,13 @@ class BrickSetSocket extends BrickSocket {
         this.html_input = document.getElementById(`${id}-set`);
         this.html_no_confim = document.getElementById(`${id}-no-confirm`);
         this.html_owners = document.getElementById(`${id}-owners`);
+        this.html_purchase_date = document.getElementById(`${id}-purchase-date`);
         this.html_purchase_location = document.getElementById(`${id}-purchase-location`);
+        this.html_purchase_price = document.getElementById(`${id}-purchase-price`);
+        this.html_statuses = document.getElementById(`${id}-statuses`);
         this.html_storage = document.getElementById(`${id}-storage`);
         this.html_tags = document.getElementById(`${id}-tags`);
+        this.html_description = document.getElementById(`${id}-description`);
 
         // Card elements
         this.html_card = document.getElementById(`${id}-card`);
@@ -181,12 +185,44 @@ class BrickSetSocket extends BrickSocket {
                 this.html_progress_bar.scrollIntoView();
             }
 
+            // Grab the purchase date
+            let purchase_date = '';
+            if (this.html_purchase_date) {
+                purchase_date = this.html_purchase_date.value;
+            }
+
+            // Grab the purchase price
+            let purchase_price = '';
+            if (this.html_purchase_price) {
+                purchase_price = this.html_purchase_price.value;
+            }
+
+            // Grab the statuses
+            const statuses = [];
+            if (this.html_statuses) {
+                this.html_statuses.querySelectorAll('input').forEach(input => {
+                    if (input.checked) {
+                        statuses.push(input.value);
+                    }
+                });
+            }
+
+            // Grab the description/notes
+            let description = '';
+            if (this.html_description) {
+                description = this.html_description.value;
+            }
+
             this.socket.emit(this.messages.IMPORT_SET, {
                 set: (set !== undefined) ? set : this.html_input.value,
                 owners: owners,
+                purchase_date: purchase_date,
                 purchase_location: purchase_location,
+                purchase_price: purchase_price,
+                statuses: statuses,
                 storage: storage,
                 tags: tags,
+                description: description,
                 refresh: this.refresh
             });
         } else {
@@ -215,7 +251,10 @@ class BrickSetSocket extends BrickSocket {
 
         if (this.html_input) {
             const value = this.html_input.value;
-            this.set_list = value.split(",").map((el) => el.trim())
+            // Split by comma, trim whitespace, and filter out empty strings
+            this.set_list = value.split(",")
+                .map((el) => el.trim())
+                .filter((el) => el !== "")
         }
     }
 
@@ -268,6 +307,56 @@ class BrickSetSocket extends BrickSocket {
         }
     }
 
+    // Minifigure is loaded (when bulk adding minifigures through set socket)
+    minifigure_loaded(data) {
+        if (this.html_card) {
+            this.html_card.classList.remove("d-none");
+
+            if (this.html_card_set) {
+                this.html_card_set.textContent = data["figure"];
+            }
+
+            if (this.html_card_name) {
+                this.html_card_name.textContent = data["name"];
+            }
+
+            if (this.html_card_image_container) {
+                this.html_card_image_container.setAttribute("style", `background-image: url(${data["image"]})`);
+            }
+
+            if (this.html_card_image) {
+                this.html_card_image.setAttribute("src", data["image"]);
+                this.html_card_image.setAttribute("alt", data["figure"]);
+            }
+
+            if (this.html_card_footer) {
+                this.html_card_footer.classList.add("d-none");
+
+                if (!data.download) {
+                    this.html_card_footer.classList.remove("d-none");
+
+                    if (this.html_card_confirm) {
+                        if (this.confirm_listener !== undefined) {
+                            this.html_card_confirm.removeEventListener("click", this.confirm_listener);
+                        }
+
+                        this.confirm_listener = ((bricksocket, figure) => (e) => {
+                            if (!bricksocket.disabled) {
+                                bricksocket.toggle(false);
+                                // For minifigures, we use import_set with the figure number
+                                bricksocket.import_set(false, figure);
+                            }
+                        })(this, data["figure"]);
+
+                        this.html_card_confirm.addEventListener("click", this.confirm_listener);
+
+                        this.html_card_confirm.scrollIntoView();
+                    }
+                }
+            }
+        }
+    }
+
     // Setup the actual socket
     setup() {
         super.setup();
@@ -277,6 +366,13 @@ class BrickSetSocket extends BrickSocket {
             this.socket.on(this.messages.SET_LOADED, ((bricksocket) => (data) => {
                 bricksocket.set_loaded(data);
             })(this));
+
+            // Minifigure loaded (for bulk add with mixed sets/minifigures)
+            if (this.messages.MINIFIGURE_LOADED) {
+                this.socket.on(this.messages.MINIFIGURE_LOADED, ((bricksocket) => (data) => {
+                    bricksocket.minifigure_loaded(data);
+                })(this));
+            }
         }
     }
 
@@ -301,8 +397,20 @@ class BrickSetSocket extends BrickSocket {
             this.html_owners.querySelectorAll('input').forEach(input => input.disabled = !enabled);
         }
 
+        if (this.html_purchase_date) {
+            this.html_purchase_date.disabled = !enabled;
+        }
+
         if (this.html_purchase_location) {
             this.html_purchase_location.disabled = !enabled;
+        }
+
+        if (this.html_purchase_price) {
+            this.html_purchase_price.disabled = !enabled;
+        }
+
+        if (this.html_statuses) {
+            this.html_statuses.querySelectorAll('input').forEach(input => input.disabled = !enabled);
         }
 
         if (this.html_storage) {
@@ -311,6 +419,10 @@ class BrickSetSocket extends BrickSocket {
 
         if (this.html_tags) {
             this.html_tags.querySelectorAll('input').forEach(input => input.disabled = !enabled);
+        }
+
+        if (this.html_description) {
+            this.html_description.disabled = !enabled;
         }
 
         if (this.html_card_confirm) {

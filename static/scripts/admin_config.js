@@ -165,11 +165,13 @@ function saveStaticConfig() {
     if (statusContainer) {
       if (data.status === 'success') {
         statusContainer.innerHTML = '<div class="alert alert-success"><i class="ri-check-line"></i> Static configuration saved to .env file!</div>';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         setTimeout(() => {
           statusContainer.innerHTML = '';
         }, 3000);
       } else {
         statusContainer.innerHTML = `<div class="alert alert-danger"><i class="ri-error-warning-line"></i> Error: ${data.message || 'Failed to save static configuration'}</div>`;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
   })

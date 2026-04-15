@@ -42,15 +42,36 @@
           <td>{{ item.fields.total_minifigures }}</td>
         {% else %}
           {% if not config['HIDE_TABLE_CHECKED_PARTS'] and not read_only %}
-            <td class="table-td-input">
+            <td data-sort="{{ item.fields.checked | default(0) | int }}" class="table-td-input">
               <center>{{ form.checkbox('', item.fields.id, item.html_id('checked'), item.url_for_checked(), item.fields.checked | default(false), parent='part', delete=read_only) }}</center>
             </td>
           {% endif %}
           {% if g.login.is_authenticated() and not read_only %}
             {% set show_missing_menu = not config['HIDE_TABLE_MISSING_PARTS'] %}
             {% set show_checked_menu = not config['HIDE_TABLE_CHECKED_PARTS'] %}
-            {% if show_missing_menu or show_checked_menu %}
-              <td></td>
+            {% set show_quick_add = not config['DISABLE_QUICK_ADD_INDIVIDUAL_PARTS'] and not config['HIDE_INDIVIDUAL_PARTS'] and not config['HIDE_QUICK_ADD_INDIVIDUAL_PARTS'] %}
+            {% if show_missing_menu or show_checked_menu or show_quick_add %}
+              <td class="text-end">
+                {% if show_quick_add %}
+                  <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                      <i class="ri-more-2-fill"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                      <li>
+                        <a class="dropdown-item quick-add-individual-part" href="#"
+                           data-part="{{ item.fields.part }}"
+                           data-color="{{ item.fields.color }}"
+                           data-name="{{ item.fields.name }}"
+                           data-color-name="{{ item.fields.color_name }}"
+                           data-image="{{ item.url_for_image() }}">
+                          <i class="ri-add-line me-2"></i>Add to individual parts
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                {% endif %}
+              </td>
             {% endif %}
           {% endif %}
         {% endif %}

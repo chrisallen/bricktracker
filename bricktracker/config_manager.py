@@ -17,7 +17,9 @@ LIVE_CHANGEABLE_VARS: Final[List[str]] = [
     'BK_ADMIN_DEFAULT_EXPANDED_SECTIONS',
     'BK_HIDE_ALL_INSTRUCTIONS',
     'BK_HIDE_ALL_MINIFIGURES',
+    'BK_HIDE_INDIVIDUAL_MINIFIGURES',
     'BK_HIDE_ALL_PARTS',
+    'BK_HIDE_INDIVIDUAL_PARTS',
     'BK_HIDE_ALL_PROBLEMS_PARTS',
     'BK_HIDE_ALL_SETS',
     'BK_HIDE_ALL_STORAGES',
@@ -26,6 +28,7 @@ LIVE_CHANGEABLE_VARS: Final[List[str]] = [
     'BK_HIDE_TABLE_DAMAGED_PARTS',
     'BK_HIDE_TABLE_MISSING_PARTS',
     'BK_HIDE_TABLE_CHECKED_PARTS',
+    'BK_DISABLE_QUICK_ADD_INDIVIDUAL_PARTS',
     'BK_HIDE_WISHES',
     'BK_MINIFIGURES_PAGINATION_SIZE_DESKTOP',
     'BK_MINIFIGURES_PAGINATION_SIZE_MOBILE',
@@ -54,6 +57,11 @@ LIVE_CHANGEABLE_VARS: Final[List[str]] = [
     'BK_STATISTICS_SHOW_CHARTS',
     'BK_STATISTICS_DEFAULT_EXPANDED',
     'BK_DARK_MODE',
+    # Badge order preferences
+    'BK_BADGE_ORDER_GRID',
+    'BK_BADGE_ORDER_DETAIL',
+    'BK_SHOW_NOTES_GRID',
+    'BK_SHOW_NOTES_DETAIL',
     # Default ordering and formatting
     'BK_INSTRUCTIONS_ALLOWED_EXTENSIONS',
     'BK_MINIFIGURES_DEFAULT_ORDER',
@@ -63,6 +71,8 @@ LIVE_CHANGEABLE_VARS: Final[List[str]] = [
     'BK_STORAGE_DEFAULT_ORDER',
     'BK_WISHES_DEFAULT_ORDER',
     # URL and Pattern Variables
+    # BrickLink minifigure links disabled - no ID mapping available
+    # 'BK_BRICKLINK_LINK_MINIFIGURE_PATTERN',
     'BK_BRICKLINK_LINK_PART_PATTERN',
     'BK_BRICKLINK_LINK_SET_PATTERN',
     'BK_REBRICKABLE_IMAGE_NIL',
@@ -85,6 +95,8 @@ RESTART_REQUIRED_VARS: Final[List[str]] = [
     'BK_AUTHENTICATION_KEY',
     'BK_DATABASE_PATH',
     'BK_DEBUG',
+    'BK_DISABLE_INDIVIDUAL_PARTS',
+    'BK_DISABLE_INDIVIDUAL_MINIFIGURES',
     'BK_DOMAIN_NAME',
     'BK_HOST',
     'BK_PORT',
@@ -179,8 +191,8 @@ class ConfigManager:
 
     def _cast_value(self, var_name: str, value: Any) -> Any:
         """Cast value to appropriate type based on variable name"""
-        # List variables (admin sections) - Check this FIRST before boolean check
-        if 'sections' in var_name.lower():
+        # List variables (admin sections, badge order) - Check this FIRST before boolean check
+        if any(keyword in var_name.lower() for keyword in ['sections', 'badge_order']):
             if isinstance(value, str):
                 return [section.strip() for section in value.split(',') if section.strip()]
             elif isinstance(value, list):
@@ -194,7 +206,7 @@ class ConfigManager:
             except (ValueError, TypeError):
                 return 0
         # Boolean variables - More specific patterns to avoid conflicts
-        if any(keyword in var_name.lower() for keyword in ['hide_', 'server_side_pagination', '_links', 'random', 'skip_', 'show_', 'use_', '_consolidation', '_charts', '_expanded']):
+        if any(keyword in var_name.lower() for keyword in ['hide_', 'disable_', 'server_side_pagination', '_links', 'random', 'skip_', 'show_', 'use_', '_consolidation', '_charts', '_expanded']):
             if isinstance(value, str):
                 return value.lower() in ('true', '1', 'yes', 'on')
             return bool(value)

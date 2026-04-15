@@ -273,7 +273,7 @@
         <div class="card-header">
           <h5 class="card-title mb-0">
             <a class="text-decoration-none text-dark" data-bs-toggle="collapse" href="#collapseStorage" role="button" aria-expanded="{{ 'true' if config['STATISTICS_DEFAULT_EXPANDED'] else 'false' }}" aria-controls="collapseStorage">
-              <i class="ri-archive-2-line"></i> Sets by Storage
+              <i class="ri-archive-2-line"></i> Storage
               <i class="ri-arrow-down-s-line float-end"></i>
             </a>
           </h5>
@@ -286,8 +286,8 @@
                 <tr>
                   <th>Storage Location</th>
                   <th class="text-center">Sets</th>
-                  <th class="text-center">Parts</th>
-                  <th class="text-center">Minifigures</th>
+                  <th class="text-center">Parts (lots, individual parts)</th>
+                  <th class="text-center">Minifigures (individual minifigures)</th>
                   <th class="text-center">Value</th>
                 </tr>
               </thead>
@@ -295,7 +295,7 @@
                 {% for storage in storage_statistics %}
                 <tr>
                   <td>
-                    <a href="{{ url_for('set.list', storage=storage.storage_id) }}" class="text-decoration-none">
+                    <a href="{{ url_for('storage.details', id=storage.storage_id) }}" class="text-decoration-none">
                       {{ storage.storage_name or 'Unknown' }}
                     </a>
                   </td>
@@ -303,10 +303,10 @@
                     <small class="text-dark">{{ storage.set_count }}</small>
                   </td>
                   <td class="text-center">
-                    <small class="text-dark">{{ "{:,}".format(storage.total_parts) }}</small>
+                    <small class="text-dark">{{ "{:,}".format(storage.total_parts) }}{% if storage.lot_count or storage.individual_part_count %} ({% if storage.lot_count %}{{ storage.lot_count }} lot{{ 's' if storage.lot_count != 1 else '' }}{% endif %}{% if storage.lot_count and storage.individual_part_count %}, {% endif %}{% if storage.individual_part_count %}{{ "{:,}".format(storage.individual_part_count) }} individual{% endif %}){% endif %}</small>
                   </td>
                   <td class="text-center">
-                    <small class="text-dark">{{ storage.total_minifigures }}</small>
+                    <small class="text-dark">{{ storage.total_minifigures }}{% if storage.individual_minifig_count %} ({{ storage.individual_minifig_count }} individual){% endif %}</small>
                   </td>
                   <td class="text-center">
                     {% if storage.total_value %}
@@ -335,7 +335,7 @@
         <div class="card-header">
           <h5 class="card-title mb-0">
             <a class="text-decoration-none text-dark" data-bs-toggle="collapse" href="#collapsePurchase" role="button" aria-expanded="{{ 'true' if config['STATISTICS_DEFAULT_EXPANDED'] else 'false' }}" aria-controls="collapsePurchase">
-              <i class="ri-shopping-cart-line"></i> Sets by Purchase Location
+              <i class="ri-shopping-cart-line"></i> Purchase Location
               <i class="ri-arrow-down-s-line float-end"></i>
             </a>
           </h5>
@@ -359,7 +359,7 @@
                 {% for location in purchase_location_statistics %}
                 <tr>
                   <td>
-                    <a href="{{ url_for('set.list', purchase_location=location.location_id) }}" class="text-decoration-none">
+                    <a href="{{ url_for('purchase_location.details', id=location.location_id) }}" class="text-decoration-none">
                       {{ location.location_name or 'Unknown' }}
                     </a>
                   </td>

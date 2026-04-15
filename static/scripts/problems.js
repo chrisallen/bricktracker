@@ -15,11 +15,11 @@ document.addEventListener("DOMContentLoaded", () => {
     sortColumnMap: {
       'name': 1,
       'color': 2,
-      'quantity': 3,
-      'missing': 4,
-      'damaged': 5,
-      'sets': 6,
-      'minifigures': 7
+      //'quantity': 3,
+      'missing': 3,
+      'damaged': 4,
+      'sets': 5,
+      'minifigures': 6
     },
     hasColorDropdown: true
   });

@@ -1,0 +1,206 @@
+{% import 'macro/accordion.html' as accordion %}
+
+{% extends 'base.html' %}
+
+{% block title %} - Add individual parts{% endblock %}
+
+{% block main %}
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      <div class="card mb-3">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="ri-hammer-line"></i> Add individual parts</h5>
+        </div>
+        <div class="card-body">
+          <div id="add-part-fail" class="alert alert-danger d-none" role="alert"></div>
+          <div id="add-part-complete" class="alert alert-success d-none" role="alert"></div>
+
+          <div class="mb-3">
+            <label for="add-part-input" class="form-label">Part number</label>
+            <input type="text" class="form-control" id="add-part-input" placeholder="3001" required
+              data-path="{{ path }}"
+              data-namespace="{{ namespace }}"
+              data-msg-complete="{{ messages['COMPLETE'] }}"
+              data-msg-create-lot="{{ messages['CREATE_LOT'] }}"
+              data-msg-fail="{{ messages['FAIL'] }}"
+              data-msg-load-part="{{ messages['LOAD_PART'] }}"
+              data-msg-load-part-colors="{{ messages['LOAD_PART_COLORS'] }}"
+              data-msg-part-colors-loaded="{{ messages['PART_COLORS_LOADED'] }}"
+              data-msg-progress="{{ messages['PROGRESS'] }}"
+              data-msg-part-loaded="{{ messages['PART_LOADED'] }}">
+            <div class="form-text">Enter the Rebrickable part number (e.g., 3001, 3622, etc.)</div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label"><strong>Add Mode</strong></label>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="add-mode" id="add-part-single-mode" value="single" checked>
+              <label class="form-check-label" for="add-part-single-mode">
+                <strong>Single Mode</strong> - Add parts immediately one at a time
+              </label>
+              <div class="form-text">Each part is added to your inventory as soon as you select it</div>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="add-mode" id="add-part-bulk-mode" value="bulk">
+              <label class="form-check-label" for="add-part-bulk-mode">
+                <strong>Bulk Mode</strong> - Add multiple individual parts
+              </label>
+              <div class="form-text">Parts are added to a cart and saved together as individual parts (no lot created)</div>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="add-mode" id="add-part-lot-mode" value="lot">
+              <label class="form-check-label" for="add-part-lot-mode">
+                <strong>Lot Mode</strong> - Create a part lot
+              </label>
+              <div class="form-text">Parts are added to a cart and saved together as a lot</div>
+            </div>
+          </div>
+
+          <!-- CSV Import section -->
+          <div class="mb-3">
+            <label for="add-part-csv-file" class="form-label">Or import from Rebrickable CSV</label>
+            <div class="input-group">
+              <input type="file" class="form-control" id="add-part-csv-file" accept=".csv">
+              <button id="add-part-import-csv" type="button" class="btn btn-secondary" disabled>
+                <i class="ri-upload-line"></i> Import CSV
+              </button>
+            </div>
+            <div class="form-text">Upload a CSV file with columns: Part, Color, Quantity (automatically enables Lot Mode)</div>
+          </div>
+
+          <!-- Cart section (only visible in lot mode) -->
+          <div id="add-part-cart-section" class="d-none mb-3">
+            <h6 class="border-bottom">
+              <i class="ri-shopping-cart-line"></i> Cart
+              <span class="badge bg-primary" id="add-part-cart-count">0</span>
+            </h6>
+            <div id="add-part-cart-items" class="mb-2">
+              <!-- Cart items will be inserted here -->
+            </div>
+            <div class="d-grid gap-2">
+              <button id="add-part-complete-lot" type="button" class="btn btn-success" disabled>
+                <i class="ri-check-line"></i> <span id="add-part-complete-button-text">Complete Lot & Add All Parts</span>
+              </button>
+              <button id="add-part-clear-cart" type="button" class="btn btn-outline-danger btn-sm">
+                <i class="ri-delete-bin-line"></i> Clear Cart
+              </button>
+            </div>
+          </div>
+
+          <hr>
+          <div class="mb-3">
+            <p>
+              Progress <span id="add-part-count"></span>
+              <span id="add-part-spinner" class="d-none">
+                <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                <span class="visually-hidden" role="status">Loading...</span>
+              </span>
+            </p>
+            <div id="add-part-progress" class="progress" role="progressbar" aria-label="Add part progress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+              <div id="add-part-progress-bar" class="progress-bar" style="width: 0%"></div>
+            </div>
+            <p id="add-part-progress-message" class="text-center d-none"></p>
+          </div>
+
+          <!-- Color selection section (hidden until part is loaded) -->
+          <div id="add-part-colors-section" class="d-none">
+            <h6 class="border-bottom mt-3 mb-3">Select Color</h6>
+            <div id="add-part-colors-grid" class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
+              <!-- Color cards will be inserted here dynamically -->
+            </div>
+          </div>
+
+          <!-- Metadata section (initially hidden, shown after selecting part) -->
+          <div id="add-part-metadata-section" class="d-none">
+            <h6 class="border-bottom mt-3">Metadata</h6>
+            <div class="accordion accordion" id="metadata">
+              {% if not (brickset_owners | length) and not (brickset_purchase_locations | length) and not (brickset_storages | length) and not (brickset_tags | length) %}
+                <div class="alert alert-warning" role="alert">
+                  You have no metadata configured.
+                  You can add entries in the <a href="{{ url_for('admin.admin', open_metadata=true) }}" class="btn btn-warning" role="button"><i class="ri-profile-line"></i> Set metadata management</a> section of the Admin panel.
+                </div>
+              {% else %}
+                {% if brickset_owners | length %}
+                  {{ accordion.header('Owners', 'owners', 'metadata', icon='user-line') }}
+                  <div id="add-part-owners">
+                  {% for owner in brickset_owners %}
+                    {% with id=owner.as_dataset() %}
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="{{ owner.fields.id }}" id="part-{{ id }}" autocomplete="off">
+                        <label class="form-check-label" for="part-{{ id }}">{{ owner.fields.name }}</label>
+                      </div>
+                    {% endwith %}
+                  {% endfor %}
+                  </div>
+                  {{ accordion.footer() }}
+                {% endif %}
+
+                {% if brickset_purchase_locations | length %}
+                  {{ accordion.header('Purchase location', 'purchase-location', 'metadata', icon='building-line') }}
+                  <label class="visually-hidden" for="add-part-purchase-location">Purchase location</label>
+                  <div class="input-group">
+                    <select id="add-part-purchase-location" class="form-select" autocomplete="off">
+                      <option value="" selected><i>None</i></option>
+                      {% for purchase_location in brickset_purchase_locations %}
+                        <option value="{{ purchase_location.fields.id }}">{{ purchase_location.fields.name }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  {{ accordion.footer() }}
+                {% endif %}
+
+                {% if brickset_storages | length %}
+                  {{ accordion.header('Storage', 'storage', 'metadata', icon='archive-line') }}
+                  <label class="visually-hidden" for="add-part-storage">Storage</label>
+                  <div class="input-group">
+                    <select id="add-part-storage" class="form-select" autocomplete="off">
+                      <option value="" selected><i>None</i></option>
+                      {% for storage in brickset_storages %}
+                        <option value="{{ storage.fields.id }}">{{ storage.fields.name }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  {{ accordion.footer() }}
+                {% endif %}
+
+                {% if brickset_tags | length %}
+                  {{ accordion.header('Tags', 'tags', 'metadata', icon='price-tag-3-line') }}
+                  <div id="add-part-tags">
+                  {% for tag in brickset_tags %}
+                    {% with id=tag.as_dataset() %}
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="{{ tag.fields.id }}" id="part-{{ id }}" autocomplete="off">
+                        <label class="form-check-label" for="part-{{ id }}">{{ tag.fields.name }}</label>
+                      </div>
+                    {% endwith %}
+                  {% endfor %}
+                  </div>
+                  {{ accordion.footer() }}
+                {% endif %}
+
+                {% if brickset_purchase_locations | length %}
+                  {{ accordion.header('Purchase details', 'purchase', 'metadata', icon='money-dollar-circle-line') }}
+                  <div class="mb-3">
+                    <label for="add-part-purchase-date" class="form-label">Purchase date</label>
+                    <input type="date" class="form-control" id="add-part-purchase-date">
+                  </div>
+                  <div class="mb-3">
+                    <label for="add-part-purchase-price" class="form-label">Purchase price</label>
+                    <input type="number" class="form-control" id="add-part-purchase-price" placeholder="0.00" step="0.01" min="0">
+                  </div>
+                  {{ accordion.footer() }}
+                {% endif %}
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        <div class="card-footer text-end">
+          <span id="add-part-status-icon" class="me-1"></span><span id="add-part-status" class="me-1"></span>
+          <button id="add-part-lookup" type="button" class="btn btn-primary"><i class="ri-search-line"></i> Look up part</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

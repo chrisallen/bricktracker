@@ -2,6 +2,7 @@ from flask import Blueprint, render_template
 
 from .exceptions import exception_handler
 from ..minifigure_list import BrickMinifigureList
+from ..part_list import BrickPartList
 from ..set_status_list import BrickSetStatusList
 from ..set_list import BrickSetList, set_metadata_lists
 
@@ -17,5 +18,6 @@ def index() -> str:
         brickset_collection=BrickSetList().last(),
         brickset_statuses=BrickSetStatusList.list(),
         minifigure_collection=BrickMinifigureList().last(),
+        part_collection=BrickPartList().last(),
         **set_metadata_lists(as_class=True)
     )

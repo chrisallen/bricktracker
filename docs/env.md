@@ -29,18 +29,24 @@
 | `BK_HIDE_ALL_PROBLEMS_PARTS` | Hide problems parts menu entry | `false` | No |
 | `BK_HIDE_TABLE_MISSING_PARTS` | Hide Missing column in tables | `false` | No |
 | `BK_HIDE_TABLE_DAMAGED_PARTS` | Hide Damaged column in tables | `false` | No |
+| `BK_HIDE_TABLE_CHECKED_PARTS` | Hide Checked column in tables | `false` | No |
 | `BK_HIDE_WISHES` | Hide wishlist menu entry | `false` | No |
 | `BK_HIDE_ALL_STORAGES` | Hide storages menu entry | `false` | No |
+| `BK_HIDE_INDIVIDUAL_MINIFIGURES` | Hide individual minifigures UI | `false` | No |
+| `BK_HIDE_INDIVIDUAL_PARTS` | Hide individual parts UI | `false` | No |
 | `BK_SHOW_GRID_SORT` | Show sort options by default | `false` | No |
 | `BK_SHOW_GRID_FILTERS` | Show filter options by default | `false` | No |
 | `BK_INDEPENDENT_ACCORDIONS` | Make accordions independent | `false` | No |
+| `BK_DISABLE_INDIVIDUAL_MINIFIGURES` | Block write operations for individual minifigures | `false` | No |
+| `BK_DISABLE_INDIVIDUAL_PARTS` | Block write operations for individual parts | `false` | No |
+| `BK_HIDE_QUICK_ADD_INDIVIDUAL_PARTS` | Hide quick-add buttons in parts tables | `false` | No |
 
 ## Sort Order Configuration
 | Variable | Purpose | Default | Required |
 |----------|---------|----------|-----------|
 | `BK_SETS_DEFAULT_ORDER` | Default set sorting | `"rebrickable_sets"."number" DESC` | No |
-| `BK_PARTS_DEFAULT_ORDER` | Default part sorting | `"inventory"."name" ASC` | No |
-| `BK_MINIFIGURES_DEFAULT_ORDER` | Default minifig sorting | `"minifigures"."name" ASC` | No |
+| `BK_PARTS_DEFAULT_ORDER` | Default part sorting | `"rebrickable_parts"."name" ASC, "rebrickable_parts"."color_name" ASC, "combined"."spare" ASC` | No |
+| `BK_MINIFIGURES_DEFAULT_ORDER` | Default minifig sorting | `"rebrickable_minifigures"."name" ASC` | No |
 | `BK_WISHES_DEFAULT_ORDER` | Default wishlist sorting | `"bricktracker_wishes"."rowid" DESC` | No |
 | `BK_STORAGE_DEFAULT_ORDER` | Default storage sorting | `"bricktracker_metadata_storages"."name" ASC` | No |
 | `BK_PURCHASE_LOCATION_DEFAULT_ORDER` | Default purchase location sorting | `"bricktracker_metadata_purchase_locations"."name" ASC` | No |
@@ -74,7 +80,7 @@
 ## API and Network Configuration
 | Variable | Purpose | Default | Required |
 |----------|---------|----------|-----------|
-| `BK_DOMAIN_NAME` | CORS origin restriction | None | No |
+| `BK_DOMAIN_NAME` | Socket.IO CORS origin restriction (leave empty for reverse proxy) | None | No |
 | `BK_REBRICKABLE_PAGE_SIZE` | Items per API call | `100` | No |
 | `BK_SOCKET_NAMESPACE` | Socket.IO namespace | `bricksocket` | No |
 | `BK_SOCKET_PATH` | Socket.IO path | `/bricksocket/` | No |
@@ -106,10 +112,10 @@
 BK_SETS_DEFAULT_ORDER="rebrickable_sets"."year" ASC
 
 # Sort parts by missing count descending
-BK_PARTS_DEFAULT_ORDER="total_missing" DESC, "inventory"."name" ASC
+BK_PARTS_DEFAULT_ORDER="total_missing" DESC, "rebrickable_parts"."name" ASC
 
-# Sort minifigures by ID
-BK_MINIFIGURES_DEFAULT_ORDER="minifigures"."fig_num" ASC
+# Sort minifigures by figure number
+BK_MINIFIGURES_DEFAULT_ORDER="rebrickable_minifigures"."figure" ASC
 
 # Sort wishlist by set number
 BK_WISHES_DEFAULT_ORDER="bricktracker_wishes"."set" ASC

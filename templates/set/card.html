@@ -57,35 +57,19 @@
   {{ card.header(item, item.fields.name, solo=solo, identifier=item.fields.set) }}
   {{ card.image(item, solo=solo, last=last, caption=item.fields.name, alt=item.fields.set) }}
   <div class="card-body border-bottom-0 {% if not solo %}p-1{% endif %}"{% if current_viewing %} style="border-color: var(--bs-border-color) !important; border-width: 1px !important;"{% endif %}>
-    {{ badge.theme(item.theme.name, solo=solo, last=last) }}
-    {% for tag in brickset_tags %}
-      {{ badge.tag(item, tag, solo=solo, last=last) }}
-    {% endfor %}
-    {% if not last %}
-      {{ badge.year(item.fields.year, solo=solo, last=last) }}
-    {% endif %}
-    {{ badge.parts(item.fields.number_of_parts, solo=solo, last=last) }}
-    {% if item.fields.instance_count is defined and item.fields.instance_count > 1 %}
-      <span class="badge bg-primary"><i class="ri-stack-line"></i> {{ item.fields.instance_count }} copies</span>
-    {% endif %}
-    {{ badge.total_minifigures(item.fields.total_minifigures, solo=solo, last=last) }}
-    {{ badge.total_missing(item.fields.total_missing, solo=solo, last=last) }}
-    {{ badge.total_damaged(item.fields.total_damaged, solo=solo, last=last) }}
-    {% for owner in brickset_owners %}
-      {{ badge.owner(item, owner, solo=solo, last=last) }}
-    {% endfor %}
-    {{ badge.storage(item, brickset_storages, solo=solo, last=last) }}
-    {% if not last %}
-      {{ badge.purchase_date(item.purchase_date(), solo=solo, last=last, date_max_formatted=item.purchase_date_max_formatted()) }}
-      {{ badge.purchase_location(item, brickset_purchase_locations, solo=solo, last=last) }}
-      {{ badge.purchase_price(item.purchase_price(), solo=solo, last=last) }}
-      {% if not solo %}
-        {{ badge.instructions(item, solo=solo, last=last) }}
-      {% endif %}
-      {{ badge.rebrickable(item, solo=solo, last=last) }}
-      {{ badge.bricklink(item, solo=solo, last=last) }}
-    {% endif %}
+    {# Render badges in configured order based on context (grid view vs detail view) #}
+    {{ badge.render_ordered_badges(item, brickset_tags, brickset_owners, brickset_storages, brickset_purchase_locations, solo=solo, last=last, context='detail' if solo else 'grid') }}
   </div>
+  {# Show notes based on context and config #}
+  {% if item.fields.description and item.fields.description | trim %}
+    {% if (solo and config['SHOW_NOTES_DETAIL']) or (not solo and config['SHOW_NOTES_GRID']) %}
+      <div class="card-body border-bottom-0 {% if not solo %}p-1{% endif %} pt-0"{% if current_viewing %} style="border-color: var(--bs-border-color) !important; border-width: 1px !important;"{% endif %}>
+        <div class="alert alert-info mb-0 {% if not solo %}p-1 small{% endif %}" role="alert">
+          <i class="ri-sticky-note-line me-1"></i>{{ item.fields.description }}
+        </div>
+      </div>
+    {% endif %}
+  {% endif %}
   {% if not tiny and brickset_statuses | length %}
     <ul class="list-group list-group-flush card-check border-bottom-0"{% if current_viewing %} style="border-color: var(--bs-border-color) !important; border-width: 1px !important;"{% endif %}>
       {% for status in brickset_statuses %}
@@ -170,3 +154,74 @@
     <div class="card-footer"></div>
   {% endif %}
 </div>
+
+{% if solo and g.login.is_authenticated() %}
+<!-- Quick Add Individual Part Modal -->
+<div class="modal fade" id="quickAddIndividualPartModal" tabindex="-1" aria-labelledby="quickAddModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="quickAddModalLabel">Add to Individual Parts Inventory</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="quickAddForm">
+          <!-- Part info (read-only) -->
+          <div class="mb-3">
+            <label class="form-label fw-bold">Part</label>
+            <div class="d-flex align-items-center">
+              <img id="quickAddPartImage" src="" alt="" style="max-width: 100px; max-height: 100px;" class="me-3">
+              <div>
+                <div id="quickAddPartName" class="fw-bold"></div>
+                <div id="quickAddPartNumber" class="text-muted small"></div>
+                <div id="quickAddPartColor" class="text-muted small"></div>
+              </div>
+            </div>
+          </div>
+
+          <input type="hidden" id="quickAddPart" name="part">
+          <input type="hidden" id="quickAddColor" name="color">
+
+          <!-- Quantity -->
+          <div class="mb-3">
+            <label for="quickAddQuantity" class="form-label">Quantity <span class="text-danger">*</span></label>
+            <input type="number" class="form-control" id="quickAddQuantity" name="quantity" value="1" min="1" required>
+          </div>
+
+          <!-- Storage (optional) -->
+          <div class="mb-3">
+            <label for="quickAddStorage" class="form-label">Storage (optional)</label>
+            <select class="form-select" id="quickAddStorage" name="storage">
+              <option value="">-- No storage --</option>
+              {% for storage in brickset_storages %}
+                <option value="{{ storage.fields.id }}">{{ storage.fields.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Purchase Location (optional) -->
+          <div class="mb-3">
+            <label for="quickAddPurchaseLocation" class="form-label">Purchase Location (optional)</label>
+            <select class="form-select" id="quickAddPurchaseLocation" name="purchase_location">
+              <option value="">-- No purchase location --</option>
+              {% for location in brickset_purchase_locations %}
+                <option value="{{ location.fields.id }}">{{ location.fields.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Description/Notes (optional) -->
+          <div class="mb-3">
+            <label for="quickAddDescription" class="form-label">Notes (optional)</label>
+            <textarea class="form-control" id="quickAddDescription" name="description" rows="2"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="quickAddSubmit">Add to Inventory</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}

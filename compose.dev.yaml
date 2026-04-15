@@ -1,0 +1,24 @@
+services:
+  bricktracker:
+    container_name: BrickTracker
+    restart: unless-stopped
+    build: .
+    ports:
+      - "3334:3333"
+    volumes:
+      - ./local:/app/data  # Data directory for database and files
+      - ./bricktracker:/app/bricktracker  # Mount code for live reload
+      - ./templates:/app/templates  # Mount templates for live reload
+      - ./static:/app/static  # Mount static files for live reload
+    environment:
+      - BK_DEBUG=true
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+    # For local development, place .env in data/ folder
+    # The app automatically detects and uses data/.env (no env_file needed)
+    # Uncomment below only if you keep .env in root for backward compatibility
+    # env_file: .env
+    develop:
+      watch:
+        - action: rebuild
+          path: requirements.txt

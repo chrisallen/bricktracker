@@ -19,7 +19,8 @@ SELECT
     MIN("bricktracker_sets"."purchase_date") AS "purchase_date",
     MAX("bricktracker_sets"."purchase_date") AS "purchase_date_max",
     REPLACE(GROUP_CONCAT(DISTINCT "bricktracker_sets"."purchase_location"), ',', '|') AS "purchase_location",
-    ROUND(AVG("bricktracker_sets"."purchase_price"), 1) AS "purchase_price"
+    ROUND(AVG("bricktracker_sets"."purchase_price"), 1) AS "purchase_price",
+    (SELECT "description" FROM "bricktracker_sets" WHERE "set" = "rebrickable_sets"."set" LIMIT 1) AS "description"
     {% block owners %}
         {% if owners_dict %}
             {% for column, uuid in owners_dict.items() %}
@@ -91,27 +92,51 @@ AND (LOWER("rebrickable_sets"."name") LIKE LOWER('%{{ search_query }}%')
 {% endif %}
 
 {% if theme_filter %}
+{% if theme_filter is string and theme_filter.startswith('-') %}
+AND "rebrickable_sets"."theme_id" != {{ theme_filter[1:] }}
+{% else %}
 AND "rebrickable_sets"."theme_id" = {{ theme_filter }}
+{% endif %}
 {% endif %}
 
 {% if year_filter %}
+{% if year_filter is string and year_filter.startswith('-') %}
+AND "rebrickable_sets"."year" != {{ year_filter[1:] }}
+{% else %}
 AND "rebrickable_sets"."year" = {{ year_filter }}
+{% endif %}
 {% endif %}
 
 {% if storage_filter %}
+{% if storage_filter.startswith('-') %}
+AND NOT EXISTS (
+    SELECT 1 FROM "bricktracker_sets" bs_filter
+    WHERE bs_filter."set" = "rebrickable_sets"."set"
+    AND bs_filter."storage" = '{{ storage_filter[1:] }}'
+)
+{% else %}
 AND EXISTS (
     SELECT 1 FROM "bricktracker_sets" bs_filter
     WHERE bs_filter."set" = "rebrickable_sets"."set"
     AND bs_filter."storage" = '{{ storage_filter }}'
 )
 {% endif %}
+{% endif %}
 
 {% if purchase_location_filter %}
+{% if purchase_location_filter.startswith('-') %}
+AND NOT EXISTS (
+    SELECT 1 FROM "bricktracker_sets" bs_filter
+    WHERE bs_filter."set" = "rebrickable_sets"."set"
+    AND bs_filter."purchase_location" = '{{ purchase_location_filter[1:] }}'
+)
+{% else %}
 AND EXISTS (
     SELECT 1 FROM "bricktracker_sets" bs_filter
     WHERE bs_filter."set" = "rebrickable_sets"."set"
     AND bs_filter."purchase_location" = '{{ purchase_location_filter }}'
 )
+{% endif %}
 {% endif %}
 
 {% if status_filter %}

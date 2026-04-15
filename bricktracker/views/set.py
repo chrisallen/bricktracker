@@ -158,6 +158,18 @@ def update_purchase_price(*, id: str) -> Response:
     return jsonify({'value': value})
 
 
+# Change the value of description
+@set_page.route('/<id>/description', methods=['POST'])
+@login_required
+@exception_handler(__file__, json=True)
+def update_description(*, id: str) -> Response:
+    brickset = BrickSet().select_light(id)
+
+    value = brickset.update_description(request.json)
+
+    return jsonify({'value': value})
+
+
 # Change the state of a owner
 @set_page.route('/<id>/owner/<metadata_id>', methods=['POST'])
 @login_required

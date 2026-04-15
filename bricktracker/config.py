@@ -10,6 +10,8 @@ from typing import Any, Final
 CONFIG: Final[list[dict[str, Any]]] = [
     {'n': 'AUTHENTICATION_PASSWORD', 'd': ''},
     {'n': 'AUTHENTICATION_KEY', 'd': ''},
+    # BrickLink minifigure links disabled - Rebrickable doesn't provide BrickLink minifigure IDs
+    # {'n': 'BRICKLINK_LINK_MINIFIGURE_PATTERN', 'd': 'https://www.bricklink.com/v2/catalog/catalogitem.page?M={figure}'},  # noqa: E501
     {'n': 'BRICKLINK_LINK_PART_PATTERN', 'd': 'https://www.bricklink.com/v2/catalog/catalogitem.page?P={part}&C={color}'},  # noqa: E501
     {'n': 'BRICKLINK_LINK_SET_PATTERN', 'd': 'https://www.bricklink.com/v2/catalog/catalogitem.page?S={set_num}'},  # noqa: E501
     {'n': 'BRICKLINK_LINKS', 'c': bool},
@@ -17,6 +19,10 @@ CONFIG: Final[list[dict[str, Any]]] = [
     {'n': 'DATABASE_TIMESTAMP_FORMAT', 'd': '%Y-%m-%d-%H-%M-%S'},
     {'n': 'DEBUG', 'c': bool},
     {'n': 'DEFAULT_TABLE_PER_PAGE', 'd': 25, 'c': int},
+    {'n': 'DISABLE_INDIVIDUAL_MINIFIGURES', 'c': bool},
+    {'n': 'DISABLE_INDIVIDUAL_PARTS', 'c': bool},
+    {'n': 'DISABLE_QUICK_ADD_INDIVIDUAL_PARTS', 'c': bool},
+    {'n': 'HIDE_QUICK_ADD_INDIVIDUAL_PARTS', 'c': bool},
     {'n': 'DOMAIN_NAME', 'e': 'DOMAIN_NAME', 'd': ''},
     {'n': 'FILE_DATETIME_FORMAT', 'd': '%d/%m/%Y, %H:%M:%S'},
     {'n': 'HOST', 'd': '0.0.0.0'},
@@ -29,7 +35,9 @@ CONFIG: Final[list[dict[str, Any]]] = [
     {'n': 'ADMIN_DEFAULT_EXPANDED_SECTIONS', 'd': ['database'], 'c': list},
     {'n': 'HIDE_ALL_INSTRUCTIONS', 'c': bool},
     {'n': 'HIDE_ALL_MINIFIGURES', 'c': bool},
+    {'n': 'HIDE_INDIVIDUAL_MINIFIGURES', 'c': bool},
     {'n': 'HIDE_ALL_PARTS', 'c': bool},
+    {'n': 'HIDE_INDIVIDUAL_PARTS', 'c': bool},
     {'n': 'HIDE_ALL_PROBLEMS_PARTS', 'e': 'BK_HIDE_MISSING_PARTS', 'c': bool},
     {'n': 'HIDE_ALL_SETS', 'c': bool},
     {'n': 'HIDE_ALL_STORAGES', 'c': bool},
@@ -47,7 +55,7 @@ CONFIG: Final[list[dict[str, Any]]] = [
     {'n': 'NO_THREADED_SOCKET', 'c': bool},
     {'n': 'PARTS_SERVER_SIDE_PAGINATION', 'c': bool},
     {'n': 'SETS_SERVER_SIDE_PAGINATION', 'c': bool},
-    {'n': 'PARTS_DEFAULT_ORDER', 'd': '"rebrickable_parts"."name" ASC, "rebrickable_parts"."color_name" ASC, "bricktracker_parts"."spare" ASC'},  # noqa: E501
+    {'n': 'PARTS_DEFAULT_ORDER', 'd': '"rebrickable_parts"."name" ASC, "rebrickable_parts"."color_name" ASC, "combined"."spare" ASC'},  # noqa: E501
     {'n': 'PARTS_FOLDER', 'd': 'data/parts'},
     {'n': 'PARTS_PAGINATION_SIZE_DESKTOP', 'd': 10, 'c': int},
     {'n': 'PARTS_PAGINATION_SIZE_MOBILE', 'd': 5, 'c': int},
@@ -97,4 +105,8 @@ CONFIG: Final[list[dict[str, Any]]] = [
     {'n': 'STATISTICS_SHOW_CHARTS', 'd': True, 'c': bool},
     {'n': 'STATISTICS_DEFAULT_EXPANDED', 'd': True, 'c': bool},
     {'n': 'DARK_MODE', 'c': bool},
+    {'n': 'BADGE_ORDER_GRID', 'd': ['theme', 'year', 'parts', 'total_minifigures', 'owner'], 'c': list},
+    {'n': 'BADGE_ORDER_DETAIL', 'd': ['theme', 'tag', 'year', 'parts', 'instance_count', 'total_minifigures', 'total_missing', 'total_damaged', 'owner', 'storage', 'purchase_date', 'purchase_location', 'purchase_price', 'instructions', 'rebrickable', 'bricklink'], 'c': list},
+    {'n': 'SHOW_NOTES_GRID', 'd': False, 'c': bool},
+    {'n': 'SHOW_NOTES_DETAIL', 'd': True, 'c': bool},
 ]

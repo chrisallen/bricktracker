@@ -6,10 +6,24 @@
 
 {% block main %}
 <div class="container">
-  {% if not bulk and not config['HIDE_ADD_BULK_SET'] %}
-  <div class="alert alert-primary" role="alert">
-    <h4 class="alert-heading">Too many to add?</h4>
-    <p class="mb-0">You can import multiple sets at once with <a href="{{ url_for('add.bulk') }}" class="btn btn-primary"><i class="ri-function-add-line"></i> Bulk add</a>.</p>
+  {% if not bulk and (not config['HIDE_ADD_BULK_SET'] or (not config['HIDE_INDIVIDUAL_PARTS'] and not config['DISABLE_INDIVIDUAL_PARTS'])) %}
+  <div class="row g-3 mb-3">
+    {% if not config['HIDE_ADD_BULK_SET'] %}
+    <div class="col-12 {% if not config['HIDE_INDIVIDUAL_PARTS'] and not config['DISABLE_INDIVIDUAL_PARTS'] %}col-md-6{% endif %}">
+      <div class="alert alert-primary mb-0 h-100" role="alert">
+        <h4 class="alert-heading">Too many to add?</h4>
+        <p class="mb-0">You can import multiple sets at once with <a href="{{ url_for('add.bulk') }}" class="btn btn-primary"><i class="ri-function-add-line"></i> Bulk add</a>.</p>
+      </div>
+    </div>
+    {% endif %}
+    {% if not config['HIDE_INDIVIDUAL_PARTS'] and not config['DISABLE_INDIVIDUAL_PARTS'] %}
+    <div class="col-12 {% if not config['HIDE_ADD_BULK_SET'] %}col-md-6{% endif %}">
+      <div class="alert alert-info mb-0 h-100" role="alert">
+        <h4 class="alert-heading">Adding individual parts?</h4>
+        <p class="mb-0">You can add standalone parts (not from a set) with <a href="{{ url_for('add.parts') }}" class="btn btn-info"><i class="ri-hammer-line"></i> Add parts</a>.</p>
+      </div>
+    </div>
+    {% endif %}
   </div>
   {% endif %}
   <div class="row">
@@ -26,8 +40,20 @@
             <div id="add-complete"></div>
           {% endif %}
           <div class="mb-3">
-            <label for="add-set" class="form-label">{% if not bulk %}Set number (only one){% else %}List of sets (separated by a comma){% endif %}</label>
-            <input type="text" class="form-control" id="add-set" placeholder="{% if not bulk %}107-1 or 1642-1 or ...{% else %}107-1, 1642-1, ...{% endif %}">
+            <label for="add-set" class="form-label">{% if not bulk %}{% if not config.get('HIDE_INDIVIDUAL_MINIFIGURES', False) and not config.get('DISABLE_INDIVIDUAL_MINIFIGURES', False) %}Set or Minifigure number (only one){% else %}Set number (only one){% endif %}{% else %}List of sets (separated by a comma){% endif %}</label>
+            <input type="text" class="form-control" id="add-set" placeholder="{% if not bulk %}{% if not config.get('HIDE_INDIVIDUAL_MINIFIGURES', False) and not config.get('DISABLE_INDIVIDUAL_MINIFIGURES', False) %}107-1 or fig-001234 or ...{% else %}107-1 or ...{% endif %}{% else %}107-1, 1642-1, ...{% endif %}"
+              data-path="{{ path }}"
+              data-namespace="{{ namespace }}"
+              data-msg-complete="{{ messages['COMPLETE'] }}"
+              data-msg-fail="{{ messages['FAIL'] }}"
+              data-msg-import-set="{{ messages['IMPORT_SET'] }}"
+              data-msg-load-set="{{ messages['LOAD_SET'] }}"
+              data-msg-progress="{{ messages['PROGRESS'] }}"
+              data-msg-set-loaded="{{ messages['SET_LOADED'] }}"
+              data-msg-import-minifigure="{{ messages['IMPORT_MINIFIGURE'] }}"
+              data-msg-load-minifigure="{{ messages['LOAD_MINIFIGURE'] }}"
+              data-msg-minifigure-loaded="{{ messages['MINIFIGURE_LOADED'] }}">
+            <div class="form-text">Sets: use format like 107-1{% if not config.get('HIDE_INDIVIDUAL_MINIFIGURES', False) and not config.get('DISABLE_INDIVIDUAL_MINIFIGURES', False) %}. Minifigures: use format like fig-001234{% endif %}</div>
           </div>
           <div class="form-check">
             <input type="checkbox" class="form-check-input" id="add-no-confirm" {% if bulk %}checked disabled{% endif %}>
@@ -37,30 +63,43 @@
           </div>
           <h6 class="border-bottom mt-2">Metadata</h6>
           <div class="accordion accordion" id="metadata">
-            {% if not (brickset_owners | length) and not (brickset_purchase_locations | length) and not (brickset_storages | length) and not (brickset_tags | length) %}
-              <div class="alert alert-warning" role="alert">
-                You have no metadata configured.
-                You can add entries in the <a href="{{ url_for('admin.admin', open_metadata=true) }}" class="btn btn-warning" role="button"><i class="ri-profile-line"></i> Set metadata management</a> section of the Admin panel.
+            {% if brickset_owners | length %}
+              {{ accordion.header('Owners', 'owners', 'metadata', icon='user-line') }}
+              <div id="add-owners">
+              {% for owner in brickset_owners %}
+                {% with id=owner.as_dataset() %}
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="{{ owner.fields.id }}" id="{{ id }}" autocomplete="off">
+                    <label class="form-check-label" for="{{ id }}">{{ owner.fields.name }}</label>
+                  </div>
+                {% endwith %}
+              {% endfor %}
               </div>
-              {% else %}
-              {% if brickset_owners | length %}
-                {{ accordion.header('Owners', 'owners', 'metadata', icon='user-line') }}
-                <div id="add-owners">
-                {% for owner in brickset_owners %}
-                  {% with id=owner.as_dataset() %}
-                    <div class="form-check">
-                      <input class="form-check-input" type="checkbox" value="{{ owner.fields.id }}" id="{{ id }}" autocomplete="off">
-                      <label class="form-check-label" for="{{ id }}">{{ owner.fields.name }}</label>
-                    </div>
-                  {% endwith %}
-                {% endfor %}
-                </div>
-                {{ accordion.footer() }}
-              {% endif %}
-              {% if brickset_purchase_locations | length %}
-                {{ accordion.header('Purchase location', 'purchase-location', 'metadata', icon='building-line') }}
-                <label class="visually-hidden" for="add-purchase-location">{{ name }}</label>
+              {{ accordion.footer() }}
+            {% endif %}
+            {{ accordion.header('Purchase', 'purchase', 'metadata', icon='wallet-3-line') }}
+            <div class="alert alert-info" role="alert">The expected date format here is <code>yyyy/mm/dd</code> (year/month/day), but you can configure how it is displayed in the set card with the <code>PURCHASE_DATE_FORMAT</code> variable.</div>
+            <div class="row row-cols-lg-auto g-1 justify-content-start align-items-center pb-2">
+              <div class="col-12">
+                <label for="add-purchase-date" class="form-label visually-hidden">Date</label>
                 <div class="input-group">
+                  <span class="input-group-text px-1"><i class="ri-calendar-line me-1"></i><span class="ms-1 d-none d-md-inline"> Date</span></span>
+                  <input class="form-control form-control-sm flex-shrink-1 px-1" type="text" id="add-purchase-date" data-add-date="true" autocomplete="off">
+                </div>
+              </div>
+              <div class="col-12">
+                <label for="add-purchase-price" class="form-label visually-hidden">Price</label>
+                <div class="input-group">
+                  <span class="input-group-text px-1"><i class="ri-wallet-3-line me-1"></i><span class="ms-1 d-none d-md-inline"> Price</span></span>
+                  <input class="form-control form-control-sm flex-shrink-1 px-1" type="text" id="add-purchase-price" autocomplete="off">
+                  {% if config['PURCHASE_CURRENCY'] %}<span class="input-group-text d-none d-md-inline px-1">{{ config['PURCHASE_CURRENCY'] }}</span>{% endif %}
+                </div>
+              </div>
+              {% if brickset_purchase_locations | length %}
+              <div class="col-12 flex-grow-1">
+                <label for="add-purchase-location" class="form-label visually-hidden">Location</label>
+                <div class="input-group">
+                  <span class="input-group-text px-1"><i class="ri-building-line me-1"></i><span class="ms-1 d-none d-md-inline"> Location</span></span>
                   <select id="add-purchase-location" class="form-select" autocomplete="off">
                     <option value="" selected><i>None</i></option>
                     {% for purchase_location in brickset_purchase_locations %}
@@ -68,35 +107,53 @@
                     {% endfor %}
                   </select>
                 </div>
-                {{ accordion.footer() }}
+              </div>
               {% endif %}
-              {% if brickset_storages | length %}
-                {{ accordion.header('Storage', 'storage', 'metadata', icon='archive-2-line') }}
-                <label class="visually-hidden" for="add-storage">{{ name }}</label>
-                <div class="input-group">
-                  <select id="add-storage" class="form-select" autocomplete="off">
-                    <option value="" selected><i>None</i></option>
-                    {% for storage in brickset_storages %}
-                      <option value="{{ storage.fields.id }}">{{ storage.fields.name }}</option>
-                    {% endfor %}
-                  </select>
-                </div>
-                {{ accordion.footer() }}
-              {% endif %}
-              {% if brickset_tags | length %}
-                {{ accordion.header('Tags', 'tags', 'metadata', icon='price-tag-2-line') }}
-                <div id="add-tags">
-                {% for tag in brickset_tags %}
-                  {% with id=tag.as_dataset() %}
-                    <div class="form-check">
-                      <input class="form-check-input" type="checkbox" value="{{ tag.fields.id }}" id="{{ id }}" autocomplete="off">
-                      <label class="form-check-label" for="{{ id }}">{{ tag.fields.name }}</label>
-                    </div>
-                  {% endwith %}
-                {% endfor %}
-                </div>
-                {{ accordion.footer() }}
-              {% endif %}
+            </div>
+            {{ accordion.footer() }}
+            {{ accordion.header('Notes', 'notes', 'metadata', icon='sticky-note-line') }}
+            <textarea class="form-control" id="add-description" rows="3" placeholder="Optional notes..."></textarea>
+            {{ accordion.footer() }}
+            {% if brickset_storages | length %}
+              {{ accordion.header('Storage', 'storage', 'metadata', icon='archive-2-line') }}
+              <label class="visually-hidden" for="add-storage">Storage</label>
+              <div class="input-group">
+                <select id="add-storage" class="form-select" autocomplete="off">
+                  <option value="" selected><i>None</i></option>
+                  {% for storage in brickset_storages %}
+                    <option value="{{ storage.fields.id }}">{{ storage.fields.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              {{ accordion.footer() }}
+            {% endif %}
+            {% if brickset_statuses | length %}
+              {{ accordion.header('Statuses', 'statuses', 'metadata', icon='checkbox-circle-line') }}
+              <div id="add-statuses">
+              {% for status in brickset_statuses %}
+                {% with id=status.as_dataset() %}
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="{{ status.fields.id }}" id="{{ id }}" autocomplete="off">
+                    <label class="form-check-label" for="{{ id }}">{{ status.fields.name }}</label>
+                  </div>
+                {% endwith %}
+              {% endfor %}
+              </div>
+              {{ accordion.footer() }}
+            {% endif %}
+            {% if brickset_tags | length %}
+              {{ accordion.header('Tags', 'tags', 'metadata', icon='price-tag-2-line') }}
+              <div id="add-tags">
+              {% for tag in brickset_tags %}
+                {% with id=tag.as_dataset() %}
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" value="{{ tag.fields.id }}" id="{{ id }}" autocomplete="off">
+                    <label class="form-check-label" for="{{ id }}">{{ tag.fields.name }}</label>
+                  </div>
+                {% endwith %}
+              {% endfor %}
+              </div>
+              {{ accordion.footer() }}
             {% endif %}
           </div>
           <hr>
@@ -141,7 +198,9 @@
     </div>
   </div>
 </div>
+{% if bulk %}
 {% with id='add', bulk=bulk %}
   {% include 'set/socket.html' %}
 {% endwith %}
+{% endif %}
 {% endblock %}

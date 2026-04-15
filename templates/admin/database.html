@@ -33,11 +33,72 @@
     </ul>
   </div>
 {% endif %}
+
+<h5 class="border-bottom mt-4">Maintenance</h5>
+{% if request.args.get('optimize_success') %}
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+  <i class="ri-checkbox-circle-line"></i> <strong>Success!</strong> Database optimization complete. Indexes rebuilt and statistics updated.
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endif %}
+{% if request.args.get('cleanup_success') %}
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+  <i class="ri-checkbox-circle-line"></i> <strong>Success!</strong> Removed {{ request.args.get('cleanup_success') }} orphaned record(s) from database.
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endif %}
+<p class="text-muted small">Maintain and optimize your database for best performance.</p>
+<div class="mb-3">
+  <a href="{{ url_for('admin_database.integrity_check') }}" class="btn btn-info" role="button">
+    <i class="ri-shield-check-line"></i> Check Database Integrity
+  </a>
+  <span class="text-muted small">Scan for orphaned records and foreign key violations</span>
+</div>
+<div class="mb-3">
+  <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#optimizeConfirmModal">
+    <i class="ri-speed-up-line"></i> Optimize Database
+  </button>
+  <span class="text-muted small">Re-create indexes and rebuild statistics (safe to run anytime)</span>
+</div>
+
+<h5 class="border-bottom mt-4">Danger zone</h5>
+{% if database_error %}<div class="alert alert-danger text-start" role="alert"><strong>Error:</strong> {{ database_error }}.</div>{% endif %}
+<div class="text-end">
+  <a href="{{ url_for('admin_database.upload') }}" class="btn btn-warning" role="button"><i class="ri-upload-line"></i> Import a database file</a>
+  <a href="{{ url_for('admin_database.drop') }}" class="btn btn-danger" role="button"><i class="ri-close-line"></i> Drop the database</a>
+  <a href="{{ url_for('admin_database.delete') }}" class="btn btn-danger" role="button"><i class="ri-delete-bin-2-line"></i> Delete the database file</a>
+</div>
 {{ accordion.footer() }}
 
-{{ accordion.header('Database danger zone', 'database-danger', 'admin', danger=true, class='text-end') }}
-{% if database_error %}<div class="alert alert-danger text-start" role="alert"><strong>Error:</strong> {{ database_error }}.</div>{% endif %}
-<a href="{{ url_for('admin_database.upload') }}" class="btn btn-warning" role="button"><i class="ri-upload-line"></i> Import a database file</a>
-<a href="{{ url_for('admin_database.drop') }}" class="btn btn-danger" role="button"><i class="ri-close-line"></i> Drop the database</a>
-<a href="{{ url_for('admin_database.delete') }}" class="btn btn-danger" role="button"><i class="ri-delete-bin-2-line"></i> Delete the database file</a>
-{{ accordion.footer() }}
+<div class="modal fade" id="optimizeConfirmModal" tabindex="-1" aria-labelledby="optimizeConfirmModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="optimizeConfirmModalLabel">
+          <i class="ri-speed-up-line"></i> Confirm Database Optimization
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Run this to improve speed and reclaim storage space after making changes to your collection.</p>
+        <p><strong>What happens:</strong></p>
+        <ul>
+          <li>Speeds up searches and filters</li>
+          <li>Improves page load times</li>
+          <li>Reduces file size by removing unused space</li>
+        </ul>
+        <p class="text-muted small"><i class="ri-information-line"></i> Safe to run anytime. Takes a few seconds to complete.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="ri-close-line"></i> Cancel
+        </button>
+        <form action="{{ url_for('admin_database.optimize') }}" method="post" style="display: inline;">
+          <button type="submit" class="btn btn-success">
+            <i class="ri-speed-up-line"></i> Yes, Optimize Now
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

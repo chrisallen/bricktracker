@@ -8,11 +8,17 @@ static/sets
 Dockerfile
 compose.yaml
 
+# Local data directories
+local/
+offline/
+data/
+
 # Documentation
 docs/
 LICENSE
 *.md
 *.sample
+.code-workspace
 
 # Temporary
 *.csv
@@ -26,11 +32,8 @@ LICENSE
 **/__pycache__
 *.pyc
 
-# Git
-.git
-
-# IDE
-.vscode
+# Hidden directories
+.?*
 
 # Dev
 test-server.sh

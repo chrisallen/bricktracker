@@ -67,28 +67,33 @@ class BrickGridFilter {
 
         // Build filters
         for (const select of this.selects) {
-            if (select.value != "") {
+            // Get the actual filter value (includes "-" prefix if toggle is in NOT mode)
+            const filterValue = typeof BrickFilterToggle !== 'undefined'
+                ? BrickFilterToggle.getFilterValue(select)
+                : select.value;
+
+            if (filterValue != "") {
                 // Multi-attribute filter
                 switch (select.dataset.filter) {
                     // List contains values
                     case "value":
                         options.filters.push({
                             attribute: select.dataset.filterAttribute,
-                            value: select.value,
+                            value: filterValue,
                         })
                     break;
 
                     // List contains metadata attribute name, looking for true/false
                     case "metadata":
-                        if (select.value.startsWith("-")) {
+                        if (filterValue.startsWith("-")) {
                             options.filters.push({
-                                attribute: select.value.substring(1),
+                                attribute: filterValue.substring(1),
                                 bool: true,
                                 value: "0"
                             })
                         } else {
                             options.filters.push({
-                                attribute: select.value,
+                                attribute: filterValue,
                                 bool: true,
                                 value: "1"
                             });
@@ -130,23 +135,58 @@ class BrickGridFilter {
 
                 // Value check
                 // For consolidated cards, attributes may be comma or pipe-separated (e.g., "storage1,storage2" or "storage1|storage2")
-                else if (attribute == null) {
-                    // Hide if attribute is missing
-                    current.parentElement.classList.add("d-none");
-                    return;
-                } else if (attribute.includes(',') || attribute.includes('|')) {
-                    // Handle comma or pipe-separated values (consolidated cards)
-                    const separator = attribute.includes('|') ? '|' : ',';
-                    const values = attribute.split(separator).map(v => v.trim());
-                    if (!values.includes(filter.value)) {
-                        current.parentElement.classList.add("d-none");
-                        return;
-                    }
-                } else {
-                    // Handle single values (regular cards)
-                    if (attribute != filter.value) {
-                        current.parentElement.classList.add("d-none");
-                        return;
+                else {
+                    // Check if this is a NOT filter (value starts with "-")
+                    const isNot = filter.value.startsWith('-');
+                    const actualValue = isNot ? filter.value.substring(1) : filter.value;
+
+                    if (attribute == null) {
+                        // If attribute is missing
+                        if (isNot) {
+                            // NOT filter: missing attribute means it doesn't match, so SHOW it
+                            // (e.g., NOT "Basement" and has no storage = show)
+                            // Continue to next filter
+                        } else {
+                            // Regular filter: missing attribute means hide
+                            current.parentElement.classList.add("d-none");
+                            return;
+                        }
+                    } else if (attribute.includes(',') || attribute.includes('|')) {
+                        // Handle comma or pipe-separated values (consolidated cards)
+                        const separator = attribute.includes('|') ? '|' : ',';
+                        const values = attribute.split(separator).map(v => v.trim());
+                        const hasValue = values.includes(actualValue);
+
+                        if (isNot) {
+                            // NOT filter: hide if ANY of the values match
+                            if (hasValue) {
+                                current.parentElement.classList.add("d-none");
+                                return;
+                            }
+                        } else {
+                            // Regular filter: hide if NONE of the values match
+                            if (!hasValue) {
+                                current.parentElement.classList.add("d-none");
+                                return;
+                            }
+                        }
+                    } else {
+                        // Handle single values (regular cards)
+                        const matches = (attribute == actualValue);
+
+                        if (isNot) {
+                            // NOT filter: hide if it matches
+                            if (matches) {
+                                current.parentElement.classList.add("d-none");
+                                return;
+                            }
+                        } else {
+                            // Regular filter: hide if it doesn't match
+                            if (!matches) {
+                                current.parentElement.classList.add("d-none");
+                                return;
+                            }
+                        }
                     }
                 }
             }

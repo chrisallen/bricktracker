@@ -3,7 +3,26 @@
 {% import 'macro/card.html' as card %}
 
 <div class="card mb-3 flex-fill {% if solo %}card-solo{% endif %}">
-  {{ card.header(item, item.fields.name, solo=solo, identifier=item.fields.part, icon='shapes-line') }}
+  <div class="card-header {% if solo %}d-flex justify-content-between align-items-center{% endif %}">
+    <h5 class="mb-0">
+      {{ badge.identifier(item.fields.part, icon='shapes-line', solo=solo, header=true) }}
+      {% if solo %}
+        {{ badge.color(item, header=true) }}
+        {{ badge.print(item, header=true) }}
+      {% endif %}
+      {{ item.fields.name }}
+    </h5>
+    {% if solo and g.login.is_authenticated() and not config.get('HIDE_INDIVIDUAL_PARTS', False) and not config.get('DISABLE_QUICK_ADD_INDIVIDUAL_PARTS', False) %}
+      <button class="btn btn-sm btn-primary quick-add-individual-part"
+              data-part="{{ item.fields.part }}"
+              data-color="{{ item.fields.color }}"
+              data-name="{{ item.fields.name }}"
+              data-color-name="{{ item.fields.color_name }}"
+              data-image="{{ item.url_for_image() }}">
+        <i class="ri-add-line"></i> Add to Inventory
+      </button>
+    {% endif %}
+  </div>
   {{ card.image(item, solo=solo, last=last, caption=item.fields.name, alt=item.fields.image_id, medium=true) }}
   <div class="card-body border-bottom-0 {% if not solo %}p-1{% endif %}">
     {% if not solo %}
@@ -29,9 +48,82 @@
       {{ accordion.cards(minifigures_using, 'Minifigures using this part', 'minifigures-using-inventory', 'part-details', 'minifigure/card.html', icon='group-line') }}
       {{ accordion.cards(minifigures_missing, 'Minifigures missing this part', 'minifigures-missing-inventory', 'part-details', 'minifigure/card.html', icon='question-line') }}
       {{ accordion.cards(minifigures_damaged, 'Minifigures with this part damaged', 'minifigures-damaged-inventory', 'part-details', 'minifigure/card.html', icon='error-warning-line') }}
+      {{ accordion.cards(individual_parts, 'Individual part instances', 'individual-parts-inventory', 'part-details', 'individual_part/card.html', icon='box-3-line') }}
+      {{ accordion.cards(individual_lots, 'Lot instances', 'individual-lots-inventory', 'part-details', 'individual_part/lot_card.html', icon='shopping-cart-line') }}
       {{ accordion.cards(different_color, 'Same part with a different color', 'different-color', 'part-details', 'part/card.html', icon='palette-line') }}
       {{ accordion.cards(similar_prints, 'Prints using the same base', 'similar-prints', 'part-details', 'part/card.html', icon='paint-brush-line') }}
     </div>
     <div class="card-footer"></div>
   {% endif %}
 </div>
+
+{% if solo and g.login.is_authenticated() and not config.get('HIDE_INDIVIDUAL_PARTS', False) and not config.get('DISABLE_QUICK_ADD_INDIVIDUAL_PARTS', False) %}
+<!-- Quick Add Individual Part Modal -->
+<div class="modal fade" id="quickAddIndividualPartModal" tabindex="-1" aria-labelledby="quickAddModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="quickAddModalLabel">Add to Individual Parts Inventory</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="quickAddForm">
+          <!-- Part info (read-only) -->
+          <div class="mb-3">
+            <label class="form-label fw-bold">Part</label>
+            <div class="d-flex align-items-center">
+              <img id="quickAddPartImage" src="" alt="" style="max-width: 100px; max-height: 100px;" class="me-3">
+              <div>
+                <div id="quickAddPartName" class="fw-bold"></div>
+                <div id="quickAddPartNumber" class="text-muted small"></div>
+                <div id="quickAddPartColor" class="text-muted small"></div>
+              </div>
+            </div>
+          </div>
+
+          <input type="hidden" id="quickAddPart" name="part">
+          <input type="hidden" id="quickAddColor" name="color">
+
+          <!-- Quantity -->
+          <div class="mb-3">
+            <label for="quickAddQuantity" class="form-label">Quantity <span class="text-danger">*</span></label>
+            <input type="number" class="form-control" id="quickAddQuantity" name="quantity" value="1" min="1" required>
+          </div>
+
+          <!-- Storage (optional) -->
+          <div class="mb-3">
+            <label for="quickAddStorage" class="form-label">Storage (optional)</label>
+            <select class="form-select" id="quickAddStorage" name="storage">
+              <option value="">-- No storage --</option>
+              {% for storage in brickset_storages %}
+                <option value="{{ storage.fields.id }}">{{ storage.fields.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Purchase Location (optional) -->
+          <div class="mb-3">
+            <label for="quickAddPurchaseLocation" class="form-label">Purchase Location (optional)</label>
+            <select class="form-select" id="quickAddPurchaseLocation" name="purchase_location">
+              <option value="">-- No purchase location --</option>
+              {% for location in brickset_purchase_locations %}
+                <option value="{{ location.fields.id }}">{{ location.fields.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Description/Notes (optional) -->
+          <div class="mb-3">
+            <label for="quickAddDescription" class="form-label">Notes (optional)</label>
+            <textarea class="form-control" id="quickAddDescription" name="description" rows="2"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="quickAddSubmit">Add to Inventory</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}

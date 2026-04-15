@@ -272,3 +272,62 @@
 [data-bs-theme="dark"] .table tbody th {
     color: var(--bs-body-color);
 }
+
+/* Navbar split button dropdown styling */
+.navbar-nav .dropdown {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.navbar-nav .dropdown .dropdown-toggle-split {
+    padding-left: 0.375rem;
+    padding-right: 0.375rem;
+    margin-left: -1px;
+}
+
+.navbar-nav .dropdown .dropdown-toggle-split::after {
+    margin-left: 0;
+}
+
+/* Navbar dropdown positioning */
+.navbar-nav .dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    margin-top: 0.125rem;
+}
+
+/* Navbar dropdown styling to match navbar theme */
+.navbar-dark .navbar-nav .dropdown-menu {
+    background-color: #212529;
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.navbar-dark .navbar-nav .dropdown-menu .dropdown-item {
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.navbar-dark .navbar-nav .dropdown-menu .dropdown-item:hover,
+.navbar-dark .navbar-nav .dropdown-menu .dropdown-item:focus {
+    color: rgba(255, 255, 255, 0.75);
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Navbar dropdown hover support for desktop */
+@media (min-width: 992px) {
+    .navbar-nav .dropdown:hover > .dropdown-menu {
+        display: block;
+    }
+}
+
+/* Filter toggle button styling */
+.filter-toggle.btn-outline-secondary {
+    border-color: #dee2e6; /* Lighter gray for better visibility */
+}
+
+.filter-toggle.btn-outline-secondary:hover {
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+}

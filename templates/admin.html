@@ -30,12 +30,15 @@
             {% include 'admin/database/drop.html' %}
             {% elif import_database %}
             {% include 'admin/database/import.html' %}
+            {% elif integrity_check %}
+            {% include 'admin/database/integrity_check.html' %}
             {% elif upgrade_database %}
             {% include 'admin/database/upgrade.html' %}
             {% elif refresh_set %}
             {% include 'admin/set/refresh.html' %}
             {% else %}
               {% include 'admin/logout.html' %}
+              {% include 'admin/export.html' %}
               {% include 'admin/instructions.html' %}
               {% if not config['USE_REMOTE_IMAGES'] %}
                 {% include 'admin/image.html' %}

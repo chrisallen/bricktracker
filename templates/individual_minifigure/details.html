@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% import 'macro/accordion.html' as accordion %}
+{% import 'macro/form.html' as form %}
+
+{% block title %} - Individual Minifigure {{ item.fields.name }}{% endblock %}
+
+{% block main %}
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">
+            <i class="ri-user-line"></i> {{ item.fields.name }}
+            <span class="badge text-bg-secondary fw-normal"><i class="ri-hashtag"></i> {{ item.fields.figure }}</span>
+          </h5>
+          <div>
+            <a href="{{ url_for('minifigure.details', figure=item.fields.figure) }}" class="btn btn-sm btn-secondary">
+              <i class="ri-arrow-left-line"></i> Back to {{ item.fields.figure }}
+            </a>
+          </div>
+        </div>
+        <div class="card-img border-bottom" style="background-image: url({{ item.url_for_image() }})">
+          <a data-lightbox data-caption="{{ item.fields.name }}" href="{{ item.url_for_image() }}" target="_blank">
+            <img class="card-medium-img" src="{{ item.url_for_image() }}" alt="{{ item.fields.figure }}" loading="lazy">
+          </a>
+        </div>
+        <div class="accordion accordion-flush border-top" id="individual-minifigure-details-{{ item.fields.id }}">
+          {{ accordion.header('Quantity', 'accordion-quantity-' ~ item.fields.id, 'individual-minifigure-details-' ~ item.fields.id, icon='functions') }}
+            {% if writes_disabled %}
+              <div class="alert alert-secondary mb-0"><i class="ri-functions"></i> Quantity: {{ item.fields.quantity }}</div>
+            {% else %}
+              {{ form.input('Quantity', item.fields.id, 'quantity', item.url_for_quantity(), item.fields.quantity, icon='functions') }}
+            {% endif %}
+          {{ accordion.footer() }}
+          {{ accordion.table(item.generic_parts(), 'Parts', 'accordion-parts-' ~ item.fields.id, 'individual-minifigure-details-' ~ item.fields.id, 'part/table.html', icon='shapes-line', alt=item.fields.figure, read_only=writes_disabled) }}
+          {% set management_read_only = writes_disabled %}{% include 'individual_minifigure/management.html' %}
+          {% if g.login.is_authenticated() and not writes_disabled %}
+            {{ accordion.header('Danger zone', 'accordion-danger-zone-' ~ item.fields.id, 'individual-minifigure-details-' ~ item.fields.id, danger=true, class='text-end') }}
+              <a href="{{ url_for('individual_minifigure.delete', id=item.fields.id) }}" class="btn btn-danger" role="button" data-bs-toggle="modal" data-bs-target="#deleteModal"><i class="ri-close-line"></i> Delete this individual minifigure instance</a>
+            {{ accordion.footer() }}
+          {% endif %}
+        </div>
+        <div class="card-footer"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to delete this individual minifigure instance? This action cannot be undone.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <form method="POST" action="{{ url_for('individual_minifigure.delete', id=item.fields.id) }}">
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -3,6 +3,17 @@
 {% import 'macro/form.html' as form %}
 
 <div class="alert alert-info m-2" role="alert">This page lists the sets that may need a refresh because they have some of their newer fields containing empty values.</div>
+{% if table_collection | length > 0 %}
+<div class="alert alert-primary m-2" role="alert">
+  <h4 class="alert-heading">Too many sets to refresh individually?</h4>
+  <p class="mb-0">
+    You can refresh multiple sets at once with
+    <a href="{{ url_for('admin_set.refresh_bulk') }}" class="btn btn-primary">
+      <i class="ri-refresh-line"></i> Bulk Refresh ({{ table_collection | length }} sets)
+    </a>
+  </p>
+</div>
+{% endif %}
 <div class="table-responsive-sm">
   <table data-table="true" class="table table-striped align-middle" id="wish">
     <thead>

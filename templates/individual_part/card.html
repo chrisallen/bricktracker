@@ -1,0 +1,40 @@
+{% import 'macro/badge.html' as badge %}
+{% import 'macro/card.html' as card %}
+{% import 'macro/form.html' as form %}
+
+<div class="card mb-3 flex-fill">
+  <div class="card-header">
+    <h5 class="mb-0">
+      <a href="{{ item.url() }}" class="text-decoration-none">
+        <i class="ri-hammer-line"></i>
+        {{ item.fields.name }} ({{ item.fields.color_name }})
+      </a>
+    </h5>
+  </div>
+  {{ card.image(item, solo=false, last=false, caption=item.fields.name, alt=item.fields.part, medium=false) }}
+  <div class="card-body border-bottom p-1">
+    {# Always show quantity first #}
+    {{ badge.quantity(item.fields.quantity, solo=false, last=false) }}
+    {# Render all other badges in configured order #}
+    {{ badge.render_ordered_badges(item, brickset_tags, brickset_owners, brickset_storages, brickset_purchase_locations, solo=false, last=false, context='grid') }}
+    {# Description badge at end if exists #}
+    {% if item.fields.description %}
+      <span class="badge text-bg-light text-dark text-wrap" data-bs-toggle="tooltip" title="{{ item.fields.description }}">
+        <i class="ri-file-text-line"></i> {{ item.fields.description[:config.get('DESCRIPTION_BADGE_MAX_LENGTH', 50)] }}{% if item.fields.description | length > config.get('DESCRIPTION_BADGE_MAX_LENGTH', 50) %}...{% endif %}
+      </span>
+    {% endif %}
+  </div>
+  {% if g.login.is_authenticated() %}
+  <div class="card-footer p-1">
+    {% if writes_disabled %}
+      <div class="input-group">
+        <span class="input-group-text px-1"><i class="ri-functions me-1"></i><span class="ms-1 d-none d-md-inline"> Qty</span></span>
+        <input class="form-control form-control-sm flex-shrink-1 px-1" type="text" value="{{ item.fields.quantity }}" disabled autocomplete="off">
+        <span class="input-group-text ri-prohibited-line px-1"></span>
+      </div>
+    {% else %}
+      {{ form.input('Qty', item.fields.id, 'quantity', item.url_for_quantity(), item.fields.quantity, icon='functions') }}
+    {% endif %}
+  </div>
+  {% endif %}
+</div>

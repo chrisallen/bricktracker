@@ -1,8 +1,10 @@
-from flask import Blueprint, render_template, request
+from flask import Blueprint, current_app, render_template, request
 from flask_login import login_required
 
 from ..exceptions import exception_handler
+from ...configuration_list import BrickConfigurationList
 from ...rebrickable_set_list import RebrickableSetList
+from ...socket import MESSAGES
 
 admin_set_page = Blueprint('admin_set',  __name__, url_prefix='/admin/set')
 
@@ -17,4 +19,29 @@ def refresh() -> str:
         refresh_set=True,
         table_collection=RebrickableSetList().need_refresh(),
         set_error=request.args.get('set_error')
+    )
+
+
+# Bulk refresh sets
+@admin_set_page.route('/refresh/bulk', methods=['GET'])
+@login_required
+@exception_handler(__file__)
+def refresh_bulk() -> str:
+    BrickConfigurationList.error_unless_is_set('REBRICKABLE_API_KEY')
+
+    # Get list of sets needing refresh
+    refresh_needed = RebrickableSetList().need_refresh()
+
+    # Build comma-separated list of set numbers
+    set_list = ', '.join([s.fields.set for s in refresh_needed.records])
+
+    return render_template(
+        'admin/set/refresh_bulk.html',
+        path=current_app.config['SOCKET_PATH'],
+        namespace=current_app.config['SOCKET_NAMESPACE'],
+        messages=MESSAGES,
+        bulk=True,
+        refresh=True,
+        set_list=set_list,
+        refresh_count=len(refresh_needed.records)
     )
