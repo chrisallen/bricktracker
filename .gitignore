@@ -36,3 +36,6 @@ vitepress/
 # Local data
 offline/
 data/
+
+# Hidden folders
+.*

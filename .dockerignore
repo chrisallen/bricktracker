@@ -40,3 +40,6 @@ LICENSE
 
 # Dev
 test-server.sh
+
+# Hidden folders
+*.*
