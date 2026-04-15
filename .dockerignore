@@ -32,14 +32,8 @@ LICENSE
 **/__pycache__
 *.pyc
 
-# Git
-.git
-
-# IDE
-.vscode
+# Hidden directories
+.?*
 
 # Dev
 test-server.sh
-
-# Hidden folders
-*.*

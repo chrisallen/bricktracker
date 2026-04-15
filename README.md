@@ -6,7 +6,7 @@ A web application for organizing and tracking LEGO sets, parts, and minifigures.
 
 <a href="https://www.buymeacoffee.com/frederikb" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="41" width="174"></a>
 
-[![](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=48JEEKLCGB8DJ)
+[![](./docs/images/blue.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=48JEEKLCGB8DJ)
 
 
 ## Features
