@@ -110,5 +110,5 @@ class RebrickableMinifigure(BrickRecord):
             'number': int(number),
             'name': str(data['set_name']),
             'quantity': int(data['quantity']),
-            'image': data['set_img_url'],
+            'image': str(data['set_img_url']) if data['set_img_url'] else None,
         }

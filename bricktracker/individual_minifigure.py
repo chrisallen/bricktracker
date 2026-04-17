@@ -543,6 +543,6 @@ class IndividualMinifigure(RebrickableMinifigure):
             'figure': str(data['set_num']),
             'number': int(number),
             'name': str(data['set_name']),
-            'image': data.get('set_img_url'),
+            'image': str(data['set_img_url']) if data.get('set_img_url') else None,
             'number_of_parts': int(data.get('num_parts', 0)),
         }

@@ -4,6 +4,10 @@
 
 ### Bug Fixes
 
+- **Fixed crash when importing sets containing minifigures or parts with no image on Rebrickable** (Issue #149c, branch `bugfix/issue-149c`): Adding or refreshing a set would fail entirely if any minifigure or part had no image URL, with error `Invalid URL '': No scheme supplied`
+  - Rebrickable returns an empty string (not `None`) for missing images; normalize empty strings to `None` at the point of ingestion in `rebrickable_minifigure.py` and `individual_minifigure.py`, matching the existing pattern in `rebrickable_set.py`
+  - Updated `rebrickable_image.py` to treat empty strings the same as `None` throughout, falling back to the configured nil placeholder image
+  - Note: the originally reported sets could no longer reproduce the crash (images may have since been added on Rebrickable), so this fix is based on asumptions only
 - **Fixed deleting a wish with an owner assigned** (Issue #152): Resolved foreign key constraint error when removing a set from the wishlist that had an owner assigned
   - Wish owners are now deleted before the wish itself, respecting the FK constraint
 
