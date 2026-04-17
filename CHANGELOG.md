@@ -4,7 +4,9 @@
 
 ### Bug Fixes
 
-- **Fixed deleting a wish with an owner assigned** (Issue #152): Resolved foreign key constraint error when removing a set from the wishlist that had an owner assigned
+- **Fixed "Reset to Defaults" blanking all settings instead of restoring them** (Issue #149a, branch `bugfix/issue-149a`): "Reset to Defaults" was clearing all fields to empty/false instead of populating them with their actual default values
+  - `resetToDefaults()` now reads from `window.DEFAULT_CONFIG` and restores each field to its proper default, matching the same logic used on initial page load
+- **Fixed deleting a wish with an owner assigned** (Issue #152, branch `bugfix/issue-152`): Resolved foreign key constraint error when removing a set from the wishlist that had an owner assigned
   - Wish owners are now deleted before the wish itself, respecting the FK constraint
 
 ## 1.4
