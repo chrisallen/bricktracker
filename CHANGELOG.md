@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.4.1
+
+### Bug Fixes
+
+- **Fixed deleting a wish with an owner assigned** (Issue #152): Resolved foreign key constraint error when removing a set from the wishlist that had an owner assigned
+  - Wish owners are now deleted before the wish itself, respecting the FK constraint
+
 ## 1.4
 
 ### Bug Fixes
