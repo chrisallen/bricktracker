@@ -4,6 +4,8 @@
 
 ### Bug Fixes
 
+- **Fixed `BK_INSTRUCTIONS_ALLOWED_EXTENSIONS` being treated as a string instead of a list** (Issue #149b, branch `bugfix/issue-149b`): When this setting was saved via the admin panel, it was stored and cast as a plain string rather than a list, causing it to be iterated character by character (e.g. `['.', 'p', 'd', 'f']` instead of `['.pdf']`)
+  - Added `allowed_extensions` to the list-type keyword detection in `_cast_value()`, matching the existing pattern used for `badge_order` settings
 - **Fixed deleting a wish with an owner assigned** (Issue #152): Resolved foreign key constraint error when removing a set from the wishlist that had an owner assigned
   - Wish owners are now deleted before the wish itself, respecting the FK constraint
 
