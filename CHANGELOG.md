@@ -2,7 +2,13 @@
 
 ## 1.4.1
 
+### Enhancements
+
+- **"Reset to Defaults" confirmation now uses a Bootstrap modal instead of a browser dialog**: Replaced the native browser `confirm()` popup with a consistent Bootstrap modal matching the style of BrickTracker
+
 ### Bug Fixes
+
+- **Fixed prices on the Statistics page being rounded to whole numbers** (Issue #146): All price values now display with two decimal places (`%.2f`) instead of being rounded to whole numbers (`%.0f`)
 
 - **Fixed "Reset to Defaults" blanking all settings instead of restoring them** (Issue #149a, branch `bugfix/issue-149a`): "Reset to Defaults" was clearing all fields to empty/false instead of populating them with their actual default values
   - `resetToDefaults()` now reads from `window.DEFAULT_CONFIG` and restores each field to its proper default, matching the same logic used on initial page load
