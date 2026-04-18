@@ -204,14 +204,20 @@ function setupButtonHandlers() {
     });
   }
 
-  // Reset button
+  // Reset button. Opens Bootstrap modal instead of browser confirm()
   const resetBtn = document.getElementById('config-reset');
   if (resetBtn) {
     resetBtn.addEventListener('click', () => {
-      console.log('Reset clicked');
-      if (confirm('Are you sure you want to reset all settings to default values? This action cannot be undone.')) {
-        resetToDefaults();
-      }
+      const modal = new bootstrap.Modal(document.getElementById('resetDefaultsModal'));
+      modal.show();
+    });
+  }
+
+  // Confirm reset inside the modal
+  const confirmResetBtn = document.getElementById('confirm-reset-defaults');
+  if (confirmResetBtn) {
+    confirmResetBtn.addEventListener('click', () => {
+      resetToDefaults();
     });
   }
 
