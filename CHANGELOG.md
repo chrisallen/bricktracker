@@ -4,6 +4,9 @@
 
 ### Bug Fixes
 
+- **Fixed purchase date, price, and notes not being saved when adding an individual minifigure** (Issue #151, branch `bugfix/issue-151`): Filling in purchase date, price, or notes before clicking Add had no effect, only purchase location was saved
+  - `BrickMinifigureSocket` was missing references to `#add-purchase-date`, `#add-purchase-price`, and `#add-description`, so those fields were never read or included in the socket emit
+  - The backend already supported all three fields. This was just a frontend error
 - **Fixed deleting a wish with an owner assigned** (Issue #152): Resolved foreign key constraint error when removing a set from the wishlist that had an owner assigned
   - Wish owners are now deleted before the wish itself, respecting the FK constraint
 
