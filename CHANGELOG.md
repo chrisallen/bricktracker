@@ -12,6 +12,8 @@
   - Rebrickable returns an empty string (not `None`) for missing images; normalize empty strings to `None` at the point of ingestion in `rebrickable_minifigure.py` and `individual_minifigure.py`, matching the existing pattern in `rebrickable_set.py`
   - Updated `rebrickable_image.py` to treat empty strings the same as `None` throughout, falling back to the configured nil placeholder image
   - Note: the originally reported sets could no longer reproduce the crash (images may have since been added on Rebrickable), so this fix is based on asumptions only
+- **Fixed previously added set being re-added when adding an individual minifigure** (Issue #150, branch `bugfix/issue-150`): After adding a set, entering a `fig-` ID and confirming would add the previous set again instead of the minifigure, if user did not reload inbetween. 
+  - `add.js` was creating a second `BrickMinifigureSocket` with its own listeners on the same button and input as `BrickSetSocket`, causing duplicate socket events and cross-socket state confusion
 - **Fixed deleting a wish with an owner assigned** (Issue #152, branch `bugfix/issue-152`): Resolved foreign key constraint error when removing a set from the wishlist that had an owner assigned
   - Wish owners are now deleted before the wish itself, respecting the FK constraint
 
