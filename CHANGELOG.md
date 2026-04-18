@@ -4,6 +4,8 @@
 
 ### Bug Fixes
 
+- **Fixed previously added set being re-added when adding an individual minifigure** (Issue #150, branch `bugfix/issue-150`): After adding a set, entering a `fig-` ID and confirming would add the previous set again instead of the minifigure, if user did not reload inbetween. 
+  - `add.js` was creating a second `BrickMinifigureSocket` with its own listeners on the same button and input as `BrickSetSocket`, causing duplicate socket events and cross-socket state confusion
 - **Fixed deleting a wish with an owner assigned** (Issue #152): Resolved foreign key constraint error when removing a set from the wishlist that had an owner assigned
   - Wish owners are now deleted before the wish itself, respecting the FK constraint
 
