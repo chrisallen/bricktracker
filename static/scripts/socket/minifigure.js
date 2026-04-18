@@ -13,9 +13,12 @@ class BrickMinifigureSocket extends BrickSocket {
         this.html_input = document.getElementById(`${id}-set`);
         this.html_no_confim = document.getElementById(`${id}-no-confirm`);
         this.html_owners = document.getElementById(`${id}-owners`);
+        this.html_purchase_date = document.getElementById(`${id}-purchase-date`);
+        this.html_purchase_price = document.getElementById(`${id}-purchase-price`);
         this.html_purchase_location = document.getElementById(`${id}-purchase-location`);
         this.html_storage = document.getElementById(`${id}-storage`);
         this.html_tags = document.getElementById(`${id}-tags`);
+        this.html_description = document.getElementById(`${id}-description`);
 
         // Card elements
         this.html_card = document.getElementById(`${id}-card`);
@@ -98,10 +101,26 @@ class BrickMinifigureSocket extends BrickSocket {
                 });
             }
 
-            // Grab the purchase location
+            // Grab the purchase info
+            let purchase_date = null;
+            if (this.html_purchase_date) {
+                purchase_date = this.html_purchase_date.value || null;
+            }
+
+            let purchase_price = null;
+            if (this.html_purchase_price) {
+                purchase_price = this.html_purchase_price.value || null;
+            }
+
             let purchase_location = null;
             if (this.html_purchase_location) {
                 purchase_location = this.html_purchase_location.value;
+            }
+
+            // Grab the description (notes)
+            let description = '';
+            if (this.html_description) {
+                description = this.html_description.value || '';
             }
 
             // Grab the storage
@@ -129,9 +148,12 @@ class BrickMinifigureSocket extends BrickSocket {
             this.socket.emit(this.messages.IMPORT_MINIFIGURE, {
                 figure: (figure !== undefined) ? figure : this.html_input.value,
                 owners: owners,
+                purchase_date: purchase_date,
+                purchase_price: purchase_price,
                 purchase_location: purchase_location,
                 storage: storage,
                 tags: tags,
+                description: description,
                 quantity: 1
             });
         } else {
@@ -235,8 +257,20 @@ class BrickMinifigureSocket extends BrickSocket {
             this.html_owners.querySelectorAll('input').forEach(input => input.disabled = !enabled);
         }
 
+        if (this.html_purchase_date) {
+            this.html_purchase_date.disabled = !enabled;
+        }
+
+        if (this.html_purchase_price) {
+            this.html_purchase_price.disabled = !enabled;
+        }
+
         if (this.html_purchase_location) {
             this.html_purchase_location.disabled = !enabled;
+        }
+
+        if (this.html_description) {
+            this.html_description.disabled = !enabled;
         }
 
         if (this.html_storage) {

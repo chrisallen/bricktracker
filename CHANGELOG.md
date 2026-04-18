@@ -14,6 +14,9 @@
   - Note: the originally reported sets could no longer reproduce the crash (images may have since been added on Rebrickable), so this fix is based on asumptions only
 - **Fixed previously added set being re-added when adding an individual minifigure** (Issue #150, branch `bugfix/issue-150`): After adding a set, entering a `fig-` ID and confirming would add the previous set again instead of the minifigure, if user did not reload inbetween. 
   - `add.js` was creating a second `BrickMinifigureSocket` with its own listeners on the same button and input as `BrickSetSocket`, causing duplicate socket events and cross-socket state confusion
+- **Fixed purchase date, price, and notes not being saved when adding an individual minifigure** (Issue #151, branch `bugfix/issue-151`): Filling in purchase date, price, or notes before clicking Add had no effect, only purchase location was saved
+  - `BrickMinifigureSocket` was missing references to `#add-purchase-date`, `#add-purchase-price`, and `#add-description`, so those fields were never read or included in the socket emit
+  - The backend already supported all three fields. This was just a frontend error
 - **Fixed deleting a wish with an owner assigned** (Issue #152, branch `bugfix/issue-152`): Resolved foreign key constraint error when removing a set from the wishlist that had an owner assigned
   - Wish owners are now deleted before the wish itself, respecting the FK constraint
 
