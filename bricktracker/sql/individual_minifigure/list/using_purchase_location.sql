@@ -6,6 +6,8 @@ SELECT
     "bricktracker_individual_minifigures"."description",
     "bricktracker_individual_minifigures"."storage",
     "bricktracker_individual_minifigures"."purchase_location",
+    "bricktracker_individual_minifigures"."purchase_date",
+    "bricktracker_individual_minifigures"."purchase_price",
     "rebrickable_minifigures"."number",
     "rebrickable_minifigures"."name",
     "rebrickable_minifigures"."image",

@@ -17,12 +17,16 @@
 - **Fixed crash when importing sets containing minifigures or parts with no image on Rebrickable** (Issue #149c, branch `bugfix/issue-149c`): Adding or refreshing a set would fail entirely if any minifigure or part had no image URL, with error `Invalid URL '': No scheme supplied`
   - Rebrickable returns an empty string (not `None`) for missing images; normalize empty strings to `None` at the point of ingestion in `rebrickable_minifigure.py` and `individual_minifigure.py`, matching the existing pattern in `rebrickable_set.py`
   - Updated `rebrickable_image.py` to treat empty strings the same as `None` throughout, falling back to the configured nil placeholder image
-  - Note: the originally reported sets could no longer reproduce the crash (images may have since been added on Rebrickable), so this fix is based on asumptions only
+  - Note: the originally reported sets could no longer reproduce the crash (images may have since been added on Rebrickable), so this fix is based on assumptions only
 - **Fixed previously added set being re-added when adding an individual minifigure** (Issue #150, branch `bugfix/issue-150`): After adding a set, entering a `fig-` ID and confirming would add the previous set again instead of the minifigure, if user did not reload inbetween. 
   - `add.js` was creating a second `BrickMinifigureSocket` with its own listeners on the same button and input as `BrickSetSocket`, causing duplicate socket events and cross-socket state confusion
 - **Fixed purchase date, price, and notes not being saved when adding an individual minifigure** (Issue #151, branch `bugfix/issue-151`): Filling in purchase date, price, or notes before clicking Add had no effect, only purchase location was saved
   - `BrickMinifigureSocket` was missing references to `#add-purchase-date`, `#add-purchase-price`, and `#add-description`, so those fields were never read or included in the socket emit
   - The backend already supported all three fields. This was just a frontend error
+- **Fixed purchase date and price not being converted when adding an individual minifigure** (Issue #151 follow-up): Purchase date was stored as a raw `YYYY/MM/DD` string and price as a raw string instead of a Unix epoch float and float respectively, causing them to be silently dropped from statistics aggregations
+  - `IndividualMinifigure.download()` now mirrors the conversion logic already present in `BrickSet.download()`: date parsed via `datetime.strptime` to timestamp, price cast to `float`
+- **Fixed a price of 0 being treated as no price** (Issue #153): Setting a purchase price of `0` on sets, individual minifigures, or parts was indistinguishable from having no price set at all
+  - Replaced truthiness checks (`if price`, `price or ''`) with explicit `None` checks throughout badge display, management input fields, and inline price update endpoints
 - **Fixed deleting a wish with an owner assigned** (Issue #152, branch `bugfix/issue-152`): Resolved foreign key constraint error when removing a set from the wishlist that had an owner assigned
   - Wish owners are now deleted before the wish itself, respecting the FK constraint
 

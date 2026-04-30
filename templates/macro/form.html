@@ -23,7 +23,7 @@
     <label class="visually-hidden" for="{{ prefix }}-{{ id }}">{{ name }}</label>
     <div class="input-group">
       {% if icon %}<span class="input-group-text px-1"><i class="ri-{{ icon }} me-1"></i><span class="ms-1 d-none d-md-inline"> {{ name }}</span></span>{% endif %}
-      <input class="form-control form-control-sm flex-shrink-1 px-1" type="text" id="{{ prefix }}-{{ id }}" value="{% if value %}{{ value }}{% endif %}"
+      <input class="form-control form-control-sm flex-shrink-1 px-1" type="text" id="{{ prefix }}-{{ id }}" value="{% if value is not none and value != '' %}{{ value }}{% endif %}"
       {% if g.login.is_authenticated() %}
         data-changer-id="{{ id }}" data-changer-prefix="{{ prefix }}" data-changer-url="{{ url }}"
         {% if date %}data-changer-date="true"{% endif %}

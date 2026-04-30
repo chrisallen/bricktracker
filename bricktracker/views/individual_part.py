@@ -311,7 +311,7 @@ def update_purchase_price(*, id: str):
     purchase_price = request.json.get('value', '')
 
     # Convert to float if provided, otherwise None
-    if purchase_price and str(purchase_price).strip():
+    if purchase_price is not None and str(purchase_price).strip() != '':
         try:
             price = float(purchase_price)
             item.update_field('purchase_price', price)
@@ -662,7 +662,14 @@ def update_lot_purchase_price(*, lot_id: str):
 
     from ..sql import BrickSQL
     sql = BrickSQL()
-    sql.execute_and_commit('individual_part_lot/update/purchase_price', parameters={'purchase_price': purchase_price if purchase_price else None, 'id': lot_id})
+    if purchase_price is not None and str(purchase_price).strip() != '':
+        try:
+            purchase_price = float(purchase_price)
+        except (ValueError, TypeError):
+            purchase_price = None
+    else:
+        purchase_price = None
+    sql.execute_and_commit('individual_part_lot/update/purchase_price', parameters={'purchase_price': purchase_price, 'id': lot_id})
 
     logger.info('Updated lot {lot_id} purchase_price to: {price}'.format(lot_id=lot_id, price=purchase_price))
     return jsonify({'success': True})

@@ -304,6 +304,13 @@ def update_purchase_date(*, id: str):
 def update_purchase_price(*, id: str):
     item = IndividualMinifigure().select_by_id(id)
     purchase_price = request.json.get('value')
+    if purchase_price is not None and str(purchase_price).strip() != '':
+        try:
+            purchase_price = float(purchase_price)
+        except (ValueError, TypeError):
+            purchase_price = None
+    else:
+        purchase_price = None
 
     BrickSQL().execute_and_commit(
         'individual_minifigure/update',
@@ -314,7 +321,7 @@ def update_purchase_price(*, id: str):
             'storage': item.fields.storage,
             'purchase_location': item.fields.purchase_location if hasattr(item.fields, 'purchase_location') else None,
             'purchase_date': item.fields.purchase_date if hasattr(item.fields, 'purchase_date') else None,
-            'purchase_price': purchase_price if purchase_price else None,
+            'purchase_price': purchase_price,
         }
     )
 
