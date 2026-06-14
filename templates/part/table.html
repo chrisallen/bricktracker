@@ -2,13 +2,13 @@
 {% import 'macro/table.html' as table %}
 
 <div class="table-responsive-sm">
-  <table data-table="{% if all %}true{% endif %}" class="table table-striped align-middle {% if not all %}sortable mb-0{% endif %}" {% if all %}id="parts"{% endif %}>
-    {{ table.header(color=true, quantity=not no_quantity, sets=all, minifigures=all, checked=not all and not read_only, hamburger_menu=not all and not read_only, accordion_id=accordion_id|default('')) }}
+  <table data-table="{% if all %}true{% endif %}" class="table table-striped align-middle {% if not all %}sortable mb-0{% endif %}" {% if all %}id="parts"{% endif %} {% if filters %}data-parts-filterable="true"{% endif %}>
+    {{ table.header(color=true, quantity=not no_quantity, sets=all, minifigures=all, checked=not all and not read_only, hamburger_menu=not all and not read_only, accordion_id=accordion_id|default(''), filters=filters|default(false)) }}
     <tbody>
       {% for item in table_collection %}
       <tr>
         {{ table.image(item.url_for_image(), caption=item.fields.name, alt=item.fields.part, accordion=solo) }}
-        <td data-sort="{{ item.fields.name }}">
+        <td data-sort="{{ item.fields.name }}" data-col="name">
           <a class="text-reset" href="{{ item.url() }}">{{ item.fields.name }}</a>
           {% if item.fields.spare %}<span class="badge rounded-pill text-bg-warning fw-normal"><i class="ri-loop-left-line"></i> Spare</span>{% endif %}
           {% if all %}
@@ -16,7 +16,7 @@
             {{ table.bricklink(item) }}
           {% endif %}
         </td>
-        <td data-sort="{{ item.fields.color_name }}">
+        <td data-sort="{{ item.fields.color_name }}" data-col="color">
           {% if item.fields.color_rgb %}<span class="color-rgb color-rgb-table {% if item.fields.color == 9999 %}color-any{% endif %} align-middle border border-black" {% if item.fields.color != 9999 %}style="background-color: #{{ item.fields.color_rgb }};"{% endif %}></span>{% endif %}
           <span class="align-middle">{{ item.fields.color_name }}</span>
         </td>
@@ -28,12 +28,12 @@
           {% endif %}
         {% endif %}
         {% if not config['HIDE_TABLE_MISSING_PARTS'] %}
-          <td data-sort="{{ item.fields.total_missing }}" class="table-td-input">
+          <td data-sort="{{ item.fields.total_missing }}" data-col="missing" class="table-td-input">
             {{ form.input('Missing', item.fields.id, item.html_id('missing'), item.url_for_problem('missing'), item.fields.total_missing, all=all, read_only=read_only) }}
           </td>
         {% endif %}
         {% if not config['HIDE_TABLE_DAMAGED_PARTS'] %}
-          <td data-sort="{{ item.fields.total_damaged }}" class="table-td-input">
+          <td data-sort="{{ item.fields.total_damaged }}" data-col="damaged" class="table-td-input">
             {{ form.input('Damaged', item.fields.id, item.html_id('damaged'), item.url_for_problem('damaged'), item.fields.total_damaged, all=all, read_only=read_only) }}
           </td>
         {% endif %}
@@ -42,7 +42,7 @@
           <td>{{ item.fields.total_minifigures }}</td>
         {% else %}
           {% if not config['HIDE_TABLE_CHECKED_PARTS'] and not read_only %}
-            <td data-sort="{{ item.fields.checked | default(0) | int }}" class="table-td-input">
+            <td data-sort="{{ item.fields.checked | default(0) | int }}" data-col="checked" class="table-td-input">
               <center>{{ form.checkbox('', item.fields.id, item.html_id('checked'), item.url_for_checked(), item.fields.checked | default(false), parent='part', delete=read_only) }}</center>
             </td>
           {% endif %}

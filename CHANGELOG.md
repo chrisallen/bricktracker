@@ -4,6 +4,12 @@
 
 ### Enhancements
 
+- **Added per-column header filters to the Parts table on the set details page**: The main Parts table now has an always-visible filter row under the column headers
+  - Name: case-insensitive substring search
+  - Color: dropdown populated from the colors present in the current results
+  - Missing / Damaged: All / With / Without dropdowns
+  - Checked: All / Checked / Unchecked
+  - Filters combine (AND) and re-evaluate live as missing/damaged values or checkboxes change. Bulk actions (mark all missing, check all, etc.) only affect the rows visible under the active filter. Scoped to the main Parts table only; per-minifigure tables stay sort-only
 - **"Reset to Defaults" confirmation now uses a Bootstrap modal instead of a browser dialog**: Replaced the native browser `confirm()` popup with a consistent Bootstrap modal matching the style of BrickTracker
 
 ### Bug Fixes

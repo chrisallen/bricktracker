@@ -110,6 +110,9 @@ class PartsBulkOperations {
         // Find all rows in this accordion
         const rows = accordionElement.querySelectorAll('tbody tr');
         rows.forEach(row => {
+            // Skip rows hidden by an active header filter
+            if (row.classList.contains('parts-filtered-out')) return;
+
             // Find the quantity cell (usually 4th column)
             const quantityCell = row.cells[3]; // Index 3 for quantity column
             const missingInput = row.querySelector('input[id*="-missing-"]');
@@ -134,6 +137,7 @@ class PartsBulkOperations {
 
         const missingInputs = accordionElement.querySelectorAll('input[id*="-missing-"]');
         missingInputs.forEach(input => {
+            if (input.closest('tr')?.classList.contains('parts-filtered-out')) return;
             if (input.value !== '') {
                 input.value = '';
                 // Trigger change event to activate BrickChanger
@@ -148,6 +152,7 @@ class PartsBulkOperations {
 
         const checkboxes = accordionElement.querySelectorAll('input[id*="-checked-"][type="checkbox"]');
         checkboxes.forEach(checkbox => {
+            if (checkbox.closest('tr')?.classList.contains('parts-filtered-out')) return;
             if (!checkbox.checked) {
                 checkbox.checked = true;
                 // Trigger change event to activate BrickChanger
@@ -162,6 +167,7 @@ class PartsBulkOperations {
 
         const checkboxes = accordionElement.querySelectorAll('input[id*="-checked-"][type="checkbox"]');
         checkboxes.forEach(checkbox => {
+            if (checkbox.closest('tr')?.classList.contains('parts-filtered-out')) return;
             if (checkbox.checked) {
                 checkbox.checked = false;
                 // Trigger change event to activate BrickChanger
