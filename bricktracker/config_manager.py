@@ -192,7 +192,7 @@ class ConfigManager:
     def _cast_value(self, var_name: str, value: Any) -> Any:
         """Cast value to appropriate type based on variable name"""
         # List variables (admin sections, badge order) - Check this FIRST before boolean check
-        if any(keyword in var_name.lower() for keyword in ['sections', 'badge_order']):
+        if any(keyword in var_name.lower() for keyword in ['sections', 'badge_order', 'allowed_extensions']):
             if isinstance(value, str):
                 return [section.strip() for section in value.split(',') if section.strip()]
             elif isinstance(value, list):

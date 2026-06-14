@@ -55,7 +55,7 @@ class RebrickableImage(object):
 
         # Get the URL (this handles nil images via url() method)
         url = self.url()
-        if url is None:
+        if not url:
             return
 
         # Grab the image
@@ -88,7 +88,7 @@ class RebrickableImage(object):
                 return self.part.fields.image_id
 
         if self.minifigure is not None:
-            if self.minifigure.fields.image is None:
+            if not self.minifigure.fields.image:
                 return RebrickableImage.nil_minifigure_name()
             else:
                 return self.minifigure.fields.figure
@@ -113,13 +113,13 @@ class RebrickableImage(object):
     # Return the url depending on the objects provided
     def url(self, /) -> str:
         if self.part is not None:
-            if self.part.fields.image is None:
+            if not self.part.fields.image:
                 return current_app.config['REBRICKABLE_IMAGE_NIL']
             else:
                 return self.part.fields.image
 
         if self.minifigure is not None:
-            if self.minifigure.fields.image is None:
+            if not self.minifigure.fields.image:
                 return current_app.config['REBRICKABLE_IMAGE_NIL_MINIFIGURE']
             else:
                 return self.minifigure.fields.image

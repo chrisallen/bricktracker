@@ -118,12 +118,14 @@
 {% endmacro %}
 
 {% macro purchase_price(price, solo=false, last=false) %}
-  {% if last %}
-    {% set tooltip=price %}
-  {% else %}
-    {% set text=price %}
+  {% if price is not none %}
+    {% if last %}
+      {% set tooltip = price | string %}
+    {% else %}
+      {% set text = price | string %}
+    {% endif %}
+    {{ badge(check=true, solo=solo, last=last, color='light border', icon='wallet-3-line', text=text, tooltip=tooltip, collapsible='Price:') }}
   {% endif %}
-  {{ badge(check=price, solo=solo, last=last, color='light border', icon='wallet-3-line', text=text, tooltip=tooltip, collapsible='Price:') }}
 {% endmacro %}
 
 {% macro set(set, solo=false, last=false, url=None, id=None) %}
@@ -294,7 +296,7 @@
       {% if not last %}
         {% if item.purchase_price is defined and item.purchase_price is callable %}
           {{ purchase_price(item.purchase_price(), solo=solo, last=last) }}
-        {% elif item.fields.purchase_price is defined and item.fields.purchase_price %}
+        {% elif item.fields.purchase_price is defined and item.fields.purchase_price is not none %}
           {{ purchase_price(item.fields.purchase_price, solo=solo, last=last) }}
         {% endif %}
       {% endif %}

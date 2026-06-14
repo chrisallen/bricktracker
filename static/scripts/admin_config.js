@@ -204,14 +204,20 @@ function setupButtonHandlers() {
     });
   }
 
-  // Reset button
+  // Reset button. Opens Bootstrap modal instead of browser confirm()
   const resetBtn = document.getElementById('config-reset');
   if (resetBtn) {
     resetBtn.addEventListener('click', () => {
-      console.log('Reset clicked');
-      if (confirm('Are you sure you want to reset all settings to default values? This action cannot be undone.')) {
-        resetToDefaults();
-      }
+      const modal = new bootstrap.Modal(document.getElementById('resetDefaultsModal'));
+      modal.show();
+    });
+  }
+
+  // Confirm reset inside the modal
+  const confirmResetBtn = document.getElementById('confirm-reset-defaults');
+  if (confirmResetBtn) {
+    confirmResetBtn.addEventListener('click', () => {
+      resetToDefaults();
     });
   }
 
@@ -285,18 +291,21 @@ function saveLiveConfiguration() {
 function resetToDefaults() {
   console.log('Resetting to defaults');
 
-  // Reset all form inputs
-  document.querySelectorAll('.config-toggle, .config-number, .config-text').forEach(input => {
-    if (input.type === 'checkbox') {
-      input.checked = false;
-    } else {
-      input.value = '';
-    }
-  });
+  Object.keys(window.DEFAULT_CONFIG).forEach(varName => {
+    const defaultValue = window.DEFAULT_CONFIG[varName];
 
-  // Update badges
-  Object.keys(window.CURRENT_CONFIG).forEach(varName => {
-    updateConfigBadge(varName, null);
+    const toggle = document.getElementById(varName);
+    if (toggle && toggle.type === 'checkbox') {
+      toggle.checked = defaultValue === true;
+    }
+
+    document.querySelectorAll(`input[data-var="${varName}"]:not(.config-static)`).forEach(input => {
+      if (input.type !== 'checkbox') {
+        input.value = defaultValue !== null && defaultValue !== undefined ? defaultValue : '';
+      }
+    });
+
+    updateConfigBadge(varName, defaultValue);
   });
 
   // Show status message

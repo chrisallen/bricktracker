@@ -100,6 +100,23 @@ part_lot_stats AS (
     FROM "bricktracker_individual_part_lots"
 ),
 
+-- Combined min/max price across all item types (separate CTE to avoid scalar subquery issues in SQLite)
+all_prices AS (
+    SELECT "purchase_price" AS price FROM "bricktracker_sets" WHERE "purchase_price" IS NOT NULL AND "purchase_price" != ''
+    UNION ALL
+    SELECT "purchase_price" FROM "bricktracker_individual_parts" WHERE "purchase_price" IS NOT NULL AND "purchase_price" != '' AND "lot_id" IS NULL
+    UNION ALL
+    SELECT "purchase_price" FROM "bricktracker_individual_minifigures" WHERE "purchase_price" IS NOT NULL AND "purchase_price" != ''
+    UNION ALL
+    SELECT "purchase_price" FROM "bricktracker_individual_part_lots" WHERE "purchase_price" IS NOT NULL AND "purchase_price" != ''
+),
+price_range AS (
+    SELECT
+        MIN(price) AS combined_minimum_cost,
+        MAX(price) AS combined_maximum_cost
+    FROM all_prices
+),
+
 -- Rebrickable sets count (for sets we actually own)
 rebrickable_stats AS (
     SELECT COUNT(*) AS unique_rebrickable_sets
@@ -140,26 +157,9 @@ financial_stats AS (
         END AS combined_average_cost,
 
         -- Min/Max price across all item types
-        (SELECT MIN(price) FROM (
-            SELECT "purchase_price" AS price FROM "bricktracker_sets" WHERE "purchase_price" IS NOT NULL
-            UNION ALL
-            SELECT "purchase_price" FROM "bricktracker_individual_parts" WHERE "purchase_price" IS NOT NULL AND "lot_id" IS NULL
-            UNION ALL
-            SELECT "purchase_price" FROM "bricktracker_individual_minifigures" WHERE "purchase_price" IS NOT NULL
-            UNION ALL
-            SELECT "purchase_price" FROM "bricktracker_individual_part_lots" WHERE "purchase_price" IS NOT NULL
-        )) AS combined_minimum_cost,
-
-        (SELECT MAX(price) FROM (
-            SELECT "purchase_price" AS price FROM "bricktracker_sets" WHERE "purchase_price" IS NOT NULL
-            UNION ALL
-            SELECT "purchase_price" FROM "bricktracker_individual_parts" WHERE "purchase_price" IS NOT NULL AND "lot_id" IS NULL
-            UNION ALL
-            SELECT "purchase_price" FROM "bricktracker_individual_minifigures" WHERE "purchase_price" IS NOT NULL
-            UNION ALL
-            SELECT "purchase_price" FROM "bricktracker_individual_part_lots" WHERE "purchase_price" IS NOT NULL
-        )) AS combined_maximum_cost
-    FROM set_stats, individual_part_stats, individual_minifig_stats, part_lot_stats
+        price_range.combined_minimum_cost,
+        price_range.combined_maximum_cost
+    FROM set_stats, individual_part_stats, individual_minifig_stats, part_lot_stats, price_range
 )
 
 -- Final select combining all statistics

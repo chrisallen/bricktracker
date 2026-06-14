@@ -1,5 +1,6 @@
 import logging
 import traceback
+from datetime import datetime
 from typing import Any, Self, TYPE_CHECKING
 from uuid import uuid4
 
@@ -67,8 +68,25 @@ class IndividualMinifigure(RebrickableMinifigure):
             self.fields.purchase_location = purchase_location.fields.id if purchase_location else None
 
             # Save purchase date and price
-            self.fields.purchase_date = data.get('purchase_date', None)
-            self.fields.purchase_price = data.get('purchase_price', None)
+            purchase_date = data.get('purchase_date', None)
+            if purchase_date == '':
+                purchase_date = None
+            if purchase_date is not None:
+                try:
+                    purchase_date = datetime.strptime(purchase_date, '%Y/%m/%d').timestamp()
+                except Exception:
+                    purchase_date = None
+            self.fields.purchase_date = purchase_date
+
+            purchase_price = data.get('purchase_price', None)
+            if purchase_price == '':
+                purchase_price = None
+            if purchase_price is not None:
+                try:
+                    purchase_price = float(purchase_price)
+                except Exception:
+                    purchase_price = None
+            self.fields.purchase_price = purchase_price
 
             # Save quantity and description
             self.fields.quantity = int(data.get('quantity', 1))
@@ -543,6 +561,6 @@ class IndividualMinifigure(RebrickableMinifigure):
             'figure': str(data['set_num']),
             'number': int(number),
             'name': str(data['set_name']),
-            'image': data.get('set_img_url'),
+            'image': str(data['set_img_url']) if data.get('set_img_url') else None,
             'number_of_parts': int(data.get('num_parts', 0)),
         }

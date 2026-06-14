@@ -1,5 +1,41 @@
 # Changelog
 
+## 1.4.1
+
+### Enhancements
+
+- **Added per-column header filters to the Parts table on the set details page**: The main Parts table now has an always-visible filter row under the column headers
+  - Name: case-insensitive substring search
+  - Color: dropdown populated from the colors present in the current results
+  - Missing / Damaged: All / With / Without dropdowns
+  - Checked: All / Checked / Unchecked
+  - Filters combine (AND) and re-evaluate live as missing/damaged values or checkboxes change. Bulk actions (mark all missing, check all, etc.) only affect the rows visible under the active filter. Scoped to the main Parts table only; per-minifigure tables stay sort-only
+- **"Reset to Defaults" confirmation now uses a Bootstrap modal instead of a browser dialog**: Replaced the native browser `confirm()` popup with a consistent Bootstrap modal matching the style of BrickTracker
+
+### Bug Fixes
+
+- **Fixed prices on the Statistics page being rounded to whole numbers** (Issue #146): All price values now display with two decimal places (`%.2f`) instead of being rounded to whole numbers (`%.0f`)
+
+- **Fixed "Reset to Defaults" blanking all settings instead of restoring them** (Issue #149a, branch `bugfix/issue-149a`): "Reset to Defaults" was clearing all fields to empty/false instead of populating them with their actual default values
+  - `resetToDefaults()` now reads from `window.DEFAULT_CONFIG` and restores each field to its proper default, matching the same logic used on initial page load
+- **Fixed `BK_INSTRUCTIONS_ALLOWED_EXTENSIONS` being treated as a string instead of a list** (Issue #149b, branch `bugfix/issue-149b`): When this setting was saved via the admin panel, it was stored and cast as a plain string rather than a list, causing it to be iterated character by character (e.g. `['.', 'p', 'd', 'f']` instead of `['.pdf']`)
+  - Added `allowed_extensions` to the list-type keyword detection in `_cast_value()`, matching the existing pattern used for `badge_order` settings
+- **Fixed crash when importing sets containing minifigures or parts with no image on Rebrickable** (Issue #149c, branch `bugfix/issue-149c`): Adding or refreshing a set would fail entirely if any minifigure or part had no image URL, with error `Invalid URL '': No scheme supplied`
+  - Rebrickable returns an empty string (not `None`) for missing images; normalize empty strings to `None` at the point of ingestion in `rebrickable_minifigure.py` and `individual_minifigure.py`, matching the existing pattern in `rebrickable_set.py`
+  - Updated `rebrickable_image.py` to treat empty strings the same as `None` throughout, falling back to the configured nil placeholder image
+  - Note: the originally reported sets could no longer reproduce the crash (images may have since been added on Rebrickable), so this fix is based on assumptions only
+- **Fixed previously added set being re-added when adding an individual minifigure** (Issue #150, branch `bugfix/issue-150`): After adding a set, entering a `fig-` ID and confirming would add the previous set again instead of the minifigure, if user did not reload inbetween. 
+  - `add.js` was creating a second `BrickMinifigureSocket` with its own listeners on the same button and input as `BrickSetSocket`, causing duplicate socket events and cross-socket state confusion
+- **Fixed purchase date, price, and notes not being saved when adding an individual minifigure** (Issue #151, branch `bugfix/issue-151`): Filling in purchase date, price, or notes before clicking Add had no effect, only purchase location was saved
+  - `BrickMinifigureSocket` was missing references to `#add-purchase-date`, `#add-purchase-price`, and `#add-description`, so those fields were never read or included in the socket emit
+  - The backend already supported all three fields. This was just a frontend error
+- **Fixed purchase date and price not being converted when adding an individual minifigure** (Issue #151 follow-up): Purchase date was stored as a raw `YYYY/MM/DD` string and price as a raw string instead of a Unix epoch float and float respectively, causing them to be silently dropped from statistics aggregations
+  - `IndividualMinifigure.download()` now mirrors the conversion logic already present in `BrickSet.download()`: date parsed via `datetime.strptime` to timestamp, price cast to `float`
+- **Fixed a price of 0 being treated as no price** (Issue #153): Setting a purchase price of `0` on sets, individual minifigures, or parts was indistinguishable from having no price set at all
+  - Replaced truthiness checks (`if price`, `price or ''`) with explicit `None` checks throughout badge display, management input fields, and inline price update endpoints
+- **Fixed deleting a wish with an owner assigned** (Issue #152, branch `bugfix/issue-152`): Resolved foreign key constraint error when removing a set from the wishlist that had an owner assigned
+  - Wish owners are now deleted before the wish itself, respecting the FK constraint
+
 ## 1.4
 
 ### Bug Fixes

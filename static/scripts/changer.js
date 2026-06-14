@@ -55,6 +55,10 @@ class BrickChanger {
             this.html_clear.addEventListener("click", ((changer) => (e) => {
                 changer.html_element.value = "";
                 changer.change();
+                // change() only POSTs to the server; dispatch an input event so
+                // client-side listeners (e.g. the parts table filter) react to
+                // the programmatic clear the same way they do to typing.
+                changer.html_element.dispatchEvent(new Event("input", { bubbles: true }));
             })(this));
         }
 

@@ -1,4 +1,4 @@
-{% macro header(image=true, color=false, parts=false, quantity=false, missing=true, missing_parts=false, damaged=true, damaged_parts=false, sets=false, minifigures=false, checked=false, hamburger_menu=false, accordion_id='') %}
+{% macro header(image=true, color=false, parts=false, quantity=false, missing=true, missing_parts=false, damaged=true, damaged_parts=false, sets=false, minifigures=false, checked=false, hamburger_menu=false, accordion_id='', filters=false) %}
   <thead>
     <tr>
       {% if image %}
@@ -59,6 +59,72 @@
         {% endif %}
       {% endif %}
     </tr>
+    {% if filters %}
+    <tr class="parts-filter-row">
+      {% if image %}
+        <th class="no-sort"></th>
+      {% endif %}
+      <th class="no-sort">
+        <input type="search" class="form-control form-control-sm parts-filter-input" data-parts-filter="name" placeholder="Search…" aria-label="Filter by name" autocomplete="off">
+      </th>
+      {% if color %}
+        <th class="no-sort">
+          <select class="form-select form-select-sm parts-filter-select" data-parts-filter="color" aria-label="Filter by color">
+            <option value="">All colors</option>
+          </select>
+        </th>
+      {% endif %}
+      {% if parts %}
+        <th class="no-sort"></th>
+      {% endif %}
+      {% if quantity %}
+        <th class="no-sort"></th>
+      {% endif %}
+      {% if missing and not config['HIDE_TABLE_MISSING_PARTS'] %}
+        <th class="no-sort">
+          <select class="form-select form-select-sm parts-filter-select" data-parts-filter="missing" aria-label="Filter by missing">
+            <option value="">All</option>
+            <option value="with">With missing</option>
+            <option value="without">Without missing</option>
+          </select>
+        </th>
+      {% endif %}
+      {% if damaged and not config['HIDE_TABLE_DAMAGED_PARTS'] %}
+        <th class="no-sort">
+          <select class="form-select form-select-sm parts-filter-select" data-parts-filter="damaged" aria-label="Filter by damaged">
+            <option value="">All</option>
+            <option value="with">With damaged</option>
+            <option value="without">Without damaged</option>
+          </select>
+        </th>
+      {% endif %}
+      {% if sets %}
+        <th class="no-sort"></th>
+      {% endif %}
+      {% if minifigures %}
+        <th class="no-sort"></th>
+      {% endif %}
+      {% if checked and not config['HIDE_TABLE_CHECKED_PARTS'] %}
+        <th class="no-sort">
+          <select class="form-select form-select-sm parts-filter-select" data-parts-filter="checked" aria-label="Filter by checked">
+            <option value="">All</option>
+            <option value="1">Checked</option>
+            <option value="0">Unchecked</option>
+          </select>
+        </th>
+      {% endif %}
+      {% if hamburger_menu and g.login.is_authenticated() %}
+        {% set show_missing_menu = not config['HIDE_TABLE_MISSING_PARTS'] %}
+        {% set show_checked_menu = not config['HIDE_TABLE_CHECKED_PARTS'] %}
+        {% set show_quick_add = not config['DISABLE_QUICK_ADD_INDIVIDUAL_PARTS'] and not config['HIDE_INDIVIDUAL_PARTS'] %}
+        {% if show_missing_menu or show_checked_menu or show_quick_add %}
+          <th class="no-sort text-end">
+            <button type="button" class="btn btn-sm btn-outline-secondary parts-filter-clear" data-parts-filter-clear title="Clear filters"><i class="ri-filter-off-line"></i></button>
+          </th>
+        {% endif %}
+      {% endif %}
+    </tr>
+    {% endif %}
   </thead>
 {% endmacro %}
 

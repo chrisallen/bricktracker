@@ -99,7 +99,11 @@
             <div class="col-6">
               <div class="text-center">
                 <div class="text-dark small">Range</div>
+                {% if financial_summary.minimum_cost is not none and financial_summary.maximum_cost is not none %}
                 <div class="fw-bold">{{ config['PURCHASE_CURRENCY'] }}{{ "%.2f"|format(financial_summary.minimum_cost) }} - {{ config['PURCHASE_CURRENCY'] }}{{ "%.2f"|format(financial_summary.maximum_cost) }}</div>
+                {% else %}
+                <div class="fw-bold">-</div>
+                {% endif %}
               </div>
             </div>
           </div>
@@ -245,7 +249,7 @@
                   </td>
                   <td class="text-center">
                     {% if theme.total_spent %}
-                      <small class="text-dark">{{ config['PURCHASE_CURRENCY'] }}{{ "%.0f"|format(theme.total_spent) }}</small>
+                      <small class="text-dark">{{ config['PURCHASE_CURRENCY'] }}{{ "%.2f"|format(theme.total_spent) }}</small>
                     {% else %}
                       <small class="text-dark">-</small>
                     {% endif %}
@@ -309,8 +313,8 @@
                     <small class="text-dark">{{ storage.total_minifigures }}{% if storage.individual_minifig_count %} ({{ storage.individual_minifig_count }} individual){% endif %}</small>
                   </td>
                   <td class="text-center">
-                    {% if storage.total_value %}
-                      <small class="text-dark">{{ config['PURCHASE_CURRENCY'] }}{{ "%.0f"|format(storage.total_value) }}</small>
+                    {% if storage.total_value is not none %}
+                      <small class="text-dark">{{ config['PURCHASE_CURRENCY'] }}{{ "%.2f"|format(storage.total_value) }}</small>
                     {% else %}
                       <small class="text-dark">-</small>
                     {% endif %}
@@ -380,15 +384,15 @@
                     {% endif %}
                   </td>
                   <td class="text-center">
-                    {% if location.avg_price %}
+                    {% if location.avg_price is not none %}
                       <small class="text-dark">{{ config['PURCHASE_CURRENCY'] }}{{ "%.2f"|format(location.avg_price) }}</small>
                     {% else %}
                       <small class="text-dark">-</small>
                     {% endif %}
                   </td>
                   <td class="text-center">
-                    {% if location.min_price and location.max_price %}
-                      <small class="text-dark">{{ config['PURCHASE_CURRENCY'] }}{{ "%.0f"|format(location.min_price) }}-{{ "%.0f"|format(location.max_price) }}</small>
+                    {% if location.min_price is not none and location.max_price is not none %}
+                      <small class="text-dark">{{ config['PURCHASE_CURRENCY'] }}{{ "%.2f"|format(location.min_price) }}-{{ "%.2f"|format(location.max_price) }}</small>
                     {% else %}
                       <small class="text-dark">-</small>
                     {% endif %}
@@ -460,14 +464,14 @@
                   </td>
                   <td class="text-center">
                     {% if year.total_spent %}
-                      <small class="text-dark">{{ config['PURCHASE_CURRENCY'] }}{{ "%.0f"|format(year.total_spent) }}</small>
+                      <small class="text-dark">{{ config['PURCHASE_CURRENCY'] }}{{ "%.2f"|format(year.total_spent) }}</small>
                     {% else %}
                       <small class="text-dark">-</small>
                     {% endif %}
                   </td>
                   <td class="text-center">
-                    {% if year.avg_price_per_set %}
-                      <small class="text-dark">{{ config['PURCHASE_CURRENCY'] }}{{ "%.0f"|format(year.avg_price_per_set) }}</small>
+                    {% if year.avg_price_per_set is not none %}
+                      <small class="text-dark">{{ config['PURCHASE_CURRENCY'] }}{{ "%.2f"|format(year.avg_price_per_set) }}</small>
                     {% else %}
                       <small class="text-dark">-</small>
                     {% endif %}
@@ -542,8 +546,8 @@
                     {% endif %}
                   </td>
                   <td class="text-center">
-                    {% if year.avg_price_per_set %}
-                      <small class="text-dark">{{ config['PURCHASE_CURRENCY'] }}{{ "%.0f"|format(year.avg_price_per_set) }}</small>
+                    {% if year.avg_price_per_set is not none %}
+                      <small class="text-dark">{{ config['PURCHASE_CURRENCY'] }}{{ "%.2f"|format(year.avg_price_per_set) }}</small>
                     {% else %}
                       <small class="text-dark">-</small>
                     {% endif %}
@@ -560,7 +564,7 @@
                 <small class="text-dark">Peak Year</small><br>
                 {% if year_summary.peak_spending_year %}
                   <strong>{{ year_summary.peak_spending_year }}</strong>
-                  <small class="text-success d-block">{{ config['PURCHASE_CURRENCY'] }}{{ "%.0f"|format(year_summary.max_spending) }}</small>
+                  <small class="text-success d-block">{{ config['PURCHASE_CURRENCY'] }}{{ "%.2f"|format(year_summary.max_spending) }}</small>
                 {% else %}
                   <small class="text-dark">N/A</small>
                 {% endif %}

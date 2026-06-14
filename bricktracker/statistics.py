@@ -58,8 +58,8 @@ class BrickStatistics:
         return {
             'total_cost': overview.get('combined_total_cost') or 0,
             'average_cost': overview.get('combined_average_cost') or 0,
-            'minimum_cost': overview.get('combined_minimum_cost') or 0,
-            'maximum_cost': overview.get('combined_maximum_cost') or 0,
+            'minimum_cost': float(overview['combined_minimum_cost']) if overview.get('combined_minimum_cost') not in (None, '') else None,
+            'maximum_cost': float(overview['combined_maximum_cost']) if overview.get('combined_maximum_cost') not in (None, '') else None,
             'items_with_price': overview.get('total_items_with_price') or 0,
             'sets_with_price': overview.get('sets_with_price') or 0,
             'total_sets': overview.get('total_sets') or 0,

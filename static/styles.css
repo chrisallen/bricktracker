@@ -331,3 +331,18 @@
     background-color: #e9ecef;
     border-color: #dee2e6;
 }
+
+/* Accordion parts table header filters */
+.parts-filter-row > th {
+    padding: 0.35rem 0.5rem;
+    vertical-align: middle;
+}
+
+.parts-filter-row .parts-filter-input,
+.parts-filter-row .parts-filter-select {
+    min-width: 6rem;
+}
+
+tr.parts-filtered-out {
+    display: none;
+}

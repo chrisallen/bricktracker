@@ -43,7 +43,7 @@
   {% endif %}
 {% endmacro %}
 
-{% macro table(table_collection, title, id, parent, target, quantity=none, icon=none, image=none, alt=none, details=none, read_only=none, hamburger_menu=none) %}
+{% macro table(table_collection, title, id, parent, target, quantity=none, icon=none, image=none, alt=none, details=none, read_only=none, hamburger_menu=none, filters=false) %}
   {% set size=table_collection | length %}
   {% if size %}
     {{ header(title, id, parent, quantity=quantity, icon=icon, class='p-0', image=image, alt=alt, hamburger_menu=hamburger_menu) }}
@@ -57,7 +57,7 @@
           <a class="btn border bg-secondary-text" href="{{ details }}">{% if icon %}<i class="ri-{{ icon }}"></i>{% endif %} Details</a>
         </p>
       {% endif %}
-      {% with solo=true, all=false, accordion_id=id, read_only=read_only, hamburger_menu=hamburger_menu %}
+      {% with solo=true, all=false, accordion_id=id, read_only=read_only, hamburger_menu=hamburger_menu, filters=filters %}
         {% include target %}
       {% endwith %}
     {{ footer() }}
