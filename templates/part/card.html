@@ -29,8 +29,15 @@
       {{ badge.color(item) }}
       {{ badge.print(item) }}
     {% endif %}
-    {{ badge.total_sets(sets_using | length, solo=solo, last=last) }}
-    {{ badge.total_minifigures(minifigures_using | length, solo=solo, last=last) }}
+    {% if solo %}
+      {{ badge.total_sets(sets_using | length, solo=solo, last=last) }}
+      {{ badge.total_minifigures(minifigures_using | length, solo=solo, last=last) }}
+    {% else %}
+      {# Sub-cards (different color / same print) carry their own per-color counts
+         from the query, not the parent's inherited sets_using/minifigures_using (#159). #}
+      {{ badge.total_sets(item.fields.total_sets, solo=solo, last=last) }}
+      {{ badge.total_minifigures(item.fields.total_minifigures, solo=solo, last=last) }}
+    {% endif %}
     {{ badge.total_quantity(item.fields.total_quantity, solo=solo, last=last) }}
     {{ badge.total_spare(item.fields.total_spare, solo=solo, last=last) }}
     {{ badge.total_missing(item.fields.total_missing, solo=solo, last=last) }}
