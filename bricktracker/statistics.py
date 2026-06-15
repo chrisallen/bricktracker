@@ -63,9 +63,12 @@ class BrickStatistics:
             'items_with_price': overview.get('total_items_with_price') or 0,
             'sets_with_price': overview.get('sets_with_price') or 0,
             'total_sets': overview.get('total_sets') or 0,
-            'percentage_with_price': round(
-                ((overview.get('total_items_with_price') or 0) / max((overview.get('total_sets') or 0), 1)) * 100, 1
-            )
+            'total_items': overview.get('total_items') or 0,
+            # #156: divide by the matching total of all priceable item types
+            # (not total_sets), and clamp to 100% as a safety net.
+            'percentage_with_price': min(round(
+                ((overview.get('total_items_with_price') or 0) / max((overview.get('total_items') or 0), 1)) * 100, 1
+            ), 100.0)
         }
 
     def get_collection_summary(self) -> dict[str, Any]:

@@ -39,6 +39,7 @@ individual_part_stats AS (
         COALESCE(SUM("missing"), 0) AS total_missing_individual_parts,
         COALESCE(SUM("damaged"), 0) AS total_damaged_individual_parts,
         COUNT(CASE WHEN "purchase_price" IS NOT NULL AND "lot_id" IS NULL THEN 1 END) AS individual_parts_with_price,
+        COUNT(CASE WHEN "lot_id" IS NULL THEN 1 END) AS individual_parts_standalone,
         COALESCE(ROUND(SUM(CASE WHEN "lot_id" IS NULL THEN "purchase_price" END), 2), 0) AS individual_parts_total_cost
     FROM "bricktracker_individual_parts"
 ),
@@ -133,6 +134,13 @@ financial_stats AS (
             COALESCE(individual_minifig_stats.individual_minifigs_with_price, 0) +
             COALESCE(part_lot_stats.part_lots_with_price, 0) AS total_items_with_price,
 
+        -- Total priceable items, mirroring total_items_with_price's item types
+        -- (fixes #156: dividing by total_sets let coverage exceed 100%)
+        set_stats.total_sets +
+            COALESCE(individual_part_stats.individual_parts_standalone, 0) +
+            COALESCE(individual_minifig_stats.total_individual_minifigures, 0) +
+            COALESCE(part_lot_stats.total_part_lots, 0) AS total_items,
+
         -- Total cost across all item types
         ROUND(COALESCE(set_stats.total_cost, 0) +
             COALESCE(individual_part_stats.individual_parts_total_cost, 0) +
@@ -190,6 +198,7 @@ SELECT
 
     -- Combined financial statistics (all item types)
     financial_stats.total_items_with_price,
+    financial_stats.total_items,
     financial_stats.combined_total_cost,
     financial_stats.combined_average_cost,
     financial_stats.combined_minimum_cost,
