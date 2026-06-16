@@ -543,6 +543,56 @@
             </div>
           </div>
 
+          <!-- Sidecar (BrickData) -->
+          <h6 class="fw-bold text-primary border-bottom pb-1 mb-3 mt-4">Sidecar (BrickData)</h6>
+          <p class="text-muted small">These take effect without a restart. The sidecar base URL itself is in the Static Settings section (it needs a restart).</p>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="BK_SIDECAR_TIMEOUT" class="form-label">
+                BK_SIDECAR_TIMEOUT {{ config_badges('BK_SIDECAR_TIMEOUT') }}
+                <div class="text-muted small">Request timeout in seconds for sidecar calls</div>
+              </label>
+              <input type="number" class="form-control config-number" id="BK_SIDECAR_TIMEOUT" data-var="BK_SIDECAR_TIMEOUT" min="1" max="120">
+            </div>
+            <div class="col-md-6">
+              <label for="BK_SIDECAR_PRICE_CACHE_HOURS" class="form-label">
+                BK_SIDECAR_PRICE_CACHE_HOURS {{ config_badges('BK_SIDECAR_PRICE_CACHE_HOURS') }}
+                <div class="text-muted small">Hours to cache BrickLink market prices before refetching</div>
+              </label>
+              <input type="number" class="form-control config-number" id="BK_SIDECAR_PRICE_CACHE_HOURS" data-var="BK_SIDECAR_PRICE_CACHE_HOURS" min="0" max="8760">
+            </div>
+            <div class="col-md-6">
+              <label for="BK_SIDECAR_RETAIL_REGION" class="form-label">
+                BK_SIDECAR_RETAIL_REGION {{ config_badges('BK_SIDECAR_RETAIL_REGION') }}
+                <div class="text-muted small">LEGO.com MSRP region: US, UK, CA or DE</div>
+              </label>
+              <input type="text" class="form-control config-text" id="BK_SIDECAR_RETAIL_REGION" data-var="BK_SIDECAR_RETAIL_REGION" {{ is_locked('BK_SIDECAR_RETAIL_REGION') }}>
+            </div>
+            <div class="col-md-6">
+              <label for="BK_SIDECAR_CURRENCY" class="form-label">
+                BK_SIDECAR_CURRENCY {{ config_badges('BK_SIDECAR_CURRENCY') }}
+                <div class="text-muted small">Currency for BrickLink market values, e.g. EUR. Empty = sidecar default.</div>
+              </label>
+              <input type="text" class="form-control config-text" id="BK_SIDECAR_CURRENCY" data-var="BK_SIDECAR_CURRENCY" {{ is_locked('BK_SIDECAR_CURRENCY') }}>
+            </div>
+            <div class="col-md-6">
+              <label for="BK_SIDECAR_DEFAULT_COVER" class="form-label">
+                BK_SIDECAR_DEFAULT_COVER {{ config_badges('BK_SIDECAR_DEFAULT_COVER') }}
+                <div class="text-muted small">Default bulk-add cover source: rebrickable, box or set</div>
+              </label>
+              <input type="text" class="form-control config-text" id="BK_SIDECAR_DEFAULT_COVER" data-var="BK_SIDECAR_DEFAULT_COVER" {{ is_locked('BK_SIDECAR_DEFAULT_COVER') }}>
+            </div>
+            <div class="col-md-6 d-flex align-items-center">
+              <div class="form-check form-switch">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_SIDECAR_AUTO_FETCH_PRICE" data-var="BK_SIDECAR_AUTO_FETCH_PRICE" {{ is_locked('BK_SIDECAR_AUTO_FETCH_PRICE') }}>
+                <label class="form-check-label" for="BK_SIDECAR_AUTO_FETCH_PRICE">
+                  BK_SIDECAR_AUTO_FETCH_PRICE {{ config_badges('BK_SIDECAR_AUTO_FETCH_PRICE') }}
+                  <div class="text-muted small">Auto-fetch BrickLink market value when viewing a set (respects cache TTL)</div>
+                </label>
+              </div>
+            </div>
+          </div>
+
           <!-- Advanced Settings -->
           <h6 class="fw-bold text-primary border-bottom pb-1 mb-3 mt-4">Advanced Settings</h6>
 
@@ -1008,6 +1058,19 @@
                   <div class="text-muted small">Disable threaded socket mode</div>
                 </label>
               </div>
+            </div>
+          </div>
+
+          <!-- Sidecar (BrickData). Only the base URL is static (restart required);
+               the rest are live-changeable and live in the Live Settings section. -->
+          <h6 class="fw-bold text-secondary border-bottom pb-1 mb-3 mt-4">Sidecar (BrickData)</h6>
+          <div class="row g-3">
+            <div class="col-12">
+              <label for="static-BK_SIDECAR_URL" class="form-label">
+                BK_SIDECAR_URL {{ config_badges('BK_SIDECAR_URL') }}
+                <div class="text-muted small">Base URL of the brickset-sidecar (e.g. http://localhost:3335). Empty disables all sidecar features. Changing it requires a restart. The other sidecar settings are in the Live Settings section above.</div>
+              </label>
+              <input type="text" class="form-control config-static" id="static-BK_SIDECAR_URL" data-var="BK_SIDECAR_URL" {{ is_locked('BK_SIDECAR_URL') }}>
             </div>
           </div>
 

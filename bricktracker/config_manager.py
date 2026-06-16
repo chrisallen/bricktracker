@@ -86,7 +86,15 @@ LIVE_CHANGEABLE_VARS: Final[List[str]] = [
     'BK_RETIRED_SETS_FILE_URL',
     'BK_RETIRED_SETS_PATH',
     'BK_THEMES_FILE_URL',
-    'BK_THEMES_PATH'
+    'BK_THEMES_PATH',
+    # Sidecar integration (everything but the URL is live-changeable; the URL
+    # itself requires a restart, see RESTART_REQUIRED_VARS)
+    'BK_SIDECAR_TIMEOUT',
+    'BK_SIDECAR_PRICE_CACHE_HOURS',
+    'BK_SIDECAR_DEFAULT_COVER',
+    'BK_SIDECAR_RETAIL_REGION',
+    'BK_SIDECAR_AUTO_FETCH_PRICE',
+    'BK_SIDECAR_CURRENCY'
 ]
 
 # Environment variables that require restart
@@ -114,7 +122,10 @@ RESTART_REQUIRED_VARS: Final[List[str]] = [
     'BK_PURCHASE_DATE_FORMAT',
     'BK_PURCHASE_CURRENCY',
     'BK_REBRICKABLE_USER_AGENT',
-    'BK_USER_AGENT'
+    'BK_USER_AGENT',
+    # Sidecar base URL only: changing it rebinds the whole feature, so it needs
+    # a restart. The other sidecar settings are live-changeable.
+    'BK_SIDECAR_URL'
 ]
 
 class ConfigManager:
@@ -200,13 +211,13 @@ class ConfigManager:
             else:
                 return []
         # Integer variables (pagination sizes, delays, etc.) - Check BEFORE boolean check
-        if any(keyword in var_name.lower() for keyword in ['_size', '_page', 'delay', 'min_', 'per_page', 'page_size']):
+        if any(keyword in var_name.lower() for keyword in ['_size', '_page', 'delay', 'min_', 'per_page', 'page_size', '_timeout', '_hours']):
             try:
                 return int(value)
             except (ValueError, TypeError):
                 return 0
         # Boolean variables - More specific patterns to avoid conflicts
-        if any(keyword in var_name.lower() for keyword in ['hide_', 'disable_', 'server_side_pagination', '_links', 'random', 'skip_', 'show_', 'use_', '_consolidation', '_charts', '_expanded']):
+        if any(keyword in var_name.lower() for keyword in ['hide_', 'disable_', 'server_side_pagination', '_links', 'random', 'skip_', 'show_', 'use_', '_consolidation', '_charts', '_expanded', 'auto_fetch']):
             if isinstance(value, str):
                 return value.lower() in ('true', '1', 'yes', 'on')
             return bool(value)
@@ -338,6 +349,13 @@ class ConfigManager:
             'BK_USE_REMOTE_IMAGES': 'Use remote images from Rebrickable CDN instead of local',
             'BK_STATISTICS_SHOW_CHARTS': 'Show collection growth charts on statistics page',
             'BK_STATISTICS_DEFAULT_EXPANDED': 'Expand all statistics sections by default',
-            'BK_DARK_MODE': 'Enable dark mode theme'
+            'BK_DARK_MODE': 'Enable dark mode theme',
+            'BK_SIDECAR_URL': 'Base URL of the brickset-sidecar container (e.g. http://localhost:3335). Leave empty to disable all sidecar features.',
+            'BK_SIDECAR_TIMEOUT': 'Request timeout in seconds for sidecar calls',
+            'BK_SIDECAR_PRICE_CACHE_HOURS': 'How long to cache BrickLink market prices before refetching (hours)',
+            'BK_SIDECAR_DEFAULT_COVER': 'Default cover image source for bulk add: rebrickable, box, or set',
+            'BK_SIDECAR_RETAIL_REGION': 'LEGO.com retail price region for MSRP: US, UK, CA, or DE',
+            'BK_SIDECAR_AUTO_FETCH_PRICE': 'Automatically fetch BrickLink market value when viewing a set (respects the cache TTL), so you do not have to press "Fetch value". Off by default as it is the slower live path.',
+            'BK_SIDECAR_CURRENCY': 'Currency to request BrickLink market values in, e.g. EUR. Empty uses the sidecar default. (The sidecar must support the currency query parameter.)'
         }
         return help_text.get(var_name, 'No help available for this variable')

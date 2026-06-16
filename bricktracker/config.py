@@ -105,8 +105,20 @@ CONFIG: Final[list[dict[str, Any]]] = [
     {'n': 'STATISTICS_SHOW_CHARTS', 'd': True, 'c': bool},
     {'n': 'STATISTICS_DEFAULT_EXPANDED', 'd': True, 'c': bool},
     {'n': 'DARK_MODE', 'c': bool},
-    {'n': 'BADGE_ORDER_GRID', 'd': ['theme', 'year', 'parts', 'total_minifigures', 'owner'], 'c': list},
-    {'n': 'BADGE_ORDER_DETAIL', 'd': ['theme', 'tag', 'year', 'parts', 'instance_count', 'total_minifigures', 'total_missing', 'total_damaged', 'owner', 'storage', 'purchase_date', 'purchase_location', 'purchase_price', 'instructions', 'rebrickable', 'bricklink'], 'c': list},
+    {'n': 'BADGE_ORDER_GRID', 'd': ['theme', 'year', 'parts', 'total_minifigures', 'instructions', 'owner'], 'c': list},
+    {'n': 'BADGE_ORDER_DETAIL', 'd': ['theme', 'tag', 'year', 'retired', 'parts', 'instance_count', 'total_minifigures', 'total_missing', 'total_damaged', 'owner', 'storage', 'purchase_date', 'purchase_location', 'purchase_price', 'msrp', 'value', 'dimensions', 'weight', 'instructions', 'rebrickable', 'bricklink'], 'c': list},
     {'n': 'SHOW_NOTES_GRID', 'd': False, 'c': bool},
     {'n': 'SHOW_NOTES_DETAIL', 'd': True, 'c': bool},
+    # Sidecar (brickset-sidecar / BrickData) integration. Opt-in: an empty
+    # SIDECAR_URL means the whole feature is off and everything degrades.
+    {'n': 'SIDECAR_URL', 'd': ''},
+    {'n': 'SIDECAR_TIMEOUT', 'd': 5, 'c': int},
+    {'n': 'SIDECAR_PRICE_CACHE_HOURS', 'd': 24, 'c': int},
+    {'n': 'SIDECAR_DEFAULT_COVER', 'd': 'rebrickable'},
+    {'n': 'SIDECAR_RETAIL_REGION', 'd': 'US'},
+    {'n': 'SIDECAR_AUTO_FETCH_PRICE', 'c': bool},
+    # Currency to request BrickLink market values in (e.g. EUR). Empty lets the
+    # sidecar use its default. Sent as a query parameter only when set; sidecars
+    # that do not support it simply ignore it.
+    {'n': 'SIDECAR_CURRENCY', 'd': ''},
 ]
