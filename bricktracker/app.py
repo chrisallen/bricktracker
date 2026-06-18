@@ -11,6 +11,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from bricktracker.configuration_list import BrickConfigurationList
 from bricktracker.login import LoginManager
 from bricktracker.navbar import Navbar
+from bricktracker.sidecar import BrickSidecar
 from bricktracker.sql import close
 from bricktracker.template_filters import replace_query_filter
 from bricktracker.version import __version__
@@ -194,6 +195,16 @@ def setup_app(app: Flask) -> None:
 
     # Register custom Jinja2 filters
     app.jinja_env.filters['replace_query'] = replace_query_filter
+
+    # Expose the sidecar feature flag and helper to every template so they can
+    # do `{% if sidecar_enabled %}`. Health is best-effort and cached, so this
+    # is cheap to evaluate on render and never blocks on a dead sidecar.
+    @app.context_processor
+    def inject_sidecar() -> dict[str, object]:
+        return {
+            'sidecar_enabled': BrickSidecar.enabled(),
+            'sidecar': BrickSidecar,
+        }
 
     # Make sure all connections are closed at the end
     @app.teardown_request

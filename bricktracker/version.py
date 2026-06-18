@@ -1,4 +1,4 @@
 from typing import Final
 
-__version__: Final[str] = '1.4.0'
-__database_version__: Final[int] = 27
+__version__: Final[str] = '1.5.0'
+__database_version__: Final[int] = 28
