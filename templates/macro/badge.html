@@ -39,7 +39,11 @@
 {% endmacro %}
 
 {% macro instructions(item, solo=false, last=false) %}
-  {{ badge(url=item.url_for_instructions(), solo=solo, last=last, blank=true, color='light border', icon='file-line', collapsible='Instructions:', text=item.instructions | length, alt='Instructions') }}
+  {# Positive "instructions downloaded" indicator: only render when the set
+     actually has instruction files (#154). #}
+  {% if item.instructions | length %}
+    {{ badge(url=item.url_for_instructions(), solo=solo, last=last, blank=true, color='light border', icon='file-line', collapsible='Instructions:', text=item.instructions | length, alt='Instructions') }}
+  {% endif %}
 {% endmacro %}
 
 {% macro parts(parts, solo=false, last=false) %}
@@ -221,12 +225,44 @@
   {{ badge(check=year, solo=solo, last=last, color='secondary', icon='calendar-line', collapsible='Year:', text=year, alt='Year') }}
 {% endmacro %}
 
-{% macro render_ordered_badges(item, brickset_tags, brickset_owners, brickset_storages, brickset_purchase_locations, solo=false, last=false, context='grid') %}
+{# --- Sidecar badges. Each takes the sidecar_summary dict and renders nothing
+   when the data is absent (so they are safe to put anywhere in BADGE_ORDER_*). #}
+{% macro retired(summary, solo=false, last=false) %}
+  {% if summary and summary.retired %}
+    {{ badge(check=true, solo=solo, last=last, color='light text-danger-emphasis bg-danger-subtle border border-danger-subtle', icon='time-line', collapsible='Retired:', text=(summary.exit_year or 'Yes'), alt='Retired') }}
+  {% endif %}
+{% endmacro %}
+
+{% macro msrp(summary, solo=false, last=false) %}
+  {% if summary and summary.prices and summary.prices.msrp is not none %}
+    {{ badge(check=true, solo=solo, last=last, color='light border', icon='price-tag-3-line', collapsible='MSRP:', text='%.2f %s' | format(summary.prices.msrp, summary.prices.msrp_currency), alt='MSRP') }}
+  {% endif %}
+{% endmacro %}
+
+{% macro value(summary, solo=false, last=false) %}
+  {% if summary and summary.prices and summary.prices.has_market and summary.prices.market_new is not none %}
+    {{ badge(check=true, solo=solo, last=last, color='light border', icon='funds-line', collapsible='Value:', text='%.2f %s' | format(summary.prices.market_new, summary.prices.market_currency), alt='Value', tooltip='BrickLink new' ~ (' — fetched ' ~ summary.prices.market_fetched_at if summary.prices.market_fetched_at else '')) }}
+  {% endif %}
+{% endmacro %}
+
+{% macro dimensions(summary, solo=false, last=false) %}
+  {% if summary and summary.dimensions %}
+    {{ badge(check=true, solo=solo, last=last, color='light border', icon='ruler-line', collapsible='Size:', text=summary.dimensions, alt='Dimensions') }}
+  {% endif %}
+{% endmacro %}
+
+{% macro weight(summary, solo=false, last=false) %}
+  {% if summary and summary.weight %}
+    {{ badge(check=true, solo=solo, last=last, color='light border', icon='scales-3-line', collapsible='Weight:', text=summary.weight, alt='Weight') }}
+  {% endif %}
+{% endmacro %}
+
+{% macro render_ordered_badges(item, brickset_tags, brickset_owners, brickset_storages, brickset_purchase_locations, solo=false, last=false, context='grid', sidecar_summary=none) %}
   {# Get badge order from config based on context (grid or detail) #}
   {% if context == 'detail' %}
-    {% set badge_order = config.get('BADGE_ORDER_DETAIL', ['theme', 'tag', 'year', 'parts', 'instance_count', 'total_minifigures', 'total_missing', 'total_damaged', 'owner', 'storage', 'purchase_date', 'purchase_location', 'purchase_price', 'instructions', 'rebrickable', 'bricklink']) %}
+    {% set badge_order = config.get('BADGE_ORDER_DETAIL', ['theme', 'tag', 'year', 'retired', 'parts', 'instance_count', 'total_minifigures', 'total_missing', 'total_damaged', 'owner', 'storage', 'purchase_date', 'purchase_location', 'purchase_price', 'msrp', 'value', 'dimensions', 'weight', 'instructions', 'rebrickable', 'bricklink']) %}
   {% else %}
-    {% set badge_order = config.get('BADGE_ORDER_GRID', ['theme', 'year', 'parts', 'total_minifigures', 'owner']) %}
+    {% set badge_order = config.get('BADGE_ORDER_GRID', ['theme', 'year', 'parts', 'total_minifigures', 'instructions', 'owner']) %}
   {% endif %}
 
   {# Render each badge in the configured order #}
@@ -301,8 +337,8 @@
         {% endif %}
       {% endif %}
     {% elif badge_key == 'instructions' %}
-      {# Only sets have instructions #}
-      {% if not last and not solo and item.instructions is defined %}
+      {# Only sets have instructions, and only when not hidden by config (#154) #}
+      {% if not last and not solo and item.instructions is defined and not config['HIDE_SET_INSTRUCTIONS'] %}
         {{ instructions(item, solo=solo, last=last) }}
       {% endif %}
     {% elif badge_key == 'rebrickable' %}
@@ -315,6 +351,16 @@
       {% if not last and item.url_for_bricklink is defined %}
         {{ bricklink(item, solo=solo, last=last) }}
       {% endif %}
+    {% elif badge_key == 'retired' %}
+      {{ retired(sidecar_summary, solo=solo, last=last) }}
+    {% elif badge_key == 'msrp' %}
+      {{ msrp(sidecar_summary, solo=solo, last=last) }}
+    {% elif badge_key == 'value' %}
+      {{ value(sidecar_summary, solo=solo, last=last) }}
+    {% elif badge_key == 'dimensions' %}
+      {{ dimensions(sidecar_summary, solo=solo, last=last) }}
+    {% elif badge_key == 'weight' %}
+      {{ weight(sidecar_summary, solo=solo, last=last) }}
     {% endif %}
   {% endfor %}
 {% endmacro %}

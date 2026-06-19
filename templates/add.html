@@ -61,6 +61,66 @@
               Add without confirmation
             </label>
           </div>
+          {% if sidecar_enabled %}
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="add-box-art" {% if bulk and config['SIDECAR_DEFAULT_COVER'] in ['box', 'set'] %}checked{% endif %}>
+            <label class="form-check-label" for="add-box-art">
+              {% if bulk %}Force box art (fallback to normal image){% else %}Use box art as cover (if available){% endif %}
+            </label>
+          </div>
+          {% if not bulk %}
+          <div class="mt-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="add-check-box-art"
+              data-sidecar-base="{{ sidecar.base_url() }}"
+              data-bs-toggle="modal" data-bs-target="#addBoxArtModal">
+              <i class="ri-eye-line"></i> Check box art
+            </button>
+          </div>
+          <div class="modal fade" id="addBoxArtModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Box art preview</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                  <p id="add-box-art-empty" class="text-muted d-none">Enter a set number first (e.g. 42043-1).</p>
+                  <img id="add-box-art-image" src="" alt="Box art preview" class="img-fluid d-none" style="max-height: 60vh;"
+                    onerror="this.classList.add('d-none'); document.getElementById('add-box-art-missing').classList.remove('d-none');">
+                  <p id="add-box-art-missing" class="text-muted d-none"><i class="ri-error-warning-line"></i> The sidecar has no box art for this set.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <script>
+            (function () {
+              var modal = document.getElementById('addBoxArtModal');
+              if (!modal) { return; }
+              modal.addEventListener('show.bs.modal', function () {
+                var base = (document.getElementById('add-check-box-art').getAttribute('data-sidecar-base') || '').replace(/\/$/, '');
+                var ref = (document.getElementById('add-set').value || '').trim().split(',')[0].trim();
+                // BrickTracker appends "-1" to a bare set number; match that so
+                // the sidecar lookup works (e.g. "10179" -> "10179-1").
+                if (ref && ref.indexOf('-') === -1) {
+                  ref = ref + '-1';
+                }
+                var image = document.getElementById('add-box-art-image');
+                var empty = document.getElementById('add-box-art-empty');
+                var missing = document.getElementById('add-box-art-missing');
+                missing.classList.add('d-none');
+                if (!ref) {
+                  image.classList.add('d-none');
+                  empty.classList.remove('d-none');
+                  return;
+                }
+                empty.classList.add('d-none');
+                image.src = base + '/images/bricklink/box/' + encodeURIComponent(ref) + '.png';
+                image.classList.remove('d-none');
+              });
+            })();
+          </script>
+          {% endif %}
+          {% endif %}
           <h6 class="border-bottom mt-2">Metadata</h6>
           <div class="accordion accordion" id="metadata">
             {% if brickset_owners | length %}

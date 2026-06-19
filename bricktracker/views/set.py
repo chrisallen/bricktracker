@@ -1,4 +1,5 @@
 import logging
+import os
 
 from flask import (
     Blueprint,
@@ -17,8 +18,11 @@ from ..exceptions import ErrorException
 from ..minifigure import BrickMinifigure
 from ..pagination_helper import get_pagination_config, build_pagination_context, get_request_params
 from ..part import BrickPart
+from ..rebrickable_image import RebrickableImage
 from ..rebrickable_set import RebrickableSet
 from ..set import BrickSet
+from ..sidecar import BrickSidecar
+from ..sidecar_set import summarize as sidecar_summarize
 from ..set_list import BrickSetList, set_metadata_lists
 from ..set_owner_list import BrickSetOwnerList
 from ..set_purchase_location_list import BrickSetPurchaseLocationList
@@ -274,6 +278,15 @@ def details(*, id: str) -> str:
     # Load the specific set
     item = BrickSet().select_specific(id)
 
+    # Sidecar enrichment + price comparison. Cache-only by default; when
+    # SIDECAR_AUTO_FETCH_PRICE is on, the market value is fetched on view
+    # (TTL-aware) so the user does not have to press "Fetch value".
+    sidecar_summary = sidecar_summarize(
+        item.fields.set,
+        purchase_price=item.fields.purchase_price,
+        fetch_price=current_app.config.get('SIDECAR_AUTO_FETCH_PRICE', False),
+    )
+
     # Check if there are multiple instances of this set
     all_instances = BrickSetList()
     # Load all sets with metadata context for tags, owners, etc.
@@ -298,6 +311,7 @@ def details(*, id: str) -> str:
             all_instances=same_set_instances,
             open_instructions=request.args.get('open_instructions'),
             brickset_statuses=BrickSetStatusList.list(all=True),
+            sidecar_summary=sidecar_summary,
             **set_metadata_lists(as_class=True)
         )
     else:
@@ -307,6 +321,7 @@ def details(*, id: str) -> str:
             item=item,
             open_instructions=request.args.get('open_instructions'),
             brickset_statuses=BrickSetStatusList.list(all=True),
+            sidecar_summary=sidecar_summary,
             **set_metadata_lists(as_class=True)
         )
 
@@ -422,3 +437,97 @@ def refresh(*, id: str | None = None, set: str | None = None) -> str:
         namespace=current_app.config['SOCKET_NAMESPACE'],
         messages=MESSAGES
     )
+
+
+# Override the cover image with a sidecar image (box / set art). Best quality
+# first: tries the *_large variant, falls back to the normal resolution (which
+# BrickLink almost always has where _large is missing).
+@set_page.route('/<id>/cover/<image_type>', methods=['POST'])
+@login_required
+@exception_handler(__file__, post_redirect='set.details')
+def cover_override(*, id: str, image_type: str) -> Response:
+    if image_type not in ('box', 'set'):
+        raise ErrorException('Unknown cover image type: {type}'.format(
+            type=image_type,
+        ))
+
+    if not BrickSidecar.enabled():
+        raise ErrorException('The sidecar is not configured')
+
+    brickset = BrickSet().select_light(id)
+    ref = brickset.fields.set
+
+    # BrickLink box/set covers only reliably exist at normal resolution
+    # (the *_large variants are almost always 404), so use the normal image.
+    saved = BrickSidecar.save_cover_override(ref, image_type)
+
+    if not saved:
+        raise ErrorException(
+            'The sidecar has no {type} image for set {ref}'.format(
+                type=image_type,
+                ref=ref,
+            )
+        )
+
+    logger.info('Set {ref} ({id}): cover overridden with sidecar {type} art'.format(  # noqa: E501
+        ref=ref,
+        id=id,
+        type=image_type,
+    ))
+
+    return redirect(brickset.url())
+
+
+# Restore the original Rebrickable cover: use the backup if we made one,
+# otherwise delete the local file and re-download from Rebrickable.
+@set_page.route('/<id>/cover/restore', methods=['POST'])
+@login_required
+@exception_handler(__file__, post_redirect='set.details')
+def cover_restore(*, id: str) -> Response:
+    brickset = BrickSet().select_specific(id)
+    ref = brickset.fields.set
+
+    if not BrickSidecar.restore_cover(ref):
+        # No backup to restore: drop the local file and pull from Rebrickable.
+        path = BrickSidecar.cover_path(ref)
+        try:
+            if os.path.exists(path):
+                os.remove(path)
+        except OSError:
+            pass
+
+        RebrickableImage(brickset).download()
+
+    logger.info('Set {ref} ({id}): cover restored to Rebrickable image'.format(
+        ref=ref,
+        id=id,
+    ))
+
+    return redirect(brickset.url())
+
+
+# Lazily (re)fetch the BrickLink market value for a set and cache it. This is
+# the expensive live path, so it only runs on an explicit user action.
+@set_page.route('/<id>/value/refresh', methods=['POST'])
+@login_required
+@exception_handler(__file__, post_redirect='set.details')
+def value_refresh(*, id: str) -> Response:
+    if not BrickSidecar.enabled():
+        raise ErrorException('The sidecar is not configured')
+
+    brickset = BrickSet().select_light(id)
+    ref = brickset.fields.set
+
+    price = BrickSidecar.get_price(ref, refresh=True)
+
+    if price is None:
+        raise ErrorException(
+            'Could not fetch a market value for set {ref}'.format(ref=ref),
+        )
+
+    logger.info('Set {ref} ({id}): market value refreshed'.format(
+        ref=ref,
+        id=id,
+    ))
+
+    return redirect(brickset.url())

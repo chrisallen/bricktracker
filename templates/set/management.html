@@ -63,5 +63,68 @@
     {{ accordion.header('Data', 'data', 'set-management', icon='database-2-line') }}
       <a href="{{ item.url_for_refresh() }}" class="btn btn-primary" role="button"><i class="ri-refresh-line"></i> Refresh the set data</a>
     {{ accordion.footer() }}
+    {% if sidecar_enabled %}
+    {{ accordion.header('Cover image', 'cover', 'set-management', icon='image-line') }}
+      <p class="text-muted small mb-2">Replace the Rebrickable cover with BrickLink box/set art from the sidecar. A backup of the original is kept so you can restore it.</p>
+      <div class="d-flex flex-wrap gap-2">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#coverPreviewModal"
+          data-cover-type="box" data-cover-label="Box art"
+          data-cover-preview="{{ sidecar.image_proxy_url('box', item.fields.set) }}"
+          data-cover-action="{{ item.url_for_cover('box') }}">
+          <i class="ri-eye-line"></i> Preview box art
+        </button>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#coverPreviewModal"
+          data-cover-type="set" data-cover-label="Set image"
+          data-cover-preview="{{ sidecar.image_proxy_url('set', item.fields.set) }}"
+          data-cover-action="{{ item.url_for_cover('set') }}">
+          <i class="ri-eye-line"></i> Preview set image
+        </button>
+        <form action="{{ item.url_for_cover_restore() }}" method="post" class="d-inline">
+          <button type="submit" class="btn btn-outline-secondary"><i class="ri-arrow-go-back-line"></i> Restore Rebrickable image</button>
+        </form>
+      </div>
+
+      <!-- Cover preview modal -->
+      <div class="modal fade" id="coverPreviewModal" tabindex="-1" aria-labelledby="coverPreviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="coverPreviewModalLabel">Cover preview</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+              <img id="coverPreviewImage" src="" alt="Cover preview" class="img-fluid" style="max-height: 60vh;"
+                onerror="this.classList.add('d-none'); document.getElementById('coverPreviewMissing').classList.remove('d-none');">
+              <p id="coverPreviewMissing" class="text-muted mt-2 d-none"><i class="ri-error-warning-line"></i> The sidecar has no image of this type for this set.</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <form id="coverApplyForm" action="" method="post" class="d-inline">
+                <button type="submit" class="btn btn-primary"><i class="ri-check-line"></i> Use as cover (override)</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        (function () {
+          var modal = document.getElementById('coverPreviewModal');
+          if (!modal) { return; }
+          modal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            if (!button) { return; }
+            var image = document.getElementById('coverPreviewImage');
+            // Reset state from any previous open
+            document.getElementById('coverPreviewMissing').classList.add('d-none');
+            image.classList.remove('d-none');
+            image.src = button.getAttribute('data-cover-preview') || '';
+            document.getElementById('coverPreviewModalLabel').textContent = (button.getAttribute('data-cover-label') || 'Cover') + ' preview';
+            document.getElementById('coverApplyForm').setAttribute('action', button.getAttribute('data-cover-action') || '');
+          });
+        })();
+      </script>
+    {{ accordion.footer() }}
+    {% endif %}
   {{ accordion.footer() }}
 {% endif %}

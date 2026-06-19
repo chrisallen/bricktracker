@@ -23,6 +23,7 @@ class BrickSetSocket extends BrickSocket {
         this.html_storage = document.getElementById(`${id}-storage`);
         this.html_tags = document.getElementById(`${id}-tags`);
         this.html_description = document.getElementById(`${id}-description`);
+        this.html_box_art = document.getElementById(`${id}-box-art`);
 
         // Card elements
         this.html_card = document.getElementById(`${id}-card`);
@@ -213,6 +214,12 @@ class BrickSetSocket extends BrickSocket {
                 description = this.html_description.value;
             }
 
+            // Grab the box art checkbox (sidecar cover override)
+            let box_art = false;
+            if (this.html_box_art) {
+                box_art = this.html_box_art.checked;
+            }
+
             this.socket.emit(this.messages.IMPORT_SET, {
                 set: (set !== undefined) ? set : this.html_input.value,
                 owners: owners,
@@ -223,6 +230,7 @@ class BrickSetSocket extends BrickSocket {
                 storage: storage,
                 tags: tags,
                 description: description,
+                box_art: box_art,
                 refresh: this.refresh
             });
         } else {

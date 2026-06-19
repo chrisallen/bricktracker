@@ -79,6 +79,11 @@ class BrickSet(RebrickableSet):
             # This must happen before inserting bricktracker_sets due to FK constraint
             self.insert_rebrickable()
 
+            # Optionally override the freshly downloaded Rebrickable cover with
+            # the sidecar box art (best-effort; falls back silently to the
+            # Rebrickable image when unavailable).
+            self.apply_sidecar_box_art(data)
+
             if not refresh:
                 # Save the storage
                 storage = BrickSetStorageList.get(
@@ -224,6 +229,42 @@ class BrickSet(RebrickableSet):
             return False
 
         return True
+
+    # Override the cover with sidecar box art when requested during add.
+    # Never raises: a sidecar miss or failure leaves the Rebrickable cover.
+    def apply_sidecar_box_art(self, data: dict[str, Any], /) -> bool:
+        if not data.get('box_art'):
+            return False
+
+        try:
+            from .sidecar import BrickSidecar
+
+            if not BrickSidecar.enabled():
+                return False
+
+            ref = self.fields.set
+            # Honour SIDECAR_DEFAULT_COVER ('box' or 'set'); anything else
+            # (e.g. 'rebrickable') falls back to the reliable box image. The
+            # *_large variants almost never exist, so use the normal resolution.
+            cover = str(current_app.config.get('SIDECAR_DEFAULT_COVER', 'box'))
+            image_type = cover if cover in ('box', 'set') else 'box'
+            saved = BrickSidecar.save_cover_override(ref, image_type)
+
+            if saved:
+                logger.info('Set {ref}: cover set from sidecar {type} art'.format(
+                    ref=ref,
+                    type=image_type,
+                ))
+            else:
+                logger.info('Set {ref}: no sidecar {type} art, kept Rebrickable cover'.format(  # noqa: E501
+                    ref=ref,
+                    type=image_type,
+                ))
+
+            return saved
+        except Exception:
+            logger.debug('sidecar box art override failed', exc_info=True)
+            return False
 
     # Purchase date
     def purchase_date(self, /, *, standard: bool = False) -> str:
@@ -456,3 +497,19 @@ class BrickSet(RebrickableSet):
     # Update description url
     def url_for_description(self, /) -> str:
         return url_for('set.update_description', id=self.fields.id)
+
+    # Cover override url (image_type: 'box' or 'set')
+    def url_for_cover(self, image_type: str, /) -> str:
+        return url_for(
+            'set.cover_override',
+            id=self.fields.id,
+            image_type=image_type,
+        )
+
+    # Restore the Rebrickable cover url
+    def url_for_cover_restore(self, /) -> str:
+        return url_for('set.cover_restore', id=self.fields.id)
+
+    # Refresh the BrickLink market value url
+    def url_for_value_refresh(self, /) -> str:
+        return url_for('set.value_refresh', id=self.fields.id)
