@@ -32,6 +32,8 @@ def overview() -> str:
     purchase_location_stats = stats.get_purchase_location_statistics()
     financial_summary = stats.get_financial_summary()
     collection_summary = stats.get_collection_summary()
+    instructions_summary = stats.get_instructions_summary()
+    sidecar_pricing = stats.get_sidecar_pricing_summary()
     sets_by_year_stats = stats.get_sets_by_year_statistics()
     purchases_by_year_stats = stats.get_purchases_by_year_statistics()
     year_summary = stats.get_year_summary()
@@ -57,6 +59,8 @@ def overview() -> str:
         purchase_location_statistics=purchase_location_stats,
         financial_summary=financial_summary,
         collection_summary=collection_summary,
+        instructions_summary=instructions_summary,
+        sidecar_pricing=sidecar_pricing,
         sets_by_year_statistics=sets_by_year_stats,
         purchases_by_year_statistics=purchases_by_year_stats,
         year_summary=year_summary,

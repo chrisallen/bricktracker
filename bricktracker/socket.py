@@ -36,6 +36,7 @@ MESSAGES: Final[dict[str, str]] = {
     'PART_LOADED': 'part_loaded',
     'PROGRESS': 'progress',
     'SET_LOADED': 'set_loaded',
+    'VALUE_ALL_SETS': 'value_all_sets',
 }
 
 
@@ -297,6 +298,73 @@ class BrickSocket(object):
 
             from .individual_part import IndividualPart
             IndividualPart().create_bulk(self, data)
+
+        @self.socket.on(MESSAGES['VALUE_ALL_SETS'], namespace=self.namespace)
+        @authenticated_socket(self)
+        def value_all_sets(data: dict[str, Any], /) -> None:
+            logger.debug('Socket: VALUE_ALL_SETS (from: {fr})'.format(
+                fr=request.sid,  # type: ignore
+            ))
+
+            from .sidecar import BrickSidecar
+            from .sidecar_cache import BrickSidecarCache
+            from .sql import BrickSQL
+
+            if not BrickSidecar.enabled():
+                self.fail(message='The sidecar is not configured')
+                return
+
+            # Distinct set numbers in the collection (reuses the instructions
+            # statistics query).
+            try:
+                rows = BrickSQL().fetchall('statistics/set_numbers')
+            except Exception:
+                rows = []
+
+            refs = [row['set'] for row in rows]
+
+            self.progress_count = 0
+            self.update_total(len(refs))
+
+            priced = 0    # sets that ended up with a value (cached or fetched)
+            fetched = 0   # sets that required a live fetch this run
+            missing = 0   # sets with no value available at all
+            for ref in refs:
+                self.auto_progress(
+                    message='Valuing set {ref}'.format(ref=ref),
+                )
+
+                # Was this set's price already fresh in the cache? If so,
+                # get_price() returns it without a network call.
+                cached, fetched_at = BrickSidecar.cached_price(ref)
+                was_fresh = (
+                    cached is not None
+                    and BrickSidecarCache.price_is_fresh(fetched_at)
+                )
+
+                try:
+                    price = BrickSidecar.get_price(ref)
+                except Exception:
+                    price = None
+
+                if price is not None:
+                    priced += 1
+                    if not was_fresh:
+                        fetched += 1
+                else:
+                    missing += 1
+
+                # Only pause when we actually hit the network, so re-runs over an
+                # already-cached collection stay fast.
+                if not was_fresh:
+                    self.socket.sleep(0.2)
+
+            self.complete(
+                message=(
+                    '{priced} set(s) now have a value ({fetched} newly fetched); '
+                    '{missing} had none available.'
+                ).format(priced=priced, fetched=fetched, missing=missing),
+            )
 
     # Update the progress auto-incrementing
     def auto_progress(

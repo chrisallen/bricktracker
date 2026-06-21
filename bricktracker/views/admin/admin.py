@@ -23,6 +23,7 @@ from ...set_tag import BrickSetTag
 from ...set_tag_list import BrickSetTagList
 from ...sql_counter import BrickCounter
 from ...sql import BrickSQL
+from ...socket import MESSAGES
 from ...theme_list import BrickThemeList
 
 logger = logging.getLogger(__name__)
@@ -211,6 +212,7 @@ def admin() -> str:
     open_logout = should_expand('authentication', open_logout)
     open_retired = should_expand('retired', open_retired)
     open_theme = should_expand('theme', open_theme)
+    open_value = should_expand('value', request.args.get('open_value', None))
 
     # Metadata sub-sections
     open_owner = should_expand('owner', open_owner)
@@ -286,6 +288,10 @@ def admin() -> str:
         open_storage=open_storage,
         open_tag=open_tag,
         open_theme=open_theme,
+        open_value=open_value,
+        messages=MESSAGES,
+        path=current_app.config['SOCKET_PATH'],
+        namespace=current_app.config['SOCKET_NAMESPACE'],
         owner_error=request.args.get('owner_error'),
         purchase_location_error=request.args.get('purchase_location_error'),
         retired=BrickRetiredList(),

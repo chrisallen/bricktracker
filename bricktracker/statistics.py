@@ -87,6 +87,103 @@ class BrickStatistics:
             'purchase_locations_used': overview.get('purchase_locations_used') or 0
         }
 
+    def get_instructions_summary(self) -> dict[str, Any] | None:
+        """Instruction coverage across the collection (#154).
+
+        Instructions live on the filesystem (INSTRUCTIONS_FOLDER), not in the
+        database, so this intersects the distinct collection set numbers with the
+        cached instructions file list. Returns None when instructions are hidden.
+        """
+        from flask import current_app
+
+        if current_app.config.get('HIDE_SET_INSTRUCTIONS', False):
+            return None
+
+        from .instructions_list import BrickInstructionsList
+
+        instructions = BrickInstructionsList()
+
+        rows = self.sql.fetchall('statistics/set_numbers')
+        set_numbers = {row['set'] for row in rows}
+
+        with_instructions = sum(
+            1 for number in set_numbers if number in instructions.sets
+        )
+        unique_sets = len(set_numbers)
+
+        return {
+            'instruction_files': instructions.sets_total,
+            'sets_with_instructions': with_instructions,
+            'unique_sets': unique_sets,
+            'percentage_with_instructions': min(round(
+                (with_instructions / max(unique_sets, 1)) * 100, 1
+            ), 100.0),
+        }
+
+    def get_sidecar_pricing_summary(self) -> dict[str, Any] | None:
+        """Collection-wide paid / retail (MSRP) / BrickLink market comparison.
+
+        Reads only from the local sidecar cache (no network). Returns None when
+        the sidecar is disabled or the cache is unavailable.
+        """
+        from .sidecar import BrickSidecar
+
+        if not BrickSidecar.enabled():
+            return None
+
+        try:
+            row = self.sql.fetchone(
+                'statistics/sidecar_pricing',
+                region=BrickSidecar.retail_region(),
+            )
+        except Exception as exception:
+            logger.debug('sidecar pricing summary failed: %s', exception)
+            return None
+
+        if row is None:
+            return None
+
+        data = dict(row)
+
+        def number(key: str) -> float:
+            value = data.get(key)
+            try:
+                return float(value) if value is not None else 0.0
+            except (TypeError, ValueError):
+                return 0.0
+
+        # Savings vs retail and value change vs paid, computed only across the
+        # sets where both sides of the comparison are known.
+        data['total_saved_vs_msrp'] = round(
+            number('msrp_where_paid') - number('paid_where_msrp'), 2
+        )
+        data['total_gain_vs_paid'] = round(
+            number('market_where_paid') - number('paid_where_market'), 2
+        )
+        data['total_gain_vs_paid_used'] = round(
+            number('market_used_where_paid') - number('paid_where_market_used'), 2
+        )
+        data['retail_currency'] = BrickSidecar.retail_currency()
+
+        # Currency the user records purchase prices in (may be a symbol such as
+        # '$' or 'kr'). Compared against the retail/market ISO codes through the
+        # symbol map so '$' vs 'USD' and 'kr' vs 'DKK' are NOT flagged.
+        from flask import current_app
+        paid_currency = str(
+            current_app.config.get('PURCHASE_CURRENCY', '') or ''
+        ).strip()
+        data['paid_currency'] = paid_currency
+
+        mismatch = False
+        if data.get('sets_with_paid'):
+            if not BrickSidecar.same_currency(paid_currency, data.get('market_currency')):
+                mismatch = True
+            if not BrickSidecar.same_currency(paid_currency, data['retail_currency']):
+                mismatch = True
+        data['currency_mismatch'] = mismatch
+
+        return data
+
     def get_sets_by_year_statistics(self) -> list[dict[str, Any]]:
         """Get statistics grouped by LEGO set release year"""
         results = self.sql.fetchall('statistics/sets_by_year')

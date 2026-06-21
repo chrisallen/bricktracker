@@ -155,11 +155,100 @@
                 <small class="text-dark">Purchase Locations</small>
               </div>
             </div>
+            {% if instructions_summary %}
+            <div class="col-6">
+              <div class="text-center">
+                <div class="h4 text-primary mb-0">{{ instructions_summary.sets_with_instructions }}<span class="text-muted fs-6">/{{ instructions_summary.unique_sets }}</span></div>
+                <small class="text-dark">Sets with Instructions <span class="text-muted">({{ instructions_summary.percentage_with_instructions }}%)</span></small>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="text-center">
+                <div class="h4 text-dark mb-0">{{ instructions_summary.instruction_files }}</div>
+                <small class="text-dark">Instruction Files</small>
+              </div>
+            </div>
+            {% endif %}
           </div>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- Sidecar pricing comparison: paid / retail / worth now -->
+  {% if sidecar_pricing %}
+  {% set sp = sidecar_pricing %}
+  <div class="row g-3 mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header bg-info text-dark d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0"><i class="ri-scales-line"></i> Pricing comparison (sidecar)</h5>
+          {% if g.login.is_authenticated() %}
+            <a href="{{ url_for('admin.admin', open_value='true') }}#value" class="btn btn-sm btn-dark">
+              <i class="ri-funds-line"></i> Value all sets
+            </a>
+          {% endif %}
+        </div>
+        <div class="card-body">
+          <div class="row g-2 text-center">
+            <div class="col-md-6 col-xl-3">
+              <div class="border rounded p-3">
+                <div class="h3 mb-0">{{ config['PURCHASE_CURRENCY'] }}{{ "%.2f"|format(sp.total_paid or 0) }}</div>
+                <small class="text-dark">Total paid <span class="text-muted">({{ sp.sets_with_paid or 0 }} sets)</span></small>
+              </div>
+            </div>
+            <div class="col-md-6 col-xl-3">
+              <div class="border rounded p-3">
+                <div class="h3 mb-0">{{ "%.2f"|format(sp.total_msrp or 0) }} {{ sp.retail_currency }}</div>
+                <small class="text-dark">Total retail / MSRP <span class="text-muted">({{ sp.sets_with_msrp or 0 }} sets)</span></small>
+              </div>
+            </div>
+            <div class="col-md-6 col-xl-3">
+              <div class="border rounded p-3">
+                <div class="h3 mb-0">{{ "%.2f"|format(sp.total_market_new or 0) }} {{ sp.market_currency or '' }}</div>
+                <small class="text-dark">Total worth now (BrickLink new) <span class="text-muted">({{ sp.sets_with_market or 0 }} sets)</span></small>
+              </div>
+            </div>
+            <div class="col-md-6 col-xl-3">
+              <div class="border rounded p-3">
+                <div class="h3 mb-0">{{ "%.2f"|format(sp.total_market_used or 0) }} {{ sp.market_currency or '' }}</div>
+                <small class="text-dark">Total worth now (BrickLink used) <span class="text-muted">({{ sp.sets_with_market_used or 0 }} sets)</span></small>
+              </div>
+            </div>
+          </div>
+          <div class="row g-2 text-center mt-1">
+            <div class="col-md-4">
+              <div class="border rounded p-2">
+                <span class="h5 {% if (sp.total_saved_vs_msrp or 0) >= 0 %}text-success{% else %}text-danger{% endif %} mb-0">{{ "%+.2f"|format(sp.total_saved_vs_msrp or 0) }} {{ sp.retail_currency }}</span>
+                <small class="d-block text-dark">Saved vs retail <span class="text-muted">(where both known)</span></small>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="border rounded p-2">
+                <span class="h5 {% if (sp.total_gain_vs_paid or 0) >= 0 %}text-success{% else %}text-danger{% endif %} mb-0">{{ "%+.2f"|format(sp.total_gain_vs_paid or 0) }} {{ sp.market_currency or '' }}</span>
+                <small class="d-block text-dark">Value change vs paid <span class="text-muted">(BrickLink new)</span></small>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="border rounded p-2">
+                <span class="h5 {% if (sp.total_gain_vs_paid_used or 0) >= 0 %}text-success{% else %}text-danger{% endif %} mb-0">{{ "%+.2f"|format(sp.total_gain_vs_paid_used or 0) }} {{ sp.market_currency or '' }}</span>
+                <small class="d-block text-dark">Value change vs paid <span class="text-muted">(BrickLink used)</span></small>
+              </div>
+            </div>
+          </div>
+          {% if sp.currency_mismatch %}
+          <div class="alert alert-warning small mb-2 mt-2" role="alert">
+            <i class="ri-error-warning-line"></i>
+            Currencies differ: you paid in <strong>{{ sp.paid_currency or '?' }}</strong>{% if sp.retail_currency %}, retail is in <strong>{{ sp.retail_currency }}</strong>{% endif %}{% if sp.market_currency %}, market value is in <strong>{{ sp.market_currency }}</strong>{% endif %}.
+            The "saved vs retail" and "value change vs paid" figures mix currencies and are <strong>not converted</strong>.
+          </div>
+          {% endif %}
+          <p class="text-muted small mb-0 mt-2"><i class="ri-information-line"></i> Estimate. Only covers sets the sidecar has data for; market value only covers sets whose value has been fetched. Currencies are not converted.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
 
   <!-- Collection Growth Charts -->
   {% if config['STATISTICS_SHOW_CHARTS'] %}
