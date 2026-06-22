@@ -46,6 +46,18 @@ class BrickGridFilter {
             });
         }
 
+        // Numeric range filters (e.g. parts 100-500, year 2015-2020). Each input
+        // carries data-filter-range="<attribute>" and data-filter-bound="min"|"max".
+        this.ranges = [];
+        if (this.html_filter) {
+            this.html_filter.querySelectorAll("input[data-filter-range]").forEach(input => {
+                input.addEventListener("input", ((gridfilter) => () => {
+                    gridfilter.filter();
+                })(this));
+                this.ranges.push(input);
+            });
+        }
+
         if (this.html_theme) {
             this.html_theme.addEventListener("change", ((grid) => () => {
                 grid.filter();
@@ -63,6 +75,28 @@ class BrickGridFilter {
         // Check if there is a search filter
         if (this.html_search && this.html_search.value != "") {
             options.search = this.html_search.value.toLowerCase();
+        }
+
+        // Build numeric range filters
+        options.ranges = {};
+        for (const input of this.ranges) {
+            const value = input.value.trim();
+            if (value === "") {
+                continue;
+            }
+
+            const number = parseFloat(value);
+            if (isNaN(number)) {
+                continue;
+            }
+
+            const attribute = input.dataset.filterRange;
+            const bound = input.dataset.filterBound;
+
+            if (!options.ranges[attribute]) {
+                options.ranges[attribute] = {};
+            }
+            options.ranges[attribute][bound] = number;
         }
 
         // Build filters
@@ -140,6 +174,17 @@ class BrickGridFilter {
                     const isNot = filter.value.startsWith('-');
                     const actualValue = isNot ? filter.value.substring(1) : filter.value;
 
+                    // "None" option: match cards that have no value for this
+                    // attribute (inverted = cards that DO have a value).
+                    if (actualValue === "__none__") {
+                        const isEmpty = (attribute == null || attribute === "");
+                        if (isNot ? isEmpty : !isEmpty) {
+                            current.parentElement.classList.add("d-none");
+                            return;
+                        }
+                        continue;
+                    }
+
                     if (attribute == null) {
                         // If attribute is missing
                         if (isNot) {
@@ -188,6 +233,21 @@ class BrickGridFilter {
                             }
                         }
                     }
+                }
+            }
+
+            // Process numeric range filters (parts, year, ...)
+            for (const attribute in options.ranges) {
+                const bounds = options.ranges[attribute];
+                const raw = current.getAttribute(`data-${attribute}`);
+                const number = (raw == null || raw === "") ? NaN : parseFloat(raw);
+
+                // No value, or outside the configured bounds: hide.
+                if (isNaN(number)
+                    || (bounds.min != null && number < bounds.min)
+                    || (bounds.max != null && number > bounds.max)) {
+                    current.parentElement.classList.add("d-none");
+                    return;
                 }
             }
 

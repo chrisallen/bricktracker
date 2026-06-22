@@ -68,6 +68,7 @@
           data-filter="value" data-filter-attribute="purchase-location"
           autocomplete="off">
           <option value="" {% if not current_purchase_location_filter %}selected{% endif %}>All</option>
+          <option value="__none__" {% if current_purchase_location_filter == '__none__' or current_purchase_location_filter == '-__none__' %}selected{% endif %}>None</option>
           {% for purchase_location in brickset_purchase_locations %}
             <option value="{{ purchase_location.fields.id }}" {% if current_purchase_location_filter == purchase_location.fields.id or current_purchase_location_filter == ('-' + purchase_location.fields.id) %}selected{% endif %}>{{ purchase_location.fields.name }}</option>
           {% endfor %}
@@ -87,6 +88,7 @@
           data-filter="value" data-filter-attribute="storage"
           autocomplete="off">
           <option value="" {% if not current_storage_filter %}selected{% endif %}>All</option>
+          <option value="__none__" {% if current_storage_filter == '__none__' or current_storage_filter == '-__none__' %}selected{% endif %}>None</option>
           {% for storage in brickset_storages %}
             <option value="{{ storage.fields.id }}" {% if current_storage_filter == storage.fields.id or current_storage_filter == ('-' + storage.fields.id) %}selected{% endif %}>{{ storage.fields.name }}</option>
           {% endfor %}
@@ -125,6 +127,28 @@
         {% endfor %}
       </select>
       {{ form.filter_toggle('grid-year') }}
+    </div>
+  </div>
+  <!-- Numeric range filters: parts and year (client-side) -->
+  <div class="w-100"></div>
+  <div class="col-12 flex-grow-1">
+    <label class="visually-hidden" for="grid-parts-min">Parts range</label>
+    <div class="input-group">
+      <span class="input-group-text"><i class="ri-shapes-line"></i><span class="ms-1 d-none d-md-inline"> Parts</span></span>
+      <input type="number" id="grid-parts-min" class="form-control" placeholder="min" min="0" autocomplete="off"
+        data-filter-range="parts" data-filter-bound="min">
+      <input type="number" id="grid-parts-max" class="form-control" placeholder="max" min="0" autocomplete="off"
+        data-filter-range="parts" data-filter-bound="max">
+    </div>
+  </div>
+  <div class="col-12 flex-grow-1">
+    <label class="visually-hidden" for="grid-year-min">Year range</label>
+    <div class="input-group">
+      <span class="input-group-text"><i class="ri-calendar-line"></i><span class="ms-1 d-none d-md-inline"> Year</span></span>
+      <input type="number" id="grid-year-min" class="form-control" placeholder="from" min="0" autocomplete="off"
+        data-filter-range="year" data-filter-bound="min">
+      <input type="number" id="grid-year-max" class="form-control" placeholder="to" min="0" autocomplete="off"
+        data-filter-range="year" data-filter-bound="max">
     </div>
   </div>
   <div class="col-12 col-lg-auto">

@@ -775,6 +775,11 @@ function initializeClearFiltersButton() {
         }
       });
 
+      // Clear numeric range filters (parts, year)
+      document.querySelectorAll('#grid-filter input[data-filter-range]').forEach(input => {
+        input.value = '';
+      });
+
       // Clear duplicate filter if active
       const duplicateButton = document.getElementById('duplicate-filter-toggle');
       if (duplicateButton && duplicateButton.classList.contains('btn-secondary')) {
