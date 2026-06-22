@@ -44,6 +44,7 @@
             <input type="text" class="form-control" id="add-set" placeholder="{% if not bulk %}{% if not config.get('HIDE_INDIVIDUAL_MINIFIGURES', False) and not config.get('DISABLE_INDIVIDUAL_MINIFIGURES', False) %}107-1 or fig-001234 or ...{% else %}107-1 or ...{% endif %}{% else %}107-1, 1642-1, ...{% endif %}"
               data-path="{{ path }}"
               data-namespace="{{ namespace }}"
+              data-bulk="{% if bulk %}true{% else %}false{% endif %}"
               data-msg-complete="{{ messages['COMPLETE'] }}"
               data-msg-fail="{{ messages['FAIL'] }}"
               data-msg-import-set="{{ messages['IMPORT_SET'] }}"

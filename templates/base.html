@@ -172,7 +172,7 @@
     <script src="{{ url_for('static', filename='scripts/socket/minifigure.js') }}"></script>
     <script src="{{ url_for('static', filename='scripts/socket/value.js') }}"></script>
     <script src="{{ url_for('static', filename='scripts/table.js') }}"></script>
-    {% if request.endpoint == 'add.add' %}
+    {% if request.endpoint in ['add.add', 'add.bulk'] %}
     <script src="{{ url_for('static', filename='scripts/add.js') }}"></script>
     {% endif %}
     {% if request.endpoint == 'add.parts' %}

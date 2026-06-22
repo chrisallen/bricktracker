@@ -11,6 +11,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const addContainer = document.getElementById('add-set');
   if (!addContainer) return;
 
+  // On the bulk page the socket is initialized by set/socket.html include,
+  // so only wire it up here for the single add page to avoid a double init.
+  if (addContainer.dataset.bulk === 'true') return;
+
   new BrickSetSocket(
     'add',
     addContainer.dataset.path,
