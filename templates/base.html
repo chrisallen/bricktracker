@@ -218,6 +218,12 @@
         setup_changers();
         setup_tables({{ config['DEFAULT_TABLE_PER_PAGE'] }});
         baguetteBox.run('[data-lightbox]');
+        // Cover carousel: group all slides into one gallery (arrows + keyboard
+        // nav). A permissive filter is needed because the Brickset additional
+        // image URLs have no file extension (/additional-images/0).
+        baguetteBox.run('.bt-gallery', {
+          filter: /(\.(gif|jpe?g|png|webp)(\?.*)?$|additional-images)/i
+        });
       });
     </script>
 

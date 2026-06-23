@@ -506,6 +506,14 @@ class BrickSet(RebrickableSet):
             image_type=image_type,
         )
 
+    # Cover override url for a Brickset additional image (0-indexed)
+    def url_for_cover_additional(self, index: int, /) -> str:
+        return url_for(
+            'set.cover_override_additional',
+            id=self.fields.id,
+            index=index,
+        )
+
     # Restore the Rebrickable cover url
     def url_for_cover_restore(self, /) -> str:
         return url_for('set.cover_restore', id=self.fields.id)

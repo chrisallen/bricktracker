@@ -19,11 +19,47 @@
   </div>
 {% endmacro %}
 
-{% macro image(item, solo=false, last=false, caption=none, alt=none, medium=none) %}
+{% macro image(item, solo=false, last=false, caption=none, alt=none, medium=none, sidecar=none, extra_count=0) %}
   {% set image_url=item.url_for_image() %}
-  <div class="card-img border-bottom" style="background-image: url({{ image_url }})">
-    <a {% if solo %}data-lightbox {% if caption %}data-caption="{{ caption }}"{% endif %} href="{{ image_url }}" target="_blank"{% else %}href="{{ item.url() }}"{% endif %}>
-      <img {% if solo and medium %}class="card-medium-img"{% endif %}{% if last %}class="card-last-img"{% endif %} src="{{ image_url }}" {% if alt %}alt="{{ alt }}"{% endif %} loading="lazy">
-    </a>
-  </div>
+  {% if solo and sidecar and extra_count and extra_count > 0 %}
+    {# Cover becomes a carousel: the set cover first, then the Brickset
+       additional images. Each slide reuses .card-img sizing (object-fit:
+       contain + max-height) so every image keeps its aspect ratio at a fixed
+       height, regardless of source resolution. #}
+    {% set carousel_id = 'setImages-' ~ item.fields.id %}
+    {# bt-gallery groups every slide anchor into a single BaguetteBox lightbox
+       gallery (prev/next buttons + arrow-key navigation), instead of each
+       image opening as its own single-image lightbox. #}
+    <div id="{{ carousel_id }}" class="card-img border-bottom carousel slide carousel-dark bt-gallery">
+      <div class="carousel-inner">
+        <div class="carousel-item active" style="background-image: url({{ image_url }})">
+          <a {% if caption %}data-caption="{{ caption }} (1/{{ extra_count + 1 }})"{% endif %} href="{{ image_url }}" target="_blank">
+            <img src="{{ image_url }}" {% if alt %}alt="{{ alt }}"{% endif %} loading="lazy">
+          </a>
+        </div>
+        {% for i in range(extra_count) %}
+          {% set extra_url = sidecar.additional_image_url(item.fields.set, i) %}
+          <div class="carousel-item" style="background-image: url({{ extra_url }})">
+            <a {% if caption %}data-caption="{{ caption }} ({{ loop.index + 1 }}/{{ extra_count + 1 }})"{% endif %} href="{{ extra_url }}" target="_blank">
+              <img src="{{ extra_url }}" {% if alt %}alt="{{ alt }} image {{ loop.index + 1 }}"{% endif %} loading="lazy">
+            </a>
+          </div>
+        {% endfor %}
+      </div>
+      <button class="carousel-control-prev" type="button" data-bs-target="#{{ carousel_id }}" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#{{ carousel_id }}" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+      </button>
+    </div>
+  {% else %}
+    <div class="card-img border-bottom" style="background-image: url({{ image_url }})">
+      <a {% if solo %}data-lightbox {% if caption %}data-caption="{{ caption }}"{% endif %} href="{{ image_url }}" target="_blank"{% else %}href="{{ item.url() }}"{% endif %}>
+        <img {% if solo and medium %}class="card-medium-img"{% endif %}{% if last %}class="card-last-img"{% endif %} src="{{ image_url }}" {% if alt %}alt="{{ alt }}"{% endif %} loading="lazy">
+      </a>
+    </div>
+  {% endif %}
 {% endmacro %}

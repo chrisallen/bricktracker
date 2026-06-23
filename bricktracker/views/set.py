@@ -478,6 +478,39 @@ def cover_override(*, id: str, image_type: str) -> Response:
     return redirect(brickset.url())
 
 
+# Override the cover with one of the Brickset additional images (0-indexed).
+@set_page.route('/<id>/cover/additional/<int:index>', methods=['POST'])
+@login_required
+@exception_handler(__file__, post_redirect='set.details')
+def cover_override_additional(*, id: str, index: int) -> Response:
+    if not current_app.config['SIDECAR_ADDITIONAL_IMAGES']:
+        raise ErrorException('Additional images are not enabled')
+
+    if not BrickSidecar.enabled():
+        raise ErrorException('The sidecar is not configured')
+
+    brickset = BrickSet().select_light(id)
+    ref = brickset.fields.set
+
+    saved = BrickSidecar.save_cover_override_from_additional(ref, index)
+
+    if not saved:
+        raise ErrorException(
+            'The sidecar has no additional image {index} for set {ref}'.format(
+                index=index,
+                ref=ref,
+            )
+        )
+
+    logger.info('Set {ref} ({id}): cover overridden with additional image {index}'.format(  # noqa: E501
+        ref=ref,
+        id=id,
+        index=index,
+    ))
+
+    return redirect(brickset.url())
+
+
 # Restore the original Rebrickable cover: use the backup if we made one,
 # otherwise delete the local file and re-download from Rebrickable.
 @set_page.route('/<id>/cover/restore', methods=['POST'])

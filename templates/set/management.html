@@ -84,6 +84,22 @@
         </form>
       </div>
 
+      {# Pick any Brickset additional image as the cover (opt-in). Each thumbnail
+         feeds the same preview modal as the box/set buttons above. #}
+      {% if sidecar_summary and sidecar_summary.additional_images_enabled and sidecar_summary.additional_image_count %}
+        <p class="text-muted small mt-3 mb-2">Or use one of the {{ sidecar_summary.additional_image_count }} additional Brickset image(s):</p>
+        <div class="d-flex flex-wrap gap-2">
+          {% for i in range(sidecar_summary.additional_image_count) %}
+            <button type="button" class="btn btn-outline-primary p-1" data-bs-toggle="modal" data-bs-target="#coverPreviewModal"
+              data-cover-type="additional" data-cover-label="Additional image {{ i + 1 }}"
+              data-cover-preview="{{ sidecar.additional_image_url(item.fields.set, i) }}"
+              data-cover-action="{{ item.url_for_cover_additional(i) }}">
+              <img src="{{ sidecar.additional_image_url(item.fields.set, i, thumbnail=true) }}" alt="Additional image {{ i + 1 }}" style="height: 48px; width: auto;" loading="lazy">
+            </button>
+          {% endfor %}
+        </div>
+      {% endif %}
+
       <!-- Cover preview modal -->
       <div class="modal fade" id="coverPreviewModal" tabindex="-1" aria-labelledby="coverPreviewModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">

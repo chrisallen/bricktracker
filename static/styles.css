@@ -12,6 +12,13 @@
     backdrop-filter: blur(8px) contrast(60%);
 }
 
+/* When the cover is a carousel, each slide carries its own blurred backdrop
+   so every image keeps the same framed, fixed-height look as a single cover. */
+.card-img.carousel .carousel-item {
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
 .card-img img.card-last-img {
     max-height: 100px;
 }

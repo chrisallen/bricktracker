@@ -55,7 +55,9 @@
   {% endif %}
 >
   {{ card.header(item, item.fields.name, solo=solo, identifier=item.fields.set) }}
-  {{ card.image(item, solo=solo, last=last, caption=item.fields.name, alt=item.fields.set) }}
+  {# When opt-in additional images are available, fold them into the cover as a carousel. #}
+  {% set show_carousel = solo and sidecar_summary is defined and sidecar_summary and sidecar_summary.additional_images_enabled and sidecar_summary.additional_image_count and sidecar_summary.additional_image_count > 0 %}
+  {{ card.image(item, solo=solo, last=last, caption=item.fields.name, alt=item.fields.set, sidecar=(sidecar if show_carousel else none), extra_count=(sidecar_summary.additional_image_count if show_carousel else 0)) }}
   <div class="card-body border-bottom-0 {% if not solo %}p-1{% endif %}"{% if current_viewing %} style="border-color: var(--bs-border-color) !important; border-width: 1px !important;"{% endif %}>
     {# Render badges in configured order based on context (grid view vs detail view) #}
     {{ badge.render_ordered_badges(item, brickset_tags, brickset_owners, brickset_storages, brickset_purchase_locations, solo=solo, last=last, context='detail' if solo else 'grid', sidecar_summary=(sidecar_summary if sidecar_summary is defined else none)) }}

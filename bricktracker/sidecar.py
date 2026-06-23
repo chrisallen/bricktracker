@@ -339,6 +339,42 @@ class BrickSidecar(object):
             ref=ref,
         )
 
+    # Build the URL of one Brickset additional image (0-indexed) for direct use
+    # in an <img src>. Unlike box/instruction art these come from Brickset, not
+    # the BrickLink image proxy. Pass thumbnail=True for the smaller variant.
+    # Does not hit the network. Returns None when the sidecar is disabled.
+    @staticmethod
+    def additional_image_url(
+        ref: str,
+        index: int,
+        /,
+        *,
+        thumbnail: bool = False,
+    ) -> str | None:
+        if not BrickSidecar.enabled():
+            return None
+
+        url = '{base}/sets/{ref}/additional-images/{index}'.format(
+            base=BrickSidecar.base_url(),
+            ref=ref,
+            index=index,
+        )
+
+        if thumbnail:
+            url = '{url}?size=thumbnail'.format(url=url)
+
+        return url
+
+    # Fetch the raw bytes of one Brickset additional image (used when saving it
+    # as the cover). Returns None on any failure or a 404.
+    @staticmethod
+    def fetch_additional_image_bytes(ref: str, index: int, /) -> bytes | None:
+        url = BrickSidecar.additional_image_url(ref, index)
+        if url is None:
+            return None
+
+        return BrickSidecar._fetch_bytes(url)
+
     # Fetch the raw bytes of a proxied image (used when saving box art locally).
     # Returns None on any failure or a 404 (BrickLink has no such image).
     @staticmethod
@@ -347,6 +383,12 @@ class BrickSidecar(object):
         if url is None:
             return None
 
+        return BrickSidecar._fetch_bytes(url)
+
+    # Download the raw bytes at a sidecar image URL, returning None on any
+    # failure or a non-OK status (e.g. a 404 when the image does not exist).
+    @staticmethod
+    def _fetch_bytes(url: str, /) -> bytes | None:
         try:
             response = requests.get(url, timeout=BrickSidecar.timeout())
 
@@ -387,6 +429,20 @@ class BrickSidecar(object):
     @staticmethod
     def save_cover_override(set_ref: str, image_type: str, /) -> bool:
         data = BrickSidecar.fetch_image_bytes(image_type, set_ref)
+        return BrickSidecar._write_cover(set_ref, data)
+
+    # Override the local cover with one Brickset additional image (0-indexed).
+    # Same backup/restore semantics as save_cover_override.
+    @staticmethod
+    def save_cover_override_from_additional(set_ref: str, index: int, /) -> bool:
+        data = BrickSidecar.fetch_additional_image_bytes(set_ref, index)
+        return BrickSidecar._write_cover(set_ref, data)
+
+    # Write image bytes as the local cover, backing up the original Rebrickable
+    # cover once so it stays restorable. Returns False when data is None (the
+    # sidecar had no such image) or on any filesystem error.
+    @staticmethod
+    def _write_cover(set_ref: str, data: bytes | None, /) -> bool:
         if data is None:
             return False
 

@@ -115,6 +115,10 @@ CONFIG: Final[list[dict[str, Any]]] = [
     {'n': 'SIDECAR_TIMEOUT', 'd': 5, 'c': int},
     {'n': 'SIDECAR_PRICE_CACHE_HOURS', 'd': 24, 'c': int},
     {'n': 'SIDECAR_DEFAULT_COVER', 'd': 'rebrickable'},
+    # Opt-in browsing of every BrickLink image the sidecar exposes for a set
+    # (a carousel on the detail page + extra cover sources). Off keeps the
+    # plain single cover behaviour.
+    {'n': 'SIDECAR_ADDITIONAL_IMAGES', 'c': bool},
     {'n': 'SIDECAR_RETAIL_REGION', 'd': 'US'},
     {'n': 'SIDECAR_AUTO_FETCH_PRICE', 'c': bool},
     # Currency to request BrickLink market values in (e.g. EUR). Empty lets the

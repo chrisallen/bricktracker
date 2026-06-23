@@ -2,6 +2,8 @@ import logging
 from datetime import datetime, timezone
 from typing import Any
 
+from flask import current_app
+
 from .sidecar import BrickSidecar
 
 logger = logging.getLogger(__name__)
@@ -40,7 +42,11 @@ def summarize(
         'dimensions': _dimensions(data),
         'weight': _weight(data),
         'instructions_count': data.get('instructionsCount'),
-        'additional_image_count': data.get('additionalImageCount'),
+        'additional_image_count': _to_int(data.get('additionalImageCount')),
+        # Carousel + extra cover sources are opt-in; off keeps the plain cover.
+        'additional_images_enabled': bool(
+            current_app.config['SIDECAR_ADDITIONAL_IMAGES']
+        ),
         'tags': _tags(data.get('tags')),
     }
 
@@ -109,6 +115,15 @@ def _to_float(value: Any) -> float | None:
         return None
     try:
         return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _to_int(value: Any) -> int | None:
+    if value is None or value == '':
+        return None
+    try:
+        return int(value)
     except (TypeError, ValueError):
         return None
 
