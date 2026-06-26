@@ -60,6 +60,21 @@
         <a class="list-group-item list-group-item-action" href="{{ url_for('admin.admin', open_tag=true) }}"><i class="ri-settings-4-line"></i> Manage the set tags</a>
       </div>
     {{ accordion.footer() }}
+    {{ accordion.header('Custom fields', 'custom-field', 'set-management', icon='edit-line') }}
+      {% if brickset_custom_fields | length %}
+        <div class="row row-cols-1 g-2 pb-2">
+          {% for custom_field in brickset_custom_fields %}
+            <div class="col-12">
+              {{ form.input(custom_field.fields.name, item.fields.id, custom_field.as_dataset(), custom_field.url_for_set_state(item.fields.id), item.fields[custom_field.as_column()], icon=('calendar-line' if custom_field.fields.type == 'date' else ('hashtag' if custom_field.fields.type == 'number' else 'edit-line')), date=(custom_field.fields.type == 'date')) }}
+            </div>
+          {% endfor %}
+        </div>
+        <hr>
+      {% else %}
+        <p class="text-center"><i class="ri-error-warning-line"></i> No custom field found.</p>
+      {% endif %}
+      <a href="{{ url_for('admin.admin', open_custom_field=true) }}" class="btn btn-primary" role="button"><i class="ri-settings-4-line"></i> Manage the custom fields</a>
+    {{ accordion.footer() }}
     {{ accordion.header('Data', 'data', 'set-management', icon='database-2-line') }}
       <a href="{{ item.url_for_refresh() }}" class="btn btn-primary" role="button"><i class="ri-refresh-line"></i> Refresh the set data</a>
     {{ accordion.footer() }}

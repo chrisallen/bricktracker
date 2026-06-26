@@ -6,6 +6,7 @@ from flask import url_for
 from .exceptions import ErrorException, NotFoundException
 from .fields import BrickRecordFields
 from .record_list import BrickRecordList
+from .set_custom_field import BrickSetCustomField
 from .set_owner import BrickSetOwner
 from .set_purchase_location import BrickSetPurchaseLocation
 from .set_status import BrickSetStatus
@@ -17,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 T = TypeVar(
     'T',
+    BrickSetCustomField,
     BrickSetOwner,
     BrickSetPurchaseLocation,
     BrickSetStatus,

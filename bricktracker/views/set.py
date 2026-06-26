@@ -23,6 +23,7 @@ from ..rebrickable_set import RebrickableSet
 from ..set import BrickSet
 from ..sidecar import BrickSidecar
 from ..sidecar_set import summarize as sidecar_summarize
+from ..set_custom_field_list import BrickSetCustomFieldList
 from ..set_list import BrickSetList, set_metadata_lists
 from ..set_owner_list import BrickSetOwnerList
 from ..set_purchase_location_list import BrickSetPurchaseLocationList
@@ -227,6 +228,19 @@ def update_tag(*, id: str, metadata_id: str) -> Response:
     state = tag.update_set_state(brickset, json=request.json)
 
     return jsonify({'value': state})
+
+
+# Change the value of a custom field
+@set_page.route('/<id>/custom_field/<metadata_id>', methods=['POST'])
+@login_required
+@exception_handler(__file__, json=True)
+def update_custom_field(*, id: str, metadata_id: str) -> Response:
+    brickset = BrickSet().select_light(id)
+    custom_field = BrickSetCustomFieldList.get(metadata_id)
+
+    value = custom_field.update_value(brickset, json=request.json)
+
+    return jsonify({'value': value})
 
 
 # Ask for deletion of a set

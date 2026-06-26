@@ -1,0 +1,65 @@
+{% import 'macro/accordion.html' as accordion %}
+
+{{ accordion.header('Set custom fields', 'custom_field', 'metadata', expanded=open_custom_field, icon='edit-line', class='p-0') }}
+{% if custom_field_error %}<div class="alert alert-danger m-2" role="alert"><strong>Error:</strong> {{ custom_field_error }}.</div>{% endif %}
+<ul class="list-group list-group-flush">
+  {% if metadata_custom_fields | length %}
+    {% for custom_field in metadata_custom_fields %}
+      <li class="list-group-item">
+        <form action="{{ url_for('admin_custom_field.rename', id=custom_field.fields.id) }}" method="post" class="row row-cols-lg-auto g-3 align-items-center">
+          <div class="col-12 flex-grow-1">
+            <label class="visually-hidden" for="name-{{ custom_field.fields.id }}">Name</label>
+            <div class="input-group">
+              <div class="input-group-text">Name</div>
+              <input type="text" class="form-control" id="name-{{ custom_field.fields.id }}" name="name" value="{{ custom_field.fields.name }}">
+              <button type="submit" class="btn btn-primary"><i class="ri-edit-line"></i> Rename</button>
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="input-group">
+              <div class="input-group-text"><i class="ri-shape-line"></i> Type</div>
+              <select class="form-select" id="type-{{ custom_field.fields.id }}"
+                data-changer-id="{{ custom_field.fields.id }}" data-changer-prefix="type" data-changer-url="{{ url_for('admin_custom_field.update_field', id=custom_field.fields.id, name='type') }}"
+                autocomplete="off">
+                <option value="text" {% if custom_field.fields.type == 'text' %}selected{% endif %}>Text</option>
+                <option value="number" {% if custom_field.fields.type == 'number' %}selected{% endif %}>Number</option>
+                <option value="date" {% if custom_field.fields.type == 'date' %}selected{% endif %}>Date</option>
+              </select>
+              <span id="status-type-{{ custom_field.fields.id }}" class="input-group-text ri-save-line px-1"></span>
+            </div>
+          </div>
+          <div class="col-12">
+            <a href="{{ url_for('admin_custom_field.delete', id=custom_field.fields.id) }}" class="btn btn-danger" role="button"><i class="ri-delete-bin-2-line"></i> Delete</a>
+          </div>
+        </form>
+      </li>
+    {% endfor %}
+  {% else %}
+    <li class="list-group-item text-center"><i class="ri-error-warning-line"></i> No custom field found.</li>
+  {% endif %}
+  <li class="list-group-item">
+    <form action="{{ url_for('admin_custom_field.add') }}" method="post" class="row row-cols-lg-auto g-3 align-items-center">
+      <div class="col-12 flex-grow-1">
+        <label class="visually-hidden" for="name">Name</label>
+        <div class="input-group">
+          <div class="input-group-text">Name</div>
+          <input type="text" class="form-control" id="name" name="name" value="">
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="input-group">
+          <div class="input-group-text"><i class="ri-shape-line"></i> Type</div>
+          <select class="form-select" id="type" name="type" autocomplete="off">
+            <option value="text" selected>Text</option>
+            <option value="number">Number</option>
+            <option value="date">Date</option>
+          </select>
+        </div>
+      </div>
+      <div class="col-12">
+        <button type="submit" class="btn btn-primary"><i class="ri-add-circle-line"></i> Add</button>
+      </div>
+    </form>
+  </li>
+</ul>
+{{ accordion.footer() }}

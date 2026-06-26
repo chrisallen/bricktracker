@@ -32,6 +32,11 @@ LEFT JOIN "bricktracker_set_tags"
 ON "bricktracker_sets"."id" IS NOT DISTINCT FROM "bricktracker_set_tags"."id"
 {% endif %}
 
+{% if custom_fields %}
+LEFT JOIN "bricktracker_set_custom_fields"
+ON "bricktracker_sets"."id" IS NOT DISTINCT FROM "bricktracker_set_custom_fields"."id"
+{% endif %}
+
 -- LEFT JOIN + SELECT to avoid messing the total
 LEFT JOIN (
     SELECT

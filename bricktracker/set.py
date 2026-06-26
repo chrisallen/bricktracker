@@ -10,6 +10,7 @@ from .exceptions import NotFoundException, DatabaseException, ErrorException
 from .minifigure_list import BrickMinifigureList
 from .part_list import BrickPartList
 from .rebrickable_set import RebrickableSet
+from .set_custom_field_list import BrickSetCustomFieldList
 from .set_owner_list import BrickSetOwnerList
 from .set_purchase_location_list import BrickSetPurchaseLocationList
 from .set_status_list import BrickSetStatusList
@@ -334,6 +335,7 @@ class BrickSet(RebrickableSet):
 
         # Load from database
         if not self.select(
+            custom_fields=BrickSetCustomFieldList.as_columns(),
             owners=BrickSetOwnerList.as_columns(),
             statuses=BrickSetStatusList.as_columns(all=True),
             tags=BrickSetTagList.as_columns(),

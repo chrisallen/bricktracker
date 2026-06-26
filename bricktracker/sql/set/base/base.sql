@@ -23,6 +23,9 @@ SELECT
     {% block statuses %}
         {% if statuses %}{{ statuses }},{% endif %}
     {% endblock %}
+    {% block custom_fields %}
+        {% if custom_fields %}{{ custom_fields }},{% endif %}
+    {% endblock %}
     {% block total_missing %}
     NULL AS "total_missing", -- dummy for order: total_missing
     {% endblock %}

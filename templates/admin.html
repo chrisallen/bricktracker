@@ -20,6 +20,8 @@
             {% include 'admin/owner/delete.html' %}
             {% elif delete_purchase_location %}
             {% include 'admin/purchase_location/delete.html' %}
+            {% elif delete_custom_field %}
+            {% include 'admin/custom_field/delete.html' %}
             {% elif delete_status %}
             {% include 'admin/status/delete.html' %}
             {% elif delete_storage %}
@@ -52,6 +54,7 @@
                 {% include 'admin/status.html' %}
                 {% include 'admin/storage.html' %}
                 {% include 'admin/tag.html' %}
+                {% include 'admin/custom_field.html' %}
               {{ accordion.footer() }}
               {% include 'admin/refresh.html' %}
               {% include 'admin/database.html' %}

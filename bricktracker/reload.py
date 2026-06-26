@@ -1,5 +1,6 @@
 from .instructions_list import BrickInstructionsList
 from .retired_list import BrickRetiredList
+from .set_custom_field_list import BrickSetCustomFieldList
 from .set_owner_list import BrickSetOwnerList
 from .set_purchase_location_list import BrickSetPurchaseLocationList
 from .set_status_list import BrickSetStatusList
@@ -30,6 +31,9 @@ def reload() -> None:
 
         # Reload the set tags
         BrickSetTagList.new(force=True)
+
+        # Reload the set custom fields
+        BrickSetCustomFieldList.new(force=True)
 
         # Reload retired sets
         BrickRetiredList(force=True)

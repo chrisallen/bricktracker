@@ -11,6 +11,8 @@ from ..exceptions import exception_handler
 from ...instructions_list import BrickInstructionsList
 from ...rebrickable_image import RebrickableImage
 from ...retired_list import BrickRetiredList
+from ...set_custom_field import BrickSetCustomField
+from ...set_custom_field_list import BrickSetCustomFieldList
 from ...set_owner import BrickSetOwner
 from ...set_owner_list import BrickSetOwnerList
 from ...set_purchase_location import BrickSetPurchaseLocation
@@ -129,6 +131,7 @@ def admin() -> str:
     database_upgrade_needed: bool = False
     database_version: int = -1
     instructions: BrickInstructionsList | None = None
+    metadata_custom_fields: list[BrickSetCustomField] = []
     metadata_owners: list[BrickSetOwner] = []
     metadata_purchase_locations: list[BrickSetPurchaseLocation] = []
     metadata_statuses: list[BrickSetStatus] = []
@@ -148,6 +151,7 @@ def admin() -> str:
 
         instructions = BrickInstructionsList()
 
+        metadata_custom_fields = BrickSetCustomFieldList.list()
         metadata_owners = BrickSetOwnerList.list()
         metadata_purchase_locations = BrickSetPurchaseLocationList.list()
         metadata_statuses = BrickSetStatusList.list(all=True)
@@ -176,6 +180,7 @@ def admin() -> str:
     open_image = request.args.get('open_image', None)
     open_instructions = request.args.get('open_instructions', None)
     open_logout = request.args.get('open_logout', None)
+    open_custom_field = request.args.get('open_custom_field', None)
     open_metadata = request.args.get('open_metadata', None)
     open_owner = request.args.get('open_owner', None)
     open_purchase_location = request.args.get('open_purchase_location', None)
@@ -187,6 +192,7 @@ def admin() -> str:
 
     open_metadata = (
         open_metadata or
+        open_custom_field or
         open_owner or
         open_purchase_location or
         open_status or
@@ -215,6 +221,7 @@ def admin() -> str:
     open_value = should_expand('value', request.args.get('open_value', None))
 
     # Metadata sub-sections
+    open_custom_field = should_expand('custom_field', open_custom_field)
     open_owner = should_expand('owner', open_owner)
     open_purchase_location = should_expand('purchase_location', open_purchase_location)
     open_status = should_expand('status', open_status)
@@ -224,6 +231,7 @@ def admin() -> str:
     # Recalculate metadata section based on sub-sections or direct config
     open_metadata = (
         should_expand('metadata', open_metadata) or
+        open_custom_field or
         open_owner or
         open_purchase_location or
         open_status or
@@ -267,6 +275,7 @@ def admin() -> str:
         database_upgrade_needed=database_upgrade_needed,
         database_version=database_version,
         instructions=instructions,
+        metadata_custom_fields=metadata_custom_fields,
         metadata_owners=metadata_owners,
         metadata_purchase_locations=metadata_purchase_locations,
         metadata_statuses=metadata_statuses,
@@ -280,6 +289,7 @@ def admin() -> str:
         open_image=open_image,
         open_instructions=open_instructions,
         open_logout=open_logout,
+        open_custom_field=open_custom_field,
         open_metadata=open_metadata,
         open_owner=open_owner,
         open_purchase_location=open_purchase_location,

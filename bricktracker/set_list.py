@@ -3,6 +3,7 @@ from typing import Any, Self, Union
 from flask import current_app
 
 from .record_list import BrickRecordList
+from .set_custom_field_list import BrickSetCustomFieldList
 from .set_owner import BrickSetOwner
 from .set_owner_list import BrickSetOwnerList
 from .set_purchase_location import BrickSetPurchaseLocation
@@ -705,6 +706,7 @@ def set_metadata_lists(
     ]
 ]:
     return {
+        'brickset_custom_fields': BrickSetCustomFieldList.list(),
         'brickset_owners': BrickSetOwnerList.list(),
         'brickset_purchase_locations': BrickSetPurchaseLocationList.list(as_class=as_class),  # noqa: E501
         'brickset_storages': BrickSetStorageList.list(as_class=as_class),
