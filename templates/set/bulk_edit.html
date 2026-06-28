@@ -1,0 +1,114 @@
+{# Mass-edit UI (Feature 4). Rendered server-side with the full metadata lists
+   so the offcanvas form has every editable field. All logic (selection,
+   shared-vs-varies detection, tri-state, apply) lives in sets-bulk-edit.js. #}
+
+<!-- Sticky bottom bar shown while in bulk-select mode -->
+<div id="bulk-select-bar" class="bulk-select-bar shadow-lg" data-bulk-edit-url="{{ url_for('set.bulk_edit') }}">
+  <div class="container-fluid d-flex flex-wrap align-items-center gap-2 py-2">
+    <span class="fw-bold"><span id="bulk-select-count">0</span> selected</span>
+    <div class="ms-auto d-flex flex-wrap gap-2">
+      <button type="button" class="btn btn-sm btn-outline-secondary" id="bulk-select-all"><i class="ri-checkbox-multiple-line"></i> Select all visible</button>
+      <button type="button" class="btn btn-sm btn-outline-secondary" id="bulk-select-clear"><i class="ri-close-circle-line"></i> Clear</button>
+      <button type="button" class="btn btn-sm btn-primary" id="bulk-edit-open" disabled><i class="ri-edit-line"></i> Edit selected</button>
+      <button type="button" class="btn btn-sm btn-outline-danger" id="bulk-select-exit"><i class="ri-logout-box-line"></i> Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- Bulk edit panel -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="bulk-edit-panel" aria-labelledby="bulk-edit-panel-label" data-bs-scroll="true" data-bs-backdrop="true">
+  <div class="offcanvas-header border-bottom">
+    <h5 class="offcanvas-title" id="bulk-edit-panel-label">Edit <span id="bulk-edit-count">0</span> sets</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body">
+    <p class="text-muted small">
+      Only fields you actually change are applied. Fields where the selected sets
+      differ show <em>varies</em> and stay untouched unless you edit them.
+    </p>
+
+    {# --- Value fields --- #}
+    <div class="mb-3">
+      <label class="form-label" for="bulk-purchase-price">Purchase price</label>
+      <input type="number" step="0.01" class="form-control bulk-control" id="bulk-purchase-price" data-bulk-field="purchase_price" data-card-attr="purchase-price">
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="bulk-purchase-date">Purchase date</label>
+      <input type="date" class="form-control bulk-control" id="bulk-purchase-date" data-bulk-field="purchase_date" data-card-attr="purchase-date">
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="bulk-storage">Storage</label>
+      <select class="form-select bulk-control" id="bulk-storage" data-bulk-field="storage" data-card-attr="storage">
+        <option value="">-- No storage --</option>
+        {% for storage in brickset_storages %}
+          <option value="{{ storage.fields.id }}">{{ storage.fields.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="bulk-purchase-location">Purchase location</label>
+      <select class="form-select bulk-control" id="bulk-purchase-location" data-bulk-field="purchase_location" data-card-attr="purchase-location">
+        <option value="">-- No purchase location --</option>
+        {% for location in brickset_purchase_locations %}
+          <option value="{{ location.fields.id }}">{{ location.fields.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    {# --- Custom fields --- #}
+    {% if brickset_custom_fields | length %}
+      <hr>
+      <h6 class="text-muted">Custom fields</h6>
+      {% for custom_field in brickset_custom_fields %}
+        <div class="mb-3">
+          <label class="form-label" for="bulk-cf-{{ custom_field.fields.id }}">{{ custom_field.fields.name }}</label>
+          {% if custom_field.fields.type == 'number' %}
+            <input type="number" step="any" class="form-control bulk-control" id="bulk-cf-{{ custom_field.fields.id }}" data-bulk-field="custom_field" data-cf-id="{{ custom_field.fields.id }}" data-card-attr="{{ custom_field.as_dataset() }}">
+          {% elif custom_field.fields.type == 'date' %}
+            <input type="date" class="form-control bulk-control" id="bulk-cf-{{ custom_field.fields.id }}" data-bulk-field="custom_field" data-cf-id="{{ custom_field.fields.id }}" data-cf-date="true" data-card-attr="{{ custom_field.as_dataset() }}">
+          {% else %}
+            <input type="text" class="form-control bulk-control" id="bulk-cf-{{ custom_field.fields.id }}" data-bulk-field="custom_field" data-cf-id="{{ custom_field.fields.id }}" data-card-attr="{{ custom_field.as_dataset() }}">
+          {% endif %}
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    {# --- Tri-state boolean metadata --- #}
+    {% if brickset_tags | length %}
+      <hr>
+      <h6 class="text-muted">Tags</h6>
+      {% for tag in brickset_tags %}
+        <div class="form-check">
+          <input class="form-check-input bulk-control bulk-tristate" type="checkbox" id="bulk-tag-{{ tag.fields.id }}" data-bulk-field="tag" data-meta-id="{{ tag.fields.id }}" data-card-attr="{{ tag.as_dataset() }}">
+          <label class="form-check-label" for="bulk-tag-{{ tag.fields.id }}">{{ tag.fields.name }}</label>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    {% if brickset_statuses | length %}
+      <hr>
+      <h6 class="text-muted">Statuses</h6>
+      {% for status in brickset_statuses %}
+        <div class="form-check">
+          <input class="form-check-input bulk-control bulk-tristate" type="checkbox" id="bulk-status-{{ status.fields.id }}" data-bulk-field="status" data-meta-id="{{ status.fields.id }}" data-card-attr="{{ status.as_dataset() }}">
+          <label class="form-check-label" for="bulk-status-{{ status.fields.id }}">{{ status.fields.name }}</label>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    {% if brickset_owners | length %}
+      <hr>
+      <h6 class="text-muted">Owners</h6>
+      {% for owner in brickset_owners %}
+        <div class="form-check">
+          <input class="form-check-input bulk-control bulk-tristate" type="checkbox" id="bulk-owner-{{ owner.fields.id }}" data-bulk-field="owner" data-meta-id="{{ owner.fields.id }}" data-card-attr="{{ owner.as_dataset() }}">
+          <label class="form-check-label" for="bulk-owner-{{ owner.fields.id }}">{{ owner.fields.name }}</label>
+        </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+  <div class="offcanvas-footer border-top p-3 d-flex gap-2">
+    <button type="button" class="btn btn-secondary flex-fill" data-bs-dismiss="offcanvas">Cancel</button>
+    <button type="button" class="btn btn-primary flex-fill" id="bulk-edit-apply"><i class="ri-save-line"></i> Apply changes</button>
+  </div>
+</div>

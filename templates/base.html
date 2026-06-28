@@ -190,6 +190,9 @@
     {% endif %}
     {% if request.endpoint == 'set.list' %}
     <script src="{{ url_for('static', filename='scripts/sets.js') }}"></script>
+    {% if g.login.is_authenticated() %}
+    <script src="{{ url_for('static', filename='scripts/sets-bulk-edit.js') }}"></script>
+    {% endif %}
     {% endif %}
     {% if request.endpoint == 'set.details' %}
     <script src="{{ url_for('static', filename='scripts/parts-table-filter.js') }}"></script>

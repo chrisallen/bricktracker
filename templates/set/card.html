@@ -52,6 +52,15 @@
         {% endif %}
       {% endwith %}
     {% endfor %}
+    {# Custom field values for bulk-edit read (only emitted when set). The attr
+       absence means "empty/varies" to the bulk editor. #}
+    {% for custom_field in brickset_custom_fields %}
+      {% with value=item.fields[custom_field.as_column()] %}
+        {% if value is not none and value != '' %}
+          data-{{ custom_field.as_dataset() }}="{{ value }}"
+        {% endif %}
+      {% endwith %}
+    {% endfor %}
   {% endif %}
 >
   {{ card.header(item, item.fields.name, solo=solo, identifier=item.fields.set) }}

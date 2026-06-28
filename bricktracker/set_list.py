@@ -53,6 +53,7 @@ class BrickSetList(BrickRecordList[BrickSet]):
     def all(self, /) -> Self:
         # Load the sets from the database with metadata context for filtering
         filter_context = {
+            'custom_fields': BrickSetCustomFieldList.as_columns(),
             'owners': BrickSetOwnerList.as_columns(),
             'statuses': BrickSetStatusList.as_columns(),
             'tags': BrickSetTagList.as_columns(),
@@ -65,6 +66,7 @@ class BrickSetList(BrickRecordList[BrickSet]):
     def all_consolidated(self, /) -> Self:
         # Load the sets from the database using consolidated query with metadata context
         filter_context = {
+            'custom_fields_dict': BrickSetCustomFieldList.as_column_mapping(),
             'owners_dict': BrickSetOwnerList.as_column_mapping(),
             'statuses_dict': BrickSetStatusList.as_column_mapping(),
             'tags_dict': BrickSetTagList.as_column_mapping(),
@@ -118,9 +120,11 @@ class BrickSetList(BrickRecordList[BrickSet]):
             'tag_filter': tag_filter,
             'year_filter': year_filter,
             'duplicate_filter': duplicate_filter,
+            'custom_fields': BrickSetCustomFieldList.as_columns(),
             'owners': BrickSetOwnerList.as_columns(),
             'statuses': BrickSetStatusList.as_columns(),
             'tags': BrickSetTagList.as_columns(),
+            'custom_fields_dict': BrickSetCustomFieldList.as_column_mapping(),
             'owners_dict': BrickSetOwnerList.as_column_mapping(),
             'statuses_dict': BrickSetStatusList.as_column_mapping(),
             'tags_dict': BrickSetTagList.as_column_mapping(),

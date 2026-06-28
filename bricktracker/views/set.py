@@ -31,6 +31,7 @@ from ..set_status_list import BrickSetStatusList
 from ..set_storage_list import BrickSetStorageList
 from ..set_tag_list import BrickSetTagList
 from ..socket import MESSAGES
+from ..sql import BrickSQL
 
 logger = logging.getLogger(__name__)
 
@@ -241,6 +242,88 @@ def update_custom_field(*, id: str, metadata_id: str) -> Response:
     value = custom_field.update_value(brickset, json=request.json)
 
     return jsonify({'value': value})
+
+
+# Mass-edit metadata across several selected sets in one request. Only the
+# fields the user actually touched are present in "changes"; tri-state booleans
+# arrive as explicit true/false, value fields as a string ('' clears).
+@set_page.route('/bulk/edit', methods=['POST'])
+@login_required
+@exception_handler(__file__, json=True)
+def bulk_edit() -> Response:
+    payload = request.json or {}
+    set_ids = payload.get('set_ids', [])
+    changes = payload.get('changes', {})
+
+    if not set_ids:
+        raise ErrorException('No sets were selected')
+
+    tags = changes.get('tags', {})
+    statuses = changes.get('statuses', {})
+    owners = changes.get('owners', {})
+    custom_fields = changes.get('custom_fields', {})
+
+    has_storage = 'storage' in changes
+    has_purchase_location = 'purchase_location' in changes
+    has_purchase_date = 'purchase_date' in changes
+    has_purchase_price = 'purchase_price' in changes
+
+    for set_id in set_ids:
+        brickset = BrickSet().select_light(set_id)
+
+        # Boolean metadata: defer so the batch is grouped (committed below).
+        for metadata_id, state in tags.items():
+            BrickSetTagList.get(metadata_id).update_set_state(
+                brickset, state=state, commit=False
+            )
+        for metadata_id, state in statuses.items():
+            BrickSetStatusList.get(metadata_id).update_set_state(
+                brickset, state=state, commit=False
+            )
+        for metadata_id, state in owners.items():
+            BrickSetOwnerList.get(metadata_id).update_set_state(
+                brickset, state=state, commit=False
+            )
+
+        # Value metadata (each commits on its own).
+        if has_storage:
+            storage = BrickSetStorageList.get(
+                changes.get('storage', ''), allow_none=True
+            )
+            storage.update_set_value(brickset, value=storage.fields.id)
+
+        if has_purchase_location:
+            purchase_location = BrickSetPurchaseLocationList.get(
+                changes.get('purchase_location', ''), allow_none=True
+            )
+            purchase_location.update_set_value(
+                brickset, value=purchase_location.fields.id
+            )
+
+        if has_purchase_date:
+            brickset.update_purchase_date(
+                {'value': changes.get('purchase_date', '')}
+            )
+
+        if has_purchase_price:
+            brickset.update_purchase_price(
+                {'value': changes.get('purchase_price', '')}
+            )
+
+        for metadata_id, value in custom_fields.items():
+            BrickSetCustomFieldList.get(metadata_id).update_value(
+                brickset, value=value
+            )
+
+    # Flush any deferred boolean updates that did not ride along with a
+    # value update's commit.
+    BrickSQL().commit()
+
+    logger.info('Bulk edit applied to {count} set(s)'.format(
+        count=len(set_ids),
+    ))
+
+    return jsonify({'updated': len(set_ids)})
 
 
 # Ask for deletion of a set

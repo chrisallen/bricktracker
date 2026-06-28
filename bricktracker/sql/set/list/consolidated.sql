@@ -43,6 +43,15 @@ SELECT
             {% endfor %}
         {% endif %}
     {% endblock %}
+    {% block custom_fields %}
+        {% if custom_fields_dict %}
+            {% for column, uuid in custom_fields_dict.items() %}
+                -- Representative value for the group (shared value when all
+                -- instances agree; used for bulk-edit read across instances).
+                , MAX("bricktracker_set_custom_fields"."{{ column }}") AS "{{ column }}"
+            {% endfor %}
+        {% endif %}
+    {% endblock %}
 FROM "bricktracker_sets"
 
 INNER JOIN "rebrickable_sets"
@@ -82,6 +91,11 @@ ON "bricktracker_sets"."id" IS NOT DISTINCT FROM "bricktracker_set_statuses"."id
 {% if tags_dict %}
 LEFT JOIN "bricktracker_set_tags"
 ON "bricktracker_sets"."id" IS NOT DISTINCT FROM "bricktracker_set_tags"."id"
+{% endif %}
+
+{% if custom_fields_dict %}
+LEFT JOIN "bricktracker_set_custom_fields"
+ON "bricktracker_sets"."id" IS NOT DISTINCT FROM "bricktracker_set_custom_fields"."id"
 {% endif %}
 
 {% block where %}

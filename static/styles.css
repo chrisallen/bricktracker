@@ -353,3 +353,54 @@
 tr.parts-filtered-out {
     display: none;
 }
+
+/* --- Mass-edit (Feature 4) --- */
+.bulk-select-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1040;
+    display: none;
+    background-color: var(--bs-body-bg);
+    border-top: 1px solid var(--bs-border-color);
+}
+
+.bulk-select-bar.show {
+    display: block;
+}
+
+/* Keep the sticky bar from covering the last row of cards */
+body.bulk-select-mode {
+    padding-bottom: 4.5rem;
+}
+
+body.bulk-select-mode #grid .card {
+    cursor: pointer;
+}
+
+.bulk-select-check {
+    display: none;
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    z-index: 5;
+}
+
+.bulk-select-check .form-check-input {
+    width: 1.4rem;
+    height: 1.4rem;
+}
+
+body.bulk-select-mode .bulk-select-check {
+    display: block;
+}
+
+#grid .card.bulk-selected {
+    outline: 3px solid var(--bs-primary);
+    outline-offset: -3px;
+}
+
+.bulk-control.bulk-touched {
+    border-color: var(--bs-primary);
+}

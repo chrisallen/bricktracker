@@ -27,6 +27,11 @@
           <i class="ri-stack-line"></i> Duplicates
         </button>
         {% endif %}
+        {% if g.login.is_authenticated() %}
+        <button class="btn btn-outline-primary" type="button" id="bulk-select-toggle" title="Select multiple sets to edit at once">
+          <i class="ri-checkbox-multiple-line"></i> Select
+        </button>
+        {% endif %}
       </div>
     </div>
   </div>
@@ -166,6 +171,10 @@
     </div>
   {% endfor %}
   </div>
+  {% endif %}
+
+  {% if g.login.is_authenticated() %}
+  {% include 'set/bulk_edit.html' %}
   {% endif %}
 
 </div>
