@@ -404,3 +404,15 @@ body.bulk-select-mode .bulk-select-check {
 .bulk-control.bulk-touched {
     border-color: var(--bs-primary);
 }
+
+/* Brickset set description: trim the trailing margin so the rendered
+   <p>/<ul> blocks sit flush inside the alert box. */
+.sidecar-description > :last-child {
+    margin-bottom: 0;
+}
+
+.sidecar-description ul,
+.sidecar-description ol {
+    padding-left: 1.2rem;
+    margin-bottom: 0.5rem;
+}

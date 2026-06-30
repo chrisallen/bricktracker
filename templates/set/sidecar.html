@@ -7,8 +7,15 @@
   {# Enrichment badges (retired / MSRP / value / dimensions / weight) are rendered
      by macro/badge.html via BADGE_ORDER_DETAIL, so they are not repeated here. #}
 
+  {# --- Designer (web-scraped; the API does not expose it) --- #}
+  {% if s.designer %}
+    <div class="card-body border-bottom-0 pt-0">
+      <div class="small text-muted"><i class="ri-pencil-ruler-2-line me-1"></i>Designer: {{ s.designer }}</div>
+    </div>
+  {% endif %}
+
   {# --- Price comparison: paid / retail / worth now --- #}
-  {% if p.paid is not none or p.msrp is not none or p.has_market %}
+  {% if p.paid is not none or p.msrp is not none or p.msrp_inflated is not none or p.has_market %}
     <div class="card-body border-bottom-0 pt-0">
       <div class="border rounded p-2">
         <div class="fw-bold small mb-1"><i class="ri-scales-line me-1"></i>Price comparison</div>
@@ -22,6 +29,12 @@
               <td>Retail (MSRP)</td>
               <td class="text-end">{% if p.msrp is not none %}{{ '%.2f' | format(p.msrp) }} {{ p.msrp_currency }}{% else %}<span class="text-muted">—</span>{% endif %}</td>
             </tr>
+            {% if p.msrp_inflated is not none %}
+            <tr>
+              <td>Retail (inflated)<i class="ri-information-line ms-1 text-muted" title="RRP adjusted for inflation"></i></td>
+              <td class="text-end text-muted">{{ '%.2f' | format(p.msrp_inflated) }} {{ p.msrp_inflated_currency }}</td>
+            </tr>
+            {% endif %}
             <tr>
               <td>Worth now (new)</td>
               <td class="text-end">{% if p.market_new is not none %}{{ '%.2f' | format(p.market_new) }} {{ p.market_currency }}{% else %}<span class="text-muted">—</span>{% endif %}</td>
@@ -64,7 +77,17 @@
     <div class="card-body border-bottom-0 pt-0">
       <div class="alert alert-secondary mb-0" role="alert">
         <div class="fw-bold small mb-1"><i class="ri-information-line me-1"></i>About this set</div>
-        <div class="small">{{ s.description }}</div>
+        <div class="small sidecar-description">{{ s.description }}</div>
+      </div>
+    </div>
+  {% endif %}
+
+  {# --- Brickset Notes (web-scraped; trivia / variants / packaging quirks). --- #}
+  {% if s.notes %}
+    <div class="card-body border-bottom-0 pt-0">
+      <div class="alert alert-light border mb-0" role="alert">
+        <div class="fw-bold small mb-1"><i class="ri-sticky-note-line me-1"></i>Notes</div>
+        <div class="small sidecar-description">{{ s.notes }}</div>
       </div>
     </div>
   {% endif %}

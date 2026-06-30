@@ -1,12 +1,24 @@
 import logging
+import re
 from datetime import datetime, timezone
+from html.parser import HTMLParser
 from typing import Any
 
 from flask import current_app
+from markupsafe import Markup, escape
 
 from .sidecar import BrickSidecar
 
 logger = logging.getLogger(__name__)
+
+# Brickset descriptions ship as HTML (<p>, <ul>, <li>, <i>, ...). Keep only a
+# small allowlist of formatting tags and drop every attribute so the markup can
+# be rendered as-is without opening an XSS hole.
+_ALLOWED_TAGS = frozenset({
+    'p', 'br', 'ul', 'ol', 'li', 'b', 'strong', 'i', 'em', 'u',
+    'h3', 'h4', 'h5', 'h6', 'small', 'sub', 'sup',
+})
+_VOID_TAGS = frozenset({'br'})
 
 
 # Build a normalized, template-friendly summary of the sidecar data for a set:
@@ -33,12 +45,14 @@ def summarize(
         return None
 
     summary: dict[str, Any] = {
-        'description': _clean_str(data.get('description')),
+        'description': _description(data.get('description')),
         'pieces': data.get('pieces'),
         'minifigs': data.get('minifigs'),
         'year': data.get('year'),
         'theme': _clean_str(data.get('theme')),
         'subtheme': _clean_str(data.get('subtheme')),
+        # Set designer(s); web-scraped, the API does not expose it.
+        'designer': _clean_str(data.get('designer')),
         'dimensions': _dimensions(data),
         'weight': _weight(data),
         'instructions_count': data.get('instructionsCount'),
@@ -48,6 +62,9 @@ def summarize(
             current_app.config['SIDECAR_ADDITIONAL_IMAGES']
         ),
         'tags': _tags(data.get('tags')),
+        # Brickset "Notes" blurb (web-scraped; contains light HTML). Sanitised
+        # like the description so it renders safely.
+        'notes': _description(data.get('notes')),
     }
 
     # Retired status from the exit date.
@@ -75,6 +92,10 @@ def summarize(
         'paid': paid,
         'msrp': msrp,
         'msrp_currency': BrickSidecar.retail_currency(),
+        # Inflation-adjusted RRP, web-scraped by the sidecar (single value in
+        # its own currency, independent of the configured retail region).
+        'msrp_inflated': _to_float(data.get('rrpInflated')),
+        'msrp_inflated_currency': _clean_str(data.get('rrpInflatedCurrency')),
         'market_new': market_new,
         'market_used': market_used,
         'market_min': _to_float(price_payload.get('new_min')) if price_payload else None,  # noqa: E501
@@ -108,6 +129,46 @@ def _clean_str(value: Any) -> str | None:
         return None
     text = str(value).strip()
     return text or None
+
+
+# Rebuild an HTML fragment keeping only the allowlisted formatting tags, with
+# all attributes stripped and all text escaped. convert_charrefs=True turns
+# entities (&reg;, &#39;, ...) into real characters before they reach the data
+# handler, so they render correctly.
+class _DescriptionSanitizer(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.parts: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: Any) -> None:
+        if tag in _ALLOWED_TAGS:
+            self.parts.append(f'<{tag}>')
+
+    def handle_startendtag(self, tag: str, attrs: Any) -> None:
+        if tag in _ALLOWED_TAGS:
+            self.parts.append(f'<{tag}>')
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag in _ALLOWED_TAGS and tag not in _VOID_TAGS:
+            self.parts.append(f'</{tag}>')
+
+    def handle_data(self, data: str) -> None:
+        self.parts.append(str(escape(data)))
+
+
+def _description(value: Any) -> Markup | None:
+    text = _clean_str(value)
+    if text is None:
+        return None
+    parser = _DescriptionSanitizer()
+    parser.feed(text)
+    parser.close()
+    cleaned = ''.join(parser.parts)
+    # Brickset pads descriptions with empty spacer paragraphs (<p>&nbsp;</p>);
+    # drop those so the blocks sit flush instead of leaving big gaps. \s also
+    # matches the &nbsp; (\xa0) the parser leaves behind.
+    cleaned = re.sub(r'<p>\s*</p>', '', cleaned).strip()
+    return Markup(cleaned) if cleaned else None
 
 
 def _to_float(value: Any) -> float | None:
