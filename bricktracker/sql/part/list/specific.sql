@@ -12,4 +12,7 @@ IFNULL("combined"."damaged", 0) AS "total_damaged",
 {% block where %}
 WHERE "combined"."id" IS NOT DISTINCT FROM :id
 AND "combined"."figure" IS NOT DISTINCT FROM :figure
+{% if skip_spare_parts %}
+AND "combined"."spare" = 0
+{% endif %}
 {% endblock %}

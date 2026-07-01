@@ -65,6 +65,10 @@ INNER JOIN "rebrickable_parts"
 ON "parts_combined"."part" = "rebrickable_parts"."part"
 AND "parts_combined"."color" = "rebrickable_parts"."color_id"
 
+{% if skip_spare_parts %}
+WHERE "parts_combined"."spare" = 0
+{% endif %}
+
 GROUP BY
     "parts_combined"."part",
     "parts_combined"."color",
