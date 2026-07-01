@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.5
+
+### Enhancements
+
+- **BrickData integration**: New BrickData companion service that enriches set detail pages live with data from Brickset and BrickLink (description, extra metadata fields, pricing and badges). Data is pulled on demand rather than cached locally, so it always reflects the current source
+  - Added BrickData settings with an admin UI and a live/restart split so most options apply without a container restart
+- **Box art cover override**: Browse a set's additional images from BrickData and pick any of them (including official box art) as the cover image
+- **Admin-defined custom fields per set** (#146): Admins can define typed custom fields that then appear on each set, with a mass-edit screen to apply metadata across multiple selected sets at once
+- **Statistics: price and instructions stats**: Added a paid / retail / market price comparison and instruction-related statistics
+- **New grid filters** (#141): Added parts-range, year-range and "None" filters to the set grid
+
+### Bug Fixes
+
+- **Fixed `BK_HIDE_SPARE_PARTS` being ignored on set detail pages**: Spare parts were still shown in the parts inventory on a set's detail page (and in per-minifigure part tables) even with the setting enabled. The set-specific and minifigure part queries now honor the flag like the other part lists do
+- **Fixed price coverage exceeding sensible bounds** (#156): Price coverage is now divided by all priced item types and clamped to 100%
+- **Fixed per-color counts on parts sub-cards** (#159): Set and minifigure counts are now computed per color
+- **Fixed missing purchase date picker on the bulk add page** (#162)
+
 ## 1.4.1
 
 ### Enhancements
