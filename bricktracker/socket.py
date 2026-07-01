@@ -307,7 +307,6 @@ class BrickSocket(object):
             ))
 
             from .sidecar import BrickSidecar
-            from .sidecar_cache import BrickSidecarCache
             from .sql import BrickSQL
 
             if not BrickSidecar.enabled():
@@ -334,13 +333,10 @@ class BrickSocket(object):
                     message='Valuing set {ref}'.format(ref=ref),
                 )
 
-                # Was this set's price already fresh in the cache? If so,
-                # get_price() returns it without a network call.
+                # Does the sidecar already hold a cached price for this set? If
+                # so, get_price() returns it without a live BrickLink fetch.
                 cached, fetched_at = BrickSidecar.cached_price(ref)
-                was_fresh = (
-                    cached is not None
-                    and BrickSidecarCache.price_is_fresh(fetched_at)
-                )
+                was_fresh = cached is not None
 
                 try:
                     price = BrickSidecar.get_price(ref)

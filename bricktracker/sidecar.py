@@ -7,8 +7,6 @@ from typing import Any, Final
 from flask import current_app
 import requests
 
-from .sidecar_cache import BrickSidecarCache
-
 logger = logging.getLogger(__name__)
 
 # The four LEGO.com retail price regions the sidecar exposes. The sidecar
@@ -156,49 +154,44 @@ class BrickSidecar(object):
         refresh: bool = False,
         use_cache: bool = True,
     ) -> dict[str, Any] | None:
-        data: dict[str, Any] | None = None
+        # The sidecar (brickdata) is the single source of truth and cache: it
+        # serves from its own DB and only hits Brickset on its own staleness
+        # rules. We always read live from it — no second cache here. (use_cache
+        # is kept for signature compatibility but no longer caches locally.)
+        params: dict[str, Any] = {}
+        if refresh:
+            params['refresh'] = 'true'
 
-        if use_cache and not refresh:
-            cached = BrickSidecarCache.read(ref)
-            if cached is not None and cached.get('payload') is not None:
-                data = cached['payload']
+        payload = BrickSidecar._get_json(
+            '/sets/{ref}'.format(ref=ref),
+            params=params or None,
+        )
 
-        if data is None:
-            payload = BrickSidecar._get_json('/sets/{ref}'.format(ref=ref))
+        if not payload:
+            return None
 
-            if not payload:
-                return None
+        sets = payload.get('sets') or []
+        if not sets:
+            return None
 
-            sets = payload.get('sets') or []
-            if not sets:
-                return None
+        data = sets[0]
 
-            data = sets[0]
-
-            # The sidecar serializes legoCom* as JSON strings; parse them so
-            # call sites get a dict (or None) instead of a raw string.
-            for region in RETAIL_REGIONS:
-                key = 'legoCom{region}'.format(region=region)
-                data[key] = BrickSidecar._parse_json_field(data.get(key))
-
-            if use_cache:
-                BrickSidecarCache.write_metadata(ref, data)
+        # The sidecar serializes legoCom* as JSON strings; parse them so call
+        # sites get a dict (or None) instead of a raw string.
+        for region in RETAIL_REGIONS:
+            key = 'legoCom{region}'.format(region=region)
+            data[key] = BrickSidecar._parse_json_field(data.get(key))
 
         if price:
             data = dict(data)
-            data['bricklink_price'] = BrickSidecar.get_price(
-                ref, refresh=refresh, use_cache=use_cache,
-            )
+            data['bricklink_price'] = BrickSidecar.get_price(ref, refresh=refresh)
 
         return data
 
-    # GET /sets/{ref}/price -> BrickLink price block, or None. This dedicated
-    # endpoint is the reliable path for market value (the rollups new_avg /
-    # used_avg are the headline numbers; granular *_avg fields can be null).
-    #
-    # Honours the SIDECAR_PRICE_CACHE_HOURS TTL: a fresh cached price is reused,
-    # an expired one is refetched, and if the network fails a stale cached price
-    # is returned rather than nothing (the caller shows fetched_at staleness).
+    # BrickLink market value for a set, or None. The sidecar owns price caching
+    # (and its own TTL): the normal path returns its cached price (fetching once
+    # if its cache expired), while refresh=True forces a live re-fetch via the
+    # dedicated /price endpoint. No local caching here.
     @staticmethod
     def get_price(
         ref: str,
@@ -207,20 +200,23 @@ class BrickSidecar(object):
         refresh: bool = False,
         use_cache: bool = True,
     ) -> dict[str, Any] | None:
-        cached = BrickSidecarCache.read(ref) if use_cache else None
-
-        if (
-            cached is not None
-            and not refresh
-            and cached.get('price_payload') is not None
-            and BrickSidecarCache.price_is_fresh(cached.get('price_fetched_at'))
-        ):
-            return cached['price_payload']
-
-        # Sidecar contract: GET /sets/{ref}?price=true&currency=<cur>. The price
-        # block comes back under sets[0].bricklink_price.
-        params: dict[str, Any] = {'price': 'true'}
         currency = str(current_app.config.get('SIDECAR_CURRENCY', '') or '').strip()
+
+        # Forced refresh (explicit user action): the dedicated endpoint
+        # re-fetches from BrickLink and rewrites the sidecar's price cache.
+        if refresh:
+            params: dict[str, Any] = {'refresh': 'true'}
+            if currency:
+                params['currency'] = currency
+            return BrickSidecar._get_json(
+                '/sets/{ref}/price'.format(ref=ref),
+                params=params,
+            )
+
+        # Normal path: the sidecar returns its cached price, or fetches once if
+        # its own TTL expired. The price rides along on the set payload under
+        # bricklink_price. No local caching — the sidecar is the cache.
+        params = {'price': 'true'}
         if currency:
             params['currency'] = currency
 
@@ -229,30 +225,55 @@ class BrickSidecar(object):
             params=params,
         )
 
-        price: dict[str, Any] | None = None
         if payload:
             sets = payload.get('sets') or []
             if sets:
-                price = sets[0].get('bricklink_price') or None
+                return sets[0].get('bricklink_price') or None
 
-        # Fallback to the dedicated price endpoint for older sidecars that do
-        # not embed bricklink_price in the set response.
-        if not price:
-            price = BrickSidecar._get_json(
-                '/sets/{ref}/price'.format(ref=ref),
-                params=({'currency': currency} if currency else None),
-            )
+        return None
 
-        if not price:
-            # Network miss: fall back to a stale cached price if we have one.
-            if cached is not None:
-                return cached.get('price_payload')
-            return None
+    # GET /sets/bulk -> cached metadata (+ cached price) for many sets at once,
+    # keyed by ref. The sidecar serves this from its own DB with no live
+    # Brickset/BrickLink calls, so it is cheap enough for collection-wide
+    # aggregation (stats) without a local cache. Requests are chunked to keep
+    # the query string within sane limits.
+    @staticmethod
+    def get_sets_bulk(
+        refs: list[str],
+        /,
+        *,
+        price: bool = True,
+        chunk_size: int = 200,
+    ) -> dict[str, dict[str, Any]]:
+        wanted = [r for r in refs if r]
+        if not wanted:
+            return {}
 
-        if use_cache:
-            BrickSidecarCache.write_price(ref, price)
+        currency = str(current_app.config.get('SIDECAR_CURRENCY', '') or '').strip()
+        out: dict[str, dict[str, Any]] = {}
 
-        return price
+        for start in range(0, len(wanted), chunk_size):
+            chunk = wanted[start:start + chunk_size]
+            params: dict[str, Any] = {'refs': ','.join(chunk)}
+            if price:
+                params['price'] = 'true'
+            if currency:
+                params['currency'] = currency
+
+            payload = BrickSidecar._get_json('/sets/bulk', params=params)
+            if not payload:
+                continue
+
+            for s in payload.get('sets') or []:
+                ref = '{n}-{v}'.format(
+                    n=s.get('number'), v=s.get('numberVariant'),
+                )
+                for region in RETAIL_REGIONS:
+                    key = 'legoCom{region}'.format(region=region)
+                    s[key] = BrickSidecar._parse_json_field(s.get(key))
+                out[ref] = s
+
+        return out
 
     # Convenience: MSRP for the configured retail region (SIDECAR_RETAIL_REGION),
     # read from an already-fetched get_set() payload. None when unavailable.
@@ -309,15 +330,31 @@ class BrickSidecar(object):
 
         return bool(codes_a & codes_b)
 
-    # Read a cached BrickLink price WITHOUT hitting the network. Used on the set
-    # detail page so a render never blocks; refreshing is an explicit action.
-    # Returns (price_dict, fetched_at_epoch) or (None, None).
+    # Read a price WITHOUT triggering a live BrickLink fetch: ask the sidecar
+    # for a cache-only price (cached_only=true), so a render never blocks.
+    # Returns (price_dict, fetched_at) or (None, None).
     @staticmethod
     def cached_price(ref: str, /) -> tuple[dict[str, Any] | None, Any]:
-        cached = BrickSidecarCache.read(ref)
-        if cached is None:
+        params: dict[str, Any] = {'price': 'true', 'cached_only': 'true'}
+        currency = str(current_app.config.get('SIDECAR_CURRENCY', '') or '').strip()
+        if currency:
+            params['currency'] = currency
+
+        payload = BrickSidecar._get_json(
+            '/sets/{ref}'.format(ref=ref),
+            params=params,
+        )
+
+        price: dict[str, Any] | None = None
+        if payload:
+            sets = payload.get('sets') or []
+            if sets:
+                price = sets[0].get('bricklink_price') or None
+
+        if price is None:
             return None, None
-        return cached.get('price_payload'), cached.get('price_fetched_at')
+
+        return price, price.get('fetched_at')
 
     # --- Images ---------------------------------------------------------
 

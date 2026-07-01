@@ -113,7 +113,6 @@ CONFIG: Final[list[dict[str, Any]]] = [
     # SIDECAR_URL means the whole feature is off and everything degrades.
     {'n': 'SIDECAR_URL', 'd': ''},
     {'n': 'SIDECAR_TIMEOUT', 'd': 5, 'c': int},
-    {'n': 'SIDECAR_PRICE_CACHE_HOURS', 'd': 24, 'c': int},
     {'n': 'SIDECAR_DEFAULT_COVER', 'd': 'rebrickable'},
     # Opt-in browsing of every BrickLink image the sidecar exposes for a set
     # (a carousel on the detail page + extra cover sources). Off keeps the

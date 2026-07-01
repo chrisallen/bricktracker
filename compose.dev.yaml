@@ -18,7 +18,14 @@ services:
     # The app automatically detects and uses data/.env (no env_file needed)
     # Uncomment below only if you keep .env in root for backward compatibility
     # env_file: .env
+    networks:
+      - default
+      - brickshare
     develop:
       watch:
         - action: rebuild
           path: requirements.txt
+
+networks:
+  brickshare:
+    external: true

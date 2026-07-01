@@ -123,8 +123,9 @@ class BrickStatistics:
     def get_sidecar_pricing_summary(self) -> dict[str, Any] | None:
         """Collection-wide paid / retail (MSRP) / BrickLink market comparison.
 
-        Reads only from the local sidecar cache (no network). Returns None when
-        the sidecar is disabled or the cache is unavailable.
+        Pulls cached metadata + price for the whole collection from the sidecar
+        in one bulk call and aggregates in Python (the sidecar is the single
+        cache). Returns None when the sidecar is disabled or unreachable.
         """
         from .sidecar import BrickSidecar
 
@@ -132,18 +133,74 @@ class BrickStatistics:
             return None
 
         try:
-            row = self.sql.fetchone(
-                'statistics/sidecar_pricing',
-                region=BrickSidecar.retail_region(),
-            )
+            instances = self.sql.fetchall('statistics/sidecar_sets')
         except Exception as exception:
             logger.debug('sidecar pricing summary failed: %s', exception)
             return None
 
-        if row is None:
+        instances = [dict(row) for row in instances]
+        if not instances:
             return None
 
-        data = dict(row)
+        refs = list({row['set_ref'] for row in instances if row.get('set_ref')})
+        try:
+            bulk = BrickSidecar.get_sets_bulk(refs)
+        except Exception as exception:
+            logger.debug('sidecar bulk fetch failed: %s', exception)
+            return None
+
+        def to_number(value: Any) -> float | None:
+            try:
+                return float(value) if value is not None else None
+            except (TypeError, ValueError):
+                return None
+
+        data: dict[str, Any] = {
+            'total_sets': 0,
+            'total_paid': 0.0, 'sets_with_paid': 0,
+            'total_msrp': 0.0, 'sets_with_msrp': 0,
+            'total_market_new': 0.0, 'sets_with_market': 0,
+            'total_market_used': 0.0, 'sets_with_market_used': 0,
+            'paid_where_msrp': 0.0, 'msrp_where_paid': 0.0,
+            'paid_where_market': 0.0, 'market_where_paid': 0.0,
+            'paid_where_market_used': 0.0, 'market_used_where_paid': 0.0,
+            'market_currency': None,
+        }
+
+        # One row per set instance, mirroring the old per-instance aggregation.
+        for row in instances:
+            set_data = bulk.get(row.get('set_ref')) or {}
+            price_block = set_data.get('bricklink_price') or {}
+
+            paid = to_number(row.get('purchase_price'))
+            msrp = BrickSidecar.retail_price(set_data) if set_data else None
+            market_new = to_number(price_block.get('new_avg'))
+            market_used = to_number(price_block.get('used_avg'))
+
+            data['total_sets'] += 1
+            if paid is not None:
+                data['total_paid'] += paid
+                data['sets_with_paid'] += 1
+            if msrp is not None:
+                data['total_msrp'] += msrp
+                data['sets_with_msrp'] += 1
+            if market_new is not None:
+                data['total_market_new'] += market_new
+                data['sets_with_market'] += 1
+            if market_used is not None:
+                data['total_market_used'] += market_used
+                data['sets_with_market_used'] += 1
+            if msrp is not None and paid is not None:
+                data['paid_where_msrp'] += paid
+                data['msrp_where_paid'] += msrp
+            if market_new is not None and paid is not None:
+                data['paid_where_market'] += paid
+                data['market_where_paid'] += market_new
+            if market_used is not None and paid is not None:
+                data['paid_where_market_used'] += paid
+                data['market_used_where_paid'] += market_used
+            if data['market_currency'] is None and price_block.get('currency_code'):
+                data['market_currency'] = price_block.get('currency_code')
 
         def number(key: str) -> float:
             value = data.get(key)

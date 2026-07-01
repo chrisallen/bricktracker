@@ -90,7 +90,6 @@ LIVE_CHANGEABLE_VARS: Final[List[str]] = [
     # Sidecar integration (everything but the URL is live-changeable; the URL
     # itself requires a restart, see RESTART_REQUIRED_VARS)
     'BK_SIDECAR_TIMEOUT',
-    'BK_SIDECAR_PRICE_CACHE_HOURS',
     'BK_SIDECAR_DEFAULT_COVER',
     'BK_SIDECAR_RETAIL_REGION',
     'BK_SIDECAR_AUTO_FETCH_PRICE',
@@ -352,7 +351,6 @@ class ConfigManager:
             'BK_DARK_MODE': 'Enable dark mode theme',
             'BK_SIDECAR_URL': 'Base URL of the brickset-sidecar container (e.g. http://localhost:3335). Leave empty to disable all sidecar features.',
             'BK_SIDECAR_TIMEOUT': 'Request timeout in seconds for sidecar calls',
-            'BK_SIDECAR_PRICE_CACHE_HOURS': 'How long to cache BrickLink market prices before refetching (hours)',
             'BK_SIDECAR_DEFAULT_COVER': 'Default cover image source for bulk add: rebrickable, box, or set',
             'BK_SIDECAR_RETAIL_REGION': 'LEGO.com retail price region for MSRP: US, UK, CA, or DE',
             'BK_SIDECAR_AUTO_FETCH_PRICE': 'Automatically fetch BrickLink market value when viewing a set (respects the cache TTL), so you do not have to press "Fetch value". Off by default as it is the slower live path.',
