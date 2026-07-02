@@ -75,10 +75,11 @@ class BrickInstructions(object):
 
             splits = normalized.split('-', 2)
 
-            if len(splits) >= 2:
+            if len(splits) >= 2 and splits[0]:
                 try:
-                    # Trying to make sense of each part as integers
-                    int(splits[0])
+                    # The set number can be alphanumeric (e.g. Pick-a-Brick
+                    # builds like "EG00029-1"); only the version suffix has
+                    # to be an integer
                     int(splits[1])
 
                     self.set = '-'.join(splits[:2])
