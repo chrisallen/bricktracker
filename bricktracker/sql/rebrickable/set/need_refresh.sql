@@ -58,10 +58,14 @@ INNER JOIN (
 
     ) "null_sums"
 
+    -- bricklink_color_id is intentionally NOT a trigger: it is an INTEGER
+    -- column so it cannot carry the empty-string "confirmed missing" sentinel,
+    -- and BrickLink mappings can be absent upstream forever. color_name and
+    -- part_num still trigger because NULL there means "never fetched"; once a
+    -- refresh confirms no mapping they are written as '' and stop matching (#163).
     WHERE "null_rgb" > 0
     OR "null_transparent" > 0
     OR "null_url" > 0
-    OR "null_bricklink_color_id" > 0
     OR "null_bricklink_color_name" > 0
     OR "null_bricklink_part_num" > 0
 ) "null_join"

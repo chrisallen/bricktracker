@@ -181,8 +181,14 @@ class RebrickablePart(BrickRecord):
             'color_rgb': data['color']['rgb'],
             'color_transparent': data['color']['is_trans'],
             'bricklink_color_id': None,
-            'bricklink_color_name': None,
-            'bricklink_part_num': None,
+            # Empty-string sentinel (not NULL) means "fetched from Rebrickable,
+            # but no BrickLink mapping exists upstream". need_refresh.sql flags
+            # only NULL (never fetched), so confirmed-missing parts/colors stop
+            # reappearing on the refresh list forever (#163). color_id stays
+            # NULL since it is an INTEGER column and is excluded from the
+            # refresh trigger instead.
+            'bricklink_color_name': '',
+            'bricklink_part_num': '',
             'name': data['part']['name'],
             'category': data['part']['part_cat_id'],
             'image': data['part']['part_img_url'],
