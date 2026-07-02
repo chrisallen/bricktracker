@@ -4,7 +4,7 @@
 
 <div class="card mb-3 flex-fill {% if solo %}card-solo{% endif %}">
   <div class="card-header {% if solo %}d-flex justify-content-between align-items-center{% endif %}">
-    <h5 class="mb-0">
+    <h5 class="mb-0 {% if not solo %}fs-6 text-nowrap overflow-x-hidden text-truncate{% endif %}">
       {{ badge.identifier(item.fields.part, icon='shapes-line', solo=solo, header=true) }}
       {% if solo %}
         {{ badge.color(item, header=true) }}
