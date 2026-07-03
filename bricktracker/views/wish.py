@@ -11,6 +11,7 @@ from werkzeug.wrappers.response import Response
 
 from .exceptions import exception_handler
 from ..retired_list import BrickRetiredList
+from ..sidecar_set import retirement_dates
 from ..wish import BrickWish
 from ..wish_list import BrickWishList
 from ..wish_owner_list import BrickWishOwnerList
@@ -23,10 +24,16 @@ wish_page = Blueprint('wish', __name__, url_prefix='/wishes')
 @wish_page.route('/', methods=['GET'])
 @exception_handler(__file__)
 def list() -> str:
+    table_collection = BrickWishList().all()
+
     return render_template(
         'wishes.html',
-        table_collection=BrickWishList().all(),
+        table_collection=table_collection,
         retired=BrickRetiredList(),
+        # BrickData fallback for already-retired sets the CSV does not cover.
+        sidecar_retired=retirement_dates(
+            [item.fields.set for item in table_collection]
+        ),
         error=request.args.get('error'),
         owners=BrickWishOwnerList.list(),
     )

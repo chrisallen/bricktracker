@@ -229,7 +229,7 @@
    when the data is absent (so they are safe to put anywhere in BADGE_ORDER_*). #}
 {% macro retired(summary, solo=false, last=false) %}
   {% if summary and summary.retired %}
-    {{ badge(check=true, solo=solo, last=last, color='light text-danger-emphasis bg-danger-subtle border border-danger-subtle', icon='time-line', collapsible='Retired:', text=(summary.exit_year or 'Yes'), alt='Retired') }}
+    {{ badge(check=true, solo=solo, last=last, color='light text-danger-emphasis bg-danger-subtle border border-danger-subtle', icon='time-line', collapsible='Retired:', text=(summary.exit_date or summary.exit_year or 'Yes'), alt='Retired') }}
   {% endif %}
 {% endmacro %}
 

@@ -20,7 +20,7 @@
     </thead>
     <tbody>
       {% for item in table_collection %}
-        {% with retirement_date = retired.get(item.fields.set) %}
+        {% with retirement_date = retired.get(item.fields.set), bd_retired = (sidecar_retired.get(item.fields.set) if sidecar_retired is defined and sidecar_retired else none) %}
           <tr>
             {{ table.image(item.url_for_image(), caption=item.fields.name, alt=item.fields.set) }}
             <td>{{ item.fields.set }} {{ table.rebrickable(item) }}</td>
@@ -28,7 +28,22 @@
             <td>{{ item.theme.name }}</td>
             <td>{{ item.fields.year }}</td>
             <td>{{ item.fields.number_of_parts }}</td>
-            <td>{% if retirement_date %}{{ retirement_date }}{% else %}<span class="badge rounded-pill text-bg-light border">Not found</span>{% endif %}</td>
+            <td>
+              {% if retirement_date %}
+                {# Upcoming-retirements CSV: these are future dates. #}
+                <span class="badge rounded-pill text-warning-emphasis bg-warning-subtle border border-warning-subtle"><i class="ri-calendar-close-line"></i> {{ retirement_date }}</span>
+              {% elif bd_retired and bd_retired.date %}
+                {# BrickData fallback for sets the CSV does not cover (#37):
+                   red when already retired, yellow when still upcoming. #}
+                {% if bd_retired.retired %}
+                  <span class="badge rounded-pill text-danger-emphasis bg-danger-subtle border border-danger-subtle"><i class="ri-time-line"></i> Retired {{ bd_retired.date }}</span>
+                {% else %}
+                  <span class="badge rounded-pill text-warning-emphasis bg-warning-subtle border border-warning-subtle"><i class="ri-calendar-close-line"></i> {{ bd_retired.date }}</span>
+                {% endif %}
+              {% else %}
+                <span class="badge rounded-pill text-bg-light border">Not found</span>
+              {% endif %}
+            </td>
             <td>
               {% for owner in owners %}
                 {{ badge.owner(item, owner) }}

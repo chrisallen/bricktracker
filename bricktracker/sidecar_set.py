@@ -67,10 +67,13 @@ def summarize(
         'notes': _description(data.get('notes')),
     }
 
-    # Retired status from the exit date.
+    # Retired status from the exit date. exit_date is the full formatted date
+    # (BrickData/Brickset has it even for sets retired long ago, which the
+    # upcoming-retirements CSV does not cover, see #37).
     retired, exit_year = _retired(data.get('exitDate'))
     summary['retired'] = retired
     summary['exit_year'] = exit_year
+    summary['exit_date'] = _format_date(data.get('exitDate'))
     summary['launch_year'] = _year(data.get('launchDate'))
 
     # --- Prices: paid / retail / market --------------------------------
@@ -235,8 +238,51 @@ def _year(value: Any) -> int | None:
     return parsed.year if parsed is not None else None
 
 
+def _format_date(value: Any) -> str | None:
+    parsed = _parse_date(value)
+    if parsed is None:
+        return None
+    return parsed.strftime(current_app.config['PURCHASE_DATE_FORMAT'])
+
+
 def _retired(exit_date: Any) -> tuple[bool, int | None]:
     parsed = _parse_date(exit_date)
     if parsed is None:
         return False, None
     return parsed < datetime.now(timezone.utc), parsed.year
+
+
+# Bulk retirement lookup for a list of set refs (e.g. the whole wishlist) in a
+# single cached BrickData call. Returns {ref: {'date': str|None,
+# 'retired': bool}} keyed by both "number-variant" and the bare number so the
+# caller can match whichever form it stores. Empty dict when the sidecar is
+# disabled or unreachable, so callers degrade to the CSV (see #37).
+def retirement_dates(
+    set_refs: Any,
+    /,
+) -> dict[str, dict[str, Any]]:
+    if not BrickSidecar.enabled():
+        return {}
+
+    refs = list({str(ref) for ref in set_refs if ref})
+    if not refs:
+        return {}
+
+    try:
+        bulk = BrickSidecar.get_sets_bulk(refs, price=False)
+    except Exception as exception:
+        logger.debug('sidecar retirement bulk fetch failed: %s', exception)
+        return {}
+
+    out: dict[str, dict[str, Any]] = {}
+    for ref, data in bulk.items():
+        retired, _ = _retired(data.get('exitDate'))
+        info = {
+            'date': _format_date(data.get('exitDate')),
+            'retired': retired,
+        }
+        out[ref] = info
+        number, _, _ = ref.partition('-')
+        out.setdefault(number, info)
+
+    return out
