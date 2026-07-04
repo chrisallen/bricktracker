@@ -72,7 +72,7 @@
           {% if not bulk %}
           <div class="mt-2">
             <button type="button" class="btn btn-sm btn-outline-secondary" id="add-check-box-art"
-              data-sidecar-base="{{ sidecar.base_url() }}"
+              data-proxy-url="{{ sidecar.image_proxy_url('box', '__REF__') }}"
               data-bs-toggle="modal" data-bs-target="#addBoxArtModal">
               <i class="ri-eye-line"></i> Check box art
             </button>
@@ -98,7 +98,7 @@
               var modal = document.getElementById('addBoxArtModal');
               if (!modal) { return; }
               modal.addEventListener('show.bs.modal', function () {
-                var base = (document.getElementById('add-check-box-art').getAttribute('data-sidecar-base') || '').replace(/\/$/, '');
+                var proxy = document.getElementById('add-check-box-art').getAttribute('data-proxy-url') || '';
                 var ref = (document.getElementById('add-set').value || '').trim().split(',')[0].trim();
                 // BrickTracker appends "-1" to a bare set number; match that so
                 // the sidecar lookup works (e.g. "10179" -> "10179-1").
@@ -115,7 +115,7 @@
                   return;
                 }
                 empty.classList.add('d-none');
-                image.src = base + '/images/bricklink/box/' + encodeURIComponent(ref) + '.png';
+                image.src = proxy.replace('__REF__', encodeURIComponent(ref));
                 image.classList.remove('d-none');
               });
             })();

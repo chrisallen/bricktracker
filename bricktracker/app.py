@@ -41,6 +41,7 @@ from bricktracker.views.minifigure import minifigure_page
 from bricktracker.views.part import part_page
 from bricktracker.views.purchase_location import purchase_location_page
 from bricktracker.views.set import set_page
+from bricktracker.views.sidecar import sidecar_page
 from bricktracker.views.statistics import statistics_page
 from bricktracker.views.storage import storage_page
 from bricktracker.views.wish import wish_page
@@ -151,6 +152,7 @@ def setup_app(app: Flask) -> None:
     app.register_blueprint(part_page)
     app.register_blueprint(purchase_location_page)
     app.register_blueprint(set_page)
+    app.register_blueprint(sidecar_page)
     app.register_blueprint(statistics_page)
     app.register_blueprint(storage_page)
     app.register_blueprint(wish_page)

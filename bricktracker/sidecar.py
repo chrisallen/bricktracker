@@ -4,7 +4,7 @@ import os
 import time
 from typing import Any, Final
 
-from flask import current_app
+from flask import current_app, url_for
 import requests
 
 logger = logging.getLogger(__name__)
@@ -363,10 +363,21 @@ class BrickSidecar(object):
     def get_images(ref: str, /) -> dict[str, Any] | None:
         return BrickSidecar._get_json('/sets/{ref}/images'.format(ref=ref))
 
-    # Build the image-proxy URL for direct use in an <img src> (no server
-    # round-trip needed to preview). Does not hit the network.
+    # Build a BrickTracker-served proxy URL for an <img src>. The browser hits
+    # BrickTracker (same origin), which fetches the image from the sidecar
+    # server-side. This works even when the sidecar is only reachable on the
+    # internal Docker network (e.g. http://brickdata:3335), which the browser
+    # cannot resolve. Returns None when disabled or the type is unknown.
     @staticmethod
     def image_proxy_url(image_type: str, ref: str, /) -> str | None:
+        if image_type not in IMAGE_TYPES or not BrickSidecar.enabled():
+            return None
+
+        return url_for('sidecar.image', image_type=image_type, ref=ref)
+
+    # The real sidecar image URL, used server-side to fetch the bytes.
+    @staticmethod
+    def _remote_image_url(image_type: str, ref: str, /) -> str | None:
         if image_type not in IMAGE_TYPES or not BrickSidecar.enabled():
             return None
 
@@ -376,12 +387,33 @@ class BrickSidecar(object):
             ref=ref,
         )
 
-    # Build the URL of one Brickset additional image (0-indexed) for direct use
-    # in an <img src>. Unlike box/instruction art these come from Brickset, not
-    # the BrickLink image proxy. Pass thumbnail=True for the smaller variant.
-    # Does not hit the network. Returns None when the sidecar is disabled.
+    # Build a BrickTracker-served proxy URL for one Brickset additional image
+    # (0-indexed) for use in an <img src>. Like image_proxy_url, the browser
+    # talks only to BrickTracker, which fetches from the sidecar server-side.
+    # Pass thumbnail=True for the smaller variant. Returns None when disabled.
     @staticmethod
     def additional_image_url(
+        ref: str,
+        index: int,
+        /,
+        *,
+        thumbnail: bool = False,
+    ) -> str | None:
+        if not BrickSidecar.enabled():
+            return None
+
+        return url_for(
+            'sidecar.additional_image',
+            ref=ref,
+            index=index,
+            thumbnail=1 if thumbnail else None,
+        )
+
+    # The real sidecar additional-image URL, used server-side to fetch bytes.
+    # Unlike box/instruction art these come from Brickset, not the BrickLink
+    # image proxy.
+    @staticmethod
+    def _remote_additional_image_url(
         ref: str,
         index: int,
         /,
@@ -405,8 +437,16 @@ class BrickSidecar(object):
     # Fetch the raw bytes of one Brickset additional image (used when saving it
     # as the cover). Returns None on any failure or a 404.
     @staticmethod
-    def fetch_additional_image_bytes(ref: str, index: int, /) -> bytes | None:
-        url = BrickSidecar.additional_image_url(ref, index)
+    def fetch_additional_image_bytes(
+        ref: str,
+        index: int,
+        /,
+        *,
+        thumbnail: bool = False,
+    ) -> bytes | None:
+        url = BrickSidecar._remote_additional_image_url(
+            ref, index, thumbnail=thumbnail,
+        )
         if url is None:
             return None
 
@@ -416,7 +456,7 @@ class BrickSidecar(object):
     # Returns None on any failure or a 404 (BrickLink has no such image).
     @staticmethod
     def fetch_image_bytes(image_type: str, ref: str, /) -> bytes | None:
-        url = BrickSidecar.image_proxy_url(image_type, ref)
+        url = BrickSidecar._remote_image_url(image_type, ref)
         if url is None:
             return None
 
