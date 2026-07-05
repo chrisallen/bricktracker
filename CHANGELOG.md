@@ -8,10 +8,18 @@
   - Added BrickData settings with an admin UI and a live/restart split so most options apply without a container restart
 - **Box art cover override**: Browse a set's additional images from BrickData and pick any of them (including official box art) as the cover image
 - **Admin-defined custom fields per set** (#146): Admins can define typed custom fields that then appear on each set, with a mass-edit screen to apply metadata across multiple selected sets at once
+- **Retail (MSRP) price and savings** (#144): Set detail shows the lego.com retail price for a chosen region (US/UK/CA/DE) as a badge and in the price comparison, plus a "saved vs retail" figure (MSRP minus what you paid) per set and summed on the Statistics page
+- **BrickLink market value** (#160): Set detail shows the current BrickLink market value (new/used average, min/max on hover) pulled on demand from BrickData, with a collection-value estimate on the Statistics page
+- **Instructions badge and stats** (#154): Sets with downloaded instruction files now show an "instructions" badge (respects `BK_HIDE_SET_INSTRUCTIONS` and the badge order), and the Statistics page counts how many sets have instructions and the total number of instruction files
 - **Statistics: price and instructions stats**: Added a paid / retail / market price comparison and instruction-related statistics
+- **Retirement dates for already-retired sets** (#37): The wishlist now falls back to BrickData for sets that the upcoming-retirements CSV does not cover, so long-retired sets show a retirement date instead of "Not found". Dates are colour-coded (yellow for upcoming, red for already retired), and the set detail "Retired" badge shows the full exit date when available
 - **New grid filters** (#141): Added parts-range, year-range and "None" filters to the set grid
 
 ### Bug Fixes
+
+- **Fixed instructions never linking to sets with alphanumeric ids** (#166): Instructions for "Pick a Brick" / promotional builds whose set id begins with letters (e.g. `EG00029-1`) were orphaned and never associated with the set; the matching now handles alphanumeric set ids
+- **Fixed font size on the landing page** (#167): Item titles in the "Latest added parts" section on the homepage now match the smaller size used by the sets and minifigures sections
+- **Fixed sets with unmappable BrickLink parts never clearing the "need refresh" list** (#163): Sets containing parts that Rebrickable has no BrickLink mapping for (e.g. length-specific pneumatic hoses) kept reappearing on the Refresh admin page right after being refreshed; these unmappable parts no longer flag a set as needing a refresh
 
 - **Fixed `BK_HIDE_SPARE_PARTS` being ignored on set detail pages**: Spare parts were still shown in the parts inventory on a set's detail page (and in per-minifigure part tables) even with the setting enabled. The set-specific and minifigure part queries now honor the flag like the other part lists do
 - **Fixed price coverage exceeding sensible bounds** (#156): Price coverage is now divided by all priced item types and clamped to 100%
