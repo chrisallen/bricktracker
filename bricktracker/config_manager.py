@@ -93,7 +93,15 @@ LIVE_CHANGEABLE_VARS: Final[List[str]] = [
     'BK_SIDECAR_DEFAULT_COVER',
     'BK_SIDECAR_RETAIL_REGION',
     'BK_SIDECAR_AUTO_FETCH_PRICE',
-    'BK_SIDECAR_CURRENCY'
+    'BK_SIDECAR_CURRENCY',
+    # Per-element show/hide toggles for the BrickData set-detail enrichment
+    'BK_SIDECAR_SHOW_DESIGNER',
+    'BK_SIDECAR_SHOW_DESCRIPTION',
+    'BK_SIDECAR_SHOW_NOTES',
+    'BK_SIDECAR_SHOW_PRICE_PAID',
+    'BK_SIDECAR_SHOW_PRICE_MSRP',
+    'BK_SIDECAR_SHOW_PRICE_MARKET',
+    'BK_SIDECAR_PRICE_BASIS'
 ]
 
 # Environment variables that require restart
@@ -354,6 +362,13 @@ class ConfigManager:
             'BK_SIDECAR_DEFAULT_COVER': 'Default cover image source for bulk add: rebrickable, box, or set',
             'BK_SIDECAR_RETAIL_REGION': 'LEGO.com retail price region for MSRP: US, UK, CA, or DE',
             'BK_SIDECAR_AUTO_FETCH_PRICE': 'Automatically fetch BrickLink market value when viewing a set (respects the cache TTL), so you do not have to press "Fetch value". Off by default as it is the slower live path.',
-            'BK_SIDECAR_CURRENCY': 'Currency to request BrickLink market values in, e.g. EUR. Empty uses the sidecar default. (The sidecar must support the currency query parameter.)'
+            'BK_SIDECAR_CURRENCY': 'Currency to request BrickLink market values in, e.g. EUR. Empty uses the sidecar default. (The sidecar must support the currency query parameter.)',
+            'BK_SIDECAR_SHOW_DESIGNER': 'Show the BrickData set designer on the set detail page',
+            'BK_SIDECAR_SHOW_DESCRIPTION': 'Show the BrickData "About this set" description on the set detail page',
+            'BK_SIDECAR_SHOW_NOTES': 'Show the BrickData Brickset notes on the set detail page',
+            'BK_SIDECAR_SHOW_PRICE_PAID': 'Show the "Paid" row (and "Change vs paid") in the BrickData price comparison',
+            'BK_SIDECAR_SHOW_PRICE_MSRP': 'Show the retail/MSRP rows (and "Saved vs retail") in the BrickData price comparison',
+            'BK_SIDECAR_SHOW_PRICE_MARKET': 'Show the "Worth now" market value rows in the BrickData price comparison',
+            'BK_SIDECAR_PRICE_BASIS': 'Which BrickLink market value the set-detail "Change vs paid" compares against: used or new (falls back to the other when one is missing). Statistics shows both regardless.'
         }
         return help_text.get(var_name, 'No help available for this variable')

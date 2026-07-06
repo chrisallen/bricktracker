@@ -124,4 +124,16 @@ CONFIG: Final[list[dict[str, Any]]] = [
     # sidecar use its default. Sent as a query parameter only when set; sidecars
     # that do not support it simply ignore it.
     {'n': 'SIDECAR_CURRENCY', 'd': ''},
+    # Per-element show/hide toggles for the BrickData enrichment on the set
+    # detail page. All default on so behaviour is unchanged; badges are handled
+    # separately via BADGE_ORDER_DETAIL.
+    {'n': 'SIDECAR_SHOW_DESIGNER', 'd': True, 'c': bool},
+    {'n': 'SIDECAR_SHOW_DESCRIPTION', 'd': True, 'c': bool},
+    {'n': 'SIDECAR_SHOW_NOTES', 'd': True, 'c': bool},
+    {'n': 'SIDECAR_SHOW_PRICE_PAID', 'd': True, 'c': bool},
+    {'n': 'SIDECAR_SHOW_PRICE_MSRP', 'd': True, 'c': bool},
+    {'n': 'SIDECAR_SHOW_PRICE_MARKET', 'd': True, 'c': bool},
+    # Which BrickLink market value the set-detail "Change vs paid" compares
+    # against: 'used' or 'new'. Statistics shows both regardless.
+    {'n': 'SIDECAR_PRICE_BASIS', 'd': 'used'},
 ]

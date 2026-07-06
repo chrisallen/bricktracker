@@ -114,9 +114,15 @@ def summarize(
     if msrp is not None and paid is not None:
         prices['savings_vs_msrp'] = round(msrp - paid, 2)
 
-    # Value movement vs what was paid (using the sealed/new market average,
-    # falling back to used).
-    market_ref = market_new if market_new is not None else market_used
+    # Value movement vs what was paid. SIDECAR_PRICE_BASIS picks which market
+    # average to compare against ('used' or 'new'); fall back to the other when
+    # the preferred one is missing.
+    basis = str(current_app.config.get('SIDECAR_PRICE_BASIS', 'used')).lower()
+    if basis == 'new':
+        market_ref = market_new if market_new is not None else market_used
+    else:
+        market_ref = market_used if market_used is not None else market_new
+    prices['market_basis'] = basis
     if market_ref is not None and paid is not None:
         prices['gain_vs_paid'] = round(market_ref - paid, 2)
 

@@ -555,13 +555,6 @@
               <input type="number" class="form-control config-number" id="BK_SIDECAR_TIMEOUT" data-var="BK_SIDECAR_TIMEOUT" min="1" max="120">
             </div>
             <div class="col-md-6">
-              <label for="BK_SIDECAR_PRICE_CACHE_HOURS" class="form-label">
-                BK_SIDECAR_PRICE_CACHE_HOURS {{ config_badges('BK_SIDECAR_PRICE_CACHE_HOURS') }}
-                <div class="text-muted small">Hours to cache BrickLink market prices before refetching</div>
-              </label>
-              <input type="number" class="form-control config-number" id="BK_SIDECAR_PRICE_CACHE_HOURS" data-var="BK_SIDECAR_PRICE_CACHE_HOURS" min="0" max="8760">
-            </div>
-            <div class="col-md-6">
               <label for="BK_SIDECAR_RETAIL_REGION" class="form-label">
                 BK_SIDECAR_RETAIL_REGION {{ config_badges('BK_SIDECAR_RETAIL_REGION') }}
                 <div class="text-muted small">LEGO.com MSRP region: US, UK, CA or DE</div>
@@ -582,12 +575,78 @@
               </label>
               <input type="text" class="form-control config-text" id="BK_SIDECAR_DEFAULT_COVER" data-var="BK_SIDECAR_DEFAULT_COVER" {{ is_locked('BK_SIDECAR_DEFAULT_COVER') }}>
             </div>
+            <div class="col-md-6">
+              <label for="BK_SIDECAR_PRICE_BASIS" class="form-label">
+                BK_SIDECAR_PRICE_BASIS {{ config_badges('BK_SIDECAR_PRICE_BASIS') }}
+                <div class="text-muted small">Market value the set-detail "Change vs paid" uses: used or new</div>
+              </label>
+              <input type="text" class="form-control config-text" id="BK_SIDECAR_PRICE_BASIS" data-var="BK_SIDECAR_PRICE_BASIS" {{ is_locked('BK_SIDECAR_PRICE_BASIS') }}>
+            </div>
             <div class="col-md-6 d-flex align-items-center">
               <div class="form-check form-switch">
                 <input class="form-check-input config-toggle" type="checkbox" id="BK_SIDECAR_AUTO_FETCH_PRICE" data-var="BK_SIDECAR_AUTO_FETCH_PRICE" {{ is_locked('BK_SIDECAR_AUTO_FETCH_PRICE') }}>
                 <label class="form-check-label" for="BK_SIDECAR_AUTO_FETCH_PRICE">
                   BK_SIDECAR_AUTO_FETCH_PRICE {{ config_badges('BK_SIDECAR_AUTO_FETCH_PRICE') }}
                   <div class="text-muted small">Auto-fetch BrickLink market value when viewing a set (respects cache TTL)</div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <h6 class="fw-bold text-secondary mb-3 mt-3">Set detail display</h6>
+          <p class="text-muted small">Show or hide individual BrickData elements on the set detail page. Badges are controlled separately via BK_BADGE_ORDER_DETAIL.</p>
+          <div class="row g-3">
+            <div class="col-md-6 d-flex align-items-center">
+              <div class="form-check form-switch">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_SIDECAR_SHOW_DESIGNER" data-var="BK_SIDECAR_SHOW_DESIGNER" {{ is_locked('BK_SIDECAR_SHOW_DESIGNER') }}>
+                <label class="form-check-label" for="BK_SIDECAR_SHOW_DESIGNER">
+                  BK_SIDECAR_SHOW_DESIGNER {{ config_badges('BK_SIDECAR_SHOW_DESIGNER') }}
+                  <div class="text-muted small">Show the set designer</div>
+                </label>
+              </div>
+            </div>
+            <div class="col-md-6 d-flex align-items-center">
+              <div class="form-check form-switch">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_SIDECAR_SHOW_DESCRIPTION" data-var="BK_SIDECAR_SHOW_DESCRIPTION" {{ is_locked('BK_SIDECAR_SHOW_DESCRIPTION') }}>
+                <label class="form-check-label" for="BK_SIDECAR_SHOW_DESCRIPTION">
+                  BK_SIDECAR_SHOW_DESCRIPTION {{ config_badges('BK_SIDECAR_SHOW_DESCRIPTION') }}
+                  <div class="text-muted small">Show the "About this set" description</div>
+                </label>
+              </div>
+            </div>
+            <div class="col-md-6 d-flex align-items-center">
+              <div class="form-check form-switch">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_SIDECAR_SHOW_NOTES" data-var="BK_SIDECAR_SHOW_NOTES" {{ is_locked('BK_SIDECAR_SHOW_NOTES') }}>
+                <label class="form-check-label" for="BK_SIDECAR_SHOW_NOTES">
+                  BK_SIDECAR_SHOW_NOTES {{ config_badges('BK_SIDECAR_SHOW_NOTES') }}
+                  <div class="text-muted small">Show the Brickset notes</div>
+                </label>
+              </div>
+            </div>
+            <div class="col-md-6 d-flex align-items-center">
+              <div class="form-check form-switch">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_SIDECAR_SHOW_PRICE_PAID" data-var="BK_SIDECAR_SHOW_PRICE_PAID" {{ is_locked('BK_SIDECAR_SHOW_PRICE_PAID') }}>
+                <label class="form-check-label" for="BK_SIDECAR_SHOW_PRICE_PAID">
+                  BK_SIDECAR_SHOW_PRICE_PAID {{ config_badges('BK_SIDECAR_SHOW_PRICE_PAID') }}
+                  <div class="text-muted small">Price comparison: "Paid" row (and "Change vs paid")</div>
+                </label>
+              </div>
+            </div>
+            <div class="col-md-6 d-flex align-items-center">
+              <div class="form-check form-switch">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_SIDECAR_SHOW_PRICE_MSRP" data-var="BK_SIDECAR_SHOW_PRICE_MSRP" {{ is_locked('BK_SIDECAR_SHOW_PRICE_MSRP') }}>
+                <label class="form-check-label" for="BK_SIDECAR_SHOW_PRICE_MSRP">
+                  BK_SIDECAR_SHOW_PRICE_MSRP {{ config_badges('BK_SIDECAR_SHOW_PRICE_MSRP') }}
+                  <div class="text-muted small">Price comparison: retail/MSRP rows (and "Saved vs retail")</div>
+                </label>
+              </div>
+            </div>
+            <div class="col-md-6 d-flex align-items-center">
+              <div class="form-check form-switch">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_SIDECAR_SHOW_PRICE_MARKET" data-var="BK_SIDECAR_SHOW_PRICE_MARKET" {{ is_locked('BK_SIDECAR_SHOW_PRICE_MARKET') }}>
+                <label class="form-check-label" for="BK_SIDECAR_SHOW_PRICE_MARKET">
+                  BK_SIDECAR_SHOW_PRICE_MARKET {{ config_badges('BK_SIDECAR_SHOW_PRICE_MARKET') }}
+                  <div class="text-muted small">Price comparison: "Worth now" market value rows</div>
                 </label>
               </div>
             </div>
