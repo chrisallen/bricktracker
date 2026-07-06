@@ -150,14 +150,18 @@ class PartsTableFilter {
         if (!this.body) {
             return;
         }
-        if (!this.emptyRow) {
-            const columns = this.table.querySelectorAll('thead tr:first-child th').length || 1;
-            this.emptyRow = document.createElement('tr');
-            this.emptyRow.className = 'parts-filter-empty no-sort';
-            this.emptyRow.innerHTML = `<td colspan="${columns}" class="text-center text-body-secondary py-3">No matching parts</td>`;
-            this.body.appendChild(this.emptyRow);
+        // Render the empty-state message as a sibling of the table rather than a
+        // tbody row. The sortable library iterates every <tr> in the tbody and
+        // reads row.cells[columnIndex], so a single colspan cell would make it
+        // crash with "can't access property dataset" when sorting any column
+        // past the first.
+        if (!this.emptyMessage) {
+            this.emptyMessage = document.createElement('div');
+            this.emptyMessage.className = 'parts-filter-empty text-center text-body-secondary py-3';
+            this.emptyMessage.textContent = 'No matching parts';
+            this.table.insertAdjacentElement('afterend', this.emptyMessage);
         }
-        this.emptyRow.style.display = visibleCount === 0 ? '' : 'none';
+        this.emptyMessage.style.display = visibleCount === 0 ? '' : 'none';
     }
 
     clear() {
