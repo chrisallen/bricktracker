@@ -53,6 +53,11 @@
                   <li><a class="dropdown-item" href="#" id="check-all-{{ accordion_id }}"><i class="ri-checkbox-line me-2"></i>Check all</a></li>
                   <li><a class="dropdown-item" href="#" id="uncheck-all-{{ accordion_id }}"><i class="ri-checkbox-blank-line me-2"></i>Uncheck all</a></li>
                 {% endif %}
+                {% if show_missing_menu or show_checked_menu %}
+                  <li><hr class="dropdown-divider"></li>
+                  <li><h6 class="dropdown-header">Audit</h6></li>
+                  <li><a class="dropdown-item" href="#" id="audit-mode-{{ accordion_id }}"><i class="ri-eye-line me-2"></i>Start audit</a></li>
+                {% endif %}
               </ul>
             </div>
           </th>

@@ -22,9 +22,9 @@
         </td>
         {% if not no_quantity %}
           {% if all %}
-            <td>{{ item.fields.total_quantity }}</td>
+            <td data-col="quantity">{{ item.fields.total_quantity }}</td>
           {% else %}
-            <td>{% if quantity %}{{ item.fields.quantity * quantity }}{% else %}{{ item.fields.quantity }}{% endif %}</td>
+            <td data-col="quantity">{% if quantity %}{{ item.fields.quantity * quantity }}{% else %}{{ item.fields.quantity }}{% endif %}</td>
           {% endif %}
         {% endif %}
         {% if not config['HIDE_TABLE_MISSING_PARTS'] %}
