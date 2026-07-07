@@ -14,6 +14,7 @@
 - **Statistics: price and instructions stats**: Added a paid / retail / market price comparison and instruction-related statistics
 - **Retirement dates for already-retired sets** (#37): The wishlist now falls back to BrickData for sets that the upcoming-retirements CSV does not cover, so long-retired sets show a retirement date instead of "Not found". Dates are colour-coded (yellow for upcoming, red for already retired), and the set detail "Retired" badge shows the full exit date when available
 - **New grid filters** (#141): Added parts-range, year-range and "None" filters to the set grid
+- **Audit mode for parts tables**: A new "Start audit" entry in the parts table header menu opens a focused, keyboard-driven popup that walks the visible parts one at a time (respecting the active filter and sort), showing a large image, the part name, color and needed quantity. Arrow keys move between parts, Enter/Space save and advance, and a Missing/Found toggle records the missing count (Found mode works out the missing count from what you found). Optimized for phones with a numeric keypad and the image kept in view
 
 ### Bug Fixes
 

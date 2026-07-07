@@ -53,6 +53,18 @@
     object-fit:contain;
 }
 
+/* Audit mode part image: large on desktop, compact on phones so the part
+   image, needed quantity and input all stay visible above the keyboard. */
+.audit-image {
+    max-height: 220px;
+}
+
+@media (max-width: 575.98px) {
+    .audit-image {
+        max-height: 130px;
+    }
+}
+
 .table-td-input {
     max-width: 150px;
 }

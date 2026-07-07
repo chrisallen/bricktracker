@@ -30,7 +30,7 @@ class PartsAuditMode {
 
         const modalHTML = `
             <div class="modal fade" id="partsAuditModal" tabindex="-1" aria-labelledby="partsAuditModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                     <div class="modal-content">
                         <div class="modal-header d-block">
                             <div class="d-flex align-items-center">
@@ -44,15 +44,14 @@ class PartsAuditMode {
                             <small class="text-secondary"><span id="audit-checked-count">0</span> checked</small>
                         </div>
                         <div class="modal-body text-center">
-                            <div class="mb-3">
-                                <img id="audit-image" class="img-fluid border rounded" alt="" style="max-height: 220px;">
+                            <div class="mb-2">
+                                <img id="audit-image" class="img-fluid border rounded audit-image" alt="">
                             </div>
-                            <div class="fs-5 fw-semibold" id="audit-name"></div>
-                            <div class="mb-2 text-secondary" id="audit-color"></div>
-                            <div class="mb-3">Needed qty: <strong id="audit-qty">0</strong></div>
+                            <div class="mb-1">Quantity <span id="audit-qty">0</span></div>
+                            <div class="mb-3"><span id="audit-name" class="fs-6"></span> <span id="audit-color" class="text-secondary ms-1"></span></div>
 
                             <div id="audit-input-area">
-                                <div class="btn-group mb-3" role="group" aria-label="Audit mode">
+                                <div class="btn-group mb-2" role="group" aria-label="Audit mode">
                                     <button type="button" class="btn btn-sm" id="audit-mode-missing">Missing</button>
                                     <button type="button" class="btn btn-sm" id="audit-mode-found">Found</button>
                                 </div>
@@ -60,7 +59,7 @@ class PartsAuditMode {
                                     <div class="col-auto">
                                         <div class="input-group">
                                             <span class="input-group-text" id="audit-input-label">Missing</span>
-                                            <input type="number" min="0" class="form-control text-center" id="audit-number" style="max-width: 6rem;" autocomplete="off">
+                                            <input type="number" inputmode="numeric" pattern="[0-9]*" min="0" class="form-control text-center" id="audit-number" style="max-width: 6rem;" autocomplete="off">
                                         </div>
                                     </div>
                                 </div>
@@ -155,14 +154,31 @@ class PartsAuditMode {
             }
         }, true);
 
-        // Focus the number box whenever the modal opens.
+        // Focus the number box whenever the modal opens (desktop only).
         this.modalEl.addEventListener('shown.bs.modal', () => {
             const active = PartsAuditMode.active;
-            if (active && active.el.number) {
-                active.el.number.focus();
-                active.el.number.select();
+            if (active) {
+                active.focusInput();
             }
         });
+    }
+
+    // On phones we never auto-focus the number box: doing so pops the keyboard
+    // and scrolls the part image off-screen. The audit flow there is touch
+    // driven (tap the field only when entering a count, then Check & Next), so
+    // the image stays visible while you identify the part.
+    isMobileLayout() {
+        return window.matchMedia('(max-width: 575.98px)').matches;
+    }
+
+    focusInput() {
+        if (this.isMobileLayout()) {
+            return;
+        }
+        if (this.el.number && !this.el.inputArea.classList.contains('d-none')) {
+            this.el.number.focus();
+            this.el.number.select();
+        }
     }
 
     start() {
@@ -191,10 +207,7 @@ class PartsAuditMode {
     setMode(mode) {
         this.mode = mode;
         this.render();
-        if (this.el.number) {
-            this.el.number.focus();
-            this.el.number.select();
-        }
+        this.focusInput();
     }
 
     currentRow() {
@@ -250,9 +263,14 @@ class PartsAuditMode {
 
             // Prefill: missing mode shows the current missing value, found starts empty.
             this.el.number.value = this.mode === 'missing' ? (missing.value || '') : '';
+
+            // Remember what the box started with so a commit that didn't change
+            // the number leaves the missing field (and the database) untouched.
+            this.originalNumber = this.el.number.value.trim();
         } else {
             this.el.inputArea.classList.add('d-none');
             this.el.noInput.classList.remove('d-none');
+            this.originalNumber = '';
         }
 
         this.updateProgress();
@@ -278,10 +296,7 @@ class PartsAuditMode {
         }
         this.index = next;
         this.render();
-        if (this.el.number && !this.el.inputArea.classList.contains('d-none')) {
-            this.el.number.focus();
-            this.el.number.select();
-        }
+        this.focusInput();
     }
 
     setMissingValue(input, value) {
@@ -300,8 +315,9 @@ class PartsAuditMode {
     }
 
     // Enter / Space: record the typed number per mode, tick checked, advance.
-    // If nothing is typed we leave the missing field untouched, so we never POST
-    // a redundant update for a part the user just glanced at and moved past.
+    // If the number box is unchanged from what the part loaded with, we leave the
+    // missing field (and the database) completely alone and only tick checked, so
+    // glancing past a part never triggers a redundant POST.
     commitAndNext() {
         const row = this.currentRow();
         if (!row) {
@@ -311,7 +327,7 @@ class PartsAuditMode {
         const input = this.missingInput(row);
         if (input) {
             const typed = this.el.number.value.trim();
-            if (typed !== '') {
+            if (typed !== this.originalNumber) {
                 const number = parseInt(typed, 10) || 0;
                 let missing;
                 if (this.mode === 'found') {
@@ -338,10 +354,7 @@ class PartsAuditMode {
         }
         this.index += 1;
         this.render();
-        if (this.el.number && !this.el.inputArea.classList.contains('d-none')) {
-            this.el.number.focus();
-            this.el.number.select();
-        }
+        this.focusInput();
     }
 }
 
