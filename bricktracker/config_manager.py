@@ -93,6 +93,7 @@ LIVE_CHANGEABLE_VARS: Final[List[str]] = [
     'BK_SIDECAR_DEFAULT_COVER',
     'BK_SIDECAR_RETAIL_REGION',
     'BK_SIDECAR_AUTO_FETCH_PRICE',
+    'BK_SIDECAR_ADDITIONAL_IMAGES',
     'BK_SIDECAR_CURRENCY',
     # Per-element show/hide toggles for the BrickData set-detail enrichment
     'BK_SIDECAR_SHOW_DESIGNER',
@@ -362,6 +363,7 @@ class ConfigManager:
             'BK_SIDECAR_DEFAULT_COVER': 'Default cover image source for bulk add: rebrickable, box, or set',
             'BK_SIDECAR_RETAIL_REGION': 'LEGO.com retail price region for MSRP: US, UK, CA, or DE',
             'BK_SIDECAR_AUTO_FETCH_PRICE': 'Automatically fetch BrickLink market value when viewing a set (respects the cache TTL), so you do not have to press "Fetch value". Off by default as it is the slower live path.',
+            'BK_SIDECAR_ADDITIONAL_IMAGES': 'Browse every BrickLink image the sidecar exposes for a set: adds a carousel on the set detail page and extra cover sources. Off keeps the plain single cover.',
             'BK_SIDECAR_CURRENCY': 'Currency to request BrickLink market values in, e.g. EUR. Empty uses the sidecar default. (The sidecar must support the currency query parameter.)',
             'BK_SIDECAR_SHOW_DESIGNER': 'Show the BrickData set designer on the set detail page',
             'BK_SIDECAR_SHOW_DESCRIPTION': 'Show the BrickData "About this set" description on the set detail page',

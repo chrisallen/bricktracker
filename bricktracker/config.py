@@ -117,7 +117,7 @@ CONFIG: Final[list[dict[str, Any]]] = [
     # Opt-in browsing of every BrickLink image the sidecar exposes for a set
     # (a carousel on the detail page + extra cover sources). Off keeps the
     # plain single cover behaviour.
-    {'n': 'SIDECAR_ADDITIONAL_IMAGES', 'c': bool},
+    {'n': 'SIDECAR_ADDITIONAL_IMAGES', 'd': False, 'c': bool},
     {'n': 'SIDECAR_RETAIL_REGION', 'd': 'US'},
     {'n': 'SIDECAR_AUTO_FETCH_PRICE', 'c': bool},
     # Currency to request BrickLink market values in (e.g. EUR). Empty lets the

@@ -591,6 +591,15 @@
                 </label>
               </div>
             </div>
+            <div class="col-md-6 d-flex align-items-center">
+              <div class="form-check form-switch">
+                <input class="form-check-input config-toggle" type="checkbox" id="BK_SIDECAR_ADDITIONAL_IMAGES" data-var="BK_SIDECAR_ADDITIONAL_IMAGES" {{ is_locked('BK_SIDECAR_ADDITIONAL_IMAGES') }}>
+                <label class="form-check-label" for="BK_SIDECAR_ADDITIONAL_IMAGES">
+                  BK_SIDECAR_ADDITIONAL_IMAGES {{ config_badges('BK_SIDECAR_ADDITIONAL_IMAGES') }}
+                  <div class="text-muted small">Show additional BrickLink images (detail-page carousel + extra cover sources)</div>
+                </label>
+              </div>
+            </div>
           </div>
 
           <h6 class="fw-bold text-secondary mb-3 mt-3">Set detail display</h6>
