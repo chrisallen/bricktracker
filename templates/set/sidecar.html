@@ -46,11 +46,11 @@
             {% if show_market %}
             <tr>
               <td>Worth now (new)</td>
-              <td class="text-end">{% if p.market_new is not none %}{{ '%.2f' | format(p.market_new) }} {{ p.market_currency }}{% else %}<span class="text-muted">—</span>{% endif %}</td>
+              <td class="text-end">{% if p.market_new is not none %}{{ '%.2f' | format(p.market_new) }} {{ p.market_currency }}{% if p.market_min is not none and p.market_max is not none %}<i class="ri-information-line ms-1 text-muted" title="Min {{ '%.2f' | format(p.market_min) }} / Max {{ '%.2f' | format(p.market_max) }} {{ p.market_currency }}"></i>{% endif %}{% else %}<span class="text-muted">—</span>{% endif %}</td>
             </tr>
             <tr>
               <td>Worth now (used)</td>
-              <td class="text-end">{% if p.market_used is not none %}{{ '%.2f' | format(p.market_used) }} {{ p.market_currency }}{% else %}<span class="text-muted">—</span>{% endif %}</td>
+              <td class="text-end">{% if p.market_used is not none %}{{ '%.2f' | format(p.market_used) }} {{ p.market_currency }}{% if p.market_used_min is not none and p.market_used_max is not none %}<i class="ri-information-line ms-1 text-muted" title="Min {{ '%.2f' | format(p.market_used_min) }} / Max {{ '%.2f' | format(p.market_used_max) }} {{ p.market_currency }}"></i>{% endif %}{% else %}<span class="text-muted">—</span>{% endif %}</td>
             </tr>
             {% endif %}
             {% if show_msrp and p.savings_vs_msrp is defined %}
