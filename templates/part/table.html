@@ -6,7 +6,8 @@
     {{ table.header(color=true, quantity=not no_quantity, sets=all, minifigures=all, checked=not all and not read_only, hamburger_menu=not all and not read_only, accordion_id=accordion_id|default(''), filters=filters|default(false)) }}
     <tbody>
       {% for item in table_collection %}
-      <tr>
+      {# tojson escapes ' but not ", so the attribute must be single-quoted #}
+      <tr {% if bag_breakdown is defined and bag_breakdown and item.html_id() in bag_breakdown %}data-bags='{{ bag_breakdown[item.html_id()] | tojson }}'{% endif %}>
         {{ table.image(item.url_for_image(), caption=item.fields.name, alt=item.fields.part, accordion=solo) }}
         <td data-sort="{{ item.fields.name }}" data-col="name">
           <a class="text-reset" href="{{ item.url() }}">{{ item.fields.name }}</a>

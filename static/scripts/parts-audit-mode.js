@@ -17,6 +17,12 @@ class PartsAuditMode {
         this.index = 0;
         this.mode = 'missing'; // 'missing' or 'found'
 
+        // Bag tables (set/bags.html) carry their own per-bag inputs, so the
+        // audit works exactly like on the parts table; the flag only tweaks
+        // the modal wording (spares note, unmatched-row message).
+        const accordion = document.getElementById(accordionId);
+        this.bagMode = !!(accordion && accordion.querySelector('table[data-bag-table]'));
+
         this.setupModal();
         this.cacheElements();
         this.setupEventListeners();
@@ -49,6 +55,14 @@ class PartsAuditMode {
                             </div>
                             <div class="mb-1">Quantity <span id="audit-qty">0</span></div>
                             <div class="mb-3"><span id="audit-name" class="fs-6"></span> <span id="audit-color" class="text-secondary ms-1"></span></div>
+
+                            <div id="audit-bags" class="mb-1 d-none">
+                                <table class="table table-sm table-bordered w-auto mx-auto mb-1">
+                                    <thead><tr><th>Bag</th><th>Qty</th></tr></thead>
+                                    <tbody id="audit-bags-body"></tbody>
+                                </table>
+                            </div>
+                            <div id="audit-spares-note" class="text-secondary small mb-2 d-none">Spare parts are not included in bag quantities.</div>
 
                             <div id="audit-input-area">
                                 <div class="btn-group mb-2" role="group" aria-label="Audit mode">
@@ -94,6 +108,9 @@ class PartsAuditMode {
             name: document.getElementById('audit-name'),
             color: document.getElementById('audit-color'),
             qty: document.getElementById('audit-qty'),
+            bags: document.getElementById('audit-bags'),
+            bagsBody: document.getElementById('audit-bags-body'),
+            sparesNote: document.getElementById('audit-spares-note'),
             inputArea: document.getElementById('audit-input-area'),
             noInput: document.getElementById('audit-no-input'),
             modeMissing: document.getElementById('audit-mode-missing'),
@@ -236,19 +253,56 @@ class PartsAuditMode {
             return;
         }
 
-        // Image: prefer the full-size lightbox target, fall back to the thumbnail.
+        // Image: prefer the full-size lightbox target, fall back to the
+        // thumbnail. Unmatched bag parts have none; hide the broken box.
         const link = row.querySelector('a[data-lightbox]');
         const img = row.querySelector('td img');
-        this.el.image.src = (link && link.getAttribute('href')) || (img && img.getAttribute('src')) || '';
+        const imageSrc = (link && link.getAttribute('href')) || (img && img.getAttribute('src')) || '';
+        this.el.image.src = imageSrc;
+        this.el.image.classList.toggle('d-none', !imageSrc);
 
+        // Unmatched bag parts render as plain text without a link.
         const nameLink = row.querySelector('[data-col="name"] a');
-        this.el.name.textContent = nameLink ? nameLink.textContent.trim() : '';
+        const nameCell = row.querySelector('[data-col="name"]');
+        this.el.name.textContent = nameLink
+            ? nameLink.textContent.trim()
+            : (nameCell ? nameCell.textContent.trim() : '');
 
         const colorCell = row.querySelector('[data-col="color"]');
         this.el.color.innerHTML = colorCell ? colorCell.innerHTML : '';
 
         const needed = this.neededQty(row);
         this.el.qty.textContent = needed;
+
+        // Per-part bag breakdown (set pages with sidecar bag data). Bag-audit
+        // rows never carry data-bags, so this stays hidden there.
+        let bagData = null;
+        if (row.dataset.bags) {
+            try {
+                bagData = JSON.parse(row.dataset.bags);
+            } catch (e) {
+                bagData = null;
+            }
+        }
+        if (bagData && bagData.length) {
+            this.el.bagsBody.replaceChildren(...bagData.map(([bag, qty]) => {
+                const tr = document.createElement('tr');
+                const bagCell = document.createElement('td');
+                bagCell.textContent = bag;
+                const qtyCell = document.createElement('td');
+                qtyCell.textContent = qty;
+                tr.append(bagCell, qtyCell);
+                return tr;
+            }));
+            this.el.bags.classList.remove('d-none');
+        } else {
+            this.el.bags.classList.add('d-none');
+        }
+
+        // Bag inventories never list spare parts, so say so whenever bag
+        // quantities are on screen.
+        const showSparesNote = (bagData && bagData.length > 0) || this.bagMode;
+        this.el.sparesNote.classList.toggle('d-none', !showSparesNote);
 
         // Toggle the input area depending on whether this table tracks missing.
         const missing = this.missingInput(row);

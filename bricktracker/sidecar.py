@@ -363,6 +363,12 @@ class BrickSidecar(object):
     def get_images(ref: str, /) -> dict[str, Any] | None:
         return BrickSidecar._get_json('/sets/{ref}/images'.format(ref=ref))
 
+    # GET /sets/{ref}/bags -> {'set': ..., 'bag_count': n, 'bags': [...]},
+    # or None (the sidecar 404s when the set has no bag inventory).
+    @staticmethod
+    def get_bags(ref: str, /) -> dict[str, Any] | None:
+        return BrickSidecar._get_json('/sets/{ref}/bags'.format(ref=ref))
+
     # Build a BrickTracker-served proxy URL for an <img src>. The browser hits
     # BrickTracker (same origin), which fetches the image from the sidecar
     # server-side. This works even when the sidecar is only reachable on the

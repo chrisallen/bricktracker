@@ -4,9 +4,10 @@ from datetime import datetime, timezone
 from html.parser import HTMLParser
 from typing import Any
 
-from flask import current_app
+from flask import current_app, url_for
 from markupsafe import Markup, escape
 
+from .bag_part import list_state as list_bag_part_state
 from .sidecar import BrickSidecar
 
 logger = logging.getLogger(__name__)
@@ -65,6 +66,8 @@ def summarize(
         # Brickset "Notes" blurb (web-scraped; contains light HTML). Sanitised
         # like the description so it renders safely.
         'notes': _description(data.get('notes')),
+        # Whether the sidecar holds a per-bag part inventory for this set.
+        'has_bags': bool(data.get('has_bags')),
     }
 
     # Retired status from the exit date. exit_date is the full formatted date
@@ -129,6 +132,148 @@ def summarize(
     summary['prices'] = prices
 
     return summary
+
+
+# Join the sidecar's per-bag inventory onto the set's part rows. Returns
+# (bags, breakdown):
+# - bags: template-ready [{'number', 'is_extra', 'parts': [...]}] in sidecar
+#   order, each part carrying its per-bag quantity, display data, the stored
+#   per-bag checked/missing state with its changer prefixes/urls, and the DOM
+#   id of the main row's missing input (the sum-group key for the client-side
+#   missing sync).
+# - breakdown: part row html_id() -> [[bag number, quantity], ...] pairs, for
+#   the bag column in the normal audit modal.
+# Degrades to (None, {}) whenever the sidecar is off or has no bag data; the
+# bag composition is joined at render time and never persisted (only the
+# per-bag progress lives in bricktracker_bag_parts).
+def bag_inventory(
+    brickset: Any,
+    parts: Any,
+    /,
+) -> tuple[list[dict[str, Any]] | None, dict[str, list[list[Any]]]]:
+    if not BrickSidecar.enabled():
+        return None, {}
+
+    payload = BrickSidecar.get_bags(brickset.fields.set)
+    if not payload or not payload.get('bags'):
+        return None, {}
+
+    # One BrickTracker row per (part, color, spare) for the whole set; bag
+    # entries reference it many-to-one via (part_ex_id, color_id).
+    index: dict[tuple[str, int, int], Any] = {
+        (str(row.fields.part), int(row.fields.color), int(row.fields.spare)): row  # noqa: E501
+        for row in parts
+    }
+
+    # Stored per-bag progress, keyed (bag, part, color, spare)
+    state = list_bag_part_state(brickset.fields.id)
+
+    # The changer prefixes keep the "-missing-"/"-checked-" fragments so the
+    # bulk operations and audit selectors match, and a per-bag "bag{i}"
+    # namespace so ids stay unique across bags.
+    def changer(index: int, kind: str, part: str, color: int, spare: int, bag: str) -> dict[str, Any]:  # noqa: E501
+        return {
+            'prefix_{kind}'.format(kind=kind): 'bag{index}-part-{kind}-{part}-{color}-{spare}'.format(  # noqa: E501
+                index=index, kind=kind, part=part, color=color, spare=spare,
+            ),
+            'url_{kind}'.format(kind=kind): url_for(
+                'set.bag_part_state',
+                id=brickset.fields.id,
+                bag=bag,
+                part=part,
+                color=color,
+                spare=spare,
+                state=kind,
+            ),
+        }
+
+    bags: list[dict[str, Any]] = []
+    breakdown: dict[str, list[list[Any]]] = {}
+
+    for i, bag in enumerate(payload['bags'], start=1):
+        number = str(bag.get('displayNumbers') or bag.get('bagNumber') or '?')
+        # "Extra" bags sometimes hold the spares, so try spare rows first
+        # there (with a fallback either way, see spare_order below)
+        is_extra = number.lower() == 'extra'
+        spare_order = (1, 0) if is_extra else (0, 1)
+
+        bag_parts: list[dict[str, Any]] = []
+        for part in bag.get('parts') or []:
+            part_ref = str(part.get('part_ex_id') or part.get('bl_part_id') or '')  # noqa: E501
+            try:
+                color = int(part.get('color_id'))
+            except (TypeError, ValueError):
+                color = -1
+            quantity = part.get('quantity') or 0
+
+            row = None
+            for spare in spare_order:
+                row = index.get((part_ref, color, spare))
+                if row is not None:
+                    break
+
+            if row is not None:
+                part_state = state.get(
+                    (number, row.fields.part, row.fields.color, row.fields.spare),  # noqa: E501
+                    {},
+                )
+                entry: dict[str, Any] = {
+                    'quantity': quantity,
+                    'name': row.fields.name,
+                    'color': row.fields.color,
+                    'color_name': row.fields.color_name,
+                    'color_rgb': row.fields.color_rgb,
+                    'spare': bool(row.fields.spare),
+                    'image_url': row.url_for_image(),
+                    'url': row.url(),
+                    # Final DOM id of the main row's missing input
+                    # (macro/form.html renders "{prefix}-{id}").
+                    'missing_input_id': '{prefix}-{id}'.format(
+                        prefix=row.html_id('missing'),
+                        id=row.fields.id,
+                    ),
+                    'checked': part_state.get('checked', False),
+                    # None renders an empty input, like the main table
+                    'missing': part_state.get('missing') or None,
+                }
+                entry.update(changer(i, 'missing', row.fields.part, row.fields.color, row.fields.spare, number))  # noqa: E501
+                entry.update(changer(i, 'checked', row.fields.part, row.fields.color, row.fields.spare, number))  # noqa: E501
+                bag_parts.append(entry)
+                breakdown.setdefault(row.html_id(), []).append(
+                    [number, quantity],
+                )
+            else:
+                # No matching row (e.g. a part the import assigned to a
+                # minifigure): display-only data from the sidecar, but the
+                # per-bag progress is still stored (keyed by the sidecar
+                # part ref, spare=0). A negative color means the sidecar
+                # gave no usable identity, so the row gets no inputs.
+                part_state = state.get((number, part_ref, color, 0), {})
+                entry = {
+                    'quantity': quantity,
+                    'name': part_ref or str(part.get('partId') or '?'),
+                    'color': None,
+                    'color_name': part.get('colorName'),
+                    'color_rgb': str(part.get('colorHex') or '').lstrip('#') or None,  # noqa: E501
+                    'spare': False,
+                    'image_url': None,
+                    'url': None,
+                    'missing_input_id': None,
+                    'checked': part_state.get('checked', False),
+                    'missing': part_state.get('missing') or None,
+                }
+                if part_ref and color >= 0:
+                    entry.update(changer(i, 'missing', part_ref, color, 0, number))  # noqa: E501
+                    entry.update(changer(i, 'checked', part_ref, color, 0, number))  # noqa: E501
+                bag_parts.append(entry)
+
+        bags.append({
+            'number': number,
+            'is_extra': is_extra,
+            'parts': bag_parts,
+        })
+
+    return bags, breakdown
 
 
 # --- Helpers ------------------------------------------------------------

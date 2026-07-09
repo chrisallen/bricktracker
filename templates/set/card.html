@@ -1,4 +1,6 @@
-{% import 'macro/accordion.html' as accordion %}
+{# "with context" so includes inside the macros (part/table.html) can see
+   render kwargs like bag_breakdown #}
+{% import 'macro/accordion.html' as accordion with context %}
 {% import 'macro/badge.html' as badge %}
 {% import 'macro/card.html' as card %}
 {% import 'macro/form.html' as form %}
@@ -147,6 +149,9 @@
           {{ accordion.footer() }}
         {% endif %}
         {{ accordion.table(item.parts(), 'Parts', 'parts-inventory', 'set-details', 'part/table.html', icon='shapes-line', hamburger_menu=g.login.is_authenticated(), filters=true)}}
+        {% if sidecar_bags is defined and sidecar_bags %}
+          {% include 'set/bags.html' %}
+        {% endif %}
         {% for minifigure in item.minifigures() %}
           {{ accordion.table(minifigure.parts(), minifigure.fields.name, minifigure.fields.figure, 'set-details', 'part/table.html', quantity=minifigure.fields.quantity, icon='group-line', image=minifigure.url_for_image(), alt=minifigure.fields.figure, details=minifigure.url(), hamburger_menu=g.login.is_authenticated())}}
         {% endfor %}

@@ -14,6 +14,7 @@ from flask_login import login_required
 from werkzeug.wrappers.response import Response
 
 from .exceptions import exception_handler
+from ..bag_part import update_state as update_bag_part_state
 from ..exceptions import ErrorException
 from ..minifigure import BrickMinifigure
 from ..pagination_helper import get_pagination_config, build_pagination_context, get_request_params
@@ -22,6 +23,7 @@ from ..rebrickable_image import RebrickableImage
 from ..rebrickable_set import RebrickableSet
 from ..set import BrickSet
 from ..sidecar import BrickSidecar
+from ..sidecar_set import bag_inventory as sidecar_bag_inventory
 from ..sidecar_set import summarize as sidecar_summarize
 from ..set_custom_field_list import BrickSetCustomFieldList
 from ..set_list import BrickSetList, set_metadata_lists
@@ -390,6 +392,15 @@ def details(*, id: str) -> str:
         fetch_price=current_app.config.get('SIDECAR_AUTO_FETCH_PRICE', False),
     )
 
+    # Per-bag inventory (BrickData): joined onto the part rows at render
+    # time, never persisted. Any failure degrades to "no bag UI".
+    sidecar_bags, bag_breakdown = None, {}
+    if sidecar_summary and sidecar_summary.get('has_bags'):
+        sidecar_bags, bag_breakdown = sidecar_bag_inventory(
+            item,
+            item.parts(),
+        )
+
     # Check if there are multiple instances of this set
     all_instances = BrickSetList()
     # Load all sets with metadata context for tags, owners, etc.
@@ -415,6 +426,8 @@ def details(*, id: str) -> str:
             open_instructions=request.args.get('open_instructions'),
             brickset_statuses=BrickSetStatusList.list(all=True),
             sidecar_summary=sidecar_summary,
+            sidecar_bags=sidecar_bags,
+            bag_breakdown=bag_breakdown,
             **set_metadata_lists(as_class=True)
         )
     else:
@@ -425,6 +438,8 @@ def details(*, id: str) -> str:
             open_instructions=request.args.get('open_instructions'),
             brickset_statuses=BrickSetStatusList.list(all=True),
             sidecar_summary=sidecar_summary,
+            sidecar_bags=sidecar_bags,
+            bag_breakdown=bag_breakdown,
             **set_metadata_lists(as_class=True)
         )
 
@@ -517,6 +532,47 @@ def checked_part(
     ))
 
     return jsonify({'checked': checked})
+
+
+# Update per-bag part state (sidecar bag inventory walkthrough)
+@set_page.route('/<id>/bags/<bag>/parts/<part>/<int:color>/<int:spare>/<state>', methods=['POST'])  # noqa: E501
+@login_required
+@exception_handler(__file__, json=True)
+def bag_part_state(
+    *,
+    id: str,
+    bag: str,
+    part: str,
+    color: int,
+    spare: int,
+    state: str,
+) -> Response:
+    # Validates the set exists (raises otherwise)
+    brickset = BrickSet().select_specific(id)
+
+    value = update_bag_part_state(
+        brickset.fields.id,
+        bag,
+        part,
+        color,
+        spare,
+        state,
+        request.json,
+    )
+
+    # Info
+    logger.info('Set {set} ({id}): updated bag {bag} part ({part} color: {color}, spare: {spare}) {state} to {value}'.format(  # noqa: E501
+        set=brickset.fields.set,
+        id=brickset.fields.id,
+        bag=bag,
+        part=part,
+        color=color,
+        spare=spare,
+        state=state,
+        value=value,
+    ))
+
+    return jsonify({state: value})
 
 
 # Refresh a set
