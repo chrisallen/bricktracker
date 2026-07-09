@@ -267,6 +267,7 @@ def bulk_edit() -> Response:
     has_purchase_location = 'purchase_location' in changes
     has_purchase_date = 'purchase_date' in changes
     has_purchase_price = 'purchase_price' in changes
+    has_description = 'description' in changes
 
     for set_id in set_ids:
         brickset = BrickSet().select_light(set_id)
@@ -308,6 +309,11 @@ def bulk_edit() -> Response:
         if has_purchase_price:
             brickset.update_purchase_price(
                 {'value': changes.get('purchase_price', '')}
+            )
+
+        if has_description:
+            brickset.update_description(
+                {'value': changes.get('description', '')}
             )
 
         for metadata_id, value in custom_fields.items():

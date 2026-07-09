@@ -226,7 +226,7 @@
         openBtn.addEventListener("click", () => {
             if (selected.size === 0) return;
             computePanel(Array.from(selected));
-            bootstrap.Offcanvas.getOrCreateInstance(panel).show();
+            bootstrap.Modal.getOrCreateInstance(panel).show();
         });
 
         // --- Apply ----------------------------------------------------------
@@ -278,6 +278,8 @@
                     changes.purchase_price = ctrl.value;
                 } else if (field === "purchase_date") {
                     changes.purchase_date = dateInputToSlash(ctrl.value);
+                } else if (field === "description") {
+                    changes.description = ctrl.value;
                 }
             });
 

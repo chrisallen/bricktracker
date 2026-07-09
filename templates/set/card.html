@@ -21,6 +21,7 @@
     {% endif %}
     {% if item.fields.purchase_date is not none %}data-purchase-date="{{ item.fields.purchase_date }}"{% endif %}
     {% if item.fields.purchase_price is not none %}data-purchase-price="{{ item.fields.purchase_price }}"{% endif %}
+    {% if item.fields.description is not none and item.fields.description | trim %}data-description="{{ item.fields.description }}"{% endif %}
     data-has-purchase-location="{{ item.fields.purchase_location is not none | int }}"
     {% if item.fields.purchase_location is not none %}
       data-purchase-location="{{ item.fields.purchase_location }}"

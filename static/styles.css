@@ -395,22 +395,43 @@ body.bulk-select-mode #grid .card {
     display: none;
     position: absolute;
     top: 0.5rem;
-    left: 0.5rem;
+    right: 0.5rem;
     z-index: 5;
+    line-height: 1;
 }
 
 .bulk-select-check .form-check-input {
     width: 1.4rem;
     height: 1.4rem;
+    margin: 0;
+    /* A halo in the body background colour lifts the checkbox off the header
+       so it reads as a floating control rather than overlapping content.
+       Don't set background-color here, it would override the Bootstrap
+       :checked fill and make ticked boxes look empty. */
+    box-shadow: 0 0 0 2px var(--bs-body-bg);
 }
 
 body.bulk-select-mode .bulk-select-check {
     display: block;
 }
 
-#grid .card.bulk-selected {
-    outline: 3px solid var(--bs-primary);
-    outline-offset: -3px;
+/* Always reserve room on the right of grid card headers so the name truncates
+   at a fixed point. Entering select mode never reflows it, and the floating
+   checkbox sits in this gutter without covering the name. */
+#grid .card > .card-header {
+    padding-right: 2.4rem;
+}
+
+/* Selection ring drawn as an overlay so it paints above full-bleed children
+   (cover image, badge row) instead of being hidden behind them. */
+#grid .card.bulk-selected::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 3px solid var(--bs-primary);
+    border-radius: var(--bs-card-border-radius);
+    pointer-events: none;
+    z-index: 4;
 }
 
 .bulk-control.bulk-touched {
