@@ -18,7 +18,7 @@ docs/
 LICENSE
 *.md
 *.sample
-.code-workspace
+*.code-workspace
 
 # Temporary
 *.csv
