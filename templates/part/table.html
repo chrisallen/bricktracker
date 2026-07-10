@@ -54,23 +54,18 @@
             {% if show_missing_menu or show_checked_menu or show_quick_add %}
               <td class="text-end">
                 {% if show_quick_add %}
-                  <div class="dropdown">
-                    <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                      <i class="ri-more-2-fill"></i>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                      <li>
-                        <a class="dropdown-item quick-add-individual-part" href="#"
-                           data-part="{{ item.fields.part }}"
-                           data-color="{{ item.fields.color }}"
-                           data-name="{{ item.fields.name }}"
-                           data-color-name="{{ item.fields.color_name }}"
-                           data-image="{{ item.url_for_image() }}">
-                          <i class="ri-add-line me-2"></i>Add to individual parts
-                        </a>
-                      </li>
-                    </ul>
-                  </div>
+                  {# The shared click handler in quick-add-individual-part.js
+                     picks this up; keep the row light, big sets render
+                     hundreds of these #}
+                  <button type="button" class="btn btn-sm btn-outline-secondary quick-add-individual-part"
+                          title="Add to individual parts" aria-label="Add to individual parts"
+                          data-part="{{ item.fields.part }}"
+                          data-color="{{ item.fields.color }}"
+                          data-name="{{ item.fields.name }}"
+                          data-color-name="{{ item.fields.color_name }}"
+                          data-image="{{ item.url_for_image() }}">
+                    <i class="ri-add-line"></i>
+                  </button>
                 {% endif %}
               </td>
             {% endif %}
