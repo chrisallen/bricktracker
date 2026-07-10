@@ -383,13 +383,13 @@ def details(*, id: str) -> str:
     # Load the specific set
     item = BrickSet().select_specific(id)
 
-    # Sidecar enrichment + price comparison. Cache-only by default; when
-    # SIDECAR_AUTO_FETCH_PRICE is on, the market value is fetched on view
-    # (TTL-aware) so the user does not have to press "Fetch value".
+    # Sidecar enrichment + price comparison, always cache-only here: when
+    # SIDECAR_AUTO_FETCH_PRICE is on, the browser refreshes the price card
+    # in the background after load (price_card(), TTL-aware), so the
+    # potentially multi-second BrickLink scrape never blocks a page render.
     sidecar_summary = sidecar_summarize(
         item.fields.set,
         purchase_price=item.fields.purchase_price,
-        fetch_price=current_app.config.get('SIDECAR_AUTO_FETCH_PRICE', False),
     )
 
     # Load the parts once; reused by the bag join and the template
@@ -540,6 +540,26 @@ def checked_part(
     ))
 
     return jsonify({'checked': checked})
+
+
+# TTL-aware market value refresh, fetched by the browser after the page
+# renders (SIDECAR_AUTO_FETCH_PRICE). Returns the re-rendered price card.
+@set_page.route('/<id>/price/card', methods=['GET'])
+@exception_handler(__file__)
+def price_card(*, id: str) -> str:
+    item = BrickSet().select_specific(id)
+
+    sidecar_summary = sidecar_summarize(
+        item.fields.set,
+        purchase_price=item.fields.purchase_price,
+        fetch_price=True,
+    )
+
+    return render_template(
+        'set/price_card.html',
+        item=item,
+        sidecar_summary=sidecar_summary,
+    )
 
 
 # Lazy-loaded bag tables fragment, fetched when the Bags accordion is

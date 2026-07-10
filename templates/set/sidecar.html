@@ -14,72 +14,13 @@
     </div>
   {% endif %}
 
-  {# --- Price comparison: paid / retail / worth now. Each row group has its own
-       live toggle; the whole card hides when all three are off. --- #}
-  {% set show_paid = config['SIDECAR_SHOW_PRICE_PAID'] %}
-  {% set show_msrp = config['SIDECAR_SHOW_PRICE_MSRP'] %}
-  {% set show_market = config['SIDECAR_SHOW_PRICE_MARKET'] %}
-  {% if (show_paid or show_msrp or show_market) and (p.paid is not none or p.msrp is not none or p.msrp_inflated is not none or p.has_market) %}
-    <div class="card-body border-bottom-0 pt-0">
-      <div class="border rounded p-2">
-        <div class="fw-bold small mb-1"><i class="ri-scales-line me-1"></i>Price comparison</div>
-        <table class="table table-sm mb-1 small">
-          <tbody>
-            {% if show_paid %}
-            <tr>
-              <td>Paid</td>
-              <td class="text-end">{% if p.paid is not none %}{{ '%.2f' | format(p.paid) }} {{ config['PURCHASE_CURRENCY'] }}{% else %}<span class="text-muted">—</span>{% endif %}</td>
-            </tr>
-            {% endif %}
-            {% if show_msrp %}
-            <tr>
-              <td>Retail (MSRP)</td>
-              <td class="text-end">{% if p.msrp is not none %}{{ '%.2f' | format(p.msrp) }} {{ p.msrp_currency }}{% else %}<span class="text-muted">—</span>{% endif %}</td>
-            </tr>
-            {% if p.msrp_inflated is not none %}
-            <tr>
-              <td>Retail (inflated)<i class="ri-information-line ms-1 text-muted" title="RRP adjusted for inflation"></i></td>
-              <td class="text-end text-muted">{{ '%.2f' | format(p.msrp_inflated) }} {{ p.msrp_inflated_currency }}</td>
-            </tr>
-            {% endif %}
-            {% endif %}
-            {% if show_market %}
-            <tr>
-              <td>Worth now (new)</td>
-              <td class="text-end">{% if p.market_new is not none %}{{ '%.2f' | format(p.market_new) }} {{ p.market_currency }}{% if p.market_min is not none and p.market_max is not none %}<i class="ri-information-line ms-1 text-muted" title="Min {{ '%.2f' | format(p.market_min) }} / Max {{ '%.2f' | format(p.market_max) }} {{ p.market_currency }}"></i>{% endif %}{% else %}<span class="text-muted">—</span>{% endif %}</td>
-            </tr>
-            <tr>
-              <td>Worth now (used)</td>
-              <td class="text-end">{% if p.market_used is not none %}{{ '%.2f' | format(p.market_used) }} {{ p.market_currency }}{% if p.market_used_min is not none and p.market_used_max is not none %}<i class="ri-information-line ms-1 text-muted" title="Min {{ '%.2f' | format(p.market_used_min) }} / Max {{ '%.2f' | format(p.market_used_max) }} {{ p.market_currency }}"></i>{% endif %}{% else %}<span class="text-muted">—</span>{% endif %}</td>
-            </tr>
-            {% endif %}
-            {% if show_msrp and p.savings_vs_msrp is defined %}
-              <tr class="border-top">
-                <td>Saved vs retail</td>
-                <td class="text-end {% if p.savings_vs_msrp >= 0 %}text-success{% else %}text-danger{% endif %}">{{ '%+.2f' | format(p.savings_vs_msrp) }}</td>
-              </tr>
-            {% endif %}
-            {% if show_paid and p.gain_vs_paid is defined %}
-              <tr>
-                <td>Change vs paid <span class="text-muted">({{ p.market_basis or 'used' }})</span></td>
-                <td class="text-end {% if p.gain_vs_paid >= 0 %}text-success{% else %}text-danger{% endif %}">{{ '%+.2f' | format(p.gain_vs_paid) }}</td>
-              </tr>
-            {% endif %}
-          </tbody>
-        </table>
-        <div class="d-flex justify-content-between align-items-center">
-          <small class="text-muted">
-            {% if p.has_market and p.market_fetched_at %}Value fetched {{ p.market_fetched_at }}{% elif not p.has_market %}Market value not fetched yet{% endif %}
-          </small>
-          {% if g.login.is_authenticated() %}
-            <form action="{{ item.url_for_value_refresh() }}" method="post" class="d-inline">
-              <button type="submit" class="btn btn-sm btn-outline-primary"><i class="ri-refresh-line"></i> {% if p.has_market %}Refresh value{% else %}Fetch value{% endif %}</button>
-            </form>
-          {% endif %}
-        </div>
-      </div>
-    </div>
-  {% endif %}
+  {# --- Price comparison: paid / retail / worth now. Rendered cache-only at
+       page load; when SIDECAR_AUTO_FETCH_PRICE is on, the browser refreshes
+       this card in the background (set.price_card, TTL-aware) so the
+       potentially slow BrickLink scrape never blocks the page render. --- #}
+  <div id="sidecar-price-card" {% if config['SIDECAR_AUTO_FETCH_PRICE'] %}data-price-src="{{ url_for('set.price_card', id=item.fields.id) }}"{% endif %}>
+    {% include 'set/price_card.html' %}
+  </div>
 
   {# --- Sidecar description, styled like notes. This is the official set blurb,
        distinct from the user's own notes, so it is always shown when present. --- #}
