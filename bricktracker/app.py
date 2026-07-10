@@ -1,3 +1,4 @@
+import gzip
 import logging
 import os
 import sys
@@ -5,7 +6,7 @@ import time
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-from flask import current_app, Flask, g
+from flask import current_app, Flask, g, request
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 from bricktracker.configuration_list import BrickConfigurationList
@@ -136,6 +137,31 @@ def setup_app(app: Flask) -> None:
         x_port=1,
         x_prefix=1,
     )
+
+    # Gzip large text responses (a big set page is ~7 MB of HTML, ~0.3 MB
+    # gzipped). gunicorn does not compress and not every deployment sits
+    # behind a compressing reverse proxy. Stdlib gzip covers this without
+    # pulling in flask-compress.
+    @app.after_request
+    def compress_response(response):  # type: ignore[no-untyped-def]
+        if (
+            response.status_code == 200
+            and not response.direct_passthrough
+            and response.content_length is not None
+            and response.content_length > 4096
+            and 'gzip' not in (response.headers.get('Content-Encoding') or '')
+            and response.mimetype in (
+                'text/html', 'text/css', 'text/plain',
+                'application/json', 'text/javascript',
+                'application/javascript', 'image/svg+xml',
+            )
+            and 'gzip' in request.accept_encodings
+        ):
+            response.set_data(gzip.compress(response.get_data(), 5))
+            response.headers['Content-Encoding'] = 'gzip'
+            response.headers.add('Vary', 'Accept-Encoding')
+
+        return response
 
     # Register errors
     app.register_error_handler(404, error_404)
