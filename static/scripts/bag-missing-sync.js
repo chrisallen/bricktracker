@@ -49,3 +49,44 @@
         document.addEventListener('input', handle);
     });
 })();
+
+// Lazy-load the bag tables the first time the Bags accordion is opened: the
+// page only ships the accordion shell, the tables (hundreds of rows/inputs)
+// come from the bags_tables fragment. After inserting, re-run the idempotent
+// wiring helpers. The sortable library and quick-add already work through
+// document-level delegation, so they pick the new tables up on their own.
+(() => {
+    document.addEventListener('DOMContentLoaded', () => {
+        const container = document.getElementById('bags-lazy');
+        const collapse = document.getElementById('bags-inventory');
+        if (!container || !collapse) {
+            return;
+        }
+
+        let loaded = false;
+        collapse.addEventListener('show.bs.collapse', async (e) => {
+            // Nested bag collapses bubble the same event up
+            if (loaded || e.target !== collapse) {
+                return;
+            }
+            loaded = true;
+
+            try {
+                const response = await fetch(container.dataset.bagsSrc);
+                if (!response.ok) {
+                    throw new Error(`Response status: ${response.status}`);
+                }
+                container.innerHTML = await response.text();
+
+                setup_changers();
+                window.initPartsTableFilters?.();
+                window.initPartsBulkOperations?.();
+                window.initPartsAuditModes?.();
+            } catch (error) {
+                console.log(error.message);
+                loaded = false; // allow retry on next open
+                container.innerHTML = '<div class="text-center text-danger p-3"><i class="ri-alert-line"></i> Could not load the bags. Close and reopen to retry.</div>';
+            }
+        });
+    });
+})();

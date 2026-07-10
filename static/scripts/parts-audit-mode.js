@@ -415,9 +415,17 @@ class PartsAuditMode {
 PartsAuditMode.active = null;
 
 // Wire up an instance per accordion that exposes an audit menu item.
-document.addEventListener('DOMContentLoaded', () => {
+// Idempotent: call again after inserting new tables (lazy-loaded bags).
+const initPartsAuditModes = () => {
     document.querySelectorAll('[id^="audit-mode-"]').forEach(item => {
+        if (item.dataset.auditTriggerWired === 'true') {
+            return;
+        }
+        item.dataset.auditTriggerWired = 'true';
         const accordionId = item.id.replace('audit-mode-', '');
         new PartsAuditMode(accordionId);
     });
-});
+};
+window.initPartsAuditModes = initPartsAuditModes;
+
+document.addEventListener('DOMContentLoaded', initPartsAuditModes);

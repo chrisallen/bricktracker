@@ -392,13 +392,19 @@ def details(*, id: str) -> str:
         fetch_price=current_app.config.get('SIDECAR_AUTO_FETCH_PRICE', False),
     )
 
+    # Load the parts once; reused by the bag join and the template
+    parts = item.parts()
+
     # Per-bag inventory (BrickData): joined onto the part rows at render
     # time, never persisted. Any failure degrades to "no bag UI".
+    # tables=False: only the bag list + audit breakdown are needed here; the
+    # bag tables themselves are lazy-loaded via bags_tables() on first open.
     sidecar_bags, bag_breakdown = None, {}
     if sidecar_summary and sidecar_summary.get('has_bags'):
         sidecar_bags, bag_breakdown = sidecar_bag_inventory(
             item,
-            item.parts(),
+            parts,
+            tables=False,
         )
 
     # Check if there are multiple instances of this set
@@ -428,6 +434,7 @@ def details(*, id: str) -> str:
             sidecar_summary=sidecar_summary,
             sidecar_bags=sidecar_bags,
             bag_breakdown=bag_breakdown,
+            set_parts=parts,
             **set_metadata_lists(as_class=True)
         )
     else:
@@ -440,6 +447,7 @@ def details(*, id: str) -> str:
             sidecar_summary=sidecar_summary,
             sidecar_bags=sidecar_bags,
             bag_breakdown=bag_breakdown,
+            set_parts=parts,
             **set_metadata_lists(as_class=True)
         )
 
@@ -532,6 +540,22 @@ def checked_part(
     ))
 
     return jsonify({'checked': checked})
+
+
+# Lazy-loaded bag tables fragment, fetched when the Bags accordion is
+# first opened (keeps ~half the DOM out of the initial page load)
+@set_page.route('/<id>/bags/tables', methods=['GET'])
+@exception_handler(__file__)
+def bags_tables(*, id: str) -> str:
+    item = BrickSet().select_specific(id)
+
+    sidecar_bags, _ = sidecar_bag_inventory(item, item.parts())
+
+    return render_template(
+        'set/bags_tables.html',
+        item=item,
+        sidecar_bags=sidecar_bags or [],
+    )
 
 
 # Update per-bag part state (sidecar bag inventory walkthrough)

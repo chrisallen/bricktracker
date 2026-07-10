@@ -201,12 +201,20 @@ class BrickChanger {
     }
 }
 
-// Helper to setup the changer
+// Helper to setup the changer. Safe to call again after inserting new
+// content (e.g. the lazy-loaded bag tables): already-wired elements are
+// skipped so listeners never double up.
 const setup_changers = () => document.querySelectorAll("*[data-changer-id]").forEach(
-    el => new BrickChanger(
-        el.dataset.changerPrefix,
-        el.dataset.changerId,
-        el.dataset.changerUrl,
-        el.dataset.changerParent
-    )
+    el => {
+        if (el.dataset.changerWired === "true") {
+            return;
+        }
+        el.dataset.changerWired = "true";
+        new BrickChanger(
+            el.dataset.changerPrefix,
+            el.dataset.changerId,
+            el.dataset.changerUrl,
+            el.dataset.changerParent
+        );
+    }
 );

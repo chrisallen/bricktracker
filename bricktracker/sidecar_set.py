@@ -150,6 +150,8 @@ def bag_inventory(
     brickset: Any,
     parts: Any,
     /,
+    *,
+    tables: bool = True,
 ) -> tuple[list[dict[str, Any]] | None, dict[str, list[list[Any]]]]:
     if not BrickSidecar.enabled():
         return None, {}
@@ -165,8 +167,12 @@ def bag_inventory(
         for row in parts
     }
 
+    # tables=False is the cheap page-render mode: only the audit breakdown
+    # and the bag list (for the accordion header) are built; the heavy
+    # per-part table data (incl. state query and thousands of url_for calls)
+    # is deferred to the lazy fragment request.
     # Stored per-bag progress, keyed (bag, part, color, spare)
-    state = list_bag_part_state(brickset.fields.id)
+    state = list_bag_part_state(brickset.fields.id) if tables else {}
 
     # The changer prefixes keep the "-missing-"/"-checked-" fragments so the
     # bulk operations and audit selectors match, and a per-bag "bag{i}"
@@ -211,6 +217,14 @@ def bag_inventory(
                 row = index.get((part_ref, color, spare))
                 if row is not None:
                     break
+
+            if row is not None and not tables:
+                breakdown.setdefault(row.html_id(), []).append(
+                    [number, quantity],
+                )
+                continue
+            elif not tables:
+                continue
 
             if row is not None:
                 part_state = state.get(

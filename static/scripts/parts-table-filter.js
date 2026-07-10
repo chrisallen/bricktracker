@@ -183,8 +183,16 @@ class PartsTableFilter {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+// Idempotent: call again after inserting new tables (lazy-loaded bags).
+const initPartsTableFilters = () => {
     document.querySelectorAll('table[data-parts-filterable="true"]').forEach(table => {
+        if (table.dataset.filterWired === 'true') {
+            return;
+        }
+        table.dataset.filterWired = 'true';
         new PartsTableFilter(table);
     });
-});
+};
+window.initPartsTableFilters = initPartsTableFilters;
+
+document.addEventListener('DOMContentLoaded', initPartsTableFilters);

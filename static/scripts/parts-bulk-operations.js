@@ -177,12 +177,19 @@ class PartsBulkOperations {
     }
 }
 
-// Initialize bulk operations for all part accordions when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-    // Find all hamburger menus and initialize bulk operations
+// Initialize bulk operations for all part accordions.
+// Idempotent: call again after inserting new tables (lazy-loaded bags).
+const initPartsBulkOperations = () => {
     const hamburgerMenus = document.querySelectorAll('button[id^="hamburger-"]');
     hamburgerMenus.forEach(button => {
+        if (button.dataset.bulkWired === 'true') {
+            return;
+        }
+        button.dataset.bulkWired = 'true';
         const accordionId = button.id.replace('hamburger-', '');
         new PartsBulkOperations(accordionId);
     });
-});
+};
+window.initPartsBulkOperations = initPartsBulkOperations;
+
+document.addEventListener('DOMContentLoaded', initPartsBulkOperations);

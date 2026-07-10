@@ -1,0 +1,58 @@
+{% import 'macro/accordion.html' as accordion %}
+{% import 'macro/form.html' as form %}
+{% import 'macro/table.html' as table %}
+
+<div class="accordion accordion-flush" id="bags-list">
+  {% for bag in sidecar_bags %}
+    {% set bag_title = bag.number if bag.is_extra else 'Bag ' ~ bag.number %}
+    {% set bag_accordion_id = 'bag-' ~ loop.index %}
+    {{ accordion.header(bag_title, bag_accordion_id, 'bags-list', quantity=bag.parts | length, icon='archive-line', class='p-0') }}
+      <div class="p-2 border-bottom">
+        <small class="text-secondary">Spare parts are not included in bag inventories.</small>
+      </div>
+      <div class="table-responsive-sm">
+        <table class="table table-striped align-middle sortable mb-0" data-parts-filterable="true" data-bag-table="true">
+          {{ table.header(color=true, quantity=true, missing=true, damaged=false, checked=true, hamburger_menu=g.login.is_authenticated(), accordion_id=bag_accordion_id, filters=true) }}
+          <tbody>
+            {% for p in bag.parts %}
+            <tr {% if p.missing_input_id %}data-target-missing="{{ p.missing_input_id }}"{% endif %}>
+              {% if p.image_url %}
+                {{ table.image(p.image_url, caption=p.name, alt=p.name) }}
+              {% else %}
+                <td class="py-0"></td>
+              {% endif %}
+              <td data-sort="{{ p.name }}" data-col="name">
+                {% if p.url %}<a class="text-reset" href="{{ p.url }}">{{ p.name }}</a>{% else %}{{ p.name }}{% endif %}
+                {% if p.spare %}<span class="badge rounded-pill text-bg-warning fw-normal"><i class="ri-loop-left-line"></i> Spare</span>{% endif %}
+              </td>
+              <td data-sort="{{ p.color_name }}" data-col="color">
+                {% if p.color_rgb %}<span class="color-rgb color-rgb-table {% if p.color == 9999 %}color-any{% endif %} align-middle border border-black" {% if p.color != 9999 %}style="background-color: #{{ p.color_rgb }};"{% endif %}></span>{% endif %}
+                <span class="align-middle">{{ p.color_name }}</span>
+              </td>
+              <td data-col="quantity">{{ p.quantity }}</td>
+              {% if not config['HIDE_TABLE_MISSING_PARTS'] %}
+                <td data-sort="{{ p.missing or 0 }}" data-col="missing" class="table-td-input">
+                  {% if p.url_missing %}
+                    {{ form.input('Missing', item.fields.id, p.prefix_missing, p.url_missing, p.missing) }}
+                  {% endif %}
+                </td>
+              {% endif %}
+              {% if not config['HIDE_TABLE_CHECKED_PARTS'] %}
+                <td data-sort="{{ p.checked | int }}" data-col="checked" class="table-td-input">
+                  {% if p.url_checked %}
+                    <center>{{ form.checkbox('', item.fields.id, p.prefix_checked, p.url_checked, p.checked) }}</center>
+                  {% endif %}
+                </td>
+              {% endif %}
+              {% if g.login.is_authenticated() and (not config['HIDE_TABLE_MISSING_PARTS'] or not config['HIDE_TABLE_CHECKED_PARTS'] or (not config['DISABLE_QUICK_ADD_INDIVIDUAL_PARTS'] and not config['HIDE_INDIVIDUAL_PARTS'])) %}
+                {# Filler cell under the hamburger column so row/header cell counts match #}
+                <td></td>
+              {% endif %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {{ accordion.footer() }}
+  {% endfor %}
+</div>

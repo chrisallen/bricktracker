@@ -148,7 +148,7 @@
           </div>
           {{ accordion.footer() }}
         {% endif %}
-        {{ accordion.table(item.parts(), 'Parts', 'parts-inventory', 'set-details', 'part/table.html', icon='shapes-line', hamburger_menu=g.login.is_authenticated(), filters=true)}}
+        {{ accordion.table(set_parts if set_parts is defined else item.parts(), 'Parts', 'parts-inventory', 'set-details', 'part/table.html', icon='shapes-line', hamburger_menu=g.login.is_authenticated(), filters=true)}}
         {% if sidecar_bags is defined and sidecar_bags %}
           {% include 'set/bags.html' %}
         {% endif %}
