@@ -7,14 +7,19 @@
 - **BrickData integration**: New BrickData companion service that enriches set detail pages live with data from Brickset and BrickLink (description, extra metadata fields, pricing and badges). Data is pulled on demand rather than cached locally, so it always reflects the current source
   - Added BrickData settings with an admin UI and a live/restart split so most options apply without a container restart
 - **Box art cover override**: Browse a set's additional images from BrickData and pick any of them (including official box art) as the cover image
-- **Admin-defined custom fields per set** (#146): Admins can define typed custom fields that then appear on each set, with a mass-edit screen to apply metadata across multiple selected sets at once
+- **Admin-defined custom fields per set** (#146): Admins can define typed custom fields that then appear on each set, with a mass-edit screen to apply metadata across multiple selected sets at once.
 - **Retail (MSRP) price and savings** (#144): Set detail shows the lego.com retail price for a chosen region (US/UK/CA/DE) as a badge and in the price comparison, plus a "saved vs retail" figure (MSRP minus what you paid) per set and summed on the Statistics page
-- **BrickLink market value** (#160): Set detail shows the current BrickLink market value (new/used average, min/max on hover) pulled on demand from BrickData, with a collection-value estimate on the Statistics page
+- **BrickLink market value** (#160): Set detail shows the current BrickLink market value (new/used average, min/max on hover) pulled on demand from BrickData, with a collection-value estimate on the Statistics page. When `BK_SIDECAR_AUTO_FETCH_PRICE` is on, the market value now refreshes in the background after the page has already rendered, instead of holding up the initial page load while BrickLink is queried
 - **Instructions badge and stats** (#154): Sets with downloaded instruction files now show an "instructions" badge (respects `BK_HIDE_SET_INSTRUCTIONS` and the badge order), and the Statistics page counts how many sets have instructions and the total number of instruction files
 - **Statistics: price and instructions stats**: Added a paid / retail / market price comparison and instruction-related statistics
 - **Retirement dates for already-retired sets** (#37): The wishlist now falls back to BrickData for sets that the upcoming-retirements CSV does not cover, so long-retired sets show a retirement date instead of "Not found". Dates are colour-coded (yellow for upcoming, red for already retired), and the set detail "Retired" badge shows the full exit date when available
 - **New grid filters** (#141): Added parts-range, year-range and "None" filters to the set grid
 - **Audit mode for parts tables**: A new "Start audit" entry in the parts table header menu opens a focused, keyboard-driven popup that walks the visible parts one at a time (respecting the active filter and sort), showing a large image, the part name, color and needed quantity. Arrow keys move between parts, Enter/Space save and advance, and a Missing/Found toggle records the missing count (Found mode works out the missing count from what you found). Optimized for phones with a numeric keypad and the image kept in view
+- **Bags**: for sets where BrickData has a per-bag part inventory, the set detail page gets a new Bags section between the parts and minifigures tables, one collapsible table per numbered bag (plus an unnumbered "Extra" bag for loose items), each with its own checkbox and missing field so progress can be tracked bag by bag. Bag tables lazy-load on first opening the Bags section to keep the initial page load light
+  - Missing counts entered on a bag row sum up into the main Parts table's missing count for that part (a part split across bags adds up correctly); bag checkboxes are separate from the main parts table's checkboxes
+  - Bag tables support the same burger-menu bulk actions and Start audit as the main parts table, run against just that bag's contents, letting you audit a set bag by bag
+  - The main parts table's audit popup also shows which bag(s) a part is in when bag data is available
+- **Quick-add to individual parts**: replaced the per-row dropdown (button + one-item menu) with a single button that adds the part directly, one click instead of two
 
 ### Bug Fixes
 
@@ -22,7 +27,8 @@
 - **Fixed font size on the landing page** (#167): Item titles in the "Latest added parts" section on the homepage now match the smaller size used by the sets and minifigures sections
 - **Fixed sets with unmappable BrickLink parts never clearing the "need refresh" list** (#163): Sets containing parts that Rebrickable has no BrickLink mapping for (e.g. length-specific pneumatic hoses) kept reappearing on the Refresh admin page right after being refreshed; these unmappable parts no longer flag a set as needing a refresh
 
-- **Fixed `BK_HIDE_SPARE_PARTS` being ignored on set detail pages**: Spare parts were still shown in the parts inventory on a set's detail page (and in per-minifigure part tables) even with the setting enabled. The set-specific and minifigure part queries now honor the flag like the other part lists do
+- **Fixed `BK_HIDE_SPARE_PARTS` looking active when it wasn't saved yet** (#169): The admin configuration page badge showed "Changed" for a toggle the moment you clicked it, identical to how it looks once actually saved, so it was easy to believe the setting was applied when "Save All Changes" was never clicked. The badge now says "Unsaved" until you save
+- **Fixed parts/year range and "None" set filters not working with server-side pagination on** (#141): The range inputs had no server-side query support and no event listeners in pagination mode (only the dropdown filters did), and the "None" option for storage/purchase location matched zero rows instead of sets with nothing set. All of it now works with pagination enabled, matching the client-side behavior
 - **Fixed price coverage exceeding sensible bounds** (#156): Price coverage is now divided by all priced item types and clamped to 100%
 - **Fixed per-color counts on parts sub-cards** (#159): Set and minifigure counts are now computed per color
 - **Fixed missing purchase date picker on the bulk add page** (#162)
