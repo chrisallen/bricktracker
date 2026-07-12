@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.4.2
+
+### Bug Fixes
+
+- **Fixed instructions downloads failing with "No instructions found on Rebrickable or Peeron"** (#171): Rebrickable now blocks scraping behind a Cloudflare challenge, so instructions are fetched from LEGO's own official building-instructions page instead
+
 ## 1.4.1
 
 ### Enhancements

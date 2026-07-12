@@ -147,7 +147,7 @@ def do_upload() -> Response:
     return redirect(url_for('instructions.list'))
 
 
-# Download instructions from Rebrickable
+# Download instructions from LEGO.com
 @instructions_page.route('/download/', methods=['GET'])
 @login_required
 @exception_handler(__file__)
@@ -185,11 +185,11 @@ def do_download() -> str:
     if request.args.get('peeron_loaded'):
         return _render_peeron_select_page(set)
 
-    # Try Rebrickable first
+    # Try LEGO.com first
     try:
         from .instructions import BrickInstructions
         rebrickable_instructions = BrickInstructions.find_instructions(set)
-        # Standard Rebrickable instructions found
+        # Standard LEGO.com instructions found
         return render_template(
             'instructions.html',
             download=True,
@@ -200,7 +200,7 @@ def do_download() -> str:
             messages=MESSAGES
         )
     except Exception:
-        # Rebrickable failed, check if Peeron has instructions (without caching thumbnails yet)
+        # LEGO.com failed, check if Peeron has instructions (without caching thumbnails yet)
         try:
             peeron = PeeronInstructions(set)
             # Just check if pages exist, don't cache thumbnails yet
@@ -223,7 +223,7 @@ def do_download() -> str:
                 download=True,
                 instructions=[],
                 set=set,
-                error='No instructions found on Rebrickable or Peeron',
+                error='No instructions found on LEGO.com or Peeron',
                 path=current_app.config['SOCKET_PATH'],
                 namespace=current_app.config['SOCKET_NAMESPACE'],
                 messages=MESSAGES
