@@ -122,7 +122,19 @@ AND "rebrickable_sets"."year" = {{ year_filter }}
 {% endif %}
 
 {% if storage_filter %}
-{% if storage_filter.startswith('-') %}
+{% if storage_filter == '__none__' %}
+AND EXISTS (
+    SELECT 1 FROM "bricktracker_sets" bs_filter
+    WHERE bs_filter."set" = "rebrickable_sets"."set"
+    AND (bs_filter."storage" IS NULL OR bs_filter."storage" = '')
+)
+{% elif storage_filter == '-__none__' %}
+AND NOT EXISTS (
+    SELECT 1 FROM "bricktracker_sets" bs_filter
+    WHERE bs_filter."set" = "rebrickable_sets"."set"
+    AND (bs_filter."storage" IS NULL OR bs_filter."storage" = '')
+)
+{% elif storage_filter.startswith('-') %}
 AND NOT EXISTS (
     SELECT 1 FROM "bricktracker_sets" bs_filter
     WHERE bs_filter."set" = "rebrickable_sets"."set"
@@ -138,7 +150,19 @@ AND EXISTS (
 {% endif %}
 
 {% if purchase_location_filter %}
-{% if purchase_location_filter.startswith('-') %}
+{% if purchase_location_filter == '__none__' %}
+AND EXISTS (
+    SELECT 1 FROM "bricktracker_sets" bs_filter
+    WHERE bs_filter."set" = "rebrickable_sets"."set"
+    AND (bs_filter."purchase_location" IS NULL OR bs_filter."purchase_location" = '')
+)
+{% elif purchase_location_filter == '-__none__' %}
+AND NOT EXISTS (
+    SELECT 1 FROM "bricktracker_sets" bs_filter
+    WHERE bs_filter."set" = "rebrickable_sets"."set"
+    AND (bs_filter."purchase_location" IS NULL OR bs_filter."purchase_location" = '')
+)
+{% elif purchase_location_filter.startswith('-') %}
 AND NOT EXISTS (
     SELECT 1 FROM "bricktracker_sets" bs_filter
     WHERE bs_filter."set" = "rebrickable_sets"."set"
@@ -151,6 +175,22 @@ AND EXISTS (
     AND bs_filter."purchase_location" = '{{ purchase_location_filter }}'
 )
 {% endif %}
+{% endif %}
+
+{% if parts_min %}
+AND "rebrickable_sets"."number_of_parts" >= {{ parts_min }}
+{% endif %}
+
+{% if parts_max %}
+AND "rebrickable_sets"."number_of_parts" <= {{ parts_max }}
+{% endif %}
+
+{% if year_min %}
+AND "rebrickable_sets"."year" >= {{ year_min }}
+{% endif %}
+
+{% if year_max %}
+AND "rebrickable_sets"."year" <= {{ year_max }}
 {% endif %}
 
 {% if status_filter %}

@@ -136,9 +136,9 @@
     <div class="input-group">
       <span class="input-group-text"><i class="ri-shapes-line"></i><span class="ms-1 d-none d-md-inline"> Parts</span></span>
       <input type="number" id="grid-parts-min" class="form-control" placeholder="min" min="0" autocomplete="off"
-        data-filter-range="parts" data-filter-bound="min">
+        data-filter-range="parts" data-filter-bound="min" value="{{ current_parts_min_filter if current_parts_min_filter is not none else '' }}">
       <input type="number" id="grid-parts-max" class="form-control" placeholder="max" min="0" autocomplete="off"
-        data-filter-range="parts" data-filter-bound="max">
+        data-filter-range="parts" data-filter-bound="max" value="{{ current_parts_max_filter if current_parts_max_filter is not none else '' }}">
     </div>
   </div>
   <div class="col-12 flex-grow-1">
@@ -146,9 +146,9 @@
     <div class="input-group">
       <span class="input-group-text"><i class="ri-calendar-line"></i><span class="ms-1 d-none d-md-inline"> Year</span></span>
       <input type="number" id="grid-year-min" class="form-control" placeholder="from" min="0" autocomplete="off"
-        data-filter-range="year" data-filter-bound="min">
+        data-filter-range="year" data-filter-bound="min" value="{{ current_year_min_filter if current_year_min_filter is not none else '' }}">
       <input type="number" id="grid-year-max" class="form-control" placeholder="to" min="0" autocomplete="off"
-        data-filter-range="year" data-filter-bound="max">
+        data-filter-range="year" data-filter-bound="max" value="{{ current_year_max_filter if current_year_max_filter is not none else '' }}">
     </div>
   </div>
   <div class="col-12 col-lg-auto">

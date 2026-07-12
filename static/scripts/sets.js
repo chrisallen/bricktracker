@@ -348,6 +348,16 @@ function setupPaginationFilterDropdowns() {
     });
   });
 
+  // Numeric range filters (#141: parts/year range) aren't <select> elements,
+  // so they're not covered by the loop above. "change" (not "input") so a
+  // full page navigation only fires once the field is done being edited.
+  const rangeInputs = document.querySelectorAll('#grid-filter input[data-filter-range]');
+  rangeInputs.forEach(input => {
+    input.addEventListener('change', () => {
+      performServerFilter();
+    });
+  });
+
   function performServerFilter() {
     const currentUrl = new URL(window.location);
 
@@ -417,6 +427,22 @@ function setupPaginationFilterDropdowns() {
       currentUrl.searchParams.set('tag', tagFilter);
     } else {
       currentUrl.searchParams.delete('tag');
+    }
+
+    // Numeric range filters (#141)
+    const rangeParams = {
+      'grid-parts-min': 'parts_min',
+      'grid-parts-max': 'parts_max',
+      'grid-year-min': 'year_min',
+      'grid-year-max': 'year_max',
+    };
+    for (const [inputId, param] of Object.entries(rangeParams)) {
+      const value = document.getElementById(inputId)?.value.trim();
+      if (value) {
+        currentUrl.searchParams.set(param, value);
+      } else {
+        currentUrl.searchParams.delete(param);
+      }
     }
 
     // Reset to page 1 when filtering
@@ -744,7 +770,7 @@ function initializeClearFiltersButton() {
       const currentUrl = new URL(window.location);
 
       // Remove all filter parameters
-      const filterParams = ['status', 'theme', 'year', 'owner', 'purchase_location', 'storage', 'tag', 'duplicate'];
+      const filterParams = ['status', 'theme', 'year', 'owner', 'purchase_location', 'storage', 'tag', 'duplicate', 'parts_min', 'parts_max', 'year_min', 'year_max'];
       filterParams.forEach(param => {
         currentUrl.searchParams.delete(param);
       });

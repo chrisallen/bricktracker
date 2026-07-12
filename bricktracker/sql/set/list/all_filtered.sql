@@ -24,7 +24,11 @@ AND "rebrickable_sets"."year" = {{ year_filter }}
 {% endif %}
 
 {% if storage_filter %}
-{% if storage_filter.startswith('-') %}
+{% if storage_filter == '__none__' %}
+AND ("bricktracker_sets"."storage" IS NULL OR "bricktracker_sets"."storage" = '')
+{% elif storage_filter == '-__none__' %}
+AND "bricktracker_sets"."storage" IS NOT NULL AND "bricktracker_sets"."storage" != ''
+{% elif storage_filter.startswith('-') %}
 AND ("bricktracker_sets"."storage" IS NULL OR "bricktracker_sets"."storage" != '{{ storage_filter[1:] }}')
 {% else %}
 AND "bricktracker_sets"."storage" = '{{ storage_filter }}'
@@ -32,11 +36,31 @@ AND "bricktracker_sets"."storage" = '{{ storage_filter }}'
 {% endif %}
 
 {% if purchase_location_filter %}
-{% if purchase_location_filter.startswith('-') %}
+{% if purchase_location_filter == '__none__' %}
+AND ("bricktracker_sets"."purchase_location" IS NULL OR "bricktracker_sets"."purchase_location" = '')
+{% elif purchase_location_filter == '-__none__' %}
+AND "bricktracker_sets"."purchase_location" IS NOT NULL AND "bricktracker_sets"."purchase_location" != ''
+{% elif purchase_location_filter.startswith('-') %}
 AND ("bricktracker_sets"."purchase_location" IS NULL OR "bricktracker_sets"."purchase_location" != '{{ purchase_location_filter[1:] }}')
 {% else %}
 AND "bricktracker_sets"."purchase_location" = '{{ purchase_location_filter }}'
 {% endif %}
+{% endif %}
+
+{% if parts_min %}
+AND "rebrickable_sets"."number_of_parts" >= {{ parts_min }}
+{% endif %}
+
+{% if parts_max %}
+AND "rebrickable_sets"."number_of_parts" <= {{ parts_max }}
+{% endif %}
+
+{% if year_min %}
+AND "rebrickable_sets"."year" >= {{ year_min }}
+{% endif %}
+
+{% if year_max %}
+AND "rebrickable_sets"."year" <= {{ year_max }}
 {% endif %}
 
 {% if status_filter %}

@@ -57,6 +57,21 @@ def list() -> str:
     year_filter = request.args.get('year')
     duplicate_filter = request.args.get('duplicate', '').lower() == 'true'
 
+    # Numeric range filters (#141): blank/invalid means "no bound"
+    def _int_arg(name: str) -> int | None:
+        value = request.args.get(name)
+        if not value:
+            return None
+        try:
+            return int(value)
+        except ValueError:
+            return None
+
+    parts_min = _int_arg('parts_min')
+    parts_max = _int_arg('parts_max')
+    year_min = _int_arg('year_min')
+    year_max = _int_arg('year_max')
+
     # Get pagination configuration
     per_page, is_mobile = get_pagination_config('sets')
     use_pagination = per_page > 0
@@ -77,6 +92,10 @@ def list() -> str:
             tag_filter=tag_filter,
             year_filter=year_filter,
             duplicate_filter=duplicate_filter,
+            parts_min=parts_min,
+            parts_max=parts_max,
+            year_min=year_min,
+            year_max=year_max,
             use_consolidated=current_app.config['SETS_CONSOLIDATION']
         )
 
@@ -113,6 +132,10 @@ def list() -> str:
         'current_tag_filter': tag_filter,
         'current_year_filter': year_filter,
         'current_duplicate_filter': duplicate_filter,
+        'current_parts_min_filter': parts_min,
+        'current_parts_max_filter': parts_max,
+        'current_year_min_filter': year_min,
+        'current_year_max_filter': year_max,
         'brickset_statuses': BrickSetStatusList.list(),
         **set_metadata_lists(as_class=True)
     }

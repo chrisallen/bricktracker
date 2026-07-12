@@ -91,6 +91,10 @@ class BrickSetList(BrickRecordList[BrickSet]):
         tag_filter: str | None = None,
         year_filter: str | None = None,
         duplicate_filter: bool = False,
+        parts_min: int | None = None,
+        parts_max: int | None = None,
+        year_min: int | None = None,
+        year_max: int | None = None,
         use_consolidated: bool = True
     ) -> tuple[Self, int]:
         # Convert theme name to theme ID for filtering
@@ -107,7 +111,7 @@ class BrickSetList(BrickRecordList[BrickSet]):
                 theme_id_filter = self._theme_name_to_id(theme_filter)
 
         # Check if any filters are applied
-        has_filters = any([status_filter, theme_id_filter, owner_filter, purchase_location_filter, storage_filter, tag_filter, year_filter, duplicate_filter])
+        has_filters = any([status_filter, theme_id_filter, owner_filter, purchase_location_filter, storage_filter, tag_filter, year_filter, duplicate_filter, parts_min, parts_max, year_min, year_max])
 
         # Prepare filter context
         filter_context = {
@@ -120,6 +124,10 @@ class BrickSetList(BrickRecordList[BrickSet]):
             'tag_filter': tag_filter,
             'year_filter': year_filter,
             'duplicate_filter': duplicate_filter,
+            'parts_min': parts_min,
+            'parts_max': parts_max,
+            'year_min': year_min,
+            'year_max': year_max,
             'custom_fields': BrickSetCustomFieldList.as_columns(),
             'owners': BrickSetOwnerList.as_columns(),
             'statuses': BrickSetStatusList.as_columns(),
@@ -177,7 +185,8 @@ class BrickSetList(BrickRecordList[BrickSet]):
             return self._all_filtered_paginated_with_instructions(
                 search_query, page, per_page, sort_field, sort_order,
                 status_filter, theme_id_filter, owner_filter,
-                purchase_location_filter, storage_filter, tag_filter
+                purchase_location_filter, storage_filter, tag_filter,
+                parts_min, parts_max, year_min, year_max
             )
 
         # Handle special case for set sorting with multiple columns
@@ -323,7 +332,11 @@ class BrickSetList(BrickRecordList[BrickSet]):
         owner_filter: str | None,
         purchase_location_filter: str | None,
         storage_filter: str | None,
-        tag_filter: str | None
+        tag_filter: str | None,
+        parts_min: int | None = None,
+        parts_max: int | None = None,
+        year_min: int | None = None,
+        year_max: int | None = None
     ) -> tuple[Self, int]:
         """Handle filtering when instructions filter is involved"""
         try:
@@ -364,6 +377,14 @@ class BrickSetList(BrickRecordList[BrickSet]):
                 if storage_filter and not self._matches_storage(record, storage_filter):
                     continue
                 if tag_filter and not self._matches_tag(record, tag_filter):
+                    continue
+                if parts_min is not None and record.fields.number_of_parts < parts_min:
+                    continue
+                if parts_max is not None and record.fields.number_of_parts > parts_max:
+                    continue
+                if year_min is not None and record.fields.year < year_min:
+                    continue
+                if year_max is not None and record.fields.year > year_max:
                     continue
 
                 filtered_records.append(record)
@@ -514,10 +535,14 @@ class BrickSetList(BrickRecordList[BrickSet]):
 
     def _matches_purchase_location(self, record, location_filter: str) -> bool:
         """Check if record matches purchase location filter"""
+        if location_filter == '__none__':
+            return not record.fields.purchase_location
         return record.fields.purchase_location == location_filter
 
     def _matches_storage(self, record, storage_filter: str) -> bool:
         """Check if record matches storage filter"""
+        if storage_filter == '__none__':
+            return not record.fields.storage
         return record.fields.storage == storage_filter
 
     def _matches_tag(self, record, tag_filter: str) -> bool:
