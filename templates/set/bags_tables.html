@@ -8,6 +8,7 @@
     {% set bag_accordion_id = 'bag-' ~ loop.index %}
     {{ accordion.header(bag_title, bag_accordion_id, 'bags-list', quantity=bag.parts | length, icon='archive-line', class='p-0') }}
       <div class="p-2 border-bottom">
+        {% if bag.note %}<small class="text-secondary d-block">{{ bag.note }}</small>{% endif %}
         <small class="text-secondary">Spare parts are not included in bag inventories.</small>
       </div>
       <div class="table-responsive-sm">

@@ -134,10 +134,26 @@ def summarize(
     return summary
 
 
+# Chronological sort key for a bag's raw bagNumber: numbered bags first (by
+# their leading number, so "1", "1 & 2", and "12 & 13" all land next to their
+# lowest number), then anything without a leading number, then "Extra" last.
+def _bag_sort_key(bag: dict[str, Any]) -> tuple[int, int, str]:
+    number = str(bag.get('bagNumber') or '')
+    if number.strip().lower() == 'extra':
+        return (2, 0, number)
+
+    match = re.match(r'\s*(\d+)', number)
+    if match:
+        return (0, int(match.group(1)), number)
+
+    return (1, 0, number)
+
+
 # Join the sidecar's per-bag inventory onto the set's part rows. Returns
 # (bags, breakdown):
-# - bags: template-ready [{'number', 'is_extra', 'parts': [...]}] in sidecar
-#   order, each part carrying its per-bag quantity, display data, the stored
+# - bags: template-ready [{'number', 'is_extra', 'parts': [...]}] in
+#   chronological bag order (numbered bags first, "Extra" last), each part
+#   carrying its per-bag quantity, display data, the stored
 #   per-bag checked/missing state with its changer prefixes/urls, and the DOM
 #   id of the main row's missing input (the sum-group key for the client-side
 #   missing sync).
@@ -166,6 +182,26 @@ def bag_inventory(
         (str(row.fields.part), int(row.fields.color), int(row.fields.spare)): row  # noqa: E501
         for row in parts
     }
+
+    # Bags also contain minifigure parts, which live outside the set's part
+    # list. setdefault: on a key collision the set part row wins.
+    for minifigure in brickset.minifigures():
+        for row in minifigure.parts():
+            index.setdefault(
+                (str(row.fields.part), int(row.fields.color), int(row.fields.spare)),  # noqa: E501
+                row,
+            )
+
+    # Secondary lookup by BrickLink part number: Brickset sometimes refers
+    # to the generic mold (2674) where Rebrickable only knows the variants
+    # (2674a..f), but the bag entry's bl_part_id is exact.
+    bl_index: dict[tuple[str, int, int], Any] = {}
+    for row in index.values():
+        if row.fields.bricklink_part_num:
+            bl_index.setdefault(
+                (str(row.fields.bricklink_part_num), int(row.fields.color), int(row.fields.spare)),  # noqa: E501
+                row,
+            )
 
     # tables=False is the cheap page-render mode: only the audit breakdown
     # and the bag list (for the accordion header) are built; the heavy
@@ -196,8 +232,12 @@ def bag_inventory(
     bags: list[dict[str, Any]] = []
     breakdown: dict[str, list[list[Any]]] = {}
 
-    for i, bag in enumerate(payload['bags'], start=1):
-        number = str(bag.get('displayNumbers') or bag.get('bagNumber') or '?')
+    for i, bag in enumerate(sorted(payload['bags'], key=_bag_sort_key), start=1):  # noqa: E501
+        # The raw bagNumber stays the stored-state key so upstream label
+        # changes never orphan progress; label is display-only ("48 & 49"
+        # for bags opened together, with a note explaining the grouping).
+        number = str(bag.get('bagNumber') or '?')
+        label = str(bag.get('label') or number)
         # "Extra" bags sometimes hold the spares, so try spare rows first
         # there (with a fallback either way, see spare_order below)
         is_extra = number.lower() == 'extra'
@@ -218,9 +258,16 @@ def bag_inventory(
                 if row is not None:
                     break
 
+            if row is None:
+                bl_ref = str(part.get('bl_part_id') or '')
+                for spare in spare_order:
+                    row = bl_index.get((bl_ref, color, spare))
+                    if row is not None:
+                        break
+
             if row is not None and not tables:
                 breakdown.setdefault(row.html_id(), []).append(
-                    [number, quantity],
+                    [label, quantity],
                 )
                 continue
             elif not tables:
@@ -254,7 +301,7 @@ def bag_inventory(
                 entry.update(changer(i, 'checked', row.fields.part, row.fields.color, row.fields.spare, number))  # noqa: E501
                 bag_parts.append(entry)
                 breakdown.setdefault(row.html_id(), []).append(
-                    [number, quantity],
+                    [label, quantity],
                 )
             else:
                 # No matching row (e.g. a part the import assigned to a
@@ -282,12 +329,33 @@ def bag_inventory(
                 bag_parts.append(entry)
 
         bags.append({
-            'number': number,
+            'number': label,
+            'note': _clean_str(bag.get('note')),
             'is_extra': is_extra,
             'parts': bag_parts,
         })
 
     return bags, breakdown
+
+
+if __name__ == '__main__':
+    # Self-check for _bag_sort_key. Sorting bagNumber as plain text would
+    # put "10" and "12 & 13" right after "1"/"1 & 2" (alphabetical), ahead
+    # of "2" and "3", which is wrong. This asserts the real order instead:
+    # numeric by leading number, "Extra" always last.
+    # Run: python -m bricktracker.sidecar_set
+    shuffled = [
+        {'bagNumber': 'Extra'},
+        {'bagNumber': '3'},
+        {'bagNumber': '12 & 13'},
+        {'bagNumber': '1'},
+        {'bagNumber': '10'},
+        {'bagNumber': '1 & 2'},
+        {'bagNumber': '2'},
+    ]
+    ordered = [b['bagNumber'] for b in sorted(shuffled, key=_bag_sort_key)]
+    assert ordered == ['1', '1 & 2', '2', '3', '10', '12 & 13', 'Extra'], ordered  # noqa: E501
+    print('ok:', ordered)
 
 
 # --- Helpers ------------------------------------------------------------
