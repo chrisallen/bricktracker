@@ -34,8 +34,8 @@ class BrickConfiguration(object):
         self.mandatory = m
         self.static_path = s
 
-        # Default for our booleans is False
-        if self.cast == bool:
+        # Booleans that don't specify an explicit default fall back to False
+        if self.cast == bool and d is None:
             self.default = False
 
         # Try default environment name
