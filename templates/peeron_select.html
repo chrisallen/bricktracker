@@ -10,7 +10,7 @@
         <form method="POST" action="{{ url_for('instructions.do_download') }}">
           <div class="card mb-3">
             <div class="card-header">
-              <h5 class="mb-0"><i class="ri-download-line"></i> Download instructions from Rebrickable</h5>
+              <h5 class="mb-0"><i class="ri-download-line"></i> Download instructions from LEGO.com</h5>
             </div>
             <div class="card-body">
               <div class="mb-3">
@@ -25,7 +25,7 @@
         </form>
         {% if loading_peeron %}
           <div class="alert alert-info" role="alert">
-            <i class="ri-information-line"></i> <strong>Found on Peeron:</strong> {{ set }} was not available on Rebrickable, loading instruction pages from Peeron...
+            <i class="ri-information-line"></i> <strong>Found on Peeron:</strong> {{ set }} was not available on LEGO.com, loading instruction pages from Peeron...
           </div>
 
           <!-- Socket elements for peeron-loader -->
@@ -55,7 +55,7 @@
 
         {% if pages %}
           <div id="peeron-loading-alert" class="alert alert-info" role="alert">
-            <i class="ri-information-line"></i> <strong>Instructions found on Peeron:</strong> {{ set }} was not available on Rebrickable, but {{ pages|length }} instruction pages were found on Peeron.
+            <i class="ri-information-line"></i> <strong>Instructions found on Peeron:</strong> {{ set }} was not available on LEGO.com, but {{ pages|length }} instruction pages were found on Peeron.
             <div id="peeron-cache-progress" class="mt-2 d-none">
               <div class="progress" role="progressbar" aria-label="Caching thumbnails" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                 <div id="peeron-cache-progress-bar" class="progress-bar" style="width: 0%"></div>

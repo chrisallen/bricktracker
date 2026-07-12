@@ -32,6 +32,7 @@
 - **Fixed price coverage exceeding sensible bounds** (#156): Price coverage is now divided by all priced item types and clamped to 100%
 - **Fixed per-color counts on parts sub-cards** (#159): Set and minifigure counts are now computed per color
 - **Fixed missing purchase date picker on the bulk add page** (#162)
+- **Fixed instructions downloads failing with "No instructions found on Rebrickable or Peeron"** (#171): Rebrickable now blocks scraping behind a Cloudflare challenge, so instructions are fetched from LEGO's own official building-instructions page instead
 
 ## 1.4.1
 
