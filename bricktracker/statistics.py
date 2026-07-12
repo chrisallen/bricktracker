@@ -81,6 +81,7 @@ class BrickStatistics:
             'unique_parts': overview.get('unique_parts') or 0,
             'total_minifigures_count': overview.get('total_minifigures_count') or 0,
             'unique_minifigures': overview.get('unique_minifigures') or 0,
+            'total_part_lots': overview.get('total_part_lots') or 0,
             'total_missing_parts': overview.get('total_missing_parts') or 0,
             'total_damaged_parts': overview.get('total_damaged_parts') or 0,
             'storage_locations_used': overview.get('storage_locations_used') or 0,

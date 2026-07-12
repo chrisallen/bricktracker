@@ -189,6 +189,9 @@ SELECT
     minifig_stats.total_minifigures_count,
     minifig_stats.unique_minifigures,
 
+    -- Part lot statistics
+    part_lot_stats.total_part_lots,
+
     -- Financial statistics (set-only for backwards compatibility)
     set_stats.sets_with_price,
     set_stats.total_cost,
@@ -210,4 +213,4 @@ SELECT
     set_stats.sets_with_storage,
     set_stats.sets_with_purchase_location
 
-FROM set_stats, part_stats, minifig_stats, rebrickable_stats, financial_stats
+FROM set_stats, part_stats, minifig_stats, part_lot_stats, rebrickable_stats, financial_stats
