@@ -63,7 +63,12 @@ function handleConfigChange(element) {
 // Update badge display
 function updateConfigBadge(varName, value) {
   const defaultValue = window.DEFAULT_CONFIG[varName];
+  const savedValue = window.CURRENT_CONFIG[varName];
   const isChanged = JSON.stringify(value) !== JSON.stringify(defaultValue);
+  // Differs from what's actually persisted (current_app.config / .env), not just
+  // from the default: toggling a checkbox alone doesn't save it, only "Save All
+  // Changes" does, so this needs its own warning or the badge lies about what's live.
+  const isUnsaved = JSON.stringify(value) !== JSON.stringify(savedValue);
 
   // Remove existing badges but keep them inline
   const existingBadges = document.querySelectorAll(`[data-badge-var="${varName}"]`);
@@ -114,11 +119,14 @@ function updateConfigBadge(varName, value) {
     label.appendChild(valueBadge);
   }
 
-  // Add changed badge if needed
-  if (isChanged) {
+  // Add changed/unsaved badge if needed. Unsaved takes priority: it means this
+  // toggle is not actually in effect yet, no matter what it differs from.
+  if (isUnsaved || isChanged) {
     const changedBadge = document.createElement('span');
-    changedBadge.className = 'badge rounded-pill text-bg-warning ms-1';
-    changedBadge.textContent = 'Changed';
+    changedBadge.className = isUnsaved
+      ? 'badge rounded-pill text-bg-info ms-1'
+      : 'badge rounded-pill text-bg-warning ms-1';
+    changedBadge.textContent = isUnsaved ? 'Unsaved - click Save All Changes' : 'Changed';
     changedBadge.setAttribute('data-badge-var', varName);
     changedBadge.setAttribute('data-badge-type', 'changed');
 
