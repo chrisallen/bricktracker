@@ -14,6 +14,7 @@ from bricktracker.login import LoginManager
 from bricktracker.navbar import Navbar
 from bricktracker.sidecar import BrickSidecar
 from bricktracker.sql import close
+from bricktracker.telemetry import BrickTelemetry
 from bricktracker.template_filters import replace_query_filter
 from bricktracker.version import __version__
 from bricktracker.views.add import add_page
@@ -105,6 +106,10 @@ def setup_app(app: Flask) -> None:
     # Load the configuration
     BrickConfigurationList(app)
 
+    # Generate the anonymous telemetry installation ID exactly once, if
+    # telemetry is enabled and no ID exists yet (see bricktracker/telemetry.py)
+    BrickTelemetry.generate_installation_id(app)
+
     # Set the logging level
     if app.config['DEBUG']:
         logging.basicConfig(
@@ -160,6 +165,26 @@ def setup_app(app: Flask) -> None:
             response.set_data(gzip.compress(response.get_data(), 5))
             response.headers['Content-Encoding'] = 'gzip'
             response.headers.add('Vary', 'Accept-Encoding')
+
+        return response
+
+    # Anonymous pageview telemetry (Usage category) plus opportunistic
+    # collection stats (Collection category). No-ops entirely unless the
+    # user has opted in. See bricktracker/telemetry.py.
+    @app.after_request
+    def track_telemetry(response):  # type: ignore[no-untyped-def]
+        if request.method == 'GET' and response.status_code == 200:
+            name = BrickTelemetry.pageview_name(request.endpoint)
+
+            if name is not None:
+                BrickTelemetry.track_pageview(name)
+                BrickTelemetry.maybe_send_collection_stats()
+
+        # Checked on every request, not just tracked pageviews. AJAX-driven
+        # actions (add to wishlist, add a set, etc.) never match a pageview
+        # name above, and would otherwise never give a queued backlog a
+        # chance to flush.
+        BrickTelemetry.maybe_flush_queue()
 
         return response
 
@@ -236,7 +261,28 @@ def setup_app(app: Flask) -> None:
             'sidecar': BrickSidecar,
         }
 
+    # Show the first-run telemetry splash to authenticated users until they
+    # have made a decision (Enable or Disable), then never again.
+    @app.context_processor
+    def inject_telemetry() -> dict[str, object]:
+        return {
+            'telemetry_show_splash': (
+                LoginManager.is_authenticated()
+                and not current_app.config.get('TELEMETRY_PROMPTED')
+            ),
+        }
+
     # Make sure all connections are closed at the end
     @app.teardown_request
     def teardown_request(_: BaseException | None) -> None:
         close()
+
+    # Report BrickTracker version + database schema version once at
+    # startup (Installation category). No-op unless telemetry is enabled.
+    with app.app_context():
+        BrickTelemetry.send_installation_info()
+
+        # Always attempt a flush at boot. This picks up anything a previous
+        # run left queued (crash, or shutdown mid-interval) without waiting
+        # for the next opportunistic check.
+        BrickTelemetry.maybe_flush_queue(force=True)

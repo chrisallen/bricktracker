@@ -1,0 +1,24 @@
+<!-- First-run telemetry splash. Shown once to authenticated users until they
+     choose Enable or Disable (see inject_telemetry() in bricktracker/app.py). -->
+<div class="modal fade" id="telemetrySplashModal" tabindex="-1" aria-labelledby="telemetrySplashModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="telemetrySplashModalLabel">
+          <i class="ri-shield-check-line"></i> Help improve BrickTracker?
+        </h5>
+      </div>
+      <div class="modal-body">
+        {% include 'telemetry/_privacy_explainer.html' %}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="telemetry-splash-disable">
+          Disable
+        </button>
+        <button type="button" class="btn btn-primary" id="telemetry-splash-enable">
+          <i class="ri-check-line"></i> Enable
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

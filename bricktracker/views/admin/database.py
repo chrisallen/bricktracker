@@ -18,6 +18,7 @@ from werkzeug.wrappers.response import Response
 from ..exceptions import exception_handler
 from ...reload import reload
 from ...sql_integrity import BrickIntegrityCheck
+from ...telemetry import BrickTelemetry
 from ...sql_migration_list import BrickSQLMigrationList
 from ...sql import BrickSQL
 from ..upload import upload_helper
@@ -124,6 +125,10 @@ def do_drop() -> Response:
 )
 def do_upgrade() -> Response:
     BrickSQL(failsafe=True).upgrade()
+
+    # Schema version just changed, so report it again rather than waiting
+    # for the next opportunistic collection-stats send.
+    BrickTelemetry.send_installation_info()
 
     reload()
 

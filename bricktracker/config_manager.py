@@ -133,7 +133,14 @@ RESTART_REQUIRED_VARS: Final[List[str]] = [
     'BK_USER_AGENT',
     # Sidecar base URL only: changing it rebinds the whole feature, so it needs
     # a restart. The other sidecar settings are live-changeable.
-    'BK_SIDECAR_URL'
+    'BK_SIDECAR_URL',
+    # Telemetry: restart-required by design, so "off" is always certain.
+    # BK_TELEMETRY_INSTALLATION_ID is deliberately absent. It is generated
+    # once by BrickTelemetry and is never user-editable.
+    'BK_TELEMETRY_ENABLED',
+    'BK_TELEMETRY_CATEGORY_INSTALLATION',
+    'BK_TELEMETRY_CATEGORY_USAGE',
+    'BK_TELEMETRY_CATEGORY_COLLECTION',
 ]
 
 class ConfigManager:
@@ -371,6 +378,10 @@ class ConfigManager:
             'BK_SIDECAR_SHOW_PRICE_PAID': 'Show the "Paid" row (and "Change vs paid") in the BrickData price comparison',
             'BK_SIDECAR_SHOW_PRICE_MSRP': 'Show the retail/MSRP rows (and "Saved vs retail") in the BrickData price comparison',
             'BK_SIDECAR_SHOW_PRICE_MARKET': 'Show the "Worth now" market value rows in the BrickData price comparison',
-            'BK_SIDECAR_PRICE_BASIS': 'Which BrickLink market value the set-detail "Change vs paid" compares against: used or new (falls back to the other when one is missing). Statistics shows both regardless.'
+            'BK_SIDECAR_PRICE_BASIS': 'Which BrickLink market value the set-detail "Change vs paid" compares against: used or new (falls back to the other when one is missing). Statistics shows both regardless.',
+            'BK_TELEMETRY_ENABLED': 'Enable anonymous telemetry to a self-hosted Matomo instance. Off by default. See "View Privacy Information" for exactly what is (and is not) sent.',
+            'BK_TELEMETRY_CATEGORY_INSTALLATION': 'Report BrickTracker version and database schema version on container start and after a migration.',
+            'BK_TELEMETRY_CATEGORY_USAGE': 'Report which pages are visited (page names only, no data).',
+            'BK_TELEMETRY_CATEGORY_COLLECTION': 'Report aggregate collection counts (totals only, never names or IDs) once every 24 hours.',
         }
         return help_text.get(var_name, 'No help available for this variable')

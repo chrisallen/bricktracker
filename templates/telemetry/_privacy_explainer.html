@@ -1,0 +1,21 @@
+<p>I use telemetry to understand how BrickTracker gets used across installations: how many exist, which versions people run, and which pages get visited. That's what tells me where to spend development time.</p>
+
+<h6 class="fw-bold mt-3">What is send</h6>
+<ul class="mb-2">
+  <li>A random anonymous ID for this installation, not tied to your hardware, network, or username</li>
+  <li>BrickTracker version and database schema version</li>
+  <li>Which optional features you have turned on (e.g. BrickData/sidecar, client- or server-side pagination)</li>
+  <li>Which pages you visit, by name only (e.g. "Statistics", "Sets")</li>
+  <li>Aggregate collection counts (e.g. total sets, total missing parts)</li>
+</ul>
+
+<h6 class="fw-bold mt-3">What is never send</h6>
+<ul class="mb-2">
+  <li>Set, part, or minifigure names, numbers, or IDs</li>
+  <li>Your wishlist contents, filenames, or search queries</li>
+  <li>Usernames, passwords, API keys, or any Rebrickable credentials</li>
+  <li>Your IP address (anonymized)</li>
+</ul>
+
+<p class="mb-2">Data goes to a self-hosted Matomo instance, not Google Analytics or any other third party.</p>
+<p class="mb-0">Telemetry is off by default and fully optional. You can turn it off any time in Admin &rarr; Static Settings (a restart is needed for that change to take effect). The code deciding what gets sent lives in <code>bricktracker/telemetry.py</code>, open source and auditable.</p>

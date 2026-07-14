@@ -1142,6 +1142,56 @@
             </div>
           </div>
 
+          <!-- Telemetry -->
+          <h6 class="fw-bold text-secondary border-bottom pb-1 mb-3 mt-4">Telemetry</h6>
+          <div class="row g-3">
+            <div class="col-12">
+              <div class="form-check form-switch">
+                <input class="form-check-input config-static-toggle" type="checkbox" id="static-BK_TELEMETRY_ENABLED" data-var="BK_TELEMETRY_ENABLED" {{ is_locked('BK_TELEMETRY_ENABLED') }}>
+                <label class="form-check-label" for="static-BK_TELEMETRY_ENABLED">
+                  BK_TELEMETRY_ENABLED {{ config_badges('BK_TELEMETRY_ENABLED') }}
+                  <div class="text-muted small">Send anonymous usage telemetry to a self-hosted Matomo instance. Off by default. <a href="#" data-bs-toggle="modal" data-bs-target="#telemetryPrivacyModal">View Privacy Information</a>.</div>
+                </label>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-check form-switch">
+                <input class="form-check-input config-static-toggle" type="checkbox" id="static-BK_TELEMETRY_CATEGORY_INSTALLATION" data-var="BK_TELEMETRY_CATEGORY_INSTALLATION" {{ is_locked('BK_TELEMETRY_CATEGORY_INSTALLATION') }}>
+                <label class="form-check-label" for="static-BK_TELEMETRY_CATEGORY_INSTALLATION">
+                  Installation Information {{ config_badges('BK_TELEMETRY_CATEGORY_INSTALLATION') }}
+                  <div class="text-muted small">BrickTracker version + database schema version</div>
+                </label>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-check form-switch">
+                <input class="form-check-input config-static-toggle" type="checkbox" id="static-BK_TELEMETRY_CATEGORY_USAGE" data-var="BK_TELEMETRY_CATEGORY_USAGE" {{ is_locked('BK_TELEMETRY_CATEGORY_USAGE') }}>
+                <label class="form-check-label" for="static-BK_TELEMETRY_CATEGORY_USAGE">
+                  Usage Statistics {{ config_badges('BK_TELEMETRY_CATEGORY_USAGE') }}
+                  <div class="text-muted small">Which pages are visited (page names only)</div>
+                </label>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-check form-switch">
+                <input class="form-check-input config-static-toggle" type="checkbox" id="static-BK_TELEMETRY_CATEGORY_COLLECTION" data-var="BK_TELEMETRY_CATEGORY_COLLECTION" {{ is_locked('BK_TELEMETRY_CATEGORY_COLLECTION') }}>
+                <label class="form-check-label" for="static-BK_TELEMETRY_CATEGORY_COLLECTION">
+                  Collection Statistics {{ config_badges('BK_TELEMETRY_CATEGORY_COLLECTION') }}
+                  <div class="text-muted small">Aggregate counts only (totals, never names or IDs)</div>
+                </label>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" disabled>
+                <label class="form-check-label text-muted">
+                  Error Reporting <span class="badge bg-secondary">Coming soon</span>
+                  <div class="text-muted small">Reserved for future use</div>
+                </label>
+              </div>
+            </div>
+          </div>
+
   <!-- Save Button for Static Settings -->
   <div class="d-flex gap-2 justify-content-end mt-4">
     <button id="config-save-static" class="btn btn-warning">
@@ -1171,6 +1221,26 @@
         <button type="button" class="btn btn-warning" id="confirm-reset-defaults" data-bs-dismiss="modal">
           <i class="ri-restart-line"></i> Reset to Defaults
         </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Telemetry Privacy Information Modal -->
+<div class="modal fade" id="telemetryPrivacyModal" tabindex="-1" aria-labelledby="telemetryPrivacyModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="telemetryPrivacyModalLabel">
+          <i class="ri-shield-check-line"></i> Telemetry Privacy Information
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        {% include 'telemetry/_privacy_explainer.html' %}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
       </div>
     </div>
   </div>

@@ -26,6 +26,7 @@ from ...set_tag_list import BrickSetTagList
 from ...sql_counter import BrickCounter
 from ...sql import BrickSQL
 from ...socket import MESSAGES
+from ...telemetry import BrickTelemetry
 from ...theme_list import BrickThemeList
 
 logger = logging.getLogger(__name__)
@@ -410,3 +411,61 @@ def update_static_config() -> str:
             'status': 'error',
             'message': str(e)
         }), 500
+
+
+# Route for the first-run telemetry splash: the user chose Enable. See the
+# comment further down for why this takes effect immediately instead of
+# waiting for a restart.
+@admin_page.route('/api/telemetry/consent/enable', methods=['POST'])
+@login_required
+@exception_handler(__file__)
+def telemetry_consent_enable() -> str:
+    # All categories start enabled. Written explicitly (not just relying on
+    # their True default) so Static Settings shows them as actually On, and
+    # so a later re-toggle there has something explicit to diff against.
+    category_vars = (
+        'BK_TELEMETRY_CATEGORY_INSTALLATION',
+        'BK_TELEMETRY_CATEGORY_USAGE',
+        'BK_TELEMETRY_CATEGORY_COLLECTION',
+    )
+
+    config_manager = ConfigManager()
+    config_manager._update_env_file('BK_TELEMETRY_ENABLED', True)
+    config_manager._update_env_file('BK_TELEMETRY_PROMPTED', True)
+    for var_name in category_vars:
+        config_manager._update_env_file(var_name, True)
+
+    # First-run consent takes effect immediately, since the user just said
+    # yes, so telemetry actually starts now. Unlike this, a later re-toggle
+    # via Static Settings still requires a restart (see update_static_config).
+    app = current_app._get_current_object()
+    app.config['TELEMETRY_ENABLED'] = True
+    app.config['TELEMETRY_PROMPTED'] = True
+    for var_name in category_vars:
+        app.config[var_name.removeprefix('BK_')] = True
+
+    BrickTelemetry.generate_installation_id(app)
+    BrickTelemetry.send_installation_info()
+    BrickTelemetry.maybe_send_collection_stats()
+    BrickTelemetry.maybe_flush_queue(force=True)
+
+    return jsonify({
+        'status': 'success',
+        'message': 'Telemetry enabled.',
+    })
+
+
+# First-run telemetry splash: the user chose Disable.
+@admin_page.route('/api/telemetry/consent/disable', methods=['POST'])
+@login_required
+@exception_handler(__file__)
+def telemetry_consent_disable() -> str:
+    config_manager = ConfigManager()
+    config_manager._update_env_file('BK_TELEMETRY_ENABLED', False)
+    config_manager._update_env_file('BK_TELEMETRY_PROMPTED', True)
+    current_app.config['TELEMETRY_PROMPTED'] = True
+
+    return jsonify({
+        'status': 'success',
+        'message': 'Telemetry stays disabled.',
+    })

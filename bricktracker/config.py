@@ -136,4 +136,20 @@ CONFIG: Final[list[dict[str, Any]]] = [
     # Which BrickLink market value the set-detail "Change vs paid" compares
     # against: 'used' or 'new'. Statistics shows both regardless.
     {'n': 'SIDECAR_PRICE_BASIS', 'd': 'used'},
+    # Opt-in anonymous telemetry (see bricktracker/telemetry.py). Off by
+    # default; only takes effect after a restart, by design, so "off" is
+    # always certain. TELEMETRY_INSTALLATION_ID is intentionally absent from
+    # the admin UI and from LIVE_CHANGEABLE_VARS/RESTART_REQUIRED_VARS in
+    # config_manager.py. It is generated once by BrickTelemetry and never
+    # user-editable.
+    {'n': 'TELEMETRY_ENABLED', 'c': bool},
+    {'n': 'TELEMETRY_PROMPTED', 'c': bool},
+    {'n': 'TELEMETRY_CATEGORY_INSTALLATION', 'd': True, 'c': bool},
+    {'n': 'TELEMETRY_CATEGORY_USAGE', 'd': True, 'c': bool},
+    {'n': 'TELEMETRY_CATEGORY_COLLECTION', 'd': True, 'c': bool},
+    {'n': 'TELEMETRY_INSTALLATION_ID', 'd': ''},
+    # Where queued-but-not-yet-flushed telemetry events are persisted between
+    # sends. Internal implementation detail, not user-editable. Absent from
+    # LIVE_CHANGEABLE_VARS/RESTART_REQUIRED_VARS like TELEMETRY_INSTALLATION_ID.
+    {'n': 'TELEMETRY_QUEUE_PATH', 'd': 'data/telemetry_queue.json'},
 ]
