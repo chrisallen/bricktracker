@@ -301,7 +301,12 @@ class BrickInstructions(object):
             if label is None or link is None or not link.get('href'):
                 continue
 
-            slug = re.sub(r'[^A-Za-z0-9]+', '-', label.get_text(strip=True)).strip('-')  # noqa: E501
+            # Prefix with the set number: filenames are how a downloaded
+            # instruction later gets matched back to its set (see
+            # BrickInstructions.__init__), and LEGO's own card labels never
+            # mention the set number, only the product name and booklet.
+            card_slug = re.sub(r'[^A-Za-z0-9]+', '-', label.get_text(strip=True)).strip('-')  # noqa: E501
+            slug = f'{set}-{card_slug}'
             download_url = urljoin('https://www.lego.com', link['href'])
 
             logger.debug(f"[find_instructions] Found download link: {download_url}")  # noqa: E501
