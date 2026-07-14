@@ -11,6 +11,7 @@ from .peeron_pdf import PeeronPDF
 from .set import BrickSet
 from .socket_decorator import authenticated_socket, rebrickable_socket
 from .sql import close as sql_close
+from .telemetry import BrickTelemetry
 
 logger = logging.getLogger(__name__)
 
@@ -137,6 +138,7 @@ class BrickSocket(object):
             except Exception:
                 pass
 
+            BrickTelemetry.track_action('DownloadInstructions')
             instructions.download(path)
 
             BrickInstructionsList(force=True)
@@ -184,6 +186,8 @@ class BrickSocket(object):
                 if not pages_data:
                     raise ValueError("No pages selected")
 
+                BrickTelemetry.track_action('DownloadPeeronInstructions')
+
                 # Parse set number
                 if '-' in set_number:
                     parts = set_number.split('-', 1)
@@ -227,6 +231,7 @@ class BrickSocket(object):
                 fr=request.sid,  # type: ignore
             ))
 
+            BrickTelemetry.track_action('AddSet')
             BrickSet().download(self, data)
 
         @self.socket.on(MESSAGES['LOAD_SET'], namespace=self.namespace)
@@ -245,6 +250,8 @@ class BrickSocket(object):
                 data=data,
                 fr=request.sid,  # type: ignore
             ))
+
+            BrickTelemetry.track_action('AddMinifigure')
 
             from .individual_minifigure import IndividualMinifigure
             IndividualMinifigure().download(self, data)
@@ -266,6 +273,8 @@ class BrickSocket(object):
                 fr=request.sid,  # type: ignore
             ))
 
+            BrickTelemetry.track_action('AddPartSingle')
+
             from .individual_part import IndividualPart
             IndividualPart().add(self, data)
 
@@ -286,6 +295,8 @@ class BrickSocket(object):
                 fr=request.sid,  # type: ignore
             ))
 
+            BrickTelemetry.track_action('AddPartLot')
+
             from .individual_part_lot import IndividualPartLot
             IndividualPartLot().create(self, data)
 
@@ -295,6 +306,8 @@ class BrickSocket(object):
             logger.debug('Socket: CREATE_BULK_INDIVIDUAL_PARTS (from: {fr})'.format(
                 fr=request.sid,  # type: ignore
             ))
+
+            BrickTelemetry.track_action('AddPartBulk')
 
             from .individual_part import IndividualPart
             IndividualPart().create_bulk(self, data)

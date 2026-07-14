@@ -25,6 +25,7 @@ from ..set_tag_list import BrickSetTagList
 from ..set_storage_list import BrickSetStorageList
 from ..set_purchase_location_list import BrickSetPurchaseLocationList
 from ..sql import BrickSQL
+from ..telemetry import BrickTelemetry
 
 logger = logging.getLogger(__name__)
 
@@ -144,6 +145,8 @@ def quick_add() -> Response:
             )
 
         sql.commit()
+
+        BrickTelemetry.track_action('QuickAddPart')
 
         logger.info('Quick-added individual part {id}: {part}/{color} x{quantity}'.format(
             id=part_id,
