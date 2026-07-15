@@ -75,10 +75,11 @@ class BrickInstructions(object):
 
             splits = normalized.split('-', 2)
 
-            if len(splits) >= 2:
+            if len(splits) >= 2 and splits[0]:
                 try:
-                    # Trying to make sense of each part as integers
-                    int(splits[0])
+                    # The set number can be alphanumeric (e.g. Pick-a-Brick
+                    # builds like "EG00029-1"); only the version suffix has
+                    # to be an integer
                     int(splits[1])
 
                     self.set = '-'.join(splits[:2])
@@ -119,18 +120,6 @@ class BrickInstructions(object):
                 'Sec-Fetch-Site': 'same-origin',
                 'Cache-Control': 'max-age=0'
             })
-
-            # Visit the set's instructions listing page first to establish session cookies
-            set_number = None
-            if self.rebrickable:
-                set_number = self.rebrickable.fields.set
-            elif self.set:
-                set_number = self.set
-
-            if set_number:
-                instructions_page = f"https://rebrickable.com/instructions/{set_number}/"
-                session.get(instructions_page)
-                session.headers.update({"Referer": instructions_page})
 
             resp = session.get(path, stream=True, allow_redirects=True)
             if not resp.ok:
@@ -269,10 +258,13 @@ class BrickInstructions(object):
     @staticmethod
     def find_instructions(set: str, /) -> list[Tuple[str, str]]:
         """
-        Scrape Rebrickable's HTML and return a list of
-        (filename_slug, download_url). Duplicate slugs get _1, _2, …
+        Scrape LEGO's official building-instructions page and return a list
+        of (filename_slug, download_url). Duplicate slugs get _1, _2, …
         """
-        page_url = f"https://rebrickable.com/instructions/{set}/"
+        # LEGO's page wants the bare set number, no "-1" version suffix
+        number, _, _version = set.partition('-')
+
+        page_url = f"https://www.lego.com/en-us/service/building-instructions/{number}"  # noqa: E501
         logger.debug(f"[find_instructions] fetching HTML from {page_url!r}")
 
         # Use plain requests instead of cloudscraper
@@ -295,23 +287,29 @@ class BrickInstructions(object):
             raise ErrorException(f'Failed to load instructions page for {set}. HTTP {resp.status_code}')
 
         soup = BeautifulSoup(resp.content, 'html.parser')
-        # Match download links with or without query parameters (e.g., ?cfe=timestamp&cfk=key)
-        link_re = re.compile(r'^/instructions/\d+/.+/download/')
 
+        # Each booklet is a "bi-card" div. Attribute order on this page is
+        # not stable between requests, so every lookup has to stay scoped
+        # inside its own card rather than collecting all h3s/links
+        # page-wide and pairing them up by position, that can silently
+        # mismatch a label with the wrong link.
         raw: list[tuple[str, str]] = []
-        for a in soup.find_all('a', href=link_re):
-            img = a.find('img', alt=True) # type: ignore
-            if not img or set not in img['alt']: # type: ignore
+        for card in soup.find_all('div', attrs={'data-test': 'bi-card'}):
+            label = card.find('h3')
+            link = card.find('a', attrs={'data-test': 'bi-card-link'})
+
+            if label is None or link is None or not link.get('href'):
                 continue
 
-            # Turn the alt text into a slug
-            alt_text = img['alt'].removeprefix('LEGO Building Instructions for ') # type: ignore
-            slug = re.sub(r'[^A-Za-z0-9]+', '-', alt_text).strip('-')
+            # Prefix with the set number: filenames are how a downloaded
+            # instruction later gets matched back to its set (see
+            # BrickInstructions.__init__), and LEGO's own card labels never
+            # mention the set number, only the product name and booklet.
+            card_slug = re.sub(r'[^A-Za-z0-9]+', '-', label.get_text(strip=True)).strip('-')  # noqa: E501
+            slug = f'{set}-{card_slug}'
+            download_url = urljoin('https://www.lego.com', link['href'])
 
-            # Build the absolute download URL - this preserves query parameters
-            # BeautifulSoup's a['href'] includes the full href with ?cfe=...&cfk=... params
-            download_url = urljoin('https://rebrickable.com', a['href']) # type: ignore
-            logger.debug(f"[find_instructions] Found download link: {download_url}")
+            logger.debug(f"[find_instructions] Found download link: {download_url}")  # noqa: E501
             raw.append((slug, download_url))
 
         if not raw:
