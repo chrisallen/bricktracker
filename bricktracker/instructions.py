@@ -15,6 +15,7 @@ from werkzeug.utils import secure_filename
 import re
 
 from .exceptions import ErrorException, DownloadException
+from .peeron_instructions import get_peeron_instruction_url
 if TYPE_CHECKING:
     from .rebrickable_set import RebrickableSet
     from .socket import BrickSocket
@@ -121,9 +122,20 @@ class BrickInstructions(object):
                 'Cache-Control': 'max-age=0'
             })
 
+            # Peeron only hands out scans to a session that visited the set's
+            # scan page first, that request is what sets the PeeronSID cookie.
+            # Without it the download silently comes back as a placeholder image
+            peeron_set = re.search(r'peeron\.com/scans/([^/]+)/', path)
+            if peeron_set:
+                number, _, version = peeron_set.group(1).partition('-')
+                session.get(get_peeron_instruction_url(number, version or '1'))
+
             resp = session.get(path, stream=True, allow_redirects=True)
             if not resp.ok:
                 raise DownloadException(f"Failed to download: HTTP {resp.status_code}")
+
+            if peeron_set and 'pdf' not in resp.headers.get('Content-Type', ''):
+                raise DownloadException('Peeron did not return a PDF, the session may have expired, try again')
 
             # Tell the socket how many bytes in total
             total = int(resp.headers.get("Content-Length", 0))

@@ -51,6 +51,26 @@ def get_peeron_scan_url(set_number: str, version_number: str):
     return pattern.format(set_number=set_number, version_number=version_number)
 
 
+def get_peeron_pdf_scan_url(response_url: str, set_number: str, version_number: str) -> str | None:
+    """
+    Peeron keeps some sets as a single PDF instead of scanned pages. Their scan
+    page then redirects to a PDF viewer (/pdf/<set>/<page>/) that answers with
+    HTTP 500, but the file itself still sits at the regular scan URL.
+    Returns that URL, or None for the usual gallery of pages.
+    """
+    if '/pdf/' not in response_url:
+        return None
+
+    page_number = response_url.rstrip('/').rsplit('/', 1)[-1]
+    if not page_number.isdigit():
+        page_number = '1'
+
+    return '{base}{page}/'.format(
+        base=get_peeron_scan_url(set_number, version_number),
+        page=page_number,
+    )
+
+
 def create_peeron_scraper():
     """Create a requests session configured for Peeron"""
     session = requests.Session()
@@ -267,6 +287,7 @@ class PeeronInstructions(object):
     set_number: str
     version_number: str
     pages: list[PeeronPage]
+    pdf_url: str | None
 
     def __init__(
         self,
@@ -291,6 +312,9 @@ class PeeronInstructions(object):
         # Placeholder for pages
         self.pages = []
 
+        # Set once we know Peeron only has this set as a single PDF
+        self.pdf_url = None
+
     # Check if instructions exist on Peeron (lightweight)
     def exists(self, /) -> bool:
         """Check if the set exists on Peeron without caching thumbnails"""
@@ -298,6 +322,14 @@ class PeeronInstructions(object):
             base_url = get_peeron_instruction_url(self.set_number, self.version_number)
             scraper = create_peeron_scraper()
             response = scraper.get(base_url)
+
+            # A single PDF set has no gallery to look at, but it does have
+            # instructions, so say so and remember where the file lives
+            self.pdf_url = get_peeron_pdf_scan_url(
+                response.url, self.set_number, self.version_number
+            )
+            if self.pdf_url:
+                return True
 
             if response.status_code != 200:
                 return False
@@ -335,6 +367,15 @@ class PeeronInstructions(object):
             logger.debug(f"[find_pages] Establishing session by visiting: {base_url}")
             response = scraper.get(base_url)
             logger.debug(f"[find_pages] Main page visit: HTTP {response.status_code}")
+
+            # Nothing to scrape when the set is one PDF, the download page
+            # handles those on its own
+            self.pdf_url = get_peeron_pdf_scan_url(
+                response.url, self.set_number, self.version_number
+            )
+            if self.pdf_url:
+                raise ErrorException(f'Peeron has {self.set_number}-{self.version_number} as a single PDF, not as scanned pages')
+
             if response.status_code != 200:
                 raise ErrorException(f'Failed to load Peeron page for {self.set_number}-{self.version_number}. HTTP {response.status_code}')
         except requests.exceptions.RequestException as e:

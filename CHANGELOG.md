@@ -33,6 +33,7 @@
 - **Fixed per-color counts on parts sub-cards** (#159): Set and minifigure counts are now computed per color
 - **Fixed missing purchase date picker on the bulk add page** (#162)
 - **Fixed instructions downloads failing with "No instructions found on Rebrickable or Peeron"** (#171): Rebrickable now blocks scraping behind a Cloudflare challenge, so instructions are fetched from LEGO's own official building-instructions page instead
+- **Fixed Peeron sets stored as a single PDF being reported as having no instructions** (#177): Peeron keeps some sets (e.g. `8501-1`) as one scanned PDF instead of separate page images, and sends those to a PDF viewer of theirs that currently returns an error. The file itself is still there, so those sets now show up as a normal instructions download instead of "No instructions found on LEGO.com or Peeron"
 
 ## 1.4.1
 

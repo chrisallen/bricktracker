@@ -205,6 +205,19 @@ def do_download() -> str:
             peeron = PeeronInstructions(set)
             # Just check if pages exist, don't cache thumbnails yet
             if peeron.exists():
+                # Peeron keeps this one as a single PDF, so there are no pages
+                # to pick, offer it like any other instructions file
+                if peeron.pdf_url:
+                    return render_template(
+                        'instructions.html',
+                        download=True,
+                        instructions=[('{set}_peeron'.format(set=set), peeron.pdf_url)],
+                        set=set,
+                        path=current_app.config['SOCKET_PATH'],
+                        namespace=current_app.config['SOCKET_NAMESPACE'],
+                        messages=MESSAGES
+                    )
+
                 # Peeron has instructions - show loading interface
                 return render_template(
                     'peeron_select.html',
