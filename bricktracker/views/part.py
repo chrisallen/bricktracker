@@ -6,192 +6,164 @@ from ..individual_part_lot_list import IndividualPartLotList
 from ..minifigure_list import BrickMinifigureList
 from ..pagination_helper import get_pagination_config, build_pagination_context, get_request_params
 from ..part import BrickPart
-from ..part_list import BrickPartList
+from ..part_list import BrickPartList, known_metadata_id
 from ..set_list import BrickSetList, set_metadata_lists
 from ..set_owner_list import BrickSetOwnerList
+from ..set_status_list import BrickSetStatusList
+from ..set_storage_list import BrickSetStorageList
+from ..set_tag_list import BrickSetTagList
 from ..sql import BrickSQL
+from ..theme_list import BrickThemeList
 
 part_page = Blueprint('part', __name__, url_prefix='/parts')
+
+
+# Read the seven filters off the query string. owner, tag and status end up as SQL
+# column names, so they are checked against the ids we know about first. The rest are
+# bound as parameters, so they can go through as they are.
+def filters_from_request(
+    owners: list,
+    statuses: list,
+    tags: list,
+    /,
+) -> dict[str, str | None]:
+    return {
+        'owner_id': known_metadata_id(
+            request.args.get('owner'),
+            {owner.fields.id for owner in owners},
+        ),
+        'color_id': request.args.get('color', 'all'),
+        'theme_id': request.args.get('theme', 'all'),
+        'year': request.args.get('year', 'all'),
+        'storage_id': request.args.get('storage', 'all'),
+        'tag_id': known_metadata_id(
+            request.args.get('tag'),
+            {tag.fields.id for tag in tags},
+        ),
+        'status_id': known_metadata_id(
+            request.args.get('status'),
+            {status.fields.id for status in statuses},
+        ),
+    }
+
+
+# Options for the colour, theme and year dropdowns. They are derived from the parts
+# on the page, so they narrow down as the owner filter narrows.
+def filter_options(
+    owner_id: str | None,
+    /,
+    *,
+    problem_only: bool = False,
+) -> dict[str, list]:
+    context = {}
+    if problem_only:
+        context['problem_only'] = True
+
+    # ponytail: a negated owner would give the options of the owner being excluded,
+    # so it just does not narrow the lists. Fine for a dropdown.
+    if owner_id and not owner_id.startswith('-'):
+        context['owner_id'] = owner_id
+
+    theme_list = BrickThemeList()
+    themes = []
+    for theme_data in BrickSQL().fetchall('part/themes/list', **context):
+        theme = theme_list.get(theme_data['theme_id'])
+        themes.append({
+            'theme_id': theme_data['theme_id'],
+            'theme_name': theme.name if theme else 'Theme {id}'.format(
+                id=theme_data['theme_id'],
+            ),
+        })
+
+    return {
+        'colors': BrickSQL().fetchall('part/colors/list', **context),
+        'themes': themes,
+        'years': BrickSQL().fetchall('part/years/list', **context),
+    }
+
+
+# Everything both parts pages need to render. They only differ by problem_only and
+# the template, so the filter plumbing lives here once.
+def parts_page_context(*, problem_only: bool) -> dict:
+    owners = BrickSetOwnerList.list()
+    statuses = BrickSetStatusList.list(all=True)
+    tags = BrickSetTagList.list()
+    storages = BrickSetStorageList.list()
+
+    filters = filters_from_request(owners, statuses, tags)
+    individuals_filter = request.args.get('individuals', 'all')
+    search_query, sort_field, sort_order, page = get_request_params()
+
+    per_page, is_mobile = get_pagination_config(
+        'problems' if problem_only else 'parts'
+    )
+    use_pagination = per_page > 0
+
+    parts = BrickPartList()
+    if use_pagination:
+        parts, total_count = parts.paginated_filtered(
+            problem_only=problem_only,
+            individuals_filter=individuals_filter,
+            search_query=search_query,
+            page=page,
+            per_page=per_page,
+            sort_field=sort_field,
+            sort_order=sort_order,
+            **filters
+        )
+        pagination = build_pagination_context(
+            page, per_page, total_count, is_mobile
+        )
+    else:
+        parts = parts.filtered(
+            problem_only=problem_only,
+            individuals_filter=individuals_filter,
+            **filters
+        )
+        pagination = None
+
+    return {
+        'table_collection': parts,
+        'pagination': pagination,
+        'use_pagination': use_pagination,
+        'search_query': search_query,
+        'sort_field': sort_field,
+        'sort_order': sort_order,
+        'current_sort': sort_field,
+        'current_order': sort_order,
+        'owners': owners,
+        'storages': storages,
+        'tags': tags,
+        'statuses': statuses,
+        'selected_owner': request.args.get('owner', 'all'),
+        'selected_color': filters['color_id'],
+        'selected_theme': filters['theme_id'],
+        'selected_year': filters['year'],
+        'selected_storage': filters['storage_id'],
+        'selected_tag': request.args.get('tag', 'all'),
+        'selected_status': request.args.get('status', 'all'),
+        'selected_individuals': individuals_filter,
+        **filter_options(filters['owner_id'], problem_only=problem_only),
+    }
 
 
 # Index
 @part_page.route('/', methods=['GET'])
 @exception_handler(__file__)
 def list() -> str:
-    # Get filter parameters from request
-    owner_id = request.args.get('owner', 'all')
-    color_id = request.args.get('color', 'all')
-    theme_id = request.args.get('theme', 'all')
-    year = request.args.get('year', 'all')
-    individuals_filter = request.args.get('individuals', 'all')
-    search_query, sort_field, sort_order, page = get_request_params()
-
-    # Get pagination configuration
-    per_page, is_mobile = get_pagination_config('parts')
-    use_pagination = per_page > 0
-
-    if use_pagination:
-        # PAGINATION MODE - Server-side pagination with search
-        parts, total_count = BrickPartList().all_filtered_paginated(
-            owner_id=owner_id,
-            color_id=color_id,
-            theme_id=theme_id,
-            year=year,
-            individuals_filter=individuals_filter,
-            search_query=search_query,
-            page=page,
-            per_page=per_page,
-            sort_field=sort_field,
-            sort_order=sort_order
-        )
-
-        pagination_context = build_pagination_context(page, per_page, total_count, is_mobile)
-    else:
-        # ORIGINAL MODE - Single page with all data for client-side search
-        parts = BrickPartList().all_filtered(owner_id, color_id, theme_id, year, individuals_filter)
-        pagination_context = None
-
-    # Get list of owners for filter dropdown
-    owners = BrickSetOwnerList.list()
-
-    # Prepare context for dependent filters
-    filter_context = {}
-    if owner_id != 'all' and owner_id:
-        filter_context['owner_id'] = owner_id
-
-    # Get list of colors for filter dropdown
-    colors = BrickSQL().fetchall('part/colors/list', **filter_context)
-
-    # Get list of themes for filter dropdown
-    from ..theme_list import BrickThemeList
-    theme_list = BrickThemeList()
-    themes_data = BrickSQL().fetchall('part/themes/list', **filter_context)
-    themes = []
-    for theme_data in themes_data:
-        theme = theme_list.get(theme_data['theme_id'])
-        themes.append({
-            'theme_id': theme_data['theme_id'],
-            'theme_name': theme.name if theme else f"Theme {theme_data['theme_id']}"
-        })
-
-    # Get list of years for filter dropdown
-    years = BrickSQL().fetchall('part/years/list', **filter_context)
-
-    template_context = {
-        'table_collection': parts,
-        'owners': owners,
-        'selected_owner': owner_id,
-        'colors': colors,
-        'selected_color': color_id,
-        'themes': themes,
-        'selected_theme': theme_id,
-        'years': years,
-        'selected_year': year,
-        'selected_individuals': individuals_filter,
-        'search_query': search_query,
-        'use_pagination': use_pagination,
-        'current_sort': sort_field,
-        'current_order': sort_order
-    }
-
-    if pagination_context:
-        template_context['pagination'] = pagination_context
-
-    return render_template('parts.html', **template_context)
-
+    return render_template(
+        'parts.html',
+        **parts_page_context(problem_only=False)
+    )
 
 
 # Problem
 @part_page.route('/problem', methods=['GET'])
 @exception_handler(__file__)
 def problem() -> str:
-    # Get filter parameters from request
-    owner_id = request.args.get('owner', 'all')
-    color_id = request.args.get('color', 'all')
-    theme_id = request.args.get('theme', 'all')
-    year = request.args.get('year', 'all')
-    storage_id = request.args.get('storage', 'all')
-    tag_id = request.args.get('tag', 'all')
-    search_query, sort_field, sort_order, page = get_request_params()
-
-    # Get pagination configuration
-    per_page, is_mobile = get_pagination_config('problems')
-    use_pagination = per_page > 0
-
-    if use_pagination:
-        # PAGINATION MODE - Server-side pagination with search and filters
-        parts, total_count = BrickPartList().problem_paginated(
-            owner_id=owner_id,
-            color_id=color_id,
-            theme_id=theme_id,
-            year=year,
-            storage_id=storage_id,
-            tag_id=tag_id,
-            search_query=search_query,
-            page=page,
-            per_page=per_page,
-            sort_field=sort_field,
-            sort_order=sort_order
-        )
-
-        pagination_context = build_pagination_context(page, per_page, total_count, is_mobile)
-    else:
-        # ORIGINAL MODE - Single page with all data for client-side search
-        parts = BrickPartList().problem_filtered(owner_id, color_id, theme_id, year, storage_id, tag_id)
-        pagination_context = None
-
-    # Get list of owners for filter dropdown
-    owners = BrickSetOwnerList.list()
-
-    # Prepare context for dependent filters
-    filter_context = {}
-    if owner_id != 'all' and owner_id:
-        filter_context['owner_id'] = owner_id
-
-    # Get list of colors for filter dropdown (problem parts only)
-    colors = BrickSQL().fetchall('part/colors/list_problem', **filter_context)
-
-    # Get list of themes for filter dropdown (problem parts only)
-    from ..theme_list import BrickThemeList
-    theme_list = BrickThemeList()
-    themes_data = BrickSQL().fetchall('part/themes/list_problem', **filter_context)
-    themes = []
-    for theme_data in themes_data:
-        theme = theme_list.get(theme_data['theme_id'])
-        themes.append({
-            'theme_id': theme_data['theme_id'],
-            'theme_name': theme.name if theme else f"Theme {theme_data['theme_id']}"
-        })
-
-    # Get list of years for filter dropdown (problem parts only)
-    years = BrickSQL().fetchall('part/years/list_problem', **filter_context)
-
-    # Get list of storages for filter dropdown (problem parts only)
-    storages = BrickSQL().fetchall('part/storages/list_problem', **filter_context)
-
-    # Get list of tags for filter dropdown (problem parts only)
-    tags = BrickSQL().fetchall('part/tags/list_problem', **filter_context)
-
     return render_template(
         'problem.html',
-        table_collection=parts,
-        pagination=pagination_context,
-        search_query=search_query,
-        sort_field=sort_field,
-        sort_order=sort_order,
-        use_pagination=use_pagination,
-        owners=owners,
-        colors=colors,
-        selected_owner=owner_id,
-        selected_color=color_id,
-        themes=themes,
-        selected_theme=theme_id,
-        years=years,
-        selected_year=year,
-        storages=storages,
-        selected_storage=storage_id,
-        tags=tags,
-        selected_tag=tag_id
+        **parts_page_context(problem_only=True)
     )
 
 
