@@ -33,6 +33,7 @@
 - **Fixed per-color counts on parts sub-cards** (#159): Set and minifigure counts are now computed per color
 - **Fixed missing purchase date picker on the bulk add page** (#162)
 - **Fixed instructions downloads failing with "No instructions found on Rebrickable or Peeron"** (#171): Rebrickable now blocks scraping behind a Cloudflare challenge, so instructions are fetched from LEGO's own official building-instructions page instead
+- **Fixed the homepage minifigure section showing figures from deleted sets** (#178): With `BK_RANDOM` enabled, "Random selection of minifigures" could show minifigures belonging to sets that had already been deleted. Catalog data for a minifigure is deliberately kept when a set is removed (two sets can share the same figure, and refetching costs a Rebrickable call), but the homepage list treated every cached figure as owned. It now only picks from figures you still own, whether through a set or as an individual minifigure. Without `BK_RANDOM` the problem was invisible, since those figures always sorted to the bottom of the list. The sets and parts sections on the same page were already correct
 - **Fixed Peeron sets stored as a single PDF being reported as having no instructions** (#177): Peeron keeps some sets (e.g. `8501-1`) as one scanned PDF instead of separate page images, and sends those to a PDF viewer of theirs that currently returns an error. The file itself is still there, so those sets now show up as a normal instructions download instead of "No instructions found on LEGO.com or Peeron"
 
 ## 1.4.1
