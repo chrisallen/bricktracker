@@ -192,7 +192,9 @@
     <script src="{{ url_for('static', filename='scripts/parts.js') }}"></script>
     {% endif %}
     {% if request.endpoint == 'part.problem' %}
-    <script src="{{ url_for('static', filename='scripts/parts.js') }}"></script>
+    {# parts.js used to be loaded here too. It looks for a #parts table that does not
+       exist on this page and retries every 100ms forever, and it double wired the
+       Clear button. problems.js is all this page needs. #}
     <script src="{{ url_for('static', filename='scripts/problems.js') }}"></script>
     {% endif %}
     {% if request.endpoint == 'set.list' %}

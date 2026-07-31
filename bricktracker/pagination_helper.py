@@ -28,6 +28,12 @@ def get_pagination_config(entity_type: str) -> Tuple[int, bool]:
 def build_pagination_context(page: int, per_page: int, total_count: int, is_mobile: bool) -> Dict[str, Any]:
     """Build pagination context for templates"""
     total_pages = (total_count + per_page - 1) // per_page if total_count > 0 else 1
+
+    # ponytail: a page past the end still runs its query and comes back empty. This
+    # only keeps the nav links sane so the user can walk back. Re-running the query
+    # against the clamped page would mean counting before selecting.
+    page = min(max(page, 1), total_pages)
+
     has_prev = page > 1
     has_next = page < total_pages
 
@@ -47,6 +53,12 @@ def get_request_params() -> Tuple[str, str, str, int]:
     search_query = request.args.get('search', '').strip()
     sort_field = request.args.get('sort', '')
     sort_order = request.args.get('order', 'asc')
-    page = int(request.args.get('page', 1))
+
+    # ?page=abc used to raise straight out of the view, and ?page=0 gave a negative
+    # offset. Anything that is not a sensible page number is just page one.
+    try:
+        page = max(int(request.args.get('page', 1)), 1)
+    except ValueError:
+        page = 1
 
     return search_query, sort_field, sort_order, page
