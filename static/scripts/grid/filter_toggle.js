@@ -60,7 +60,8 @@ class BrickFilterToggle {
             'grid-tag': 'tag',
             'grid-year': 'year'
         };
-        return mapping[selectId] || selectId.replace('grid-', '');
+        // The sets grid uses grid-*, the parts and problem tables use filter-*
+        return mapping[selectId] || selectId.replace(/^(grid|filter)-/, '');
     }
 
     handleToggleClick(toggle, targetSelect) {
