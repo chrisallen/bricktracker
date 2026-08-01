@@ -180,13 +180,18 @@
   {{ badge(check=item.fields[tag.as_column()], solo=solo, last=last, color='light text-primary-emphasis bg-primary-subtle border border-primary-subtle', icon='price-tag-2-line', text=text, alt='Tag', tooltip=tooltip) }}
 {% endmacro %}
 
-{% macro theme(theme, solo=false, last=false) %}
+{% macro theme(theme, solo=false, last=false, theme_id=none) %}
   {% if last %}
     {% set tooltip=theme %}
   {% else %}
     {% set text=theme %}
   {% endif %}
-  {{ badge(check=theme, solo=solo, last=last, color='primary', icon='price-tag-3-line', text=text, alt='Theme', tooltip=tooltip) }}
+  {# With a theme_id the badge links to the sets list filtered on that theme (#179).
+     Same parameter statistics.html already uses. #}
+  {% if theme_id %}
+    {% set url=url_for('set.list', theme=theme_id) %}
+  {% endif %}
+  {{ badge(check=theme, url=url, solo=solo, last=last, color='primary', icon='price-tag-3-line', text=text, alt='Theme', tooltip=tooltip) }}
 {% endmacro %}
 
 {% macro total_damaged(damaged, solo=false, last=false) %}
@@ -270,7 +275,7 @@
     {% if badge_key == 'theme' %}
       {# Only sets have themes #}
       {% if item.theme is defined %}
-        {{ theme(item.theme.name, solo=solo, last=last) }}
+        {{ theme(item.theme.name, solo=solo, last=last, theme_id=item.theme.id) }}
       {% endif %}
     {% elif badge_key == 'tag' %}
       {% for tag_item in brickset_tags %}
