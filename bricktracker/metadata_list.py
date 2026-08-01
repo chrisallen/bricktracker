@@ -206,3 +206,33 @@ class BrickMetadataList(BrickRecordList[T]):
             endpoint,
             id=minifigure_id,
         )
+
+
+# Owner and tag filter values are interpolated into queries as column names, which
+# no amount of quoting makes safe. Only values naming metadata we already know about
+# are allowed through, anything else is dropped and the filter does not apply.
+#
+# Values look like "owner-<id>", or "-owner-<id>" for the != form.
+def known_metadata_filter(
+    value: str | None,
+    kind: str,
+    items: list,
+    /,
+) -> str | None:
+    if not value:
+        return None
+
+    candidate = value[1:] if value.startswith('-') else value
+
+    if not candidate.startswith('{kind}-'.format(kind=kind)):
+        return None
+
+    if candidate not in {item.as_dataset() for item in items}:
+        logger.warning('Ignoring unknown {kind} filter: {value}'.format(
+            kind=kind,
+            value=value,
+        ))
+
+        return None
+
+    return value

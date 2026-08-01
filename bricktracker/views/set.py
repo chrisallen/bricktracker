@@ -26,6 +26,7 @@ from ..sidecar import BrickSidecar
 from ..sidecar_set import bag_inventory as sidecar_bag_inventory
 from ..sidecar_set import summarize as sidecar_summarize
 from ..set_custom_field_list import BrickSetCustomFieldList
+from ..metadata_list import known_metadata_filter
 from ..set_list import BrickSetList, set_metadata_lists
 from ..set_owner_list import BrickSetOwnerList
 from ..set_purchase_location_list import BrickSetPurchaseLocationList
@@ -50,11 +51,22 @@ def list() -> str:
     # Get filter parameters
     status_filter = request.args.get('status')
     theme_filter = request.args.get('theme')
-    owner_filter = request.args.get('owner')
     purchase_location_filter = request.args.get('purchase_location')
     storage_filter = request.args.get('storage')
-    tag_filter = request.args.get('tag')
     year_filter = request.args.get('year')
+
+    # owner and tag arrive as "owner-<id>" / "tag-<id>" and end up as SQL column
+    # names, which no quoting makes safe. Only ids we already know about get through.
+    owner_filter = known_metadata_filter(
+        request.args.get('owner'),
+        'owner',
+        BrickSetOwnerList.list(),
+    )
+    tag_filter = known_metadata_filter(
+        request.args.get('tag'),
+        'tag',
+        BrickSetTagList.list(),
+    )
     duplicate_filter = request.args.get('duplicate', '').lower() == 'true'
 
     # Numeric range filters (#141): blank/invalid means "no bound"
