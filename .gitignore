@@ -26,8 +26,10 @@ run_local.sh
 settings.local.json
 /offline/
 
-# Personal maintainer-only tooling - never pushed to the public repo
 scripts/
+
+/*.md
+/Screenshot_*.png
 
 # Apple idiocy
 .DS_Store
