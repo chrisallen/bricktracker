@@ -177,6 +177,50 @@ AND EXISTS (
 {% endif %}
 {% endif %}
 
+{# Owner and tag used to be missing here, which forced the whole page off the
+   consolidated query: picking an owner silently turned grouped cards into
+   per instance cards. Same EXISTS shape as storage above, so a group shows when any
+   of its instances matches. #}
+{% if owner_filter %}
+{% if owner_filter.startswith('-owner-') %}
+AND NOT EXISTS (
+    SELECT 1 FROM "bricktracker_sets" bs_filter
+    INNER JOIN "bricktracker_set_owners" bso_filter
+    ON bs_filter."id" IS NOT DISTINCT FROM bso_filter."id"
+    WHERE bs_filter."set" = "rebrickable_sets"."set"
+    AND bso_filter."{{ owner_filter[1:].replace('-', '_') }}" = 1
+)
+{% elif owner_filter.startswith('owner-') %}
+AND EXISTS (
+    SELECT 1 FROM "bricktracker_sets" bs_filter
+    INNER JOIN "bricktracker_set_owners" bso_filter
+    ON bs_filter."id" IS NOT DISTINCT FROM bso_filter."id"
+    WHERE bs_filter."set" = "rebrickable_sets"."set"
+    AND bso_filter."{{ owner_filter.replace('-', '_') }}" = 1
+)
+{% endif %}
+{% endif %}
+
+{% if tag_filter %}
+{% if tag_filter.startswith('-tag-') %}
+AND NOT EXISTS (
+    SELECT 1 FROM "bricktracker_sets" bs_filter
+    INNER JOIN "bricktracker_set_tags" bst_filter
+    ON bs_filter."id" IS NOT DISTINCT FROM bst_filter."id"
+    WHERE bs_filter."set" = "rebrickable_sets"."set"
+    AND bst_filter."{{ tag_filter[1:].replace('-', '_') }}" = 1
+)
+{% elif tag_filter.startswith('tag-') %}
+AND EXISTS (
+    SELECT 1 FROM "bricktracker_sets" bs_filter
+    INNER JOIN "bricktracker_set_tags" bst_filter
+    ON bs_filter."id" IS NOT DISTINCT FROM bst_filter."id"
+    WHERE bs_filter."set" = "rebrickable_sets"."set"
+    AND bst_filter."{{ tag_filter.replace('-', '_') }}" = 1
+)
+{% endif %}
+{% endif %}
+
 {% if parts_min %}
 AND "rebrickable_sets"."number_of_parts" >= {{ parts_min }}
 {% endif %}

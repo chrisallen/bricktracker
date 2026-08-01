@@ -7,7 +7,7 @@
 
 {# Compute per part+color set/minifigure counts so each sub-card shows its own
    totals (fixes #159: they used to inherit the parent part's counts). Mirrors
-   part/list/all.sql. #}
+   part/list/filtered.sql. #}
 {% block total_sets %}
 IFNULL(COUNT(DISTINCT CASE WHEN "combined"."source_type" = 'set' THEN "combined"."id" ELSE NULL END), 0) AS "total_sets",
 {% endblock %}

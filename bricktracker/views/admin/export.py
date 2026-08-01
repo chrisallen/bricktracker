@@ -63,7 +63,9 @@ def export_parts_rebrickable() -> Response:
     year = request.args.get('year')
 
     part_list = BrickPartList()
-    part_list.all_filtered(owner_id, color_id, theme_id, year)
+    part_list.filtered(
+        owner_id=owner_id, color_id=color_id, theme_id=theme_id, year=year
+    )
 
     part_quantities = {}
     for part in part_list.records:
@@ -101,7 +103,9 @@ def export_parts_lego() -> Response:
     year = request.args.get('year')
 
     part_list = BrickPartList()
-    part_list.all_filtered(owner_id, color_id, theme_id, year)
+    part_list.filtered(
+        owner_id=owner_id, color_id=color_id, theme_id=theme_id, year=year
+    )
 
     element_quantities = {}
     for part in part_list.records:
@@ -140,7 +144,9 @@ def export_parts_bricklink() -> Response:
     year = request.args.get('year')
 
     part_list = BrickPartList()
-    part_list.all_filtered(owner_id, color_id, theme_id, year)
+    part_list.filtered(
+        owner_id=owner_id, color_id=color_id, theme_id=theme_id, year=year
+    )
 
     part_quantities = {}
     for part in part_list.records:
@@ -183,7 +189,10 @@ def export_problems_rebrickable() -> Response:
     year = request.args.get('year')
 
     part_list = BrickPartList()
-    part_list.problem_filtered(owner_id, color_id, theme_id, year)
+    part_list.filtered(
+        problem_only=True,
+        owner_id=owner_id, color_id=color_id, theme_id=theme_id, year=year
+    )
 
     part_quantities = {}
     for part in part_list.records:
@@ -223,7 +232,10 @@ def export_problems_lego() -> Response:
     year = request.args.get('year')
 
     part_list = BrickPartList()
-    part_list.problem_filtered(owner_id, color_id, theme_id, year)
+    part_list.filtered(
+        problem_only=True,
+        owner_id=owner_id, color_id=color_id, theme_id=theme_id, year=year
+    )
 
     element_quantities = {}
     for part in part_list.records:
@@ -263,7 +275,10 @@ def export_problems_bricklink() -> Response:
     year = request.args.get('year')
 
     part_list = BrickPartList()
-    part_list.problem_filtered(owner_id, color_id, theme_id, year)
+    part_list.filtered(
+        problem_only=True,
+        owner_id=owner_id, color_id=color_id, theme_id=theme_id, year=year
+    )
 
     part_quantities = {}
     for part in part_list.records:
@@ -318,7 +333,9 @@ def get_combined_parts_data(owner_id, color_id, theme_id, year):
     """Get both set-based and individual parts combined."""
     # Get set-based parts
     part_list = BrickPartList()
-    part_list.all_filtered(owner_id, color_id, theme_id, year)
+    part_list.filtered(
+        owner_id=owner_id, color_id=color_id, theme_id=theme_id, year=year
+    )
 
     combined_quantities = {}
     for part in part_list.records:
@@ -439,7 +456,9 @@ def export_parts_combined_lego() -> Response:
 
     # Get set-based parts
     part_list = BrickPartList()
-    part_list.all_filtered(owner_id, color_id, theme_id, year)
+    part_list.filtered(
+        owner_id=owner_id, color_id=color_id, theme_id=theme_id, year=year
+    )
 
     element_quantities = {}
     for part in part_list.records:
@@ -520,7 +539,9 @@ def export_parts_combined_bricklink() -> Response:
 
     # Get set-based parts
     part_list = BrickPartList()
-    part_list.all_filtered(owner_id, color_id, theme_id, year)
+    part_list.filtered(
+        owner_id=owner_id, color_id=color_id, theme_id=theme_id, year=year
+    )
 
     part_quantities = {}
     for part in part_list.records:

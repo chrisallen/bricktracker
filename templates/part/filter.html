@@ -1,3 +1,11 @@
+{% import 'macro/form.html' as form %}
+{#
+  Filter bar for /parts and /parts/problem. Both pages carry the same seven filters,
+  so there is one template rather than two that drift apart.
+
+  Every dropdown gets the = / != toggle, so "everything except X" works the same way
+  it does on the sets page.
+#}
 <div id="table-filter" class="collapse {% if config['SHOW_GRID_FILTERS'] %}show{% endif %} row row-cols-lg-auto g-1 justify-content-center align-items-center">
   {% if owners | length %}
   <div class="col-12 flex-grow-1">
@@ -6,12 +14,15 @@
       <select id="filter-owner" class="form-select" onchange="applyFiltersAndKeepOpen()" autocomplete="off">
         <option value="all" {% if selected_owner == 'all' %}selected{% endif %}>All owners</option>
         {% for owner in owners %}
-          <option value="{{ owner.fields.id }}" {% if selected_owner == owner.fields.id %}selected{% endif %}>{{ owner.fields.name }}</option>
+          <option value="{{ owner.fields.id }}" {% if selected_owner == owner.fields.id or selected_owner == ('-' + owner.fields.id) %}selected{% endif %}>{{ owner.fields.name }}</option>
         {% endfor %}
       </select>
+      {{ form.filter_toggle('filter-owner') }}
     </div>
   </div>
   {% endif %}
+  {# ponytail: colour has no != toggle. "Everything except red" is not a thing people
+     ask for, and it would need its own branch in the query. Add both if it comes up. #}
   {% if colors | length %}
   <div class="col-12 flex-grow-1">
     <div class="input-group">
@@ -34,9 +45,10 @@
       <select id="filter-theme" class="form-select" onchange="applyFiltersAndKeepOpen()" autocomplete="off">
         <option value="all" {% if selected_theme == 'all' %}selected{% endif %}>All themes</option>
         {% for theme in themes %}
-          <option value="{{ theme.theme_id }}" {% if selected_theme == theme.theme_id|string %}selected{% endif %}>{{ theme.theme_name }}</option>
+          <option value="{{ theme.theme_id }}" {% if selected_theme == theme.theme_id|string or selected_theme == ('-' + theme.theme_id|string) %}selected{% endif %}>{{ theme.theme_name }}</option>
         {% endfor %}
       </select>
+      {{ form.filter_toggle('filter-theme') }}
     </div>
   </div>
   {% endif %}
@@ -47,9 +59,53 @@
       <select id="filter-year" class="form-select" onchange="applyFiltersAndKeepOpen()" autocomplete="off">
         <option value="all" {% if selected_year == 'all' %}selected{% endif %}>All years</option>
         {% for year in years %}
-          <option value="{{ year.year }}" {% if selected_year == year.year|string %}selected{% endif %}>{{ year.year }}</option>
+          <option value="{{ year.year }}" {% if selected_year == year.year|string or selected_year == ('-' + year.year|string) %}selected{% endif %}>{{ year.year }}</option>
         {% endfor %}
       </select>
+      {{ form.filter_toggle('filter-year') }}
+    </div>
+  </div>
+  {% endif %}
+  {% if storages | length %}
+  <div class="col-12 flex-grow-1">
+    <div class="input-group">
+      <span class="input-group-text"><i class="ri-inbox-line"></i><span class="ms-1 d-none d-md-inline"> Storage</span></span>
+      <select id="filter-storage" class="form-select" onchange="applyFiltersAndKeepOpen()" autocomplete="off">
+        <option value="all" {% if selected_storage == 'all' %}selected{% endif %}>All storages</option>
+        <option value="__none__" {% if selected_storage == '__none__' or selected_storage == '-__none__' %}selected{% endif %}>No storage</option>
+        {% for storage in storages %}
+          <option value="{{ storage.fields.id }}" {% if selected_storage == storage.fields.id or selected_storage == ('-' + storage.fields.id) %}selected{% endif %}>{{ storage.fields.name }}</option>
+        {% endfor %}
+      </select>
+      {{ form.filter_toggle('filter-storage') }}
+    </div>
+  </div>
+  {% endif %}
+  {% if tags | length %}
+  <div class="col-12 flex-grow-1">
+    <div class="input-group">
+      <span class="input-group-text"><i class="ri-price-tag-line"></i><span class="ms-1 d-none d-md-inline"> Tag</span></span>
+      <select id="filter-tag" class="form-select" onchange="applyFiltersAndKeepOpen()" autocomplete="off">
+        <option value="all" {% if selected_tag == 'all' %}selected{% endif %}>All tags</option>
+        {% for tag in tags %}
+          <option value="{{ tag.fields.id }}" {% if selected_tag == tag.fields.id or selected_tag == ('-' + tag.fields.id) %}selected{% endif %}>{{ tag.fields.name }}</option>
+        {% endfor %}
+      </select>
+      {{ form.filter_toggle('filter-tag') }}
+    </div>
+  </div>
+  {% endif %}
+  {% if statuses | length %}
+  <div class="col-12 flex-grow-1">
+    <div class="input-group">
+      <span class="input-group-text"><i class="ri-checkbox-line"></i><span class="ms-1 d-none d-md-inline"> Status</span></span>
+      <select id="filter-status" class="form-select" onchange="applyFiltersAndKeepOpen()" autocomplete="off">
+        <option value="all" {% if selected_status == 'all' %}selected{% endif %}>All statuses</option>
+        {% for status in statuses %}
+          <option value="{{ status.fields.id }}" {% if selected_status == status.fields.id or selected_status == ('-' + status.fields.id) %}selected{% endif %}>{{ status.fields.name }}</option>
+        {% endfor %}
+      </select>
+      {{ form.filter_toggle('filter-status') }}
     </div>
   </div>
   {% endif %}

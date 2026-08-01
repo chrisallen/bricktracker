@@ -110,9 +110,6 @@ class BrickSetList(BrickRecordList[BrickSet]):
             else:
                 theme_id_filter = self._theme_name_to_id(theme_filter)
 
-        # Check if any filters are applied
-        has_filters = any([status_filter, theme_id_filter, owner_filter, purchase_location_filter, storage_filter, tag_filter, year_filter, duplicate_filter, parts_min, parts_max, year_min, year_max])
-
         # Prepare filter context
         filter_context = {
             'search_query': search_query,
@@ -169,11 +166,8 @@ class BrickSetList(BrickRecordList[BrickSet]):
                 'purchase-price': '"bricktracker_sets"."purchase_price"'
             }
 
-        # Choose query based on consolidation preference and filter complexity
-        # Owner/tag filters still need to fall back to non-consolidated for now
-        # due to complex aggregation requirements
-        complex_filters = [owner_filter, tag_filter]
-        if use_consolidated and not any(complex_filters):
+        # Choose query based on consolidation preference
+        if use_consolidated:
             query_to_use = self.consolidated_query
         else:
             # Use filtered query when consolidation is disabled or complex filters applied
@@ -186,7 +180,8 @@ class BrickSetList(BrickRecordList[BrickSet]):
                 search_query, page, per_page, sort_field, sort_order,
                 status_filter, theme_id_filter, owner_filter,
                 purchase_location_filter, storage_filter, tag_filter,
-                parts_min, parts_max, year_min, year_max
+                parts_min, parts_max, year_min, year_max,
+                year_filter, duplicate_filter
             )
 
         # Handle special case for set sorting with multiple columns
@@ -336,7 +331,9 @@ class BrickSetList(BrickRecordList[BrickSet]):
         parts_min: int | None = None,
         parts_max: int | None = None,
         year_min: int | None = None,
-        year_max: int | None = None
+        year_max: int | None = None,
+        year_filter: str | None = None,
+        duplicate_filter: str | None = None
     ) -> tuple[Self, int]:
         """Handle filtering when instructions filter is involved"""
         try:
@@ -352,6 +349,17 @@ class BrickSetList(BrickRecordList[BrickSet]):
             # Load instructions list
             instructions_list = BrickInstructionsList()
             instruction_sets = set(instructions_list.sets.keys())
+
+            # Which set numbers appear more than once, worked out once rather than
+            # rescanned for every record
+            duplicate_sets: set[str] = set()
+            if duplicate_filter:
+                seen: dict[str, int] = {}
+                for record in all_sets.records:
+                    seen[record.fields.set] = seen.get(record.fields.set, 0) + 1
+                duplicate_sets = {
+                    number for number, count in seen.items() if count > 1
+                }
 
             # Apply all filters manually
             filtered_records = []
@@ -378,13 +386,23 @@ class BrickSetList(BrickRecordList[BrickSet]):
                     continue
                 if tag_filter and not self._matches_tag(record, tag_filter):
                     continue
-                if parts_min is not None and record.fields.number_of_parts < parts_min:
+                if year_filter and not self._matches_year(record, year_filter):
                     continue
-                if parts_max is not None and record.fields.number_of_parts > parts_max:
+                if duplicate_filter and record.fields.set not in duplicate_sets:
                     continue
-                if year_min is not None and record.fields.year < year_min:
+
+                # A set with no part count used to raise here, and the bare except
+                # below turned that into "instructions filter silently ignored"
+                number_of_parts = record.fields.number_of_parts or 0
+                if parts_min is not None and number_of_parts < parts_min:
                     continue
-                if year_max is not None and record.fields.year > year_max:
+                if parts_max is not None and number_of_parts > parts_max:
+                    continue
+
+                year = record.fields.year or 0
+                if year_min is not None and year < year_min:
+                    continue
+                if year_max is not None and year > year_max:
                     continue
 
                 filtered_records.append(record)
@@ -478,7 +496,10 @@ class BrickSetList(BrickRecordList[BrickSet]):
             theme_list = BrickThemeList()
             themes = set()
             for record in theme_records:
-                theme_id = record.get('theme_id')
+                # sqlite3.Row has no .get(). This used to raise on every call, which
+                # sent the whole thing into the fallback below and quietly loaded the
+                # entire collection unfiltered on every render.
+                theme_id = record['theme_id'] if 'theme_id' in record.keys() else None
                 if theme_id:
                     theme = theme_list.get(theme_id)
                     if theme and hasattr(theme, 'name'):
@@ -518,43 +539,76 @@ class BrickSetList(BrickRecordList[BrickSet]):
         return (search_lower in record.fields.name.lower() or
                 search_lower in record.fields.set.lower())
 
+    # Every filter value on the sets page can carry a leading "-" meaning "not this",
+    # produced by the != toggle. This path used to ignore it, so a negated filter
+    # either did nothing at all or matched nothing at all.
+    @staticmethod
+    def _is_negated(value: str) -> bool:
+        return value.startswith('-')
+
+    @staticmethod
+    def _without_negation(value: str) -> str:
+        return value[1:] if value.startswith('-') else value
+
+    @classmethod
+    def _apply_negation(cls, matched: bool, value: str) -> bool:
+        return not matched if cls._is_negated(value) else matched
+
     def _matches_theme(self, record, theme_id: str) -> bool:
         """Check if record matches theme filter"""
-        return str(record.fields.theme_id) == theme_id
+        matched = str(record.fields.theme_id) == self._without_negation(theme_id)
+
+        return self._apply_negation(matched, theme_id)
+
+    def _matches_year(self, record, year_filter: str) -> bool:
+        """Check if record matches year filter"""
+        matched = str(record.fields.year) == self._without_negation(year_filter)
+
+        return self._apply_negation(matched, year_filter)
 
     def _matches_owner(self, record, owner_filter: str) -> bool:
         """Check if record matches owner filter"""
-        if not owner_filter.startswith('owner-'):
+        value = self._without_negation(owner_filter)
+        if not value.startswith('owner-'):
             return True
 
         # Convert owner-uuid format to owner_uuid column name
-        owner_column = owner_filter.replace('-', '_')
+        owner_column = value.replace('-', '_')
+        matched = getattr(record.fields, owner_column, 0) == 1
 
-        # Check if record has this owner attribute set to 1
-        return hasattr(record.fields, owner_column) and getattr(record.fields, owner_column) == 1
+        return self._apply_negation(matched, owner_filter)
 
     def _matches_purchase_location(self, record, location_filter: str) -> bool:
         """Check if record matches purchase location filter"""
-        if location_filter == '__none__':
-            return not record.fields.purchase_location
-        return record.fields.purchase_location == location_filter
+        value = self._without_negation(location_filter)
+        if value == '__none__':
+            matched = not record.fields.purchase_location
+        else:
+            matched = record.fields.purchase_location == value
+
+        return self._apply_negation(matched, location_filter)
 
     def _matches_storage(self, record, storage_filter: str) -> bool:
         """Check if record matches storage filter"""
-        if storage_filter == '__none__':
-            return not record.fields.storage
-        return record.fields.storage == storage_filter
+        value = self._without_negation(storage_filter)
+        if value == '__none__':
+            matched = not record.fields.storage
+        else:
+            matched = record.fields.storage == value
+
+        return self._apply_negation(matched, storage_filter)
 
     def _matches_tag(self, record, tag_filter: str) -> bool:
         """Check if record matches tag filter"""
-        if not tag_filter.startswith('tag-'):
+        value = self._without_negation(tag_filter)
+        if not value.startswith('tag-'):
             return True
 
         # Convert tag-uuid format to tag_uuid column name
-        tag_column = tag_filter.replace('-', '_')
+        tag_column = value.replace('-', '_')
+        matched = getattr(record.fields, tag_column, 0) == 1
 
-        # Check if record has this tag attribute set to 1
-        return hasattr(record.fields, tag_column) and getattr(record.fields, tag_column) == 1
+        return self._apply_negation(matched, tag_filter)
 
     def _sort_records(self, records, sort_field: str, sort_order: str):
         """Sort records manually"""

@@ -119,7 +119,12 @@ class BrickRecordList(Generic[T]):
             # Wrap in COUNT(*)
             wrapped_sql = f"SELECT COUNT(*) as total_count FROM ({count_sql.strip()})"
 
-            count_result = BrickSQL().raw_execute(wrapped_sql, {}).fetchone()
+            # Same bound values as the list query, otherwise any named placeholder
+            # in the filters blows up the count
+            count_result = BrickSQL().raw_execute(
+                wrapped_sql,
+                self.sql_parameters(),
+            ).fetchone()
             total_count = count_result['total_count'] if count_result else 0
 
         # Prepare sort order

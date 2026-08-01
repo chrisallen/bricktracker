@@ -378,49 +378,36 @@ window.updateUrlParams = function(params, resetPage = true) {
 
 // Shared filter application (supports owner, color, theme, year, storage, tag, and problems filters)
 window.applyPageFilters = function(tableId) {
-  const ownerSelect = document.getElementById('filter-owner');
-  const colorSelect = document.getElementById('filter-color');
-  const themeSelect = document.getElementById('filter-theme');
-  const yearSelect = document.getElementById('filter-year');
-  const storageSelect = document.getElementById('filter-storage');
-  const tagSelect = document.getElementById('filter-tag');
-  const problemsSelect = document.getElementById('filter-problems');
   const params = {};
 
-  // Handle owner filter
-  if (ownerSelect) {
-    params.owner = ownerSelect.value;
-  }
+  // Read a select's value, including the leading "-" when its != toggle is on
+  const readFilter = (selectId, paramName) => {
+    const select = document.getElementById(selectId);
+    if (!select) {
+      return;
+    }
 
-  // Handle color filter
-  if (colorSelect) {
-    params.color = colorSelect.value;
-  }
+    // "all" means the filter is off, so never let the != toggle turn it into "-all"
+    if (select.value === 'all' || select.value === '') {
+      params[paramName] = select.value;
+      return;
+    }
 
-  // Handle theme filter
-  if (themeSelect) {
-    params.theme = themeSelect.value;
-  }
+    params[paramName] = typeof BrickFilterToggle !== 'undefined'
+      ? BrickFilterToggle.getFilterValue(select)
+      : select.value;
+  };
 
-  // Handle year filter
-  if (yearSelect) {
-    params.year = yearSelect.value;
-  }
+  readFilter('filter-owner', 'owner');
+  readFilter('filter-color', 'color');
+  readFilter('filter-theme', 'theme');
+  readFilter('filter-year', 'year');
+  readFilter('filter-storage', 'storage');
+  readFilter('filter-tag', 'tag');
+  readFilter('filter-status', 'status');
 
-  // Handle storage filter
-  if (storageSelect) {
-    params.storage = storageSelect.value;
-  }
-
-  // Handle tag filter
-  if (tagSelect) {
-    params.tag = tagSelect.value;
-  }
-
-  // Handle problems filter (for minifigures page)
-  if (problemsSelect) {
-    params.problems = problemsSelect.value;
-  }
+  // Minifigures page only
+  readFilter('filter-problems', 'problems');
 
   // Check if we're in pagination mode
   const isPaginationMode = window.isPaginationModeForPage(tableId);

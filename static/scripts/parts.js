@@ -84,7 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const clearButton = document.getElementById('table-filter-clear');
   if (clearButton) {
     clearButton.addEventListener('click', () => {
-      window.clearPageFilters('parts', ['owner', 'color', 'theme', 'year', 'individuals']);
+      window.clearPageFilters('parts', ['owner', 'color', 'theme', 'year', 'storage', 'tag', 'status', 'individuals']);
     });
   }
 });
