@@ -132,12 +132,22 @@ ON "combined"."id" IS NOT DISTINCT FROM "bricktracker_set_tags"."id"
 {# Theme and year only exist for set sourced parts. The LEFT JOIN gives NULL for
    everything else, and NULL = x is never true, so individual parts drop out on
    their own. #}
+{# The negated forms stay set only too. A part with no set behind it has no theme and
+   no year, so it is neither "from 2023" nor "from a year that is not 2023". #}
 {% if theme_id %}
-  {% set _ = conditions.append('"rebrickable_sets"."theme_id" = :theme_id') %}
+  {% if theme_id.startswith('-') %}
+    {% set _ = conditions.append('"rebrickable_sets"."theme_id" IS NOT NULL AND "rebrickable_sets"."theme_id" != :theme_id') %}
+  {% else %}
+    {% set _ = conditions.append('"rebrickable_sets"."theme_id" = :theme_id') %}
+  {% endif %}
 {% endif %}
 
 {% if year %}
-  {% set _ = conditions.append('"rebrickable_sets"."year" = :year') %}
+  {% if year.startswith('-') %}
+    {% set _ = conditions.append('"rebrickable_sets"."year" IS NOT NULL AND "rebrickable_sets"."year" != :year') %}
+  {% else %}
+    {% set _ = conditions.append('"rebrickable_sets"."year" = :year') %}
+  {% endif %}
 {% endif %}
 
 {% if storage_id %}

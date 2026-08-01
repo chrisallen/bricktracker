@@ -126,17 +126,17 @@ class BrickPartList(BrickRecordList[BrickPart]):
         if current_app.config.get('HIDE_SPARE_PARTS', False):
             context['skip_spare_parts'] = True
 
-        # Everything that is data rather than a column name gets bound
+        # Everything that is data rather than a column name gets bound. The query
+        # decides what "not this" means, so the value itself is bound without its
+        # leading "-".
         self.filter_parameters = {}
         for name in BOUND_FILTERS:
             value = context.get(name)
             if value is None:
                 continue
-            if name == 'storage_id':
-                if value in STORAGE_SENTINELS:
-                    continue
-                value = without_negation(value)
-            self.filter_parameters[name] = value
+            if name == 'storage_id' and value in STORAGE_SENTINELS:
+                continue
+            self.filter_parameters[name] = without_negation(value)
 
         if search_query:
             self.filter_parameters['search_query'] = '%{query}%'.format(
