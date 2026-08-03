@@ -1,3 +1,4 @@
+{% import 'macro/form.html' as form %}
 <div id="table-filter" class="collapse {% if config['SHOW_GRID_FILTERS'] %}show{% endif %} row row-cols-lg-auto g-1 justify-content-center align-items-center">
   {% if owners | length %}
   <div class="col-12 flex-grow-1">
@@ -6,9 +7,10 @@
       <select id="filter-owner" class="form-select" onchange="applyFiltersAndKeepOpen()" autocomplete="off">
         <option value="all" {% if selected_owner == 'all' %}selected{% endif %}>All owners</option>
         {% for owner in owners %}
-          <option value="{{ owner.fields.id }}" {% if selected_owner == owner.fields.id %}selected{% endif %}>{{ owner.fields.name }}</option>
+          <option value="{{ owner.fields.id }}" {% if selected_owner == owner.fields.id or selected_owner == ('-' + owner.fields.id) %}selected{% endif %}>{{ owner.fields.name }}</option>
         {% endfor %}
       </select>
+      {{ form.filter_toggle('filter-owner') }}
     </div>
   </div>
   {% endif %}
@@ -30,9 +32,10 @@
       <select id="filter-theme" class="form-select" onchange="applyFiltersAndKeepOpen()" autocomplete="off">
         <option value="all" {% if selected_theme == 'all' %}selected{% endif %}>All themes</option>
         {% for theme in themes %}
-          <option value="{{ theme.theme_id }}" {% if selected_theme == theme.theme_id|string %}selected{% endif %}>{{ theme.theme_name }}</option>
+          <option value="{{ theme.theme_id }}" {% if selected_theme == theme.theme_id|string or selected_theme == ('-' + theme.theme_id|string) %}selected{% endif %}>{{ theme.theme_name }}</option>
         {% endfor %}
       </select>
+      {{ form.filter_toggle('filter-theme') }}
     </div>
   </div>
   {% endif %}
@@ -43,9 +46,10 @@
       <select id="filter-year" class="form-select" onchange="applyFiltersAndKeepOpen()" autocomplete="off">
         <option value="all" {% if selected_year == 'all' %}selected{% endif %}>All years</option>
         {% for year in years %}
-          <option value="{{ year.year }}" {% if selected_year == year.year|string %}selected{% endif %}>{{ year.year }}</option>
+          <option value="{{ year.year }}" {% if selected_year == year.year|string or selected_year == ('-' + year.year|string) %}selected{% endif %}>{{ year.year }}</option>
         {% endfor %}
       </select>
+      {{ form.filter_toggle('filter-year') }}
     </div>
   </div>
   {% endif %}

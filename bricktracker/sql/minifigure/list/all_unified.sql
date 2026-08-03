@@ -1,4 +1,15 @@
--- Unified query that shows both set minifigures and individual minifigures
+{#
+  Unified query that shows both set minifigures and individual minifigures.
+
+  theme_id, year and search_query are data, not column names, so they are bound
+  (:theme_id, :year, :search_query) rather than interpolated into the query text. A
+  leading "-" means "not this"; the view strips it before binding the value, this
+  template only uses it to pick the SQL operator.
+
+  Individual minifigures aren't tied to any set, so they have no theme or year of
+  their own. When one of those filters is active they drop out entirely, same
+  reasoning as parts use for the same case.
+#}
 SELECT
     "figure",
     "number",
@@ -50,14 +61,22 @@ FROM (
     ON "bricktracker_minifigures"."id" IS NOT DISTINCT FROM "problem_join"."id"
     AND "rebrickable_minifigures"."figure" IS NOT DISTINCT FROM "problem_join"."figure"
     WHERE 1=1
-    {% if theme_id and theme_id != 'all' %}
-    AND "filter_rs"."theme_id" = {{ theme_id }}
+    {% if theme_id %}
+    {% if theme_id.startswith('-') %}
+    AND "filter_rs"."theme_id" != :theme_id
+    {% else %}
+    AND "filter_rs"."theme_id" = :theme_id
     {% endif %}
-    {% if year and year != 'all' %}
-    AND "filter_rs"."year" = {{ year }}
+    {% endif %}
+    {% if year %}
+    {% if year.startswith('-') %}
+    AND "filter_rs"."year" != :year
+    {% else %}
+    AND "filter_rs"."year" = :year
+    {% endif %}
     {% endif %}
     {% if search_query %}
-    AND (LOWER("rebrickable_minifigures"."name") LIKE LOWER('%{{ search_query }}%'))
+    AND (LOWER("rebrickable_minifigures"."name") LIKE :search_query)
     {% endif %}
 
     UNION ALL
@@ -89,8 +108,13 @@ FROM (
     ) "ind_problem_join"
     ON "bricktracker_individual_minifigures"."id" IS NOT DISTINCT FROM "ind_problem_join"."id"
     WHERE 1=1
+    {% if theme_id or year %}
+    -- No set behind an individual minifigure, so it has no theme or year: it can
+    -- never match a filter on either.
+    AND 0=1
+    {% endif %}
     {% if search_query %}
-    AND (LOWER("rebrickable_minifigures"."name") LIKE LOWER('%{{ search_query }}%'))
+    AND (LOWER("rebrickable_minifigures"."name") LIKE :search_query)
     {% endif %}
 ) "combined"
 GROUP BY

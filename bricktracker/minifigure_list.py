@@ -5,6 +5,7 @@ from typing import Any, Self, TYPE_CHECKING
 from flask import current_app
 
 from .minifigure import BrickMinifigure
+from .part_list import without_negation
 from .rebrickable import Rebrickable
 from .record_list import BrickRecordList
 if TYPE_CHECKING:
@@ -18,6 +19,7 @@ logger = logging.getLogger(__name__)
 class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
     brickset: 'BrickSet | None'
     order: str
+    filter_parameters: dict[str, Any]
 
     # Queries
     all_query: str = 'minifigure/list/all_unified'
@@ -33,6 +35,7 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
 
         # Placeholders
         self.brickset = None
+        self.filter_parameters = {}
 
         # Store the order for this list
         self.order = current_app.config['MINIFIGURES_DEFAULT_ORDER']
@@ -43,21 +46,74 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
 
         return self
 
+    # Build the Jinja context for a filtered query, and stash the values that get
+    # bound as SQL parameters. theme/year values are data, not column names, and
+    # used to be interpolated raw into the query text; owner stays a column name
+    # (validated by the caller against known owner ids first).
+    def filter_context(
+        self,
+        /,
+        *,
+        owner_id: str | None = None,
+        problems_filter: str = 'all',
+        theme_id: str = 'all',
+        year: str = 'all',
+        individuals_filter: str = 'all',
+        search_query: str | None = None,
+    ) -> dict[str, Any]:
+        context: dict[str, Any] = {}
+
+        if owner_id and owner_id != 'all':
+            context['owner_id'] = owner_id
+
+        if problems_filter and problems_filter != 'all':
+            context['problems_filter'] = problems_filter
+
+        if theme_id and theme_id != 'all':
+            context['theme_id'] = theme_id
+
+        if year and year != 'all':
+            context['year'] = year
+
+        if individuals_filter and individuals_filter != 'all':
+            context['individuals_filter'] = individuals_filter
+
+        if search_query:
+            context['search_query'] = search_query
+
+        self.filter_parameters = {}
+        if 'theme_id' in context:
+            self.filter_parameters['theme_id'] = without_negation(context['theme_id'])  # noqa: E501
+        if 'year' in context:
+            self.filter_parameters['year'] = without_negation(context['year'])
+        if search_query:
+            self.filter_parameters['search_query'] = '%{query}%'.format(
+                query=search_query.lower(),
+            )
+
+        return context
+
     # Load all minifigures with problems filter
-    def all_filtered(self, /, owner_id: str | None = None, problems_filter: str = 'all', theme_id: str = 'all', year: str = 'all', individuals_filter: str = 'all') -> Self:
+    def all_filtered(
+        self,
+        /,
+        owner_id: str | None = None,
+        problems_filter: str = 'all',
+        theme_id: str = 'all',
+        year: str = 'all',
+        individuals_filter: str = 'all',
+    ) -> Self:
         # Save the owner_id parameter
         if owner_id is not None:
             self.fields.owner_id = owner_id
 
-        context = {}
-        if problems_filter and problems_filter != 'all':
-            context['problems_filter'] = problems_filter
-        if theme_id and theme_id != 'all':
-            context['theme_id'] = theme_id
-        if year and year != 'all':
-            context['year'] = year
-        if individuals_filter and individuals_filter != 'all':
-            context['individuals_filter'] = individuals_filter
+        context = self.filter_context(
+            owner_id=owner_id,
+            problems_filter=problems_filter,
+            theme_id=theme_id,
+            year=year,
+            individuals_filter=individuals_filter,
+        )
 
         # Choose query based on whether owner filtering is needed
         if owner_id and owner_id != 'all':
@@ -66,36 +122,6 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
             query = self.all_query
 
         self.list(override_query=query, **context)
-        return self
-
-    # Load all minifigures by owner
-    def all_by_owner(self, owner_id: str | None = None, /) -> Self:
-        # Save the owner_id parameter
-        self.fields.owner_id = owner_id
-
-        # Load the minifigures from the database
-        self.list(override_query=self.all_by_owner_query)
-
-        return self
-
-    # Load all minifigures by owner with problems filter
-    def all_by_owner_filtered(self, /, owner_id: str | None = None, problems_filter: str = 'all', theme_id: str = 'all', year: str = 'all', individuals_filter: str = 'all') -> Self:
-        # Save the owner_id parameter
-        self.fields.owner_id = owner_id
-
-        context = {}
-        if problems_filter and problems_filter != 'all':
-            context['problems_filter'] = problems_filter
-        if theme_id and theme_id != 'all':
-            context['theme_id'] = theme_id
-        if year and year != 'all':
-            context['year'] = year
-        if individuals_filter and individuals_filter != 'all':
-            context['individuals_filter'] = individuals_filter
-
-        # Load the minifigures from the database
-        self.list(override_query=self.all_by_owner_query, **context)
-
         return self
 
     # Load minifigures with pagination support
@@ -110,30 +136,18 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
         page: int = 1,
         per_page: int = 50,
         sort_field: str | None = None,
-        sort_order: str = 'asc'
+        sort_order: str = 'asc',
     ) -> tuple[Self, int]:
-        # Prepare filter context
-        filter_context = {}
-        if owner_id and owner_id != 'all':
-            filter_context['owner_id'] = owner_id
-            list_query = self.all_by_owner_query
-        else:
-            list_query = self.all_query
+        list_query = self.all_by_owner_query if owner_id and owner_id != 'all' else self.all_query  # noqa: E501
 
-        if search_query:
-            filter_context['search_query'] = search_query
-
-        if problems_filter and problems_filter != 'all':
-            filter_context['problems_filter'] = problems_filter
-
-        if theme_id and theme_id != 'all':
-            filter_context['theme_id'] = theme_id
-
-        if year and year != 'all':
-            filter_context['year'] = year
-
-        if individuals_filter and individuals_filter != 'all':
-            filter_context['individuals_filter'] = individuals_filter
+        context = self.filter_context(
+            owner_id=owner_id,
+            problems_filter=problems_filter,
+            theme_id=theme_id,
+            year=year,
+            individuals_filter=individuals_filter,
+            search_query=search_query,
+        )
 
         # Field mapping for sorting (using column names from the unified query)
         field_mapping = {
@@ -153,7 +167,7 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
             sort_order=sort_order,
             list_query=list_query,
             field_mapping=field_mapping,
-            **filter_context
+            **context
         )
 
     # Minifigures with a part damaged part
@@ -258,6 +272,10 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
         # Add owner_id parameter for owner filtering
         if hasattr(self.fields, 'owner_id') and self.fields.owner_id is not None:
             parameters['owner_id'] = self.fields.owner_id
+
+        # Filter values that are data rather than column names (theme/year values),
+        # bound instead of interpolated raw into the query
+        parameters.update(self.filter_parameters)
 
         return parameters
 

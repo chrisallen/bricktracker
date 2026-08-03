@@ -23,6 +23,7 @@
 
 ### Bug Fixes
 
+- **Fixed the minifigures owner filter going straight into the query as an unchecked column name, and owner/theme/year having no not-equals option**: Same class of bug already fixed on the sets and parts pages, just not caught here yet. The owner value is now checked against known owners before it touches the query, and owner, theme and year all get the same not-equals toggle the rest of the filters have
 - **Fixed instructions never linking to sets with alphanumeric ids** (#166): Instructions for "Pick a Brick" / promotional builds whose set id begins with letters (e.g. `EG00029-1`) were orphaned and never associated with the set; the matching now handles alphanumeric set ids
 - **Fixed font size on the landing page** (#167): Item titles in the "Latest added parts" section on the homepage now match the smaller size used by the sets and minifigures sections
 - **Fixed sets with unmappable BrickLink parts never clearing the "need refresh" list** (#163): Sets containing parts that Rebrickable has no BrickLink mapping for (e.g. length-specific pneumatic hoses) kept reappearing on the Refresh admin page right after being refreshed; these unmappable parts no longer flag a set as needing a refresh

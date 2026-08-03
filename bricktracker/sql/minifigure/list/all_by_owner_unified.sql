@@ -1,4 +1,16 @@
--- Unified query that shows both set minifigures and individual minifigures filtered by owner
+{#
+  Unified query that shows both set minifigures and individual minifigures filtered
+  by owner.
+
+  owner_id is interpolated as a column name suffix (validated by the view against
+  known owner ids first, no amount of quoting makes a column name safe). theme_id,
+  year and search_query are data, so they are bound (:theme_id, :year,
+  :search_query) instead. A leading "-" means "not this".
+
+  Individual minifigures aren't tied to any set, so they have no theme or year of
+  their own: those filters exclude them entirely, same as the plain (no owner)
+  unified query.
+#}
 SELECT
     "figure",
     "number",
@@ -22,8 +34,13 @@ FROM (
         IFNULL("problem_join"."total_missing", 0) AS "total_missing",
         IFNULL("problem_join"."total_damaged", 0) AS "total_damaged",
         {% if owner_id and owner_id != 'all' %}
+        {% if owner_id.startswith('-') %}
+        CASE WHEN IFNULL("bricktracker_set_owners"."owner_{{ owner_id[1:] }}", 0) = 0 THEN IFNULL("bricktracker_minifigures"."quantity", 0) ELSE 0 END AS "total_quantity",
+        CASE WHEN IFNULL("bricktracker_set_owners"."owner_{{ owner_id[1:] }}", 0) = 0 THEN 1 ELSE 0 END AS "total_sets",
+        {% else %}
         CASE WHEN "bricktracker_set_owners"."owner_{{ owner_id }}" = 1 THEN IFNULL("bricktracker_minifigures"."quantity", 0) ELSE 0 END AS "total_quantity",
         CASE WHEN "bricktracker_set_owners"."owner_{{ owner_id }}" = 1 THEN 1 ELSE 0 END AS "total_sets",
+        {% endif %}
         {% else %}
         IFNULL("bricktracker_minifigures"."quantity", 0) AS "total_quantity",
         1 AS "total_sets",
@@ -47,8 +64,13 @@ FROM (
             "bricktracker_parts"."id",
             "bricktracker_parts"."figure",
             {% if owner_id and owner_id != 'all' %}
+            {% if owner_id.startswith('-') %}
+            SUM(CASE WHEN IFNULL("owner_parts"."owner_{{ owner_id[1:] }}", 0) = 0 THEN "bricktracker_parts"."missing" ELSE 0 END) AS "total_missing",
+            SUM(CASE WHEN IFNULL("owner_parts"."owner_{{ owner_id[1:] }}", 0) = 0 THEN "bricktracker_parts"."damaged" ELSE 0 END) AS "total_damaged"
+            {% else %}
             SUM(CASE WHEN "owner_parts"."owner_{{ owner_id }}" = 1 THEN "bricktracker_parts"."missing" ELSE 0 END) AS "total_missing",
             SUM(CASE WHEN "owner_parts"."owner_{{ owner_id }}" = 1 THEN "bricktracker_parts"."damaged" ELSE 0 END) AS "total_damaged"
+            {% endif %}
             {% else %}
             SUM("bricktracker_parts"."missing") AS "total_missing",
             SUM("bricktracker_parts"."damaged") AS "total_damaged"
@@ -67,16 +89,28 @@ FROM (
     AND "rebrickable_minifigures"."figure" IS NOT DISTINCT FROM "problem_join"."figure"
     {% set conditions = [] %}
     {% if owner_id and owner_id != 'all' %}
-      {% set _ = conditions.append('"bricktracker_set_owners"."owner_' ~ owner_id ~ '" = 1') %}
+      {% if owner_id.startswith('-') %}
+        {% set _ = conditions.append('IFNULL("bricktracker_set_owners"."owner_' ~ owner_id[1:] ~ '", 0) = 0') %}
+      {% else %}
+        {% set _ = conditions.append('"bricktracker_set_owners"."owner_' ~ owner_id ~ '" = 1') %}
+      {% endif %}
     {% endif %}
-    {% if theme_id and theme_id != 'all' %}
-      {% set _ = conditions.append('"rebrickable_sets"."theme_id" = ' ~ theme_id) %}
+    {% if theme_id %}
+      {% if theme_id.startswith('-') %}
+        {% set _ = conditions.append('"rebrickable_sets"."theme_id" != :theme_id') %}
+      {% else %}
+        {% set _ = conditions.append('"rebrickable_sets"."theme_id" = :theme_id') %}
+      {% endif %}
     {% endif %}
-    {% if year and year != 'all' %}
-      {% set _ = conditions.append('"rebrickable_sets"."year" = ' ~ year) %}
+    {% if year %}
+      {% if year.startswith('-') %}
+        {% set _ = conditions.append('"rebrickable_sets"."year" != :year') %}
+      {% else %}
+        {% set _ = conditions.append('"rebrickable_sets"."year" = :year') %}
+      {% endif %}
     {% endif %}
     {% if search_query %}
-      {% set _ = conditions.append('(LOWER("rebrickable_minifigures"."name") LIKE LOWER(\'%' ~ search_query ~ '%\'))') %}
+      {% set _ = conditions.append('(LOWER("rebrickable_minifigures"."name") LIKE :search_query)') %}
     {% endif %}
     {% if conditions %}
     WHERE {{ conditions | join(' AND ') }}
@@ -95,8 +129,13 @@ FROM (
         IFNULL("ind_problem_join"."total_missing", 0) AS "total_missing",
         IFNULL("ind_problem_join"."total_damaged", 0) AS "total_damaged",
         {% if owner_id and owner_id != 'all' %}
+        {% if owner_id.startswith('-') %}
+        CASE WHEN IFNULL("bricktracker_set_owners"."owner_{{ owner_id[1:] }}", 0) = 0 THEN IFNULL("bricktracker_individual_minifigures"."quantity", 0) ELSE 0 END AS "total_quantity",
+        CASE WHEN IFNULL("bricktracker_set_owners"."owner_{{ owner_id[1:] }}", 0) = 0 THEN 1 ELSE 0 END AS "total_individual",
+        {% else %}
         CASE WHEN "bricktracker_set_owners"."owner_{{ owner_id }}" = 1 THEN IFNULL("bricktracker_individual_minifigures"."quantity", 0) ELSE 0 END AS "total_quantity",
         CASE WHEN "bricktracker_set_owners"."owner_{{ owner_id }}" = 1 THEN 1 ELSE 0 END AS "total_individual",
+        {% endif %}
         {% else %}
         IFNULL("bricktracker_individual_minifigures"."quantity", 0) AS "total_quantity",
         1 AS "total_individual",
@@ -120,10 +159,18 @@ FROM (
     ON "bricktracker_individual_minifigures"."id" IS NOT DISTINCT FROM "ind_problem_join"."id"
     {% set ind_conditions = [] %}
     {% if owner_id and owner_id != 'all' %}
-      {% set _ = ind_conditions.append('"bricktracker_set_owners"."owner_' ~ owner_id ~ '" = 1') %}
+      {% if owner_id.startswith('-') %}
+        {% set _ = ind_conditions.append('IFNULL("bricktracker_set_owners"."owner_' ~ owner_id[1:] ~ '", 0) = 0') %}
+      {% else %}
+        {% set _ = ind_conditions.append('"bricktracker_set_owners"."owner_' ~ owner_id ~ '" = 1') %}
+      {% endif %}
+    {% endif %}
+    {% if theme_id or year %}
+      {# No set behind an individual minifigure, so it can never match these #}
+      {% set _ = ind_conditions.append('0=1') %}
     {% endif %}
     {% if search_query %}
-      {% set _ = ind_conditions.append('(LOWER("rebrickable_minifigures"."name") LIKE LOWER(\'%' ~ search_query ~ '%\'))') %}
+      {% set _ = ind_conditions.append('(LOWER("rebrickable_minifigures"."name") LIKE :search_query)') %}
     {% endif %}
     {% if ind_conditions %}
     WHERE {{ ind_conditions | join(' AND ') }}
