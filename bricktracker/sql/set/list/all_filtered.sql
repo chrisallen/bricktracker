@@ -130,4 +130,24 @@ AND (
     WHERE "duplicate_check"."set" = "bricktracker_sets"."set"
 ) > 1
 {% endif %}
+
+{# Custom field values are free text, so unlike owner/tag/status (booleans) they are
+   bound (:custom_field_value_<id>) rather than interpolated. Only the column name
+   (the field id) is interpolated, and it never comes from user input directly: the
+   view only ever builds this dict from fields it already knows about. #}
+{% for field_id, value in (custom_field_filters or {}).items() %}
+{% if value.startswith('-') %}
+AND NOT EXISTS (
+    SELECT 1 FROM "bricktracker_set_custom_fields"
+    WHERE "bricktracker_set_custom_fields"."id" = "bricktracker_sets"."id"
+    AND "bricktracker_set_custom_fields"."custom_field_{{ field_id }}" = :custom_field_value_{{ field_id }}
+)
+{% else %}
+AND EXISTS (
+    SELECT 1 FROM "bricktracker_set_custom_fields"
+    WHERE "bricktracker_set_custom_fields"."id" = "bricktracker_sets"."id"
+    AND "bricktracker_set_custom_fields"."custom_field_{{ field_id }}" = :custom_field_value_{{ field_id }}
+)
+{% endif %}
+{% endfor %}
 {% endblock %}

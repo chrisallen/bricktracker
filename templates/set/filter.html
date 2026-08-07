@@ -114,6 +114,27 @@
       </div>
     </div>
   {% endif %}
+  {% for field in brickset_custom_fields %}
+    {% set field_values = custom_field_values.get(field.fields.id, []) %}
+    {% if field_values | length %}
+    <div class="col-12 flex-grow-1">
+      <label class="visually-hidden" for="grid-{{ field.as_column() }}">{{ field.fields.name }}</label>
+      <div class="input-group">
+        <span class="input-group-text"><i class="ri-list-settings-line"></i><span class="ms-1 d-none d-md-inline"> {{ field.fields.name }}</span></span>
+        <select id="grid-{{ field.as_column() }}" class="form-select"
+          data-filter="value" data-filter-attribute="{{ field.as_dataset() }}"
+          autocomplete="off">
+          <option value="" {% if not current_custom_field_filters.get(field.fields.id) %}selected{% endif %}>All</option>
+          {% for value in field_values %}
+            {% set selected_value = current_custom_field_filters.get(field.fields.id) %}
+            <option value="{{ value }}" {% if selected_value == value or selected_value == ('-' + value) %}selected{% endif %}>{{ value }}</option>
+          {% endfor %}
+        </select>
+        {{ form.filter_toggle('grid-' + field.as_column()) }}
+      </div>
+    </div>
+    {% endif %}
+  {% endfor %}
   <div class="col-12 flex-grow-1">
     <label class="visually-hidden" for="grid-year">Year</label>
     <div class="input-group">

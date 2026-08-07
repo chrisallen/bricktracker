@@ -3,10 +3,12 @@ from flask import Blueprint, current_app, render_template, request
 from .exceptions import exception_handler
 from ..individual_part_list import IndividualPartList
 from ..individual_part_lot_list import IndividualPartLotList
+from ..metadata_list import custom_field_filters_from_request
 from ..minifigure_list import BrickMinifigureList
 from ..pagination_helper import get_pagination_config, build_pagination_context, get_request_params
 from ..part import BrickPart
 from ..part_list import BrickPartList, known_metadata_id
+from ..set_custom_field_list import BrickSetCustomFieldList
 from ..set_list import BrickSetList, set_metadata_lists
 from ..set_owner_list import BrickSetOwnerList
 from ..set_status_list import BrickSetStatusList
@@ -89,9 +91,14 @@ def parts_page_context(*, problem_only: bool) -> dict:
     statuses = BrickSetStatusList.list(all=True)
     tags = BrickSetTagList.list()
     storages = BrickSetStorageList.list()
+    custom_fields = BrickSetCustomFieldList.list()
 
     filters = filters_from_request(owners, statuses, tags)
     individuals_filter = request.args.get('individuals', 'all')
+    custom_field_filters = custom_field_filters_from_request(
+        request.args,
+        custom_fields,
+    )
     search_query, sort_field, sort_order, page = get_request_params()
 
     per_page, is_mobile = get_pagination_config(
@@ -109,6 +116,7 @@ def parts_page_context(*, problem_only: bool) -> dict:
             per_page=per_page,
             sort_field=sort_field,
             sort_order=sort_order,
+            custom_field_filters=custom_field_filters,
             **filters
         )
         pagination = build_pagination_context(
@@ -118,9 +126,16 @@ def parts_page_context(*, problem_only: bool) -> dict:
         parts = parts.filtered(
             problem_only=problem_only,
             individuals_filter=individuals_filter,
+            custom_field_filters=custom_field_filters,
             **filters
         )
         pagination = None
+
+    # Distinct values already in use for each custom field, for its filter dropdown
+    custom_field_values = {
+        field.fields.id: field.distinct_values()
+        for field in custom_fields
+    }
 
     return {
         'table_collection': parts,
@@ -135,6 +150,9 @@ def parts_page_context(*, problem_only: bool) -> dict:
         'storages': storages,
         'tags': tags,
         'statuses': statuses,
+        'custom_fields': custom_fields,
+        'custom_field_values': custom_field_values,
+        'selected_custom_fields': custom_field_filters,
         'selected_owner': request.args.get('owner', 'all'),
         'selected_color': filters['color_id'],
         'selected_theme': filters['theme_id'],

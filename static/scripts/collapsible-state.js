@@ -409,6 +409,13 @@ window.applyPageFilters = function(tableId) {
   // Minifigures page only
   readFilter('filter-problems', 'problems');
 
+  // One select per admin-defined custom field, id "filter-custom_field_<id>",
+  // param name is the id with the "filter-" prefix stripped (parts, problem and
+  // minifigures pages all render these the same way).
+  document.querySelectorAll('#table-filter select[id^="filter-custom_field_"]').forEach(select => {  // eslint-disable-line max-len
+    readFilter(select.id, select.id.replace(/^filter-/, ''));
+  });
+
   // Check if we're in pagination mode
   const isPaginationMode = window.isPaginationModeForPage(tableId);
 
@@ -489,6 +496,13 @@ window.applyFiltersAndKeepState = function(tableId, storageKey) {
 
 // Shared function to clear all filters for a page (works in both pagination and client-side modes)
 window.clearPageFilters = function(tableId, filterParams) {
+  // Custom field filters are dynamic (one per admin-defined field), so they can't
+  // be part of the static filterParams list callers pass in - discover them instead.
+  const customFieldParams = Array.from(
+    document.querySelectorAll('#table-filter select[id^="filter-custom_field_"]')
+  ).map(select => select.id.replace(/^filter-/, ''));
+  filterParams = filterParams.concat(customFieldParams);
+
   const isPaginationMode = window.isPaginationModeForPage(tableId);
 
   if (isPaginationMode) {

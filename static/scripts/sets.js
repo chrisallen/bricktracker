@@ -219,6 +219,14 @@ function initializeFilterDropdowns() {
       tagDropdown.value = stripNotPrefix(tagParam);
     }
   }
+
+  // One select per admin-defined custom field, id "grid-custom_field_<id>"
+  document.querySelectorAll('#grid-filter select[id^="grid-custom_field_"]').forEach(select => {  // eslint-disable-line max-len
+    const param = urlParams.get(select.id.replace(/^grid-/, ''));
+    if (param) {
+      select.value = stripNotPrefix(param);
+    }
+  });
 }
 
 function initializeClientSideFilterDropdowns() {
@@ -386,6 +394,13 @@ function setupPaginationFilterDropdowns() {
     const storageFilter = getFilterValue(storageSelect);
     const tagFilter = getFilterValue(tagSelect);
 
+    // One select per admin-defined custom field, id "grid-custom_field_<id>": the
+    // param name is the id with the "grid-" prefix stripped.
+    const customFieldFilters = {};
+    document.querySelectorAll('#grid-filter select[id^="grid-custom_field_"]').forEach(select => {  // eslint-disable-line max-len
+      customFieldFilters[select.id.replace(/^grid-/, '')] = getFilterValue(select);
+    });
+
     // Update URL parameters
     if (statusFilter) {
       currentUrl.searchParams.set('status', statusFilter);
@@ -427,6 +442,14 @@ function setupPaginationFilterDropdowns() {
       currentUrl.searchParams.set('tag', tagFilter);
     } else {
       currentUrl.searchParams.delete('tag');
+    }
+
+    for (const [param, value] of Object.entries(customFieldFilters)) {
+      if (value) {
+        currentUrl.searchParams.set(param, value);
+      } else {
+        currentUrl.searchParams.delete(param);
+      }
     }
 
     // Numeric range filters (#141)
@@ -764,13 +787,22 @@ function initializeClearFiltersButton() {
   const clearFiltersButton = document.getElementById('grid-filter-clear');
   if (!clearFiltersButton) return;
 
+  // Custom field filters are dynamic (one per admin-defined field), so they can't
+  // be part of the static lists below - discover them instead.
+  const customFieldParams = Array.from(
+    document.querySelectorAll('#grid-filter select[id^="grid-custom_field_"]')
+  ).map(select => select.id.replace(/^grid-/, ''));
+  const customFieldDropdownIds = Array.from(
+    document.querySelectorAll('#grid-filter select[id^="grid-custom_field_"]')
+  ).map(select => select.id);
+
   clearFiltersButton.addEventListener('click', () => {
     if (isPaginationMode()) {
       // SERVER-SIDE PAGINATION MODE: Remove all filter parameters and redirect to base URL
       const currentUrl = new URL(window.location);
 
       // Remove all filter parameters
-      const filterParams = ['status', 'theme', 'year', 'owner', 'purchase_location', 'storage', 'tag', 'duplicate', 'parts_min', 'parts_max', 'year_min', 'year_max'];
+      const filterParams = ['status', 'theme', 'year', 'owner', 'purchase_location', 'storage', 'tag', 'duplicate', 'parts_min', 'parts_max', 'year_min', 'year_max'].concat(customFieldParams);
       filterParams.forEach(param => {
         currentUrl.searchParams.delete(param);
       });
@@ -790,7 +822,7 @@ function initializeClearFiltersButton() {
         'grid-purchase-location',
         'grid-storage',
         'grid-tag'
-      ];
+      ].concat(customFieldDropdownIds);
 
       filterDropdowns.forEach(dropdownId => {
         const dropdown = document.getElementById(dropdownId);

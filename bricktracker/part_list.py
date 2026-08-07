@@ -104,6 +104,7 @@ class BrickPartList(BrickRecordList[BrickPart]):
         problem_only: bool = False,
         individuals_filter: str | None = None,
         search_query: str | None = None,
+        custom_field_filters: dict[str, str] | None = None,
         **filters: str | None,
     ) -> dict[str, Any]:
         context: dict[str, Any] = {}
@@ -121,6 +122,9 @@ class BrickPartList(BrickRecordList[BrickPart]):
 
         if search_query:
             context['search_query'] = search_query
+
+        if custom_field_filters:
+            context['custom_field_filters'] = custom_field_filters
 
         # Hide spare parts from display if configured
         if current_app.config.get('HIDE_SPARE_PARTS', False):
@@ -143,6 +147,9 @@ class BrickPartList(BrickRecordList[BrickPart]):
                 query=search_query.lower(),
             )
 
+        for field_id, value in (custom_field_filters or {}).items():
+            self.filter_parameters['custom_field_value_{id}'.format(id=field_id)] = without_negation(value)  # noqa: E501
+
         return context
 
     # Load parts with filters. problem_only narrows to parts with something missing
@@ -153,11 +160,13 @@ class BrickPartList(BrickRecordList[BrickPart]):
         *,
         problem_only: bool = False,
         individuals_filter: str | None = None,
+        custom_field_filters: dict[str, str] | None = None,
         **filters: str | None,
     ) -> Self:
         context = self.filter_context(
             problem_only=problem_only,
             individuals_filter=individuals_filter,
+            custom_field_filters=custom_field_filters,
             **filters
         )
 
@@ -177,12 +186,14 @@ class BrickPartList(BrickRecordList[BrickPart]):
         per_page: int = 50,
         sort_field: str | None = None,
         sort_order: str = 'asc',
+        custom_field_filters: dict[str, str] | None = None,
         **filters: str | None,
     ) -> tuple[Self, int]:
         context = self.filter_context(
             problem_only=problem_only,
             individuals_filter=individuals_filter,
             search_query=search_query,
+            custom_field_filters=custom_field_filters,
             **filters
         )
 

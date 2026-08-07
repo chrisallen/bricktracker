@@ -2,10 +2,12 @@ from flask import Blueprint, current_app, render_template, request
 
 from .exceptions import exception_handler
 from ..individual_minifigure_list import IndividualMinifigureList
+from ..metadata_list import custom_field_filters_from_request
 from ..minifigure import BrickMinifigure
 from ..minifigure_list import BrickMinifigureList
 from ..pagination_helper import get_pagination_config, build_pagination_context, get_request_params
 from ..part_list import known_metadata_id
+from ..set_custom_field_list import BrickSetCustomFieldList
 from ..set_list import BrickSetList, set_metadata_lists
 from ..set_owner_list import BrickSetOwnerList
 
@@ -17,6 +19,7 @@ minifigure_page = Blueprint('minifigure', __name__, url_prefix='/minifigures')
 @exception_handler(__file__)
 def list() -> str:
     owners = BrickSetOwnerList.list()
+    custom_fields = BrickSetCustomFieldList.list()
 
     # Get filter parameters from request. owner is interpolated as a column name
     # downstream, so it is checked against the owner ids we already know about first.
@@ -28,6 +31,10 @@ def list() -> str:
     theme_id = request.args.get('theme', 'all')
     year = request.args.get('year', 'all')
     individuals_filter = request.args.get('individuals', 'all')
+    custom_field_filters = custom_field_filters_from_request(
+        request.args,
+        custom_fields,
+    )
     search_query, sort_field, sort_order, page = get_request_params()
 
     # Get pagination configuration
@@ -47,6 +54,7 @@ def list() -> str:
             per_page=per_page,
             sort_field=sort_field,
             sort_order=sort_order,
+            custom_field_filters=custom_field_filters,
         )
 
         pagination_context = build_pagination_context(page, per_page, total_count, is_mobile)
@@ -58,6 +66,7 @@ def list() -> str:
             theme_id=theme_id,
             year=year,
             individuals_filter=individuals_filter,
+            custom_field_filters=custom_field_filters,
         )
 
         pagination_context = None
@@ -85,6 +94,12 @@ def list() -> str:
     # Get list of years for filter dropdown
     years = BrickSQL().fetchall('minifigure/years/list', **filter_context)
 
+    # Distinct values already in use for each custom field, for its filter dropdown
+    custom_field_values = {
+        field.fields.id: field.distinct_values()
+        for field in custom_fields
+    }
+
     template_context = {
         'table_collection': minifigures,
         'owners': owners,
@@ -95,6 +110,9 @@ def list() -> str:
         'years': years,
         'selected_year': year,
         'selected_individuals': individuals_filter,
+        'custom_fields': custom_fields,
+        'custom_field_values': custom_field_values,
+        'selected_custom_fields': custom_field_filters,
         'search_query': search_query,
         'use_pagination': use_pagination,
         'current_sort': sort_field,

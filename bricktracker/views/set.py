@@ -26,7 +26,7 @@ from ..sidecar import BrickSidecar
 from ..sidecar_set import bag_inventory as sidecar_bag_inventory
 from ..sidecar_set import summarize as sidecar_summarize
 from ..set_custom_field_list import BrickSetCustomFieldList
-from ..metadata_list import known_metadata_filter
+from ..metadata_list import custom_field_filters_from_request, known_metadata_filter
 from ..set_list import BrickSetList, set_metadata_lists
 from ..set_owner_list import BrickSetOwnerList
 from ..set_purchase_location_list import BrickSetPurchaseLocationList
@@ -69,6 +69,12 @@ def list() -> str:
     )
     duplicate_filter = request.args.get('duplicate', '').lower() == 'true'
 
+    custom_fields = BrickSetCustomFieldList.list()
+    custom_field_filters = custom_field_filters_from_request(
+        request.args,
+        custom_fields,
+    )
+
     # Numeric range filters (#141): blank/invalid means "no bound"
     def _int_arg(name: str) -> int | None:
         value = request.args.get(name)
@@ -108,6 +114,7 @@ def list() -> str:
             parts_max=parts_max,
             year_min=year_min,
             year_max=year_max,
+            custom_field_filters=custom_field_filters,
             use_consolidated=current_app.config['SETS_CONSOLIDATION']
         )
 
@@ -130,6 +137,12 @@ def list() -> str:
         if theme_name:
             display_theme_filter = theme_name
 
+    # Distinct values already in use for each custom field, for its filter dropdown
+    custom_field_values = {
+        field.fields.id: field.distinct_values()
+        for field in custom_fields
+    }
+
     template_context = {
         'collection': sets,
         'search_query': search_query,
@@ -148,6 +161,8 @@ def list() -> str:
         'current_parts_max_filter': parts_max,
         'current_year_min_filter': year_min,
         'current_year_max_filter': year_max,
+        'current_custom_field_filters': custom_field_filters,
+        'custom_field_values': custom_field_values,
         'brickset_statuses': BrickSetStatusList.list(),
         **set_metadata_lists(as_class=True)
     }

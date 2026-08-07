@@ -53,6 +53,24 @@
     </div>
   </div>
   {% endif %}
+  {% for field in custom_fields %}
+    {% set field_values = custom_field_values.get(field.fields.id, []) %}
+    {% if field_values | length %}
+    {% set selected_value = selected_custom_fields.get(field.fields.id, 'all') %}
+    <div class="col-12 flex-grow-1">
+      <div class="input-group">
+        <span class="input-group-text"><i class="ri-list-settings-line"></i><span class="ms-1 d-none d-md-inline"> {{ field.fields.name }}</span></span>
+        <select id="filter-{{ field.as_column() }}" class="form-select" onchange="applyFiltersAndKeepOpen()" autocomplete="off">
+          <option value="all" {% if selected_value == 'all' %}selected{% endif %}>Any {{ field.fields.name }}</option>
+          {% for value in field_values %}
+            <option value="{{ value }}" {% if selected_value == value or selected_value == ('-' + value) %}selected{% endif %}>{{ value }}</option>
+          {% endfor %}
+        </select>
+        {{ form.filter_toggle('filter-' + field.as_column()) }}
+      </div>
+    </div>
+    {% endif %}
+  {% endfor %}
   <div class="col-12 col-lg-auto">
     <button id="table-filter-clear" class="btn btn-outline-danger w-100" type="button" title="Clear all filters">
       <i class="ri-filter-off-line"></i> <span class="d-none d-md-inline">Clear</span>

@@ -1,5 +1,5 @@
 import logging
-from typing import List, overload, Self, Type, TypeVar
+from typing import Any, List, overload, Self, Type, TypeVar
 
 from flask import url_for
 
@@ -236,3 +236,23 @@ def known_metadata_filter(
         return None
 
     return value
+
+
+# Custom field filters arrive as one query arg per defined field:
+# custom_field_<id>=<value>, or custom_field_<id>=-<value> for the != form. Unlike
+# owner/tag, the id itself never needs validating against user input: this only ever
+# loops over fields we already know about, so an unknown id can never get in.
+def custom_field_filters_from_request(
+    args: Any,
+    fields: list,
+    /,
+) -> dict[str, str]:
+    filters: dict[str, str] = {}
+
+    for field in fields:
+        value = args.get('custom_field_{id}'.format(id=field.fields.id))
+
+        if value and value != 'all':
+            filters[field.fields.id] = value
+
+    return filters

@@ -47,9 +47,9 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
         return self
 
     # Build the Jinja context for a filtered query, and stash the values that get
-    # bound as SQL parameters. theme/year values are data, not column names, and
-    # used to be interpolated raw into the query text; owner stays a column name
-    # (validated by the caller against known owner ids first).
+    # bound as SQL parameters. theme/year/custom field values are data, not column
+    # names, and used to be interpolated raw into the query text; owner stays a
+    # column name (validated by the caller against known owner ids first).
     def filter_context(
         self,
         /,
@@ -60,6 +60,7 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
         year: str = 'all',
         individuals_filter: str = 'all',
         search_query: str | None = None,
+        custom_field_filters: dict[str, str] | None = None,
     ) -> dict[str, Any]:
         context: dict[str, Any] = {}
 
@@ -81,6 +82,9 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
         if search_query:
             context['search_query'] = search_query
 
+        if custom_field_filters:
+            context['custom_field_filters'] = custom_field_filters
+
         self.filter_parameters = {}
         if 'theme_id' in context:
             self.filter_parameters['theme_id'] = without_negation(context['theme_id'])  # noqa: E501
@@ -90,6 +94,8 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
             self.filter_parameters['search_query'] = '%{query}%'.format(
                 query=search_query.lower(),
             )
+        for field_id, value in (custom_field_filters or {}).items():
+            self.filter_parameters['custom_field_value_{id}'.format(id=field_id)] = without_negation(value)  # noqa: E501
 
         return context
 
@@ -102,6 +108,7 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
         theme_id: str = 'all',
         year: str = 'all',
         individuals_filter: str = 'all',
+        custom_field_filters: dict[str, str] | None = None,
     ) -> Self:
         # Save the owner_id parameter
         if owner_id is not None:
@@ -113,6 +120,7 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
             theme_id=theme_id,
             year=year,
             individuals_filter=individuals_filter,
+            custom_field_filters=custom_field_filters,
         )
 
         # Choose query based on whether owner filtering is needed
@@ -137,6 +145,7 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
         per_page: int = 50,
         sort_field: str | None = None,
         sort_order: str = 'asc',
+        custom_field_filters: dict[str, str] | None = None,
     ) -> tuple[Self, int]:
         list_query = self.all_by_owner_query if owner_id and owner_id != 'all' else self.all_query  # noqa: E501
 
@@ -147,6 +156,7 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
             year=year,
             individuals_filter=individuals_filter,
             search_query=search_query,
+            custom_field_filters=custom_field_filters,
         )
 
         # Field mapping for sorting (using column names from the unified query)
@@ -273,8 +283,8 @@ class BrickMinifigureList(BrickRecordList[BrickMinifigure]):
         if hasattr(self.fields, 'owner_id') and self.fields.owner_id is not None:
             parameters['owner_id'] = self.fields.owner_id
 
-        # Filter values that are data rather than column names (theme/year values),
-        # bound instead of interpolated raw into the query
+        # Filter values that are data rather than column names (theme/year/custom
+        # field values), bound instead of interpolated raw into the query
         parameters.update(self.filter_parameters)
 
         return parameters

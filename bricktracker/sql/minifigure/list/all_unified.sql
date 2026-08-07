@@ -6,9 +6,9 @@
   leading "-" means "not this"; the view strips it before binding the value, this
   template only uses it to pick the SQL operator.
 
-  Individual minifigures aren't tied to any set, so they have no theme or year of
-  their own. When one of those filters is active they drop out entirely, same
-  reasoning as parts use for the same case.
+  Individual minifigures aren't tied to any set, so they have no theme, year or
+  custom field value of their own. When one of those filters is active they drop out
+  entirely, same reasoning as parts use for the same case.
 #}
 SELECT
     "figure",
@@ -38,12 +38,16 @@ FROM (
     FROM "bricktracker_minifigures"
     INNER JOIN "rebrickable_minifigures"
     ON "bricktracker_minifigures"."figure" IS NOT DISTINCT FROM "rebrickable_minifigures"."figure"
-    {% if theme_id or year %}
-    -- Join with sets for theme/year filtering
+    {% if theme_id or year or custom_field_filters %}
+    -- Join with sets for theme/year/custom field filtering
     INNER JOIN "bricktracker_sets" AS "filter_sets"
     ON "bricktracker_minifigures"."id" IS NOT DISTINCT FROM "filter_sets"."id"
     INNER JOIN "rebrickable_sets" AS "filter_rs"
     ON "filter_sets"."set" IS NOT DISTINCT FROM "filter_rs"."set"
+    {% endif %}
+    {% if custom_field_filters %}
+    LEFT JOIN "bricktracker_set_custom_fields"
+    ON "filter_sets"."id" IS NOT DISTINCT FROM "bricktracker_set_custom_fields"."id"
     {% endif %}
     -- LEFT JOIN for problems
     LEFT JOIN (
@@ -75,6 +79,13 @@ FROM (
     AND "filter_rs"."year" = :year
     {% endif %}
     {% endif %}
+    {% for field_id, value in (custom_field_filters or {}).items() %}
+    {% if value.startswith('-') %}
+    AND IFNULL("bricktracker_set_custom_fields"."custom_field_{{ field_id }}", '') != :custom_field_value_{{ field_id }}
+    {% else %}
+    AND "bricktracker_set_custom_fields"."custom_field_{{ field_id }}" = :custom_field_value_{{ field_id }}
+    {% endif %}
+    {% endfor %}
     {% if search_query %}
     AND (LOWER("rebrickable_minifigures"."name") LIKE :search_query)
     {% endif %}
@@ -108,9 +119,9 @@ FROM (
     ) "ind_problem_join"
     ON "bricktracker_individual_minifigures"."id" IS NOT DISTINCT FROM "ind_problem_join"."id"
     WHERE 1=1
-    {% if theme_id or year %}
-    -- No set behind an individual minifigure, so it has no theme or year: it can
-    -- never match a filter on either.
+    {% if theme_id or year or custom_field_filters %}
+    -- No set behind an individual minifigure, so it has no theme, year or custom
+    -- field value: it can never match a filter on any of those.
     AND 0=1
     {% endif %}
     {% if search_query %}

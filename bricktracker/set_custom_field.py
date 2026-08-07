@@ -25,11 +25,21 @@ class BrickSetCustomField(BrickMetadata):
     select_query: str = 'set/metadata/custom_field/select'
     update_field_query: str = 'set/metadata/custom_field/update/field'
     update_set_value_query: str = 'set/metadata/custom_field/update/value'
+    values_query: str = 'set/metadata/custom_field/values'
 
     # SQL column name uses an underscore (kind has a space), so override the
     # default which would produce "custom-field_{id}".
     def as_column(self, /) -> str:
         return 'custom_field_{id}'.format(id=self.fields.id)
+
+    # Distinct values already in use for this field, to populate its filter dropdown.
+    def distinct_values(self, /) -> list[str]:
+        rows = BrickSQL().fetchall(
+            self.values_query,
+            column=self.as_column(),
+        )
+
+        return [row['value'] for row in rows]
 
     # Grab data from a form (name + type)
     def from_form(self, form: dict[str, str], /) -> Self:

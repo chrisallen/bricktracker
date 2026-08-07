@@ -7,9 +7,9 @@
   year and search_query are data, so they are bound (:theme_id, :year,
   :search_query) instead. A leading "-" means "not this".
 
-  Individual minifigures aren't tied to any set, so they have no theme or year of
-  their own: those filters exclude them entirely, same as the plain (no owner)
-  unified query.
+  Individual minifigures aren't tied to any set, so they have no theme, year or
+  custom field value of their own: those filters exclude them entirely, same as the
+  plain (no owner) unified query.
 #}
 SELECT
     "figure",
@@ -58,6 +58,10 @@ FROM (
     -- Left join with set owners
     LEFT JOIN "bricktracker_set_owners"
     ON "bricktracker_sets"."id" IS NOT DISTINCT FROM "bricktracker_set_owners"."id"
+    {% if custom_field_filters %}
+    LEFT JOIN "bricktracker_set_custom_fields"
+    ON "bricktracker_sets"."id" IS NOT DISTINCT FROM "bricktracker_set_custom_fields"."id"
+    {% endif %}
     -- LEFT JOIN for problems
     LEFT JOIN (
         SELECT
@@ -109,6 +113,13 @@ FROM (
         {% set _ = conditions.append('"rebrickable_sets"."year" = :year') %}
       {% endif %}
     {% endif %}
+    {% for field_id, value in (custom_field_filters or {}).items() %}
+      {% if value.startswith('-') %}
+        {% set _ = conditions.append('IFNULL("bricktracker_set_custom_fields"."custom_field_' ~ field_id ~ '", \'\') != :custom_field_value_' ~ field_id) %}
+      {% else %}
+        {% set _ = conditions.append('"bricktracker_set_custom_fields"."custom_field_' ~ field_id ~ '" = :custom_field_value_' ~ field_id) %}
+      {% endif %}
+    {% endfor %}
     {% if search_query %}
       {% set _ = conditions.append('(LOWER("rebrickable_minifigures"."name") LIKE :search_query)') %}
     {% endif %}
@@ -165,7 +176,7 @@ FROM (
         {% set _ = ind_conditions.append('"bricktracker_set_owners"."owner_' ~ owner_id ~ '" = 1') %}
       {% endif %}
     {% endif %}
-    {% if theme_id or year %}
+    {% if theme_id or year or custom_field_filters %}
       {# No set behind an individual minifigure, so it can never match these #}
       {% set _ = ind_conditions.append('0=1') %}
     {% endif %}

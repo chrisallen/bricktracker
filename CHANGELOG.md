@@ -20,6 +20,7 @@
   - Bag tables support the same burger-menu bulk actions and Start audit as the main parts table, run against just that bag's contents, letting you audit a set bag by bag
   - The main parts table's audit popup also shows which bag(s) a part is in when bag data is available
 - **Quick-add to individual parts**: replaced the per-row dropdown (button + one-item menu) with a single button that adds the part directly, one click instead of two
+- **Custom fields as a filter**: Admin-defined custom fields could only be edited per set until now. They can filter the sets, parts, problem and minifigures pages too: pick a value for a field to narrow the list, with the same equals/not-equals toggle the other filters use
 
 ### Bug Fixes
 

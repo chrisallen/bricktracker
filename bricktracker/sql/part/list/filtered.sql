@@ -104,6 +104,14 @@ ON "combined"."id" IS NOT DISTINCT FROM "bricktracker_set_statuses"."id"
 LEFT JOIN "bricktracker_set_tags"
 ON "combined"."id" IS NOT DISTINCT FROM "bricktracker_set_tags"."id"
 {% endif %}
+
+{% if custom_field_filters %}
+-- Custom fields are set only (unlike owner/tag/status they don't apply to
+-- individual parts/minifigures at all), so this only ever matches "combined" rows
+-- whose source is a set.
+LEFT JOIN "bricktracker_set_custom_fields"
+ON "combined"."id" IS NOT DISTINCT FROM "bricktracker_set_custom_fields"."id"
+{% endif %}
 {% endblock %}
 
 {% block where %}
@@ -189,6 +197,17 @@ ON "combined"."id" IS NOT DISTINCT FROM "bricktracker_set_tags"."id"
     {% set _ = conditions.append('"bricktracker_set_tags"."tag_' ~ tag_id ~ '" = 1') %}
   {% endif %}
 {% endif %}
+
+{# Custom fields are set only, same reasoning as theme/year above: an individual
+   part/minifigure has no value at all, so it drops out of both the positive and
+   the negated form rather than vacuously satisfying the negation. #}
+{% for field_id, value in (custom_field_filters or {}).items() %}
+  {% if value.startswith('-') %}
+    {% set _ = conditions.append('"bricktracker_set_custom_fields"."custom_field_' ~ field_id ~ '" IS NOT NULL AND "bricktracker_set_custom_fields"."custom_field_' ~ field_id ~ '" != :custom_field_value_' ~ field_id) %}
+  {% else %}
+    {% set _ = conditions.append('"bricktracker_set_custom_fields"."custom_field_' ~ field_id ~ '" = :custom_field_value_' ~ field_id) %}
+  {% endif %}
+{% endfor %}
 
 {% if conditions %}
 WHERE {{ conditions | join(' AND ') }}
