@@ -80,7 +80,11 @@ def summarize(
     summary['launch_year'] = _year(data.get('launchDate'))
 
     # --- Prices: paid / retail / market --------------------------------
-    msrp = BrickSidecar.retail_price(data)
+    # Full detail rather than just the number: SIDECAR_RETAIL_REGION can list a
+    # fallback region ("DE,US"), so which region and currency MSRP came from
+    # depends on the set, and the price card explains that in a tooltip.
+    retail = BrickSidecar.retail_details(data)
+    msrp = retail['price']
 
     # When auto-fetch is on, hit the TTL-aware path (network only on a cache
     # miss/expiry); otherwise stay cache-only so the render never blocks.
@@ -94,14 +98,29 @@ def summarize(
     market_used = _to_float(price_payload.get('used_avg')) if price_payload else None
     paid = _to_float(purchase_price)
 
+    # Inflation-adjusted RRP is scraped in whatever currency Brickset showed it
+    # in, which is not always the retail region's, so it gets the rate for its
+    # own currency. No rate for that currency means it keeps its own label.
+    msrp_inflated = _to_float(data.get('rrpInflated'))
+    msrp_inflated_currency = _clean_str(data.get('rrpInflatedCurrency'))
+    if msrp_inflated is not None and msrp_inflated_currency:
+        inflated_rate = BrickSidecar.msrp_rate_for(msrp_inflated_currency)
+        if inflated_rate:
+            msrp_inflated = round(msrp_inflated * inflated_rate, 2)
+            msrp_inflated_currency = BrickSidecar.purchase_currency()
+
     prices: dict[str, Any] = {
         'paid': paid,
         'msrp': msrp,
-        'msrp_currency': BrickSidecar.retail_currency(),
-        # Inflation-adjusted RRP, web-scraped by the sidecar (single value in
-        # its own currency, independent of the configured retail region).
-        'msrp_inflated': _to_float(data.get('rrpInflated')),
-        'msrp_inflated_currency': _clean_str(data.get('rrpInflatedCurrency')),
+        'msrp_currency': retail['currency'],
+        # Provenance for the "Retail (MSRP)" tooltip: which LEGO.com region the
+        # figure came from, what it was before conversion, and the rate used.
+        'msrp_region': retail['region'],
+        'msrp_source': retail['source_price'],
+        'msrp_source_currency': retail['source_currency'],
+        'msrp_rate': retail['rate'],
+        'msrp_inflated': msrp_inflated,
+        'msrp_inflated_currency': msrp_inflated_currency,
         'market_new': market_new,
         'market_used': market_used,
         'market_min': _to_float(price_payload.get('new_min')) if price_payload else None,  # noqa: E501
@@ -113,9 +132,22 @@ def summarize(
         'has_market': price_payload is not None,
     }
 
-    # Savings vs MSRP (positive = paid less than retail).
+    # Savings vs MSRP (positive = paid less than retail). Only a real number
+    # when both sides are in the same currency, which needs SIDECAR_MSRP_RATE
+    # whenever you buy in something other than the retail region's currency.
+    # savings_currency stays None when they do not match, so the template can
+    # flag the figure instead of quietly presenting DKK minus USD. An unset
+    # PURCHASE_CURRENCY gives '' instead: nothing to label, nothing to warn
+    # about either.
     if msrp is not None and paid is not None:
         prices['savings_vs_msrp'] = round(msrp - paid, 2)
+        paid_currency = str(
+            current_app.config.get('PURCHASE_CURRENCY', '') or ''
+        ).strip()
+        matches = BrickSidecar.same_currency(
+            prices['msrp_currency'], paid_currency,
+        )
+        prices['savings_currency'] = paid_currency if matches else None
 
     # Value movement vs what was paid. SIDECAR_PRICE_BASIS picks which market
     # average to compare against ('used' or 'new'); fall back to the other when

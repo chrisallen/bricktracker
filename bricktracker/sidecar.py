@@ -275,32 +275,183 @@ class BrickSidecar(object):
 
         return out
 
-    # Convenience: MSRP for the configured retail region (SIDECAR_RETAIL_REGION),
-    # read from an already-fetched get_set() payload. None when unavailable.
+    # MSRP for the configured retail region(s), read from an already-fetched
+    # get_set() payload. Returns (price, currency), where the currency is
+    # PURCHASE_CURRENCY when a rate converted it and the region's own currency
+    # otherwise. Price is None when no configured region has one.
+    #
+    # SIDECAR_RETAIL_REGION may list several regions ("DE,US"): the first one
+    # that actually has a price wins. Older sets frequently only have a US
+    # price, so a lone "DE" would leave them with no MSRP at all.
+    #
+    # This is the single place MSRP enters the app (set detail and statistics
+    # both come through here), so the conversion lives here rather than at each
+    # call site.
+    # Full detail, so the UI can explain where a number came from:
+    #   price / currency    what to display, after any conversion
+    #   region              which LEGO.com region it was read from
+    #   source_price        the untouched figure in the region's own currency
+    #   source_currency     that region's currency
+    #   rate                the rate applied, or 0 when nothing was converted
+    @staticmethod
+    def retail_details(set_data: dict[str, Any], /) -> dict[str, Any]:
+        for region in BrickSidecar.retail_regions():
+            block = set_data.get('legoCom{region}'.format(region=region))
+            if not isinstance(block, dict):
+                continue
+
+            value = block.get('retailPrice')
+            if value is None:
+                continue
+
+            try:
+                price = float(value)
+            except (TypeError, ValueError):
+                continue
+
+            currency = REGION_CURRENCY[region]
+            rate = BrickSidecar.msrp_rate_for(currency)
+
+            return {
+                'price': round(price * rate, 2) if rate else price,
+                'currency': (
+                    BrickSidecar.purchase_currency() if rate else currency
+                ),
+                'region': region,
+                'source_price': price,
+                'source_currency': currency,
+                'rate': rate,
+            }
+
+        # Nothing found: report the primary region's display currency so the
+        # caller still has a sensible label for an empty cell.
+        return {
+            'price': None,
+            'currency': BrickSidecar.retail_currency(),
+            'region': None,
+            'source_price': None,
+            'source_currency': None,
+            'rate': 0.0,
+        }
+
+    # (price, currency) only, for callers that do not need the provenance.
+    @staticmethod
+    def retail_price_currency(
+        set_data: dict[str, Any],
+        /,
+    ) -> tuple[float | None, str]:
+        details = BrickSidecar.retail_details(set_data)
+        return details['price'], details['currency']
+
+    # Just the price, for callers that do not care which region it came from.
     @staticmethod
     def retail_price(set_data: dict[str, Any], /) -> float | None:
-        region = BrickSidecar.retail_region()
-        block = set_data.get('legoCom{region}'.format(region=region))
+        return BrickSidecar.retail_details(set_data)['price']
 
-        if not isinstance(block, dict):
-            return None
+    # Configured retail regions in preference order, e.g. ['DE', 'US'].
+    # Unknown entries are dropped and an empty result falls back to ['US'].
+    @staticmethod
+    def retail_regions() -> list[str]:
+        raw = str(current_app.config.get('SIDECAR_RETAIL_REGION', 'US') or '')
 
-        value = block.get('retailPrice')
-        try:
-            return float(value) if value is not None else None
-        except (TypeError, ValueError):
-            return None
+        regions: list[str] = []
+        for entry in raw.split(','):
+            region = entry.strip().upper()
+            if region in REGION_CURRENCY and region not in regions:
+                regions.append(region)
 
-    # Configured retail region (US/UK/CA/DE), defaulting to US.
+        return regions or ['US']
+
+    # Primary (first) retail region, kept for callers that want a single value.
     @staticmethod
     def retail_region() -> str:
-        region = str(current_app.config.get('SIDECAR_RETAIL_REGION', 'US')).upper()
-        return region if region in REGION_CURRENCY else 'US'
+        return BrickSidecar.retail_regions()[0]
 
-    # Currency code for the configured retail region.
+    # Currency code the primary region publishes MSRP in, before conversion.
+    @staticmethod
+    def region_currency() -> str:
+        return REGION_CURRENCY[BrickSidecar.retail_region()]
+
+    # Currency MSRP is *displayed* in for the primary region: that region's own
+    # currency normally, or PURCHASE_CURRENCY once a rate covers it.
     @staticmethod
     def retail_currency() -> str:
-        return REGION_CURRENCY[BrickSidecar.retail_region()]
+        if BrickSidecar.msrp_rate_for(BrickSidecar.region_currency()):
+            return BrickSidecar.purchase_currency()
+
+        return BrickSidecar.region_currency()
+
+    # Currency the user records purchase prices in, falling back to the primary
+    # region's currency so a label is never blank.
+    @staticmethod
+    def purchase_currency() -> str:
+        purchase = str(
+            current_app.config.get('PURCHASE_CURRENCY', '') or ''
+        ).strip()
+
+        return purchase or BrickSidecar.region_currency()
+
+    # Manual MSRP -> PURCHASE_CURRENCY exchange rates (SIDECAR_MSRP_RATE),
+    # keyed by ISO currency code. Brickset only gives MSRP in the region's
+    # currency, so without a rate a DKK "paid" gets compared against a USD
+    # retail price and "Saved vs retail" is nonsense. Entered by hand: no live
+    # rate API, no daily refresh.
+    #
+    # Two accepted forms:
+    #   7.45              one rate, for the primary region's currency
+    #   EUR:7.45,USD:6.47 one rate per currency, needed when
+    #                     SIDECAR_RETAIL_REGION lists regions that do not share
+    #                     a currency
+    #
+    # A currency with no rate is simply not converted, so an unlisted fallback
+    # region shows its own currency rather than a wrong number.
+    @staticmethod
+    def msrp_rates() -> dict[str, float]:
+        raw = str(
+            current_app.config.get('SIDECAR_MSRP_RATE', '') or ''
+        ).strip()
+        if not raw:
+            return {}
+
+        rates: dict[str, float] = {}
+
+        for entry in raw.split(','):
+            entry = entry.strip()
+            if not entry:
+                continue
+
+            code, separator, value = entry.partition(':')
+            if not separator:
+                # Bare number: applies to the primary region's currency.
+                code, value = BrickSidecar.region_currency(), entry
+
+            try:
+                rate = float(value.strip())
+            except ValueError:
+                logger.debug('invalid SIDECAR_MSRP_RATE entry %r', entry)
+                continue
+
+            if rate <= 0:
+                continue
+
+            # Accept a symbol as the key too, so '€:7.45' works like 'EUR:7.45'.
+            for resolved in BrickSidecar.currency_codes(code):
+                rates[resolved] = rate
+
+        return rates
+
+    # Rate for one currency (ISO code or symbol), or 0 when it has none.
+    @staticmethod
+    def msrp_rate_for(currency: Any, /) -> float:
+        rates = BrickSidecar.msrp_rates()
+        if not rates:
+            return 0.0
+
+        for code in BrickSidecar.currency_codes(currency):
+            if code in rates:
+                return rates[code]
+
+        return 0.0
 
     # The ISO code(s) a currency value can represent. An ISO code maps to itself;
     # a known symbol maps to its candidate set (see CURRENCY_SYMBOLS); anything
@@ -584,3 +735,79 @@ class BrickSidecar(object):
                 return None
 
         return None
+
+
+if __name__ == '__main__':
+    # Self-check for the region fallback and the manual MSRP conversion. This
+    # is money arithmetic that feeds "Saved vs retail", so a silent regression
+    # here shows the user a confidently wrong number.
+    # Run: python -m bricktracker.sidecar
+    from flask import Flask
+
+    app = Flask(__name__)
+
+    # 10302: sold in every region. 8250 (1997): US price only, which is why the
+    # fallback exists at all.
+    modern = {
+        'legoComUS': {'retailPrice': 179.99},
+        'legoComDE': {'retailPrice': 179.99},
+    }
+    old = {'legoComUS': {'retailPrice': 49.5}, 'legoComDE': None}
+
+    def check(set_data, rate='', region='US', purchase='kr'):
+        app.config.update(
+            SIDECAR_MSRP_RATE=rate,
+            SIDECAR_RETAIL_REGION=region,
+            PURCHASE_CURRENCY=purchase,
+        )
+        with app.app_context():
+            return BrickSidecar.retail_price_currency(set_data)
+
+    # No rate: MSRP stays exactly as Brickset gave it, in the region currency.
+    assert check(modern) == (179.99, 'USD')
+    assert check(modern, rate='0') == (179.99, 'USD')
+    assert check(modern, region='DE') == (179.99, 'EUR')
+
+    # A bare rate binds to the primary region's currency and relabels.
+    assert check(modern, rate='6.47') == (1164.54, 'kr')
+    assert check(modern, rate='7.45', region='DE') == (1340.93, 'kr')
+
+    # Junk and negatives are ignored rather than guessed at.
+    assert check(modern, rate='-2') == (179.99, 'USD')
+    assert check(modern, rate='six') == (179.99, 'USD')
+
+    # An empty PURCHASE_CURRENCY must not produce a blank label.
+    assert check(modern, rate='6.47', purchase='') == (1164.54, 'USD')
+
+    # Region fallback: DE first, US only when DE has no price.
+    assert check(modern, region='DE,US') == (179.99, 'EUR')
+    assert check(old, region='DE,US') == (49.5, 'USD')
+    # A lone DE leaves the old set with no MSRP at all.
+    assert check(old, region='DE') == (None, 'EUR')
+    # Unknown regions are dropped, an all-junk list falls back to US.
+    assert check(old, region='XX,US') == (49.5, 'USD')
+    assert check(old, region='XX') == (49.5, 'USD')
+
+    # The dangerous case: a fallback to a currency the rate does not cover must
+    # NOT be converted with the primary region's rate. 49.5 * 7.45 would be a
+    # confidently wrong 368.78 kr.
+    assert check(old, rate='7.45', region='DE,US') == (49.5, 'USD')
+
+    # One rate per currency covers both regions properly.
+    both = 'EUR:7.45,USD:6.47'
+    assert check(modern, rate=both, region='DE,US') == (1340.93, 'kr')
+    # 320.265 rounds to .26, not .27: round() is banker's rounding. Fine for a
+    # display estimate, and pinned here so the behaviour is not a surprise.
+    assert check(old, rate=both, region='DE,US') == (320.26, 'kr')
+
+    # Symbols work as rate keys, and lookups accept symbols too.
+    with app.app_context():
+        app.config.update(SIDECAR_MSRP_RATE='€:7.45')
+        assert BrickSidecar.msrp_rate_for('EUR') == 7.45
+        assert BrickSidecar.msrp_rate_for('USD') == 0.0
+
+    # Same-currency detection still drives the mismatch warnings.
+    assert BrickSidecar.same_currency('kr', 'DKK')
+    assert not BrickSidecar.same_currency('kr', 'USD')
+
+    print('ok: msrp region fallback + conversion')

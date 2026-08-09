@@ -124,6 +124,13 @@ CONFIG: Final[list[dict[str, Any]]] = [
     # sidecar use its default. Sent as a query parameter only when set; sidecars
     # that do not support it simply ignore it.
     {'n': 'SIDECAR_CURRENCY', 'd': ''},
+    # Manual exchange rate used to convert MSRP into PURCHASE_CURRENCY, since
+    # Brickset only publishes retail prices in the region's own currency (USD
+    # for US, GBP for UK, ...). Value is "how many PURCHASE_CURRENCY units one
+    # unit of the region currency is worth", e.g. 6.47 for USD -> DKK. Empty or
+    # 0 leaves MSRP untouched in its original currency. Kept as a string here
+    # and parsed defensively, so a typo cannot break startup.
+    {'n': 'SIDECAR_MSRP_RATE', 'd': ''},
     # Per-element show/hide toggles for the BrickData enrichment on the set
     # detail page. All default on so behaviour is unchanged; badges are handled
     # separately via BADGE_ORDER_DETAIL.

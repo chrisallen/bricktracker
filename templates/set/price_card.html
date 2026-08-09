@@ -21,7 +21,7 @@
             {% if show_msrp %}
             <tr>
               <td>Retail (MSRP)</td>
-              <td class="text-end">{% if p.msrp is not none %}{{ '%.2f' | format(p.msrp) }} {{ p.msrp_currency }}{% else %}<span class="text-muted">—</span>{% endif %}</td>
+              <td class="text-end">{% if p.msrp is not none %}{{ '%.2f' | format(p.msrp) }} {{ p.msrp_currency }}{% if p.msrp_region %}<i class="ri-information-line ms-1 text-muted" title="LEGO.com {{ p.msrp_region }} price{% if p.msrp_rate %}: {{ '%.2f' | format(p.msrp_source) }} {{ p.msrp_source_currency }}, converted at {{ '%g' | format(p.msrp_rate) }}{% endif %}"></i>{% endif %}{% else %}<span class="text-muted">—</span>{% endif %}</td>
             </tr>
             {% if p.msrp_inflated is not none %}
             <tr>
@@ -42,8 +42,8 @@
             {% endif %}
             {% if show_msrp and p.savings_vs_msrp is defined %}
               <tr class="border-top">
-                <td>Saved vs retail</td>
-                <td class="text-end {% if p.savings_vs_msrp >= 0 %}text-success{% else %}text-danger{% endif %}">{{ '%+.2f' | format(p.savings_vs_msrp) }}</td>
+                <td>Saved vs retail{% if p.savings_currency is none %}<i class="ri-error-warning-line ms-1 text-warning" title="Paid is in {{ config['PURCHASE_CURRENCY'] }} but retail is in {{ p.msrp_currency }}. Set BK_SIDECAR_MSRP_RATE to convert."></i>{% endif %}</td>
+                <td class="text-end {% if p.savings_vs_msrp >= 0 %}text-success{% else %}text-danger{% endif %}">{{ '%+.2f' | format(p.savings_vs_msrp) }}{% if p.savings_currency %} {{ p.savings_currency }}{% endif %}</td>
               </tr>
             {% endif %}
             {% if show_paid and p.gain_vs_paid is defined %}

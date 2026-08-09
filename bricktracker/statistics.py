@@ -168,13 +168,31 @@ class BrickStatistics:
             'market_currency': None,
         }
 
+        # With a fallback retail region ("DE,US") the MSRP currency varies per
+        # set, so once any conversion rate is configured we only total the sets
+        # that actually landed in the purchase currency. Otherwise a converted
+        # DKK price and a raw USD one would be added together. With no rate at
+        # all nothing converts and the totals stay the mixed-currency estimate
+        # they have always been, which the page already warns about.
+        msrp_rates = BrickSidecar.msrp_rates()
+        msrp_target = BrickSidecar.purchase_currency()
+
         # One row per set instance, mirroring the old per-instance aggregation.
         for row in instances:
             set_data = bulk.get(row.get('set_ref')) or {}
             price_block = set_data.get('bricklink_price') or {}
 
             paid = to_number(row.get('purchase_price'))
-            msrp = BrickSidecar.retail_price(set_data) if set_data else None
+
+            msrp: float | None = None
+            if set_data:
+                msrp, msrp_currency = BrickSidecar.retail_price_currency(
+                    set_data,
+                )
+                if msrp_rates and not BrickSidecar.same_currency(
+                    msrp_currency, msrp_target,
+                ):
+                    msrp = None
             market_new = to_number(price_block.get('new_avg'))
             market_used = to_number(price_block.get('used_avg'))
 

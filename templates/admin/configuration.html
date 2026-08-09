@@ -557,7 +557,7 @@
             <div class="col-md-6">
               <label for="BK_SIDECAR_RETAIL_REGION" class="form-label">
                 BK_SIDECAR_RETAIL_REGION {{ config_badges('BK_SIDECAR_RETAIL_REGION') }}
-                <div class="text-muted small">LEGO.com MSRP region: US, UK, CA or DE</div>
+                <div class="text-muted small">LEGO.com MSRP region: US, UK, CA or DE. List fallbacks with commas (<code>DE,US</code>); first one with a price wins.</div>
               </label>
               <input type="text" class="form-control config-text" id="BK_SIDECAR_RETAIL_REGION" data-var="BK_SIDECAR_RETAIL_REGION" {{ is_locked('BK_SIDECAR_RETAIL_REGION') }}>
             </div>
@@ -567,6 +567,13 @@
                 <div class="text-muted small">Currency for BrickLink market values, e.g. EUR. Empty = sidecar default.</div>
               </label>
               <input type="text" class="form-control config-text" id="BK_SIDECAR_CURRENCY" data-var="BK_SIDECAR_CURRENCY" {{ is_locked('BK_SIDECAR_CURRENCY') }}>
+            </div>
+            <div class="col-md-6">
+              <label for="BK_SIDECAR_MSRP_RATE" class="form-label">
+                BK_SIDECAR_MSRP_RATE {{ config_badges('BK_SIDECAR_MSRP_RATE') }}
+                <div class="text-muted small">Fixed rate to convert MSRP into {{ config['PURCHASE_CURRENCY'] or 'your currency' }}, e.g. <code>6.47</code> for USD to DKK. One rate per currency when the region list mixes currencies: <code>EUR:7.45,USD:6.47</code>. Empty = no conversion.</div>
+              </label>
+              <input type="text" class="form-control config-text" id="BK_SIDECAR_MSRP_RATE" data-var="BK_SIDECAR_MSRP_RATE" {{ is_locked('BK_SIDECAR_MSRP_RATE') }}>
             </div>
             <div class="col-md-6">
               <label for="BK_SIDECAR_DEFAULT_COVER" class="form-label">

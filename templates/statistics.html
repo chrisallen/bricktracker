@@ -243,7 +243,7 @@
             The "saved vs retail" and "value change vs paid" figures mix currencies and are <strong>not converted</strong>.
           </div>
           {% endif %}
-          <p class="text-muted small mb-0 mt-2"><i class="ri-information-line"></i> Estimate. Only covers sets the sidecar has data for; market value only covers sets whose value has been fetched. Currencies are not converted.</p>
+          <p class="text-muted small mb-0 mt-2"><i class="ri-information-line"></i> Estimate. Only covers sets the sidecar has data for; market value only covers sets whose value has been fetched. {% if config['SIDECAR_MSRP_RATE'] %}Retail is converted at your fixed rate of {{ config['SIDECAR_MSRP_RATE'] }}; nothing else is converted.{% else %}Currencies are not converted.{% endif %}</p>
         </div>
       </div>
     </div>
