@@ -29,6 +29,8 @@ settings.local.json
 /scripts/
 
 /*.md
+!/README.md
+!/FORK_CHANGELOG.md
 /Screenshot_*.png
 
 # Apple idiocy
@@ -41,6 +43,7 @@ vitepress/
 # Local data
 offline/
 data/
+/backups/
 
 # Hidden folders
 .?*

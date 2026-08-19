@@ -1,3 +1,20 @@
+# BrickTracker (personal fork)
+
+This is a personal fork of [BrickTracker](https://gitea.baerentsen.space/FrederikBaerentsen/BrickTracker)
+by Frederik Bærentsen. It maintains regular syncs with upstream and
+adds custom features on top.
+
+**Currently synced with upstream:** `release/1.5`
+(see commit history for exact merge points)
+
+## Custom features in this fork
+- (none yet — entries added below as each feature merges)
+
+See [FORK_CHANGELOG.md](FORK_CHANGELOG.md) for the full history of
+changes made in this fork.
+
+---
+
 <img src="static/brick.png" height="100" width="100">
 
 # BrickTracker
